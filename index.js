@@ -12,7 +12,7 @@ const ensureArray = x => x instanceof Array ? x : [x]
 const solrPost = config => path => (data, coreOpt = '') => {
   const core = coreOpt || config.core
   if (!core) {
-    throw new Error('core nor specified')
+    throw new Error('core not specified')
   }
 
   const solrUrl = url.format({
@@ -37,7 +37,7 @@ const solrPost = config => path => (data, coreOpt = '') => {
 const solrGet = config => path => (query = {}, coreOpt = '') => {
   const core = coreOpt || query.core || config.core
   if (!core) {
-    throw new Error('core nor specified')
+    throw new Error('core not specified')
   }
 
   delete query.core
