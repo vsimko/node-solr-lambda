@@ -3,6 +3,10 @@
     "standard"
   ],
   "env": {
-    "jest": true
+    "mocha": true
+  },
+  "rules": {
+    "indent": "off",
+    "quotes": ["error", "double"]
   }
 }
