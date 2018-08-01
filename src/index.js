@@ -71,7 +71,16 @@ const prepareSolrClient = config => ({
   rollback: () => Error("not implemented yet"),
   spell: () => Error("not implemented yet"),
   optimize: () => Error("not implemented yet"),
-  realTimeGet: () => Error("not implemented yet")
+  realTimeGet: () => Error("not implemented yet"),
+  facet: (jsonFacet, coreOpt = "") =>
+    solrGet(config)("query")(
+      {
+        q: "*:*", // filtering will be implemented later
+        rows: 0,
+        "json.facet": JSON.stringify(jsonFacet)
+      },
+      coreOpt
+    )
 })
 
 module.exports = {
