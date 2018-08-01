@@ -50,7 +50,7 @@ const solrGet = config => path => (query = {}, coreOpt = "") => {
     ...defaultConfig,
     ...config, // overrides defalt config
     pathname: `solr/${core}/${path}`,
-    queryWithoutCore
+    query: queryWithoutCore // DO NOT rename the query parameter!
   })
 
   return axios(solrUrl).then(r => r.data)
