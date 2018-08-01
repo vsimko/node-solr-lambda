@@ -53,6 +53,12 @@ const solrGet = config => path => (query = {}, coreOpt = "") => {
     query: queryWithoutCore // DO NOT rename the query parameter!
   })
 
+  if (config.debug) {
+    console.debug("SOLR QUERY:")
+    console.debug(query)
+    console.debug("SOLR HTTP GET: " + solrUrl)
+  }
+
   return axios(solrUrl).then(r => r.data)
 }
 
