@@ -3,15 +3,27 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 
-# Examples
+# Short example
 ```js
-const solr = require('node-solr-lambda').prepareSolrClient()
-solr.ping('my_core')
-solr.select({q:'label:something'},'my_core')
+const {prepareSolrClient, defaultConfig} = require('node-solr-lambda')
+const solr = prepareSolrClient({ ...defaultConfig, core:'mycore'})
+solr.ping() // -> true if mycore exists
+solr.select({q:'label:something'}).then(console.log)
 ```
 
+# Example with async
 ```js
-const solr = require('node-solr-lambda').prepareSolrClient({core:'my_core'})
-solr.ping()
-solr.select({q:'label:something'})
+const {prepareSolrClient, defaultConfig} = require('node-solr-lambda')
+const solr = prepareSolrClient({ ...defaultConfig, core:'mycore'})
+
+main()
+async main() {
+  try {
+    await solr.addField({ name:"myfield", type:"text_general" })
+    const resp = await solr.select({q:'*:*'})
+    console.log(resp)
+  } catch(e) {
+    console.error(e)
+  }
+}
 ```
