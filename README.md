@@ -15,11 +15,11 @@
 # Example
 
 ```js
-const { prepareSolrClient, defaultConfig } = require("node-solr-lambda");
-const solr = prepareSolrClient({ ...defaultConfig, core: "mycore" });
+const { prepareSolrClient } = require("node-solr-lambda");
+const solr = prepareSolrClient({ core: "mycore" });
 
 async function myfun() {
-  const mycoreExists = await solr.ping(); // -> true if mycore exists
+  const mycoreExists = await solr.ping(); // -> true if "mycore" exists
   const result = await solr.query({ query: "label:something" });
   console.log(result.data);
 
