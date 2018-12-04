@@ -1,4 +1,16 @@
 // @ts-check
+/**
+ * Support for type checking and intellisense in vscode:
+ * @typedef {import("./solr").SolrConfig} SolrConfig
+ * @typedef {import("./solr").SolrData} SolrData
+ * @typedef {import("./solr").SolrDocument} SolrDocument
+ * @typedef {import("./solr").SolrResponse} SolrResponse
+ * @typedef {import("./solr").DeleteQuery} DeleteQuery
+ * @typedef {import("./solr").FieldProperties} FieldProperties
+ * @typedef {import("./solr").FieldTypeProperties} FieldTypeProperties
+ * @typedef {import("./solr").SolrQuery} SolrQuery
+ */
+
 const url = require("url")
 const { default: axios } = require("axios")
 
