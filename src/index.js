@@ -56,9 +56,11 @@ const solrSchema = config => op => data =>
 
 /** @param {SolrConfig} config */
 const prepareSolrClient = config => {
+  // sanity checks
   if (!config.core) {
     throw Error("missing 'core' parameter in your config")
   }
+  // now creating the API
   return {
     ping: () =>
       solrPost({ ...config, apiPrefix: "solr" })("admin/ping")({})
@@ -67,8 +69,7 @@ const prepareSolrClient = config => {
         })
         .catch(() => false),
 
-    /**
-     * @param {SolrDocument | SolrDocument[]} data */
+    /** @param {SolrDocument | SolrDocument[]} data */
     add: data => solrPost(config)("update")(ensureArray(data)),
 
     /** @param {DeleteQuery} deleteQuery */
@@ -76,27 +77,20 @@ const prepareSolrClient = config => {
       solrPost({ ...config, apiPrefix: "solr" })("update")({
         delete: deleteQuery
       }),
+
+    /** @type {(data:FieldProperties) => Promise<SolrResponse>} */
     addField: solrSchema(config)("add-field"),
 
-    /**
-     * @type {(data:FieldTypeProperties) => Promise<SolrResponse>}
-     * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field-type
-     */
+    /** @type {(data:FieldTypeProperties) => Promise<SolrResponse>} */
     addFieldType: solrSchema(config)("add-field-type"),
 
-    /**
-     * @type {({name:string}) => Promise<SolrResponse>}
-     */
+    /** @type {({name:string}) => Promise<SolrResponse>} */
     deleteField: solrSchema(config)("delete-field"),
 
-    /**
-     * @type {({name:string}) => Promise<SolrResponse>}
-     */
+    /** @type {({name:string}) => Promise<SolrResponse>} */
     deleteFieldType: solrSchema(config)("delete-field-type"),
 
-    /**
-     * @type {(data:SolrQuery) => Promise<SolrResponse>}
-     */
+    /** @type {(data:SolrQuery) => Promise<SolrResponse>} */
     query: solrPost(config)("query")
   }
 }
