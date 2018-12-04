@@ -1,81 +1,48 @@
 // @ts-check
-/**
- * @typedef {typeof defaultConfig} SolrConfig
- * @typedef {import(".").SolrDocument} SolrDocument
- * @typedef {import(".").SolrData} SolrData
- * @typedef {import(".").SolrResponse} SolrResponse
- * @typedef {import("axios").AxiosError} AxiosError
- * @typedef {import(".").SolrException} SolrException
- */
-
 const url = require("url")
 const { default: axios } = require("axios")
 
+/** @type {SolrConfig} */
 const defaultConfig = {
+  urlConfig: {
   hostname: "localhost",
   port: 8983,
   protocol: "http",
+    query: {
+      commitWithin: 500,
+      overwrite: true,
+      wt: "json"
+    }
+  },
   debug: false,
-  core: "",
   apiPrefix: "api/cores"
 }
 
 /** @type {(x:object) => object|object[]} */
 const ensureArray = x => (Object(x) instanceof Array ? x : [x])
 
-/**
- * @type {(config:SolrConfig) => (path:string) => (data:SolrData) => Promise<SolrResponse>}
- */
+const isEmptyObject = obj =>
+  Object.keys(obj).length === 0 && obj.constructor === Object
+
+/** @type {(config:SolrConfig) => (path:string) => (data:SolrData) => Promise<SolrResponse>} */
 const solrPost = config => path => async data => {
   const { core, apiPrefix } = config
   const solrUrl = url.format({
-    ...defaultConfig,
-    ...config, // overrides defalt config
-    pathname: `${apiPrefix}/${core}/${path}`,
-    query: {
-      wt: "json",
-      overwrite: true,
-      commitWithin: 1000
-    }
+    ...config.urlConfig,
+    pathname: `${apiPrefix}/${core}/${path}`
   })
 
   if (config.debug) {
-    console.debug(`\n$ curl '${solrUrl}' -d '${JSON.stringify(data)}'\n`)
+    const dataPart = isEmptyObject(data) ? "" : ` -d ${JSON.stringify(data)}`
+    console.debug(
+      `\n$ curl -X POST '${solrUrl}' -H 'Content-Type: application/json'${dataPart}\n`
+    )
   }
 
   const response = await axios.post(solrUrl, data, {
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      accept: "application/json; charset=utf-8"
-    }
+    headers: { "Content-Type": "application/json" }
   })
 
-  return response.data
-}
-
-/**
- * @type {(config:SolrConfig) => (path:string) => (query:any) => Promise<SolrResponse>}
- */
-const solrGet = config => path => async query => {
-  const core = query.core || config.core
-  const { apiPrefix } = config
-
-  // we don't want to alter the query structure
-  const queryWithoutCore = { ...query }
-  delete queryWithoutCore.core
-
-  const solrUrl = url.format({
-    ...defaultConfig,
-    ...config, // overrides defalt config
-    pathname: `${apiPrefix}/${core}/${path}`,
-    query: queryWithoutCore // DO NOT rename the "query" parameter!
-  })
-
-  if (config.debug) {
-    console.debug(`\n$ curl '${solrUrl}'\n`)
-  }
-
-  const response = await axios(solrUrl)
   return response.data
 }
 
@@ -88,26 +55,30 @@ const solrSchema = config => op => data =>
   solrPost(config)("schema")({ [op]: data })
 
 /** @param {SolrConfig} config */
-const prepareSolrClient = config => ({
+const prepareSolrClient = config => {
+  if (!config.core) {
+    throw Error("missing 'core' parameter in your config")
+  }
+  return {
   ping: () =>
-    solrGet({ ...config, apiPrefix: "solr" })("admin/ping")({})
+      solrPost({ ...config, apiPrefix: "solr" })("admin/ping")({})
       .then(value => {
         return value.status === "OK"
       })
       .catch(() => false),
 
   /**
-   * @param {SolrDocument} data */
+     * @param {SolrDocument | SolrDocument[]} data */
   add: data => solrPost(config)("update")(ensureArray(data)),
 
   /**
-   * @type {(data: import(".").FieldProperties) => Promise<SolrResponse>}
+     * @type {(data:FieldProperties) => Promise<SolrResponse>}
    * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field
    */
   addField: solrSchema(config)("add-field"),
 
   /**
-   * @type {(data:import(".").FieldTypeProperties) => Promise<SolrResponse>}
+     * @type {(data:FieldTypeProperties) => Promise<SolrResponse>}
    * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field-type
    */
   addFieldType: solrSchema(config)("add-field-type"),
@@ -123,18 +94,11 @@ const prepareSolrClient = config => ({
   deleteFieldType: solrSchema(config)("delete-field-type"),
 
   /**
-   * @type {(query:import(".").SolrSelect) => Promise<SolrResponse>}
+     * @type {(data:SolrQuery) => Promise<SolrResponse>}
    */
-  select: solrGet(config)("select"),
-
-  facet: (facetMap, filterArr = []) =>
-    solrPost(config)("query")({
-      query: "*:*",
-      limit: "0",
-      filter: filterArr,
-      facet: facetMap
-    })
-})
+    query: solrPost(config)("query")
+  }
+}
 
 module.exports = {
   prepareSolrClient,
