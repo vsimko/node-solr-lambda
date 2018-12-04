@@ -2,28 +2,43 @@
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
+# Example
 
-# Short example
 ```js
-const {prepareSolrClient, defaultConfig} = require('node-solr-lambda')
-const solr = prepareSolrClient({ ...defaultConfig, core:'mycore'})
-solr.ping() // -> true if mycore exists
-solr.select({q:'label:something'}).then(console.log)
-```
+const { prepareSolrClient, defaultConfig } = require("node-solr-lambda");
+const solr = prepareSolrClient({ ...defaultConfig, core: "mycore" });
 
-# Example with async
-```js
-const {prepareSolrClient, defaultConfig} = require('node-solr-lambda')
-const solr = prepareSolrClient({ ...defaultConfig, core:'mycore'})
+async function myfun() {
+  const mycoreExists = await solr.ping(); // -> true if mycore exists
+  const result = await solr.query({ query: "label:something" });
+  console.log(result.data);
 
-main()
-async main() {
-  try {
-    await solr.addField({ name:"myfield", type:"text_general" })
-    const resp = await solr.select({q:'*:*'})
-    console.log(resp)
-  } catch(e) {
-    console.error(e)
-  }
+  await solr.addField({ name: "price", type: "plong", multiValued: false });
+  await solr.addField({
+    name: "category",
+    type: "string",
+    multiValued: true,
+    docValues: true
+  });
+
+  const item1 = { id: "item1", price: 123, category: ["cpu", "ram"] };
+  const item2 = { id: "item2", price: 456, category: ["cpu", "usb"] };
+  await solr.add(item1); // works with single object
+  await solr.add([item1, item2]); // works with object[]
+
+  await solr.query({
+    query: "*:*",
+    facet: {
+      top_5_categories: {
+        terms: {
+          field: "category",
+          limit: 5,
+          facet: {
+            avg_price: "avg(price)"
+          }
+        }
+      }
+    }
+  });
 }
 ```
