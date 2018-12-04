@@ -5,9 +5,9 @@ const { default: axios } = require("axios")
 /** @type {SolrConfig} */
 const defaultConfig = {
   urlConfig: {
-  hostname: "localhost",
-  port: 8983,
-  protocol: "http",
+    hostname: "localhost",
+    port: 8983,
+    protocol: "http",
     query: {
       commitWithin: 500,
       overwrite: true,
@@ -60,42 +60,42 @@ const prepareSolrClient = config => {
     throw Error("missing 'core' parameter in your config")
   }
   return {
-  ping: () =>
+    ping: () =>
       solrPost({ ...config, apiPrefix: "solr" })("admin/ping")({})
-      .then(value => {
-        return value.status === "OK"
-      })
-      .catch(() => false),
+        .then(value => {
+          return value.status === "OK"
+        })
+        .catch(() => false),
 
-  /**
+    /**
      * @param {SolrDocument | SolrDocument[]} data */
-  add: data => solrPost(config)("update")(ensureArray(data)),
+    add: data => solrPost(config)("update")(ensureArray(data)),
 
-  /**
+    /**
      * @type {(data:FieldProperties) => Promise<SolrResponse>}
-   * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field
-   */
-  addField: solrSchema(config)("add-field"),
+     * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field
+     */
+    addField: solrSchema(config)("add-field"),
 
-  /**
+    /**
      * @type {(data:FieldTypeProperties) => Promise<SolrResponse>}
-   * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field-type
-   */
-  addFieldType: solrSchema(config)("add-field-type"),
+     * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field-type
+     */
+    addFieldType: solrSchema(config)("add-field-type"),
 
-  /**
-   * @type {({name:string}) => Promise<SolrResponse>}
-   */
-  deleteField: solrSchema(config)("delete-field"),
+    /**
+     * @type {({name:string}) => Promise<SolrResponse>}
+     */
+    deleteField: solrSchema(config)("delete-field"),
 
-  /**
-   * @type {({name:string}) => Promise<SolrResponse>}
-   */
-  deleteFieldType: solrSchema(config)("delete-field-type"),
+    /**
+     * @type {({name:string}) => Promise<SolrResponse>}
+     */
+    deleteFieldType: solrSchema(config)("delete-field-type"),
 
-  /**
+    /**
      * @type {(data:SolrQuery) => Promise<SolrResponse>}
-   */
+     */
     query: solrPost(config)("query")
   }
 }
