@@ -33,7 +33,7 @@ const solrPost = config => path => async data => {
   })
 
   if (config.debug) {
-    const dataPart = isEmptyObject(data) ? "" : ` -d ${JSON.stringify(data)}`
+    const dataPart = isEmptyObject(data) ? "" : ` -d '${JSON.stringify(data)}'`
     console.debug(
       `\n$ curl -X POST '${solrUrl}' -H 'Content-Type: application/json'${dataPart}\n`
     )
