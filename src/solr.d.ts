@@ -261,126 +261,125 @@ interface FacetFunctionResult {
   [facetName: string]: number
 }
 
-declare global {
-  interface SolrData {
-    [key: string]: SolrDataValue
+export interface SolrData {
+  [key: string]: SolrDataValue
+}
+
+/**
+ * Fields are defined in the fields element of `schema.xml`.
+ * Once you have the **field types** set up, defining the fields themselves is simple.
+ *
+ * @see https://lucene.apache.org/solr/guide/7_5/defining-fields.html
+ * @see https://lucene.apache.org/solr/guide/7_5/defining-fields.html#optional-field-type-override-properties
+ */
+export type FieldProperties = FieldGeneralProperties &
+  FieldTypeDefaultProperties
+
+/**
+ * A field type defines the analysis that will occur on a field when documents are indexed
+ * or queries are sent to the index.
+ * A field type definition can include four types of information:
+ * - The `name` of the field type (**mandatory**).
+ * - An implementation `class` name (**mandatory**).
+ * - If the field type is `TextField`, a description of the field analysis for the field type.
+ * - Field type properties - depending on the implementation class,
+ *   some properties **may be mandatory**.
+ *
+ * The field type `class` determines most of the behavior of a field type, but optional properties
+ * can also be defined.
+ *
+ * The properties that can be specified for a given field type fall into three major categories:
+ * - Properties specific to the field type’s class.
+ * - General Properties {@link FieldTypeGeneralProperties} that Solr supports for any field type.
+ * - Field Default Properties {@link FieldTypeDefaultProperties} that can be specified on the field
+ *   type that will be inherited by fields that use this type instead of the default behavior.
+ */
+export type FieldTypeProperties = FieldTypeGeneralProperties &
+  FieldTypeDefaultProperties
+
+export interface SolrDocument {
+  id: string
+  _childDocuments_?: SolrFragmentWithId | SolrFragmentWithId[]
+  [key: string]: SolrDataValue | SolrData
+}
+
+/**
+ * This type definition contains just the most important parts.
+ */
+export interface SolrResponse {
+  status?: string
+  facets?: {
+    count?: number
+  } & {
+    [facetName: string]: (TermsFacet | FacetFunctionResult)[] // TODO: to be completed
   }
-
-  /**
-   * Fields are defined in the fields element of `schema.xml`.
-   * Once you have the **field types** set up, defining the fields themselves is simple.
-   *
-   * @see https://lucene.apache.org/solr/guide/7_5/defining-fields.html
-   * @see https://lucene.apache.org/solr/guide/7_5/defining-fields.html#optional-field-type-override-properties
-   */
-  type FieldProperties = FieldGeneralProperties & FieldTypeDefaultProperties
-
-  /**
-   * A field type defines the analysis that will occur on a field when documents are indexed
-   * or queries are sent to the index.
-   * A field type definition can include four types of information:
-   * - The `name` of the field type (**mandatory**).
-   * - An implementation `class` name (**mandatory**).
-   * - If the field type is `TextField`, a description of the field analysis for the field type.
-   * - Field type properties - depending on the implementation class,
-   *   some properties **may be mandatory**.
-   *
-   * The field type `class` determines most of the behavior of a field type, but optional properties
-   * can also be defined.
-   *
-   * The properties that can be specified for a given field type fall into three major categories:
-   * - Properties specific to the field type’s class.
-   * - General Properties {@link FieldTypeGeneralProperties} that Solr supports for any field type.
-   * - Field Default Properties {@link FieldTypeDefaultProperties} that can be specified on the field
-   *   type that will be inherited by fields that use this type instead of the default behavior.
-   */
-  type FieldTypeProperties = FieldTypeGeneralProperties &
-    FieldTypeDefaultProperties
-
-  interface SolrDocument {
-    id: string
-    _childDocuments_?: SolrFragmentWithId | SolrFragmentWithId[]
-    [key: string]: SolrDataValue | SolrData
+  response?: {
+    docs: SolrDocument[]
+    numFound: number
+    start: number
   }
+  responseHeader: SolrResponseHeader
+}
 
-  /**
-   * This type definition contains just the most important parts.
-   */
-  interface SolrResponse {
-    status?: string
-    facets?: {
-      count?: number
-    } & {
-      [facetName: string]: (TermsFacet | FacetFunctionResult)[] // TODO: to be completed
-    }
-    response?: {
-      docs: SolrDocument[]
-      numFound: number
-      start: number
-    }
-    responseHeader: SolrResponseHeader
-  }
-
-  /**
-   * This type definition contains just the most important parts.
-   */
-  interface SolrException {
+/**
+ * This type definition contains just the most important parts.
+ */
+export interface SolrException {
+  config
+  message: string
+  request: ClientRequest
+  response: {
     config
-    message: string
+    data: {
+      error: {
+        code: number
+        details: {
+          errorMessages: string[]
+          [key: string]: object
+        }[]
+        metadata: string[]
+      }
+      responseHeader: SolrResponseHeader
+    }
+    headers
     request: ClientRequest
-    response: {
-      config
-      data: {
-        error: {
-          code: number
-          details: {
-            errorMessages: string[]
-            [key: string]: object
-          }[]
-          metadata: string[]
-        }
-        responseHeader: SolrResponseHeader
-      }
-      headers
-      request: ClientRequest
-      status: number
-      statusText: string
-    }
-    stack: string
+    status: number
+    statusText: string
   }
+  stack: string
+}
 
-  interface SolrQuery {
-    query?
-    filter?
-    start?
-    limit?
-    sort?
-    facet?
-    params?: {
-      hl?: "on" | "off"
-      "hl.simple.pre"?: string
-      "hl.simple.post"?: string
-      "hl.fl"?: string
-      indent?: "off" | "on"
+export interface SolrQuery {
+  query?
+  filter?
+  start?
+  limit?
+  sort?
+  facet?
+  params?: {
+    hl?: "on" | "off"
+    "hl.simple.pre"?: string
+    "hl.simple.post"?: string
+    "hl.fl"?: string
+    indent?: "off" | "on"
+  }
+}
+
+export interface SolrConfig {
+  urlConfig?: UrlObject & {
+    query?: {
+      overwrite?: boolean
+      commitWithin?: number
+      wt?: "json" | "xml" | "python" | "ruby" | "php" | "csv"
+      [key: string]: any
     }
   }
+  debug?: boolean
+  core?: string
+  apiPrefix?: string
+}
 
-  interface SolrConfig {
-    urlConfig: UrlObject & {
-      query: {
-        overwrite: boolean
-        commitWithin: number
-        wt: "json" | "xml" | "python" | "ruby" | "php" | "csv"
-        [key: string]: any
-      }
-    }
-    debug: boolean
-    core?: string
-    apiPrefix: string
-  }
-
-  interface DeleteQuery {
-    id?: string
-    query?: any
-  }
+export interface DeleteQuery {
+  id?: string
+  query?: any
 }

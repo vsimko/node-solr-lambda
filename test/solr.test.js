@@ -3,9 +3,9 @@ const { expect } = require("chai")
 
 describe("#prepareSolrClient", () => {
   it("should be able to prepare the client", () => {
-    const client = prepareSolrClient()
-    expect(client).to.haveOwnProperty("ping")
-    expect(client).to.haveOwnProperty("select")
-    expect(client).to.haveOwnProperty("add")
+    const solr = prepareSolrClient({ core: "dummy" })
+    expect(solr).to.haveOwnProperty("ping")
+    expect(solr).to.haveOwnProperty("query")
+    expect(solr).to.haveOwnProperty("add")
   })
 })

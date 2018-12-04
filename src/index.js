@@ -66,8 +66,24 @@ const solrPost = config => path => async data => {
 const solrSchema = config => op => data =>
   solrPost(config)("schema")({ [op]: data })
 
-/** @param {SolrConfig} config */
-const prepareSolrClient = config => {
+const mergeConfig = (a, b) => mergeConfigImpure({ ...a }, b)
+
+function mergeConfigImpure (target, source) {
+  for (let k in source) {
+    const objOrScalar = target[k]
+    if (objOrScalar != null && objOrScalar.constructor === Object) {
+      mergeConfigImpure(objOrScalar, source[k]) // recurse on objects
+    } else {
+      target[k] = source[k] // assign scalar value
+    }
+  }
+  return target
+}
+
+/** @param {SolrConfig} userConfig */
+const prepareSolrClient = (userConfig = {}) => {
+  const config = mergeConfig(defaultConfig, userConfig)
+
   // sanity checks
   if (!config.core) {
     throw Error("missing 'core' parameter in your config")
@@ -109,5 +125,6 @@ const prepareSolrClient = config => {
 
 module.exports = {
   prepareSolrClient,
-  defaultConfig
+  defaultConfig,
+  mergeConfig
 }
