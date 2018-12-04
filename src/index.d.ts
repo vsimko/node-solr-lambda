@@ -378,4 +378,9 @@ declare global {
     core?: string
     apiPrefix: string
   }
+
+  interface DeleteQuery {
+    id?: string
+    query?: any
+  }
 }

@@ -71,10 +71,11 @@ const prepareSolrClient = config => {
      * @param {SolrDocument | SolrDocument[]} data */
     add: data => solrPost(config)("update")(ensureArray(data)),
 
-    /**
-     * @type {(data:FieldProperties) => Promise<SolrResponse>}
-     * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#add-a-new-field
-     */
+    /** @param {DeleteQuery} deleteQuery */
+    delete: deleteQuery =>
+      solrPost({ ...config, apiPrefix: "solr" })("update")({
+        delete: deleteQuery
+      }),
     addField: solrSchema(config)("add-field"),
 
     /**
