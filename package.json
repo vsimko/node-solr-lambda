@@ -1,6 +1,6 @@
 {
   "name": "node-solr-lambda",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Minimalistic Solr client written in functional programming style",
   "main": "src/index",
   "repository": "https://github.com/vsimko/node-solr-lambda.git",
@@ -24,6 +24,9 @@
     "eslint-plugin-standard": "^4.0.0",
     "mocha": "^5.2.0",
     "standard-version": "^4.4.0"
+  },
+  "resolutions": {
+    "os-locale": "^3.0.1"
   },
   "scripts": {
     "git-cred": "git config credential.helper store",
