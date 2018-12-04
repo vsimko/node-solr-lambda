@@ -2,6 +2,16 @@
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
+# Features
+
+- functional-style API with jsdoc type annotations
+- plain javascipt in commonjs format - no additional build step required
+- ES6+ including async/await, lambdas, spread operator...
+- typechecking support in vscode (without compiling typescript code)
+- no dependencies other than `axios`
+- as close as possible to the Solr Json-based REST API
+- functions for working with document, fields and field types
+
 # Example
 
 ```js
