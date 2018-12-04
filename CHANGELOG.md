@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/vsimko/node-solr-lambda/compare/v1.1.0...v2.0.0) (2018-12-04)
+
+
+### Bug Fixes
+
+* add explicit typedef imports instead of declare global ([c388079](https://github.com/vsimko/node-solr-lambda/commit/c388079))
+
+
+### Features
+
+* add mergeConfig exported function used also in prepareSolrClient ([051ecd0](https://github.com/vsimko/node-solr-lambda/commit/051ecd0))
+
+
+### BREAKING CHANGES
+
+* the prepareSolrClient function now accepts
+user config which is merged with the default config (overrides its
+fields). The userConfig can also be empty.
+
+
+
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/vsimko/node-solr-lambda/compare/v1.0.0...v1.1.0) (2018-12-04)
 
