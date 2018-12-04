@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/vsimko/node-solr-lambda/compare/v1.0.0...v1.1.0) (2018-12-04)
+
+
+### Bug Fixes
+
+* printing curl command in debug mode should use quoted data ([752c1cc](https://github.com/vsimko/node-solr-lambda/commit/752c1cc))
+
+
+### Features
+
+* implemented `delete` function for deleting document by id or query ([e1166e4](https://github.com/vsimko/node-solr-lambda/commit/e1166e4))
+
+
+
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/vsimko/node-solr-lambda/compare/v0.2.2...v1.0.0) (2018-12-04)
 
