@@ -29,6 +29,8 @@
     "git-cred": "git config credential.helper store",
     "lint": "eslint .",
     "test": "mocha",
-    "release": "standard-version"
+    "release": "standard-version",
+    "release:push": "git push --follow-tags origin master",
+    "release:npm": "yarn publish"
   }
 }
