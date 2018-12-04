@@ -137,5 +137,6 @@ const prepareSolrClient = config => ({
 })
 
 module.exports = {
-  prepareSolrClient
+  prepareSolrClient,
+  defaultConfig
 }
