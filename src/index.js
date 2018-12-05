@@ -47,9 +47,21 @@ const solrPost = config => path => async data => {
     )
   }
 
-  const response = await axios.post(solrUrl, data, {
-    headers: { "Content-Type": "application/json" }
-  })
+  const response = await axios
+    .post(solrUrl, data, {
+      headers: { "Content-Type": "application/json" }
+    })
+    .catch(reason => {
+      // converting error response from solr
+      switch (reason.response.status) {
+        case 400:
+          throw Error(reason.response.data.error.msg)
+        case 404:
+          throw Error(`${reason.message}: ${reason.response.statusText}`)
+        default:
+          throw reason
+      }
+    })
 
   return response.data
 }
