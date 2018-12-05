@@ -244,15 +244,6 @@ type SolrDataValue = any
 //   | SolrFragmentWithId
 //   | SolrFragmentWithId[]
 
-/**
- * This type definition contains just the most important parts.
- */
-interface SolrResponseHeader {
-  params?: object
-  status: number
-  QTime: number
-}
-
 interface TermsFacet {
   buckets: { val: string; count: number }[]
 }
@@ -306,6 +297,15 @@ export interface SolrDocument {
 /**
  * This type definition contains just the most important parts.
  */
+interface SolrResponseHeader {
+  params?: object
+  status: number
+  QTime: number
+}
+
+/**
+ * This type definition contains just the most important parts.
+ */
 export interface SolrResponse {
   status?: string
   facets?: {
@@ -349,7 +349,7 @@ export interface SolrException {
   stack: string
 }
 
-export interface SolrQuery {
+export interface QueryRequest {
   query?
   filter?
   start?
@@ -379,7 +379,67 @@ export interface SolrConfig {
   apiPrefix?: string
 }
 
-export interface DeleteQuery {
+export interface DeleteRequest {
   id?: string
   query?: any
 }
+
+export type ConfigRequest = {
+  // Commands for Common Properties:
+  // https://lucene.apache.org/solr/guide/7_5/config-api.html#commands-for-common-properties
+
+  "set-property"?: { [property: string]: any }
+  "unset-property"?: string
+
+  // Basic Commands for Components
+  // https://lucene.apache.org/solr/guide/7_5/config-api.html#basic-commands-for-components
+
+  "add-requesthandler"?: any
+  "update-requesthandler"?: any
+  "delete-requesthandler"?: any
+  "add-searchcomponent"?: any
+  "update-searchcomponent"?: any
+  "delete-searchcomponent"?: any
+  "add-initparams"?: any
+  "update-initparams"?: any
+  "delete-initparams"?: any
+  "add-queryresponsewriter"?: any
+  "update-queryresponsewriter"?: any
+  "delete-queryresponsewriter"?: any
+
+  // Advanced Commands for Components:
+  // https://lucene.apache.org/solr/guide/7_5/config-api.html#advanced-commands-for-components
+
+  "add-queryparser"?: any
+  "update-queryparser"?: any
+  "delete-queryparser"?: any
+  "add-valuesourceparser"?: any
+  "update-valuesourceparser"?: any
+  "delete-valuesourceparser"?: any
+  "add-transformer"?: any
+  "update-transformer"?: any
+  "delete-transformer"?: any
+  "add-updateprocessor"?: any
+  "update-updateprocessor"?: any
+  "delete-updateprocessor"?: any
+  "add-queryconverter"?: any
+  "update-queryconverter"?: any
+  "delete-queryconverter"?: any
+  "add-listener"?: any
+  "update-listener"?: any
+  "delete-listener"?: any
+  "add-runtimelib"?: any
+  "update-runtimelib"?: any
+  "delete-runtimelib"?: any
+
+  // Commands for User-Defined Properties:
+  // https://lucene.apache.org/solr/guide/7_5/config-api.html#commands-for-user-defined-properties
+  "set-user-property"?: {
+    "update.autoCreateFields"?: TrueOrFalseString // boolean does not work, perhaps a bug in solr
+    [variableName: string]: any
+  }
+  "unset-user-property"?: string
+}
+
+type TrueOrFalseString = "true" | "false"
+type OnOrOffString = "on" | "off"

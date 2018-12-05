@@ -2,17 +2,19 @@
 /**
  * Support for type checking and intellisense in vscode:
  * @typedef {import("./solr").SolrConfig} SolrConfig
+ * @typedef {import("./solr").ConfigRequest} ConfigRequest
  * @typedef {import("./solr").SolrData} SolrData
  * @typedef {import("./solr").SolrDocument} SolrDocument
  * @typedef {import("./solr").SolrResponse} SolrResponse
- * @typedef {import("./solr").DeleteQuery} DeleteQuery
+ * @typedef {import("./solr").DeleteRequest} DeleteRequest
  * @typedef {import("./solr").FieldProperties} FieldProperties
  * @typedef {import("./solr").FieldTypeProperties} FieldTypeProperties
- * @typedef {import("./solr").SolrQuery} SolrQuery
+ * @typedef {import("./solr").QueryRequest} QueryRequest
  */
 
 const url = require("url")
 const { default: axios } = require("axios")
+const { mergeConfig, ensureArray, isEmptyObject } = require("./utils")
 
 /** @type {SolrConfig} */
 const defaultConfig = {
@@ -30,12 +32,6 @@ const defaultConfig = {
   apiPrefix: "api/cores"
 }
 
-/** @type {(x:object) => object|object[]} */
-const ensureArray = x => (Object(x) instanceof Array ? x : [x])
-
-const isEmptyObject = obj =>
-  Object.keys(obj).length === 0 && obj.constructor === Object
-
 /** @type {(config:SolrConfig) => (path:string) => (data:SolrData) => Promise<SolrResponse>} */
 const solrPost = config => path => async data => {
   const { core, apiPrefix } = config
@@ -45,9 +41,9 @@ const solrPost = config => path => async data => {
   })
 
   if (config.debug) {
-    const dataPart = isEmptyObject(data) ? "" : ` -d '${JSON.stringify(data)}'`
+    const dataPart = isEmptyObject(data) ? "" : `-d '${JSON.stringify(data)}'`
     console.debug(
-      `\n$ curl -X POST '${solrUrl}' -H 'Content-Type: application/json'${dataPart}\n`
+      `\ncurl -X POST '${solrUrl}' -H 'Content-Type: application/json' ${dataPart}\n`
     )
   }
 
@@ -58,28 +54,6 @@ const solrPost = config => path => async data => {
   return response.data
 }
 
-/**
- * Perform an operation on solr schema.
- * @see https://lucene.apache.org/solr/guide/7_5/schema-api.html#modify-the-schema
- * @param {SolrConfig} config
- */
-const solrSchema = config => op => data =>
-  solrPost(config)("schema")({ [op]: data })
-
-const mergeConfig = (a, b) => mergeConfigImpure({ ...a }, b)
-
-function mergeConfigImpure (target, source) {
-  for (let k in source) {
-    const objOrScalar = target[k]
-    if (objOrScalar != null && objOrScalar.constructor === Object) {
-      mergeConfigImpure(objOrScalar, source[k]) // recurse on objects
-    } else {
-      target[k] = source[k] // assign scalar value
-    }
-  }
-  return target
-}
-
 /** @param {SolrConfig} userConfig */
 const prepareSolrClient = (userConfig = {}) => {
   const config = mergeConfig(defaultConfig, userConfig)
@@ -88,10 +62,19 @@ const prepareSolrClient = (userConfig = {}) => {
   if (!config.core) {
     throw Error("missing 'core' parameter in your config")
   }
+
+  // some functions require /solr prefix instead of /api/cores/
+  const configWithSolrPrefix = { ...config, apiPrefix: "solr" }
+
+  const solrConfigRequest = solrPost(configWithSolrPrefix)("config")
+
+  const solrSchemaRequest = op => data =>
+    solrPost(config)("schema")({ [op]: data })
+
   // now creating the API
   return {
     ping: () =>
-      solrPost({ ...config, apiPrefix: "solr" })("admin/ping")({})
+      solrPost(configWithSolrPrefix)("admin/ping")({})
         .then(value => {
           return value.status === "OK"
         })
@@ -100,26 +83,39 @@ const prepareSolrClient = (userConfig = {}) => {
     /** @param {SolrDocument | SolrDocument[]} data */
     add: data => solrPost(config)("update")(ensureArray(data)),
 
-    /** @param {DeleteQuery} deleteQuery */
+    /** @param {DeleteRequest} deleteQuery */
     delete: deleteQuery =>
-      solrPost({ ...config, apiPrefix: "solr" })("update")({
+      solrPost(configWithSolrPrefix)("update")({
         delete: deleteQuery
       }),
 
     /** @type {(data:FieldProperties) => Promise<SolrResponse>} */
-    addField: solrSchema(config)("add-field"),
+    addField: solrSchemaRequest("add-field"),
 
     /** @type {(data:FieldTypeProperties) => Promise<SolrResponse>} */
-    addFieldType: solrSchema(config)("add-field-type"),
+    addFieldType: solrSchemaRequest("add-field-type"),
 
     /** @type {({name:string}) => Promise<SolrResponse>} */
-    deleteField: solrSchema(config)("delete-field"),
+    deleteField: solrSchemaRequest("delete-field"),
 
     /** @type {({name:string}) => Promise<SolrResponse>} */
-    deleteFieldType: solrSchema(config)("delete-field-type"),
+    deleteFieldType: solrSchemaRequest("delete-field-type"),
 
-    /** @type {(data:SolrQuery) => Promise<SolrResponse>} */
-    query: solrPost(config)("query")
+    /** @type {(data:QueryRequest) => Promise<SolrResponse>} */
+    query: solrPost(config)("query"),
+
+    config: solrConfigRequest,
+
+    /**
+     * Convenience function to set the `update.autoCreateFields` user property.
+     * @param {boolean} enable
+     */
+    configAutoEnableFields: enable =>
+      solrConfigRequest({
+        "set-user-property": {
+          "update.autoCreateFields": enable ? "true" : "false"
+        }
+      })
   }
 }
 
