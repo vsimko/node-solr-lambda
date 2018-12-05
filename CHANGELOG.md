@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/vsimko/node-solr-lambda/compare/v2.1.0...v2.2.0) (2018-12-05)
+
+
+### Bug Fixes
+
+* function `mergeConfig` now uses `deepCopy` through JSON serdes. ([c240ad3](https://github.com/vsimko/node-solr-lambda/commit/c240ad3))
+
+
+### Features
+
+* add `mergedConfig` function ([9ca2fe6](https://github.com/vsimko/node-solr-lambda/commit/9ca2fe6))
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/vsimko/node-solr-lambda/compare/v2.0.2...v2.1.0) (2018-12-05)
 
