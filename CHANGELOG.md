@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/vsimko/node-solr-lambda/compare/v2.0.2...v2.1.0) (2018-12-05)
+
+
+### Features
+
+* add solr.config function and and configAutoEnableFields ([ade5e8a](https://github.com/vsimko/node-solr-lambda/commit/ade5e8a))
+
+
+
 <a name="2.0.2"></a>
 ## [2.0.2](https://github.com/vsimko/node-solr-lambda/compare/v2.0.0...v2.0.2) (2018-12-04)
 
