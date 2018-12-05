@@ -66,6 +66,8 @@ const prepareSolrClient = (userConfig = {}) => {
   // some functions require /solr prefix instead of /api/cores/
   const configWithSolrPrefix = { ...config, apiPrefix: "solr" }
 
+  // we already use the variable config, therefore solrConfigRequest
+  // represents the "config" API call from Solr
   const solrConfigRequest = solrPost(configWithSolrPrefix)("config")
 
   const solrSchemaRequest = op => data =>
@@ -73,6 +75,7 @@ const prepareSolrClient = (userConfig = {}) => {
 
   // now creating the API
   return {
+    mergedConfig: () => config,
     ping: () =>
       solrPost(configWithSolrPrefix)("admin/ping")({})
         .then(value => {
