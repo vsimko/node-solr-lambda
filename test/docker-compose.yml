@@ -1,0 +1,12 @@
+version: "2"
+
+services:
+  solr:
+    image: solr:alpine
+    ports:
+      - "18983:8983" # port 18983 for debugging
+    entrypoint:
+      - docker-entrypoint.sh
+      - sh
+      - -c
+      - solr-precreate testcore & solr-precreate testcore2
