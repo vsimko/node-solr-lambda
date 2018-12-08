@@ -3,130 +3,120 @@
  * Support for type checking and intellisense in vscode:
  * @typedef {import("./solr").SolrConfig} SolrConfig
  * @typedef {import("./solr").ConfigRequest} ConfigRequest
- * @typedef {import("./solr").SolrData} SolrData
+ * @typedef {import("./solr").SolrException} SolrException
  * @typedef {import("./solr").SolrDocument} SolrDocument
  * @typedef {import("./solr").SolrResponse} SolrResponse
  * @typedef {import("./solr").DeleteRequest} DeleteRequest
  * @typedef {import("./solr").FieldProperties} FieldProperties
  * @typedef {import("./solr").FieldTypeProperties} FieldTypeProperties
  * @typedef {import("./solr").QueryRequest} QueryRequest
+ * @typedef {{name:string, type?:string, [key:string]:any}} FieldDef
+ * @typedef {import("axios").AxiosResponse} AxiosResponse
  */
 
 const url = require("url")
 const { default: axios } = require("axios")
-const { mergeConfig, ensureArray, isEmptyObject } = require("./utils")
+const { mergeConfig, ensureArray } = require("./utils")
 
 /** @type {SolrConfig} */
 const defaultConfig = {
-  urlConfig: {
-    hostname: "localhost",
-    port: 8983,
-    protocol: "http",
-    query: {
-      commitWithin: 500,
-      overwrite: true,
-      wt: "json"
-    }
-  },
-  debug: false,
-  apiPrefix: "api/cores"
-}
-
-/** @type {(config:SolrConfig) => (path:string) => (data:SolrData) => Promise<SolrResponse>} */
-const solrPost = config => path => async data => {
-  const { core, apiPrefix } = config
-  const solrUrl = url.format({
-    ...config.urlConfig,
-    pathname: `${apiPrefix}/${core}/${path}`
-  })
-
-  if (config.debug) {
-    const dataPart = isEmptyObject(data) ? "" : `-d '${JSON.stringify(data)}'`
-    console.debug(
-      `\ncurl -X POST '${solrUrl}' -H 'Content-Type: application/json' ${dataPart}\n`
-    )
+  hostname: "localhost",
+  port: 8983,
+  protocol: "http",
+  query: {
+    commitWithin: 500,
+    overwrite: true
   }
-
-  const response = await axios
-    .post(solrUrl, data, {
-      headers: { "Content-Type": "application/json" }
-    })
-    .catch(reason => {
-      // converting error response from solr
-      switch (reason.response.status) {
-        case 400:
-          throw Error(reason.response.data.error.msg)
-        case 404:
-          throw Error(`${reason.message}: ${reason.response.statusText}`)
-        default:
-          throw reason
-      }
-    })
-
-  return response.data
 }
 
-/** @param {SolrConfig} userConfig */
-const prepareSolrClient = (userConfig = {}) => {
+/** @type {(axiosResp:AxiosResponse) => SolrResponse} */
+const convertSolrResponse = axiosResp => axiosResp.data
+
+// converting error response from solr
+/** @param {SolrException} reason */
+const convertSolrError = reason => {
+  switch (reason.response.status) {
+    case 400:
+      throw Error(reason.response.data.error.msg)
+    case 404:
+      throw Error(`${reason.message}: ${reason.response.statusText}`)
+    default:
+      throw reason
+  }
+}
+
+/**
+ * @param {SolrConfig} userConfig This is merged with the defaultConfig
+ * @param {string} core
+ */
+const prepareSolrClient = (core, userConfig = {}) => {
+  console.assert(core, "Missing 'core' parameter")
+
   const config = mergeConfig(defaultConfig, userConfig)
 
-  // sanity checks
-  if (!config.core) {
-    throw Error("missing 'core' parameter in your config")
-  }
+  /** @type {(pathname:string) => (data:any) => Promise<SolrResponse>} */
+  const httpPostReq = pathname => data =>
+    axios
+      .post(url.format({ ...config, pathname }), data)
+      .then(convertSolrResponse)
+      .catch(convertSolrError)
 
-  // some functions require /solr prefix instead of /api/cores/
-  const configWithSolrPrefix = { ...config, apiPrefix: "solr" }
+  /** @type {(pathname:string) => (query:any) => Promise<SolrResponse>} */
+  const httpGetReq = pathname => query =>
+    axios
+      .get(url.format({ ...mergeConfig(config, { query }), pathname }))
+      .then(convertSolrResponse)
+      .catch(convertSolrError)
 
-  // we already use the variable config, therefore solrConfigRequest
-  // represents the "config" API call from Solr
-  const solrConfigRequest = solrPost(configWithSolrPrefix)("config")
+  /** @type {(op:string) => (fieldDef:FieldDef) => Promise<SolrResponse>} */
+  const solrSchemaReq = op => fieldDef =>
+    httpPostReq(`/api/cores/${core}/schema`)({ [op]: fieldDef })
 
-  const solrSchemaRequest = op => data =>
-    solrPost(config)("schema")({ [op]: data })
+  /** @type {(data:ConfigRequest) => Promise<SolrResponse> } */
+  const configReq = httpPostReq(`/api/cores/${core}/config`)
 
   // now creating the API
   return {
     mergedConfig: () => config,
-    ping: () =>
-      solrPost(configWithSolrPrefix)("admin/ping")({})
-        .then(value => {
-          return value.status === "OK"
-        })
-        .catch(() => false),
+
+    commit: () => httpGetReq(`/solr/${core}/update`)({ commit: true }),
+
+    /** @type {(data:QueryRequest) => Promise<SolrResponse>} */
+    query: httpPostReq(`/api/cores/${core}/query`),
 
     /** @param {SolrDocument | SolrDocument[]} data */
-    add: data => solrPost(config)("update")(ensureArray(data)),
+    add: data => httpPostReq(`/api/cores/${core}/update`)(ensureArray(data)),
 
     /** @param {DeleteRequest} deleteQuery */
     delete: deleteQuery =>
-      solrPost(configWithSolrPrefix)("update")({
-        delete: deleteQuery
-      }),
+      httpPostReq(`/api/cores/${core}/update`)({ delete: deleteQuery }),
+
+    /** @param {string} name */
+    deleteField: name => solrSchemaReq("delete-field")({ name }),
+
+    /** @param {string} name */
+    deleteFieldType: name => solrSchemaReq("delete-field-type")({ name }),
 
     /** @type {(data:FieldProperties) => Promise<SolrResponse>} */
-    addField: solrSchemaRequest("add-field"),
+    addField: solrSchemaReq("add-field"),
 
     /** @type {(data:FieldTypeProperties) => Promise<SolrResponse>} */
-    addFieldType: solrSchemaRequest("add-field-type"),
+    addFieldType: solrSchemaReq("add-field-type"),
 
-    /** @type {({name:string}) => Promise<SolrResponse>} */
-    deleteField: solrSchemaRequest("delete-field"),
+    /** @type {(data:FieldTypeProperties) => Promise<SolrResponse>} */
+    replaceField: solrSchemaReq("replace-field"),
 
-    /** @type {({name:string}) => Promise<SolrResponse>} */
-    deleteFieldType: solrSchemaRequest("delete-field-type"),
+    config: configReq,
 
-    /** @type {(data:QueryRequest) => Promise<SolrResponse>} */
-    query: solrPost(config)("query"),
+    /** @type {() => Promise<string[]>} */
+    solrListFields: () =>
+      httpGetReq(`/solr/${core}/schema/fields`)({}).then(data =>
+        data.fields.map(field => field.name)
+      ),
 
-    config: solrConfigRequest,
-
-    /**
-     * Convenience function to set the `update.autoCreateFields` user property.
-     * @param {boolean} enable
-     */
+    /** @param {boolean} enable */
     configAutoEnableFields: enable =>
-      solrConfigRequest({
+      configReq({
         "set-user-property": {
           "update.autoCreateFields": enable ? "true" : "false"
         }
@@ -134,8 +124,42 @@ const prepareSolrClient = (userConfig = {}) => {
   }
 }
 
+/** @param {SolrConfig} userConfig */
+const prepareCoreAdmin = userConfig => {
+  const config = mergeConfig(defaultConfig, userConfig)
+  return {
+    /** @type {(core:string) => Promise<SolrResponse>} */
+    ping: core =>
+      axios
+        .get(url.format({ ...config, pathname: `/solr/${core}/admin/ping` }))
+        .then(convertSolrResponse)
+        .catch(convertSolrError),
+
+    /** @type {(core:string) => Promise<SolrResponse>} */
+    solrDeleteCore: core =>
+      axios
+        .get(
+          url.format({
+            ...mergeConfig(config, {
+              query: {
+                core,
+                action: "UNLOAD",
+                deleteIndex: true,
+                deleteDataDir: true,
+                deleteInstanceDir: true
+              }
+            }),
+            pathname: "/solr/admin/cores"
+          })
+        )
+        .then(convertSolrResponse)
+        .catch(convertSolrError)
+  }
+}
+
 module.exports = {
   prepareSolrClient,
+  prepareCoreAdmin,
   defaultConfig,
   mergeConfig
 }

@@ -45,12 +45,8 @@ function mergeConfigImpure (target, source) {
  */
 const ensureArray = x => x instanceof Array ? x : [x]
 
-const isEmptyObject = obj =>
-  Object.keys(obj).length === 0 && obj.constructor === Object
-
 module.exports = {
   mergeConfig,
   mergeConfigImpure,
-  ensureArray,
-  isEmptyObject
+  ensureArray
 }

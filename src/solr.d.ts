@@ -308,6 +308,7 @@ interface SolrResponseHeader {
  */
 export interface SolrResponse {
   status?: string
+  fields?: any
   facets?: {
     count?: number
   } & {
@@ -332,11 +333,8 @@ export interface SolrException {
     config
     data: {
       error: {
+        msg: string
         code: number
-        details: {
-          errorMessages: string[]
-          [key: string]: object
-        }[]
         metadata: string[]
       }
       responseHeader: SolrResponseHeader
@@ -365,18 +363,13 @@ export interface QueryRequest {
   }
 }
 
-export interface SolrConfig {
-  urlConfig?: UrlObject & {
-    query?: {
-      overwrite?: boolean
-      commitWithin?: number
-      wt?: "json" | "xml" | "python" | "ruby" | "php" | "csv"
-      [key: string]: any
-    }
+export type SolrConfig = UrlObject & {
+  query?: {
+    overwrite?: boolean
+    commitWithin?: number
+    wt?: "json" | "xml" | "python" | "ruby" | "php" | "csv"
+    [key: string]: any
   }
-  debug?: boolean
-  core?: string
-  apiPrefix?: string
 }
 
 export interface DeleteRequest {
@@ -435,11 +428,11 @@ export type ConfigRequest = {
   // Commands for User-Defined Properties:
   // https://lucene.apache.org/solr/guide/7_5/config-api.html#commands-for-user-defined-properties
   "set-user-property"?: {
-    "update.autoCreateFields"?: TrueOrFalseString // boolean does not work, perhaps a bug in solr
+    "update.autoCreateFields"?: TrueFalseString // boolean does not work, perhaps a bug in solr
     [variableName: string]: any
   }
   "unset-user-property"?: string
 }
 
-type TrueOrFalseString = "true" | "false"
-type OnOrOffString = "on" | "off"
+type TrueFalseString = "true" | "false"
+type OnOffString = "on" | "off"
