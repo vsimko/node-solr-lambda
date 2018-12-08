@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/vsimko/node-solr-lambda/compare/v2.2.0...v3.0.0) (2018-12-08)
+
+
+### Bug Fixes
+
+* convert 404 and 400 http errors to exceptions ([6ca25ed](https://github.com/vsimko/node-solr-lambda/commit/6ca25ed))
+
+
+### Features
+
+* split api between client and core admin and simplify internal design ([37b0788](https://github.com/vsimko/node-solr-lambda/commit/37b0788))
+
+
+### BREAKING CHANGES
+
+* - config:
+  - removed parameters debug, apiPrefix
+  - urlConfig moved up one level
+- printing of debugging messages removed
+- prepareSolrClient accepts first parameter `core` and optinoal parameter `userConfig`
+- added function `commit`
+- added function `solrListFields`
+- moved function `ping` to `prepareCoreAdmin`
+- added function `solrDeleteCore` to `prepareCoreAdmin`
+- functions `deleteField` and `deleteFieldType` now accepts a single `name` parameter rather than object
+
+
+
 <a name="2.2.0"></a>
 # [2.2.0](https://github.com/vsimko/node-solr-lambda/compare/v2.1.0...v2.2.0) (2018-12-05)
 
