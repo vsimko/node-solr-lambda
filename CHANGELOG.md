@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/vsimko/node-solr-lambda/compare/v3.0.0...v3.0.1) (2018-12-09)
+
+
+### Bug Fixes
+
+* update docs, move solr.d.ts to types.d.ts ([af72e46](https://github.com/vsimko/node-solr-lambda/commit/af72e46))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/vsimko/node-solr-lambda/compare/v2.2.0...v3.0.0) (2018-12-08)
 
