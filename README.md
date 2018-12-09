@@ -8,20 +8,19 @@
 - plain javascipt in commonjs format - no additional build step required
 - ES6+ including async/await, lambdas, spread operator...
 - typechecking support in vscode (without compiling typescript code)
-- no dependencies other than `axios`
+- no runtime dependencies other than `axios`
 - as close as possible to the Solr Json-based REST API
-- functions for working with document, fields and field types
+- functions for working with documents, fields, field types, cores
 
 # Example
 
 ```js
 const { prepareSolrClient } = require("node-solr-lambda");
-const solr = prepareSolrClient({ core: "mycore" });
+const solr = prepareSolrClient("mycore");
 
 async function myfun() {
-  const mycoreExists = await solr.ping(); // -> true if "mycore" exists
   const result = await solr.query({ query: "label:something" });
-  console.log(result.data);
+  console.log(result);
 
   await solr.addField({ name: "price", type: "plong", multiValued: false });
   await solr.addField({
@@ -35,6 +34,7 @@ async function myfun() {
   const item2 = { id: "item2", price: 456, category: ["cpu", "usb"] };
   await solr.add(item1); // works with single object
   await solr.add([item1, item2]); // works with object[]
+  await solr.commit()
 
   await solr.query({
     query: "*:*",

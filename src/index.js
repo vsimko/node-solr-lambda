@@ -1,15 +1,15 @@
 // @ts-check
 /**
  * Support for type checking and intellisense in vscode:
- * @typedef {import("./solr").SolrConfig} SolrConfig
- * @typedef {import("./solr").ConfigRequest} ConfigRequest
- * @typedef {import("./solr").SolrException} SolrException
- * @typedef {import("./solr").SolrDocument} SolrDocument
- * @typedef {import("./solr").SolrResponse} SolrResponse
- * @typedef {import("./solr").DeleteRequest} DeleteRequest
- * @typedef {import("./solr").FieldProperties} FieldProperties
- * @typedef {import("./solr").FieldTypeProperties} FieldTypeProperties
- * @typedef {import("./solr").QueryRequest} QueryRequest
+ * @typedef {import("./types").SolrConfig} SolrConfig
+ * @typedef {import("./types").ConfigRequest} ConfigRequest
+ * @typedef {import("./types").SolrException} SolrException
+ * @typedef {import("./types").SolrDocument} SolrDocument
+ * @typedef {import("./types").SolrResponse} SolrResponse
+ * @typedef {import("./types").DeleteRequest} DeleteRequest
+ * @typedef {import("./types").FieldProperties} FieldProperties
+ * @typedef {import("./types").FieldTypeProperties} FieldTypeProperties
+ * @typedef {import("./types").QueryRequest} QueryRequest
  * @typedef {{name:string, type?:string, [key:string]:any}} FieldDef
  * @typedef {import("axios").AxiosResponse} AxiosResponse
  */
