@@ -2,7 +2,7 @@
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
-# Features
+## Features
 
 - functional-style API with jsdoc type annotations
 - plain javascipt in commonjs format - no additional build step required
@@ -12,7 +12,7 @@
 - as close as possible to the Solr Json-based REST API
 - functions for working with documents, fields, field types, cores
 
-# Example
+## Example
 
 ```js
 const { prepareSolrClient } = require("node-solr-lambda");
@@ -51,4 +51,18 @@ async function myfun() {
     }
   });
 }
+```
+
+## How to test
+
+We provide a docker-compose with a solr instance for testing.
+The testing solr instance needs to run first:
+```sh
+# run this in a separate terminal and shutdown using CTRL+C
+yarn test:prepare
+```
+
+Now you can run the test suite:
+```sh
+yarn test
 ```
