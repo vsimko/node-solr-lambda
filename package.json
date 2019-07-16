@@ -1,13 +1,13 @@
 {
   "name": "node-solr-lambda",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Minimalistic Solr client written in functional programming style",
   "main": "src/index",
   "repository": "https://github.com/vsimko/node-solr-lambda.git",
   "author": "Viliam Simko <viliam.simko@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.19.0"
   },
   "engines": {
     "node": ">=8.0.0"
