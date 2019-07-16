@@ -4,7 +4,7 @@ const { expect, use } = require("chai")
 const cap = require("chai-as-promised")
 use(cap)
 
-/** @typedef {import("../src/solr").SolrConfig} SolrConfig */
+/** @typedef {import("../src/types").SolrConfig} SolrConfig */
 
 /** @type {SolrConfig} */
 const testConfing = { port: 18983 } // see docker-compose.yml
