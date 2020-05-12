@@ -27,7 +27,7 @@ const deepCopy = x => JSON.parse(JSON.stringify(x))
  * @param {T} source
  */
 function mergeConfigImpure (target, source) {
-  for (let k in source) {
+  for (const k in source) {
     const maybeObject = target[k]
     if (maybeObject != null && maybeObject.constructor === Object) {
       mergeConfigImpure(maybeObject, source[k]) // recurse on objects
