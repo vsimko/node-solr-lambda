@@ -10,7 +10,7 @@
  * @typedef {import("./types").FieldProperties} FieldProperties
  * @typedef {import("./types").FieldTypeProperties} FieldTypeProperties
  * @typedef {import("./types").QueryRequest} QueryRequest
- * @typedef {{name:string, type?:string, [key:string]:any}} FieldDef
+ * @typedef {{name:string, type?:string, class?:string, enumsConfig?:string, enumName?:string, [key:string]:any}} FieldDef
  * @typedef {import("axios").AxiosResponse} AxiosResponse
  */
 
