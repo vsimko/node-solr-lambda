@@ -7,24 +7,24 @@
   "author": "Viliam Simko <viliam.simko@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.2"
+    "axios": "^0.27.2"
   },
   "engines": {
     "node": ">=8.0.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.11",
-    "@types/mocha": "^7.0.2",
-    "chai": "^4.2.0",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^7.0.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint": "^8.43.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.0.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^7.1.2",
-    "standard-version": "^8.0.1"
+    "eslint-plugin-promise": "^6.1.1",
+    "mocha": "10.1.0",
+    "standard-version": "^9.5.0"
   },
   "resolutions": {},
   "scripts": {
