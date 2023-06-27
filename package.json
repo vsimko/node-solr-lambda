@@ -1,6 +1,6 @@
 {
   "name": "node-solr-lambda",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "Minimalistic Solr client written in functional programming style",
   "main": "src/index",
   "repository": "https://github.com/vsimko/node-solr-lambda.git",
