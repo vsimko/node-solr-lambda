@@ -32,7 +32,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /{core}/schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property and GET /config/overlay userProps read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #166) |
 | `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Tested: CREATE, STATUS, RELOAD, and fixture UNLOAD cleanup on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Tested: SolrCloud CREATE/LIST/DELETE on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
+| `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Tested: SolrCloud CREATE/LIST/DELETE, CREATEALIAS/LISTALIASES/DELETEALIAS, and implicit-router CREATESHARD/DELETESHARD lifecycle with CLUSTERSTATUS read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #176) |
 | `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Tested: system metadata on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Tested: JVM metrics on pinned 8.11.4 / 9.11.0 / 10.1.0; Solr 8/9 return JSON, Solr 10.1 Prometheus text |
 | `security()` — authentication and authorization handlers | Documented | Documented | Documented | Tested: authenticated BasicAuth/RuleBasedAuthorization, anonymous rejection, authentication/authorization GET, and authentication `set-property` read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #162) |
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #162 passed the Node.js 20/22/24 checks, standalone integration jobs, security-enabled standalone jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection, authenticated authentication/authorization reads, and authentication property mutation/read-back.
+CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #162 passed the Node.js 20/22/24 checks, standalone integration jobs, security-enabled standalone jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search (CI #176). The security-enabled matrix verifies anonymous rejection, authenticated authentication/authorization reads, and authentication property mutation/read-back.
 
 | Solr line | Pinned Docker image |
 | --- | --- |
