@@ -1,9 +1,43 @@
 # Error handling
 
-The client throws `SolrHttpError` when Solr returns a non-success HTTP status. The error includes the HTTP status, status text, and response payload.
+The client uses typed errors. Catch these errors at the application boundary.
 
-The client throws `SolrValidationError` when an enabled schema rejects a request or response.
+## `SolrHttpError`
 
-Network errors and abort errors from the Fetch API pass to the caller. Catch these errors at the application boundary. Do not assume that every failed request includes a Solr error response.
+The client throws `SolrHttpError` when Solr returns a non-success HTTP status.
 
-The `export()` method returns the raw Fetch API `Response`. Read its body as a stream. It does not parse the export body as JSON.
+| Property | Description |
+| --- | --- |
+| `status` | HTTP status code. |
+| `statusText` | HTTP status text. |
+| `endpoint` | Request origin and path. The query string is omitted. |
+| `body` | Raw response body as text. An empty response is an empty string. |
+| `payload` | Parsed JSON, raw text when JSON parsing fails, or `undefined` for an empty body. |
+| `solrError` | Parsed Solr `error` object when the response contains one. |
+| `cause` | Optional underlying error, when one exists. |
+
+The `solrError` object preserves Solr fields such as `code`, `msg`, and `metadata`. The error message uses `solrError.msg` when it is available. Otherwise, it uses the HTTP status and status text.
+
+## `SolrNetworkError`
+
+The client throws `SolrNetworkError` when Fetch fails before a response is received, or when reading a non-streaming response body fails.
+
+- `endpoint` contains the request origin and path without query parameters.
+- `cause` contains the original Fetch or body-read error.
+
+The transport can retry configured network failures. When the retry policy is exhausted, the final error is `SolrNetworkError`.
+
+## `SolrValidationError`
+
+The client throws `SolrValidationError` when an enabled input or output schema rejects a value. The error includes the operation name and validation issues.
+
+## Response body handling
+
+- Valid JSON is available in `payload` as a parsed value.
+- Text and malformed JSON remain available as text in `body` and `payload`.
+- Empty response bodies produce `body === ""` and `payload === undefined`.
+- HTTP errors are raised for both JSON and non-JSON response bodies.
+
+## Raw export responses
+
+The `export()` method returns the raw Fetch API `Response` for successful responses. Read its body as a stream. For a non-success response, it throws `SolrHttpError` with the raw body and parsed payload.
