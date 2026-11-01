@@ -1,6 +1,6 @@
 # Solr server compatibility
 
-This page records the v4 client compatibility policy. It separates documentation evidence from runtime test evidence.
+This page records the current client compatibility policy. It separates documentation evidence from runtime test evidence.
 
 ## Status terms
 
@@ -69,7 +69,7 @@ The client does not yet provide dedicated typed wrappers for the V2 API.
 
 ## Current support policy
 
-- The v4 target lines are Solr 8.x, 9.x, and 10.x.
+- Target Solr server lines are 8.x, 9.x, and 10.x.
 - The minimum supported patch release for each line is **not established**.
 - No Solr major line is runtime-certified by this repository yet.
 - Treat all operations in the endpoint matrix as **unverified** until the integration matrix passes.
@@ -78,7 +78,7 @@ The client does not yet provide dedicated typed wrappers for the V2 API.
 
 ## Required integration evidence
 
-For each supported Solr line, run the same integration suite against a pinned patch release. Record the exact image tag and test result.
+For each target Solr line, run the same integration suite against a pinned patch release. Record the exact image tag and test result.
 
 The suite must cover:
 
