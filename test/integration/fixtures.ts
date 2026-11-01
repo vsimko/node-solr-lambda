@@ -41,6 +41,7 @@ export interface SolrIntegrationFixture {
 
 export interface SolrCloudIntegrationFixture {
   client: SolrClient;
+  clientForCollection(name: string): SolrClient;
   createCollection(prefix?: string): Promise<string>;
 }
 
@@ -152,6 +153,9 @@ export function cloudIntegrationTest(
     const createdCollections = new Set<string>();
     const fixture: SolrCloudIntegrationFixture = {
       client,
+      clientForCollection(name) {
+        return new SolrClient({ baseUrl: baseUrl!, collection: name, timeoutMs: 30_000 });
+      },
       async createCollection(prefix = "integration_collection") {
         const name = `${prefix}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
         await client.collections("CREATE", {
