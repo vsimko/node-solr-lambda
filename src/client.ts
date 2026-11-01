@@ -68,4 +68,29 @@ export class SolrClient {
   ping<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/admin/ping"),{operation:"ping"});}
   schema<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/schema"),{method:"POST",body:command,operation:"schema"});}
   config<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/config"),{method:"POST",body:command,operation:"config"});}
+
+  queryJson<T=unknown>(request:Readonly<Record<string,unknown>>):Promise<T> {
+    return this.request<T>(this.endpoint("/query"),{method:"POST",body:request,operation:"queryJson"});
+  }
+  coreAdmin<T=unknown>(action:import("./types.js").CoreAdminAction,params:import("./types.js").SolrAdminParams={}):Promise<T> {
+    return this.request<T>("/solr/admin/cores",{query:{action,...params},operation:"coreAdmin"});
+  }
+  collections<T=unknown>(action:import("./types.js").CollectionAdminAction,params:import("./types.js").SolrAdminParams={}):Promise<T> {
+    return this.request<T>("/solr/admin/collections",{query:{action,...params},operation:"collections"});
+  }
+  systemInfo<T=unknown>():Promise<T> {
+    return this.request<T>("/solr/admin/info/system",{operation:"systemInfo"});
+  }
+  metrics<T=unknown>(params:import("./types.js").SolrAdminParams={}):Promise<T> {
+    return this.request<T>("/solr/admin/metrics",{query:params,operation:"metrics"});
+  }
+  security<T=unknown>(area:"authentication"|"authorization",command?:Readonly<Record<string,unknown>>):Promise<T> {
+    return this.request<T>(`/solr/admin/${area}`,{method:command===undefined?"GET":"POST",...(command===undefined?{}:{body:command}),operation:"security"});
+  }
+  stream<T=unknown>(expression:string):Promise<T> {
+    return this.request<T>(this.endpoint("/stream"),{method:"POST",body:{expr:expression},operation:"stream"});
+  }
+  export<T=unknown>(params:import("./types.js").SolrAdminParams):Promise<T> {
+    return this.request<T>(this.endpoint("/export"),{query:params,operation:"export"});
+  }
 }
