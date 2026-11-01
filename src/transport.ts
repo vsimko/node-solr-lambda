@@ -112,6 +112,7 @@ function wrapResponse(response: Response, context: RequestSignalContext, endpoin
     context.cleanup();
     return response;
   }
+  context.signal.addEventListener("abort", context.cleanup, { once: true });
   const reader = response.body.getReader();
   const stream = new ReadableStream<Uint8Array>({
     async pull(controller) {
