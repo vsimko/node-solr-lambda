@@ -7,6 +7,7 @@ integrationTest("System info endpoint returns server information", async ({ clie
 });
 
 integrationTest("Metrics API returns JVM metrics", async ({ client }) => {
-  const result = await client.metrics<{ metrics?: Record<string, unknown> }>({ group: "jvm" });
-  assert.ok(result.metrics && Object.keys(result.metrics).length > 0, `JVM metrics should be present: ${JSON.stringify(result)}`);
+  const result = await client.metrics<string>({ group: "jvm" });
+  assert.equal(typeof result, "string");
+  assert.match(result, /jvm_[a-z_]+/, "JVM metrics should contain Prometheus metric names");
 });
