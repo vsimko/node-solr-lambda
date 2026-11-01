@@ -43,8 +43,11 @@ Use HTTPS when you send credentials over a network. Do not store passwords or to
 Header precedence, from lowest to highest:
 
 1. `requestDefaults.headers`
-2. `headers`
-3. Per-request `RequestOptions.headers`
+2. The `auth` or legacy Basic authentication setting
+3. `headers`
+4. Per-request `RequestOptions.headers`
+
+The last two levels can override the generated Authorization header.
 
 ## Request defaults
 
@@ -83,6 +86,7 @@ const solr = createSolrClient({
 - The default methods list contains only `GET`.
 - Network failures can be retried by default. The client does not retry when the caller has aborted the request.
 - The delay uses exponential backoff and is capped by `maxDelayMs`.
+- A per-request `AbortSignal` takes precedence over `timeoutMs`.
 - Set `retry: false` to disable retries.
 
 Only add `POST`, `PUT`, or `DELETE` to the retry method list when the operation is safe to repeat. A retry can send the same request more than once.
