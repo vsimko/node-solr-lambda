@@ -1,5 +1,5 @@
 import test from "node:test";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { SolrClient } from "../../src/index.js";
 import type { SolrDocument } from "../../src/index.js";
 
@@ -18,7 +18,7 @@ export function createSecurityFixtureData(username = "integration-admin", passwo
     authentication: {
       class: "solr.BasicAuthPlugin",
       blockUnknown: true,
-      credentials: { [username]: password }
+      credentials: { [username]: createHash("sha256").update(password).digest("hex") }
     },
     authorization: {
       class: "solr.RuleBasedAuthorizationPlugin",
