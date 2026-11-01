@@ -6,7 +6,7 @@ This table tracks the v4 implementation. A generic request method does not mean 
 
 | API area | Current v4 surface | Remaining work |
 | --- | --- | --- |
-| Client transport | Typed base URL, core/collection, Basic/Bearer auth, headers, timeout, custom fetch, request defaults, and opt-in retries | Advanced auth mechanisms and retry telemetry. |
+| Client transport | Typed base URL, core/collection, Basic/Bearer auth, headers, client and per-request timeouts, AbortSignal controls, custom fetch, request defaults, and opt-in retries | Advanced auth mechanisms and retry telemetry. |
 | Errors | `SolrHttpError`, `SolrNetworkError`, `SolrTimeoutError`, `SolrAbortError`, and `SolrValidationError` | Solr-version-specific error payloads still need integration evidence. |
 | Standard Query | `query()`, `queryJson()` | Typed parsers, facets, highlighting, grouping, stats, cursors, JSON Facet models, version tests. |
 | Update / Documents | `add()`, `delete()`, `commit()`, `rollback()` | Atomic update models, soft commit options, optimize, extract, update parameter coverage. |
