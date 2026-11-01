@@ -79,3 +79,55 @@ test("Collections replica lifecycle parameters are serialized", async () => {
   assert.equal(remove.searchParams.get("replica"), "core_node2");
   assert.equal(remove.searchParams.get("deleteDataDir"), "true");
 });
+
+test("Collections replica move and property actions are serialized", async () => {
+  const requested: string[] = [];
+  const client = createSolrClient({
+    fetch: async (input) => {
+      requested.push(String(input));
+      return new Response(JSON.stringify({ success: true }));
+    }
+  });
+
+  await client.collections("MOVEREPLICA", {
+    collection: "books",
+    replica: "core_node2",
+    targetNode: "solr-node-2:8983_solr",
+    timeout: 120
+  });
+  await client.collections("BALANCESHARDUNIQUE", {
+    collection: "books",
+    property: "preferredLeader",
+    onlyactivenodes: true
+  });
+  await client.collections("ADDREPLICAPROP", {
+    collection: "books",
+    shard: "shard1",
+    replica: "core_node2",
+    property: "preferredLeader",
+    "property.value": "true"
+  });
+  await client.collections("DELETEREPLICAPROP", {
+    collection: "books",
+    shard: "shard1",
+    replica: "core_node2",
+    property: "preferredLeader"
+  });
+
+  const move = new URL(requested[0]!);
+  assert.equal(move.searchParams.get("action"), "MOVEREPLICA");
+  assert.equal(move.searchParams.get("targetNode"), "solr-node-2:8983_solr");
+  assert.equal(move.searchParams.get("timeout"), "120");
+
+  const balance = new URL(requested[1]!);
+  assert.equal(balance.searchParams.get("action"), "BALANCESHARDUNIQUE");
+  assert.equal(balance.searchParams.get("property"), "preferredLeader");
+
+  const addProperty = new URL(requested[2]!);
+  assert.equal(addProperty.searchParams.get("action"), "ADDREPLICAPROP");
+  assert.equal(addProperty.searchParams.get("property.value"), "true");
+
+  const deleteProperty = new URL(requested[3]!);
+  assert.equal(deleteProperty.searchParams.get("action"), "DELETEREPLICAPROP");
+  assert.equal(deleteProperty.searchParams.get("replica"), "core_node2");
+});
