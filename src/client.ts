@@ -104,7 +104,7 @@ export class SolrClient {
     const url=new URL(path.replace(/^\\//,""),this.clientConfig.baseUrl??DEFAULT_BASE_URL);
     appendQuery(url,options.body===undefined?input as RequestOptions["query"]:options.query);
     const headers:Record<string,string>={accept:"*/*",...(options.body===undefined?{}:{"content-type":"application/json"}),...(this.clientConfig.username!==undefined?{authorization:`Basic ${btoa(`${this.clientConfig.username}:${this.clientConfig.password??""}`)}`}:{}),...this.clientConfig.headers,...options.headers};
-    return this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
+    const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});\n    if(!response.ok){const text=await response.text();let payload:unknown=text;try{payload=text?JSON.parse(text) as unknown:undefined;}catch{}throw new SolrHttpError(response.status,response.statusText,payload);}\n    return response;
   }
   export(params:import("./types.js").SolrAdminParams):Promise<Response> {
     return this.requestRaw(this.endpoint("/export"),{query:params,operation:"export"});
