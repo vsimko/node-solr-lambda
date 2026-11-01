@@ -285,13 +285,111 @@ export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
 export interface UpdateOptions { overwrite?: boolean; commitWithin?: number; boost?: number; }
 export interface CommitOptions { waitSearcher?: boolean; softCommit?: boolean; expungeDeletes?: boolean; maxSegments?: number; }
-export interface SolrResponse<T = unknown> {
-  responseHeader?: { status?: number; QTime?: number; partialResults?: boolean };
-  response?: { numFound?: number; start?: number; docs?: T[] };
+export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
+  responseHeader?: SolrResponseHeader;
+  response?: SolrQueryResult<TDocument>;
+  /** Classic Facet API response; present when classic faceting is enabled. */
+  facet_counts?: SolrFacetCounts;
+  /** JSON Facet API response; the caller can provide its expected facet shape. */
+  facets?: TJsonFacet;
+  /** Highlight snippets keyed by document ID and field. */
+  highlighting?: SolrHighlighting;
+  /** Grouped query results keyed by group field or function. */
+  grouped?: Readonly<Record<string, SolrGroupedResult<TDocument>>>;
+  /** Stats Component response. */
+  stats?: SolrStats;
+  /** Query parser and execution diagnostics, when debug is enabled. */
+  debug?: SolrDebugInfo;
   /** Opaque cursor to pass as cursorMark on the next page. */
   nextCursorMark?: string;
+  /** Other optional Solr response sections remain accessible. */
   [key: string]: unknown;
 }
+/** Core result metadata returned by a Solr /select query. */
+export interface SolrQueryResult<TDocument = unknown> {
+  /** Number of matching documents before pagination. */
+  numFound?: number;
+  /** Zero-based offset of the first returned document. */
+  start?: number;
+  /** Highest score among the returned documents, when scoring is enabled. */
+  maxScore?: number;
+  /** Whether numFound is exact rather than an estimate. */
+  numFoundExact?: boolean;
+  /** Documents in this page. */
+  docs?: TDocument[];
+}
+
+/** Standard response header shared by Solr JSON responses. */
+export interface SolrResponseHeader {
+  status?: number;
+  QTime?: number;
+  partialResults?: boolean;
+  [key: string]: unknown;
+}
+
+/** Classic Facet API response sections. */
+export interface SolrFacetCounts {
+  facet_queries?: Readonly<Record<string, number>>;
+  facet_fields?: Readonly<Record<string, readonly (string | number)[]>>;
+  facet_dates?: Readonly<Record<string, unknown>>;
+  facet_ranges?: Readonly<Record<string, unknown>>;
+  facet_intervals?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+/** Highlight snippets keyed by document unique key, then field name. */
+export type SolrHighlighting = Readonly<Record<string, Readonly<Record<string, readonly string[]>>>>;
+
+/** A grouped result list for one group field or function. */
+export interface SolrGroupedResult<TDocument = unknown> {
+  matches?: number;
+  ngroups?: number;
+  totalGroupCount?: number;
+  groups?: readonly {
+    groupValue?: string | number | null;
+    matches?: number;
+    doclist?: SolrQueryResult<TDocument>;
+  }[];
+  doclist?: SolrQueryResult<TDocument>;
+}
+
+/** Common statistics returned for one field by the Stats Component. */
+export interface SolrFieldStats {
+  min?: number | string | null;
+  max?: number | string | null;
+  sum?: number;
+  count?: number;
+  missing?: number;
+  mean?: number;
+  stddev?: number;
+  sumOfSquares?: number;
+  distinctValues?: readonly unknown[];
+  countDistinct?: number;
+  [key: string]: unknown;
+}
+
+/** Stats Component response. */
+export interface SolrStats {
+  stats_fields?: Readonly<Record<string, SolrFieldStats>>;
+  [key: string]: unknown;
+}
+
+/** Common debug information returned when debug is enabled. */
+export interface SolrDebugInfo {
+  rawquerystring?: string;
+  querystring?: string;
+  parsedquery?: string;
+  parsedquery_toString?: string;
+  explain?: Readonly<Record<string, string>>;
+  timing?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+/** Typed response for the standard Solr query handler. */
+export interface SolrQueryResponse<TDocument = unknown, TJsonFacet = unknown> extends SolrResponse<TDocument, TJsonFacet> {
+  response?: SolrQueryResult<TDocument>;
+}
+
 export interface RequestControlOptions {
   /** Cancel this request. The caller signal and timeout are combined. */
   signal?: AbortSignal;
