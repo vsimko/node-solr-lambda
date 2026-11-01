@@ -161,18 +161,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update-lifecycle.test.ts"
       ],
-      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. CI execution is pending for this branch; do not treat this as runtime evidence until it passes."
+      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
     },
     {
       "id": "update.optimize",
@@ -205,18 +205,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update-lifecycle.test.ts"
       ],
-      "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. CI execution is pending for this branch; do not treat this as runtime evidence until it passes."
+      "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
     },
     {
       "id": "admin.ping",
@@ -227,11 +227,11 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
@@ -239,7 +239,7 @@
         "test/cancellation.test.ts",
         "test/integration/solr-core-lifecycle.test.ts"
       ],
-      "notes": "Ping response status OK is asserted on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. CI execution is pending for this branch; do not treat this as runtime evidence until it passes."
+      "notes": "Ping response status OK is asserted on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
     },
     {
       "id": "schema.api",
@@ -250,18 +250,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/schema.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-schema.test.ts"
       ],
-      "notes": "Schema API add-field and GET /schema/fields read-back have tests authored for on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup deletes the field. CI execution is pending for this branch; do not treat this as runtime evidence until it passes."
+      "notes": "Schema API add-field and GET /schema/fields read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup deletes the field (CI #145)."
     },
     {
       "id": "config.api",
@@ -272,18 +272,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/config.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-config-security.test.ts"
       ],
-      "notes": "Config API set-user-property has a test authored for on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property. Security payloads are test data only and the live security endpoint remains unverified. CI execution is pending for this branch; do not treat this as runtime evidence until it passes."
+      "notes": "Config API set-user-property passes on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property. Security payloads are test data only; live Security API remains unverified (CI #145)."
     },
     {
       "id": "admin.core",
@@ -294,18 +294,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
         "test/integration/solr-core-lifecycle.test.ts"
       ],
-      "notes": "CoreAdmin CREATE, STATUS, and RELOAD have tests authored for with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them. CI execution is pending for this branch; do not treat this as runtime evidence until it passes."
+      "notes": "CoreAdmin CREATE, STATUS, and RELOAD pass with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them (CI #145)."
     },
     {
       "id": "admin.collections",
@@ -316,18 +316,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
         "test/integration/solr-collections.test.ts"
       ],
-      "notes": "SolrCloud CREATE/LIST/DELETE lifecycle test runs in a dedicated SolrCloud CI matrix for Solr 8.11.4, 9.11.0, and 10.1.0; CI pending."
+      "notes": "SolrCloud CREATE/LIST/DELETE lifecycle test passes in dedicated SolrCloud CI jobs for Solr 8.11.4, 9.11.0, and 10.1.0 (CI #145)."
     },
     {
       "id": "system.info",
@@ -403,18 +403,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-streaming.test.ts"
       ],
-      "notes": "Streaming Expressions search is tested in a SolrCloud collection (not standalone mode); cloud integration matrix added, CI pending."
+      "notes": "Streaming Expressions search against a disposable SolrCloud collection passes on Solr 8.11.4, 9.11.0, and 10.1.0 (CI #145)."
     },
     {
       "id": "export.api",
