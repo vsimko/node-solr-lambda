@@ -58,6 +58,41 @@ await solr.query({
 
 Some query parsers instead accept an `excludeTags` local parameter. Keep it in that parser's local-params prefix, for example `solrLocalParams({ type: "parent", which: "type:parent", excludeTags: solrExcludeTags("category") }, query)`. Exclusion is contextual: this client does not globally remove tagged filters.
 
+## CursorMark pagination
+
+Cursor pagination is useful for walking large sorted result sets without increasing the `start` offset. The first request uses `cursorMark: "*"`; pass the response's `nextCursorMark` into the next request. Stop when the returned mark equals the mark used for that request:
+
+```ts
+import type { SolrResponse } from "node-solr-lambda";
+
+interface Product { id: string; updatedAt: string; }
+
+let cursorMark = "*";
+let done = false;
+
+while (!done) {
+  const page = await solr.query<SolrResponse<Product>>({
+    query: "*:*",
+    cursorMark,
+    sort: "updatedAt asc,id asc",
+    limit: 500
+  });
+
+  for (const product of page.response?.docs ?? []) {
+    await processProduct(product);
+  }
+
+  const nextCursorMark = page.nextCursorMark;
+  if (nextCursorMark === undefined) {
+    throw new Error("Solr response did not include nextCursorMark");
+  }
+  done = nextCursorMark === cursorMark;
+  cursorMark = nextCursorMark;
+}
+```
+
+TypeScript requires `sort` whenever `cursorMark` is supplied and rejects non-zero `offset` values; Solr permits `start=0` but no other start offset with a cursor. Runtime validation enforces the same rules for JavaScript callers. The library cannot infer the collection's schema, so callers must include the configured `uniqueKey` field in the sort expression (in either direction), usually as the final tie-breaker. Use a stable sort across every page. Avoid sort expressions whose value changes between requests, such as date math based on a moving `NOW`; in distributed SolrCloud, sorting by `score` can also be unstable across replicas. Index updates that change a document's sort value during a cursor scan can still cause duplicates or omissions. Cursor pagination and its constraints are documented in the [Solr Reference Guide](https://solr.apache.org/guide/solr/latest/query-guide/pagination-of-results.html).
+
 ## Sort, field-list, and expression helpers
 
 The helpers build Solr syntax strings; they do not parse or restrict the full Solr expression language. Raw strings remain supported for custom functions, transformers, local syntax, and server extensions.

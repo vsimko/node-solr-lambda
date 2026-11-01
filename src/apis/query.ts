@@ -7,6 +7,18 @@ function serializeFilter(filter: SolrFilter): string {
 }
 
 export function query<T>(client: SolrTransport, path: string, query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {
+  if (query.cursorMark !== undefined) {
+    if (typeof query.sort !== "string" || query.sort.trim() === "") {
+      throw new TypeError("cursorMark requires a non-empty sort expression");
+    }
+    if (query.offset !== undefined && query.offset !== 0) {
+      throw new TypeError("cursorMark cannot be combined with a non-zero offset");
+    }
+    if (query.cursorMark.trim() === "") {
+      throw new TypeError("cursorMark must be a non-empty string");
+    }
+  }
+
   const params: Record<string, unknown> = { ...(query.params ?? {}), ...query };
   if (query.query !== undefined) params.q = query.query;
   if (query.filter !== undefined) {

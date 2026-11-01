@@ -136,7 +136,7 @@ export type SolrQueryParserOptions =
  * Use parserOptions for discoverable parser-specific parameters. Put additional
  * Solr parameters in params; arbitrary top-level keys are intentionally rejected.
  */
-export interface SolrQuery {
+export interface SolrStandardQueryOptions {
   /** Query expression, serialized as Solr's q parameter. */
   query?: string;
   /** One or more filter queries, serialized as repeated fq parameters. */
@@ -149,6 +149,8 @@ export interface SolrQuery {
   limit?: number;
   /** Result offset, serialized as Solr's start parameter. */
   offset?: number;
+  /** Cursor pagination cannot be combined with a non-zero offset. */
+  cursorMark?: never;
   /** Query parser name, serialized as defType. */
   defType?: SolrQueryParser;
   /** Parser-specific options, flattened into individual Solr request parameters. */
@@ -160,13 +162,29 @@ export interface SolrQuery {
   /** Additional Solr parameters not yet exposed as dedicated options. */
   params?: Readonly<Record<string, SolrQueryParamValue>>;
 }
+
+/** Cursor requests require a sort expression and cannot use a non-zero offset. */
+export interface SolrCursorQuery extends Omit<SolrStandardQueryOptions, "sort" | "offset" | "cursorMark"> {
+  /** Initial value "*" or the nextCursorMark returned by the previous page. */
+  cursorMark: string;
+  /** Stable sort expression that includes the collection's uniqueKey field. */
+  sort: string;
+  /** Solr permits start=0, but no non-zero offset, with cursorMark. */
+  offset?: 0;
+}
+
+/** Supplying cursorMark switches to the stricter cursor-query shape. */
+export type SolrQuery = SolrStandardQueryOptions | SolrCursorQuery;
+
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
 export interface UpdateOptions { overwrite?: boolean; commitWithin?: number; boost?: number; }
 export interface CommitOptions { waitSearcher?: boolean; softCommit?: boolean; expungeDeletes?: boolean; maxSegments?: number; }
 export interface SolrResponse<T = unknown> {
-  responseHeader?: { status?: number; QTime?: number };
+  responseHeader?: { status?: number; QTime?: number; partialResults?: boolean };
   response?: { numFound?: number; start?: number; docs?: T[] };
+  /** Opaque cursor to pass as cursorMark on the next page. */
+  nextCursorMark?: string;
   [key: string]: unknown;
 }
 export interface RequestControlOptions {

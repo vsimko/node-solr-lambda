@@ -1,4 +1,4 @@
-import type { SolrClient } from "../src/index.js";
+import type { SolrClient, SolrResponse } from "../src/index.js";
 import { solrExcludeTags, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort } from "../src/index.js";
 
 declare const solr: SolrClient;
@@ -50,3 +50,17 @@ void solr.query({ query: "*:*", "q.op": "XOR" });
 solrSort({ expression: "price", direction: "sideways" });
 // @ts-expect-error Filter cache must be a boolean.
 void solr.query({ filter: { query: "id:1", cache: "false" } });
+
+
+void solr.query<SolrResponse<{ id: string }>>({
+  query: "*:*",
+  cursorMark: "*",
+  sort: "timestamp asc,id asc",
+  limit: 100,
+  offset: 0
+}).then(cursorPage => cursorPage.nextCursorMark);
+
+// @ts-expect-error Cursor pagination requires an explicit sort expression.
+void solr.query({ query: "*:*", cursorMark: "*" });
+// @ts-expect-error Cursor pagination cannot use a non-zero offset.
+void solr.query({ query: "*:*", cursorMark: "*", sort: "id asc", offset: 10 });
