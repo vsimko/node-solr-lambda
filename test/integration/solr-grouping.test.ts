@@ -36,7 +36,8 @@ integrationTest("Solr result grouping returns typed groups and collapse/expand s
 
   const fieldGroups = grouped.grouped?.category_s;
   assert.ok(fieldGroups?.groups);
-  assert.equal(fieldGroups.ngroups, 2);
+  assert.equal(fieldGroups.matches, 4);
+  assert.equal(fieldGroups.groups.length, 2);
   assert.deepEqual(new Set(fieldGroups.groups.map(group => group.groupValue)), new Set(["books", "music"]));
   assert.equal(fieldGroups.groups.find(group => group.groupValue === "books")?.doclist?.docs?.[0]?.price_f, 35);
   assert.equal(fieldGroups.groups.find(group => group.groupValue === "music")?.doclist?.docs?.[0]?.price_f, 75);
