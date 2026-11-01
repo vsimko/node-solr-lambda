@@ -58,11 +58,44 @@ export interface SolrClientConfig {
   requestDefaults?: SolrRequestDefaults;
   validation?: ValidationConfig;
 }
+
+/** Built-in Solr query parsers. Custom parser names remain accepted. */
+export type SolrQueryParser = "lucene" | "dismax" | "edismax" | (string & {});
+
+/** Boolean operator used by the Solr query parser. */
+export type SolrQueryOperator = "AND" | "OR";
+
+/** Common Solr response writers. Custom writer names remain accepted. */
+export type SolrResponseWriter = "json" | "xml" | "csv" | "javabin" | (string & {});
+
+/**
+ * Options for the standard /select query handler.
+ *
+ * Use the named properties for common Solr parameters so IDEs can provide
+ * completion and catch misspellings. Put additional Solr parameters in the
+ * params property; arbitrary top-level keys are intentionally rejected.
+ */
 export interface SolrQuery {
-  query?: string; filter?: string | readonly string[]; fields?: string | readonly string[];
-  sort?: string; limit?: number; offset?: number;
+  /** Query expression, serialized as Solr's q parameter. */
+  query?: string;
+  /** One or more filter queries, serialized as repeated fq parameters. */
+  filter?: string | readonly string[];
+  /** Field list, serialized as Solr's fl parameter. */
+  fields?: string | readonly string[];
+  /** Solr sort expression, for example price desc, id asc. */
+  sort?: string;
+  /** Maximum number of documents, serialized as Solr's rows parameter. */
+  limit?: number;
+  /** Result offset, serialized as Solr's start parameter. */
+  offset?: number;
+  /** Query parser name, serialized as defType. */
+  defType?: SolrQueryParser;
+  /** Boolean query operator, serialized as q.op. */
+  "q.op"?: SolrQueryOperator;
+  /** Response writer, serialized as wt. */
+  wt?: SolrResponseWriter;
+  /** Additional Solr parameters not yet exposed as dedicated options. */
   params?: Readonly<Record<string, string | number | boolean | readonly (string | number)[]>>;
-  [key: string]: unknown;
 }
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
