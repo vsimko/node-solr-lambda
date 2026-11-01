@@ -16,6 +16,8 @@ This table tracks the v4 implementation. A generic request method does not mean 
 
 ## Compatibility policy
 
+See the [Solr server compatibility matrix](compatibility.md) for the documentation baselines, version-specific notes, and runtime verification status.
+
 Test every supported endpoint against Solr 8.x, 9.x, and 10.x. Mark version-specific behavior in the endpoint documentation. Do not infer support from a successful TypeScript build.
 
 An endpoint is complete when it has typed request and response models, documentation, unit tests, integration tests for each supported Solr major version, and a recorded compatibility result.
