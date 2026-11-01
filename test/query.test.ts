@@ -366,3 +366,93 @@ test("query can explicitly disable highlighting", async () => {
   assert.equal(requestedUrl?.searchParams.get("hl"), "false");
   assert.equal(requestedUrl?.searchParams.has("hl.fl"), false);
 });
+
+test("query serializes grouping and expansion parameters", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    sort: "score desc",
+    grouping: {
+      fields: ["category_s", "brand_s"],
+      functions: ["sum(price_d)"],
+      queries: ["price_d:[0 TO 20]", "price_d:[20 TO *]"],
+      limit: 3,
+      offset: 1,
+      sort: "price_d desc",
+      groupSort: "price_d asc",
+      format: "grouped",
+      main: false,
+      numGroups: true,
+      truncate: true,
+      facet: true,
+      facetLimit: 10,
+      cachePercent: 25
+    },
+    expand: {
+      field: "category_s",
+      sort: "price_d desc",
+      rows: 5,
+      query: "inStock_b:true",
+      filter: ["status_s:active", "tenant_s:acme"],
+      nullGroup: true
+    }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("group"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("group.field"), ["category_s", "brand_s"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("group.func"), ["sum(price_d)"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("group.query"), ["price_d:[0 TO 20]", "price_d:[20 TO *]"]);
+  assert.equal(requestedUrl?.searchParams.get("group.limit"), "3");
+  assert.equal(requestedUrl?.searchParams.get("group.offset"), "1");
+  assert.equal(requestedUrl?.searchParams.get("sort"), "price_d desc");
+  assert.equal(requestedUrl?.searchParams.get("group.sort"), "price_d asc");
+  assert.equal(requestedUrl?.searchParams.get("group.format"), "grouped");
+  assert.equal(requestedUrl?.searchParams.get("group.main"), "false");
+  assert.equal(requestedUrl?.searchParams.get("group.ngroups"), "true");
+  assert.equal(requestedUrl?.searchParams.get("group.truncate"), "true");
+  assert.equal(requestedUrl?.searchParams.get("group.facet"), "true");
+  assert.equal(requestedUrl?.searchParams.get("group.facet.limit"), "10");
+  assert.equal(requestedUrl?.searchParams.get("group.cache.percent"), "25");
+  assert.equal(requestedUrl?.searchParams.get("expand"), "true");
+  assert.equal(requestedUrl?.searchParams.get("expand.field"), "category_s");
+  assert.equal(requestedUrl?.searchParams.get("expand.sort"), "price_d desc");
+  assert.equal(requestedUrl?.searchParams.get("expand.rows"), "5");
+  assert.equal(requestedUrl?.searchParams.get("expand.q"), "inStock_b:true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("expand.fq"), ["status_s:active", "tenant_s:acme"]);
+  assert.equal(requestedUrl?.searchParams.get("expand.nullGroup"), "true");
+});
+
+test("query serializes collapse as an additional filter query", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({
+    query: "*:*",
+    filter: "status_s:active",
+    collapse: {
+      field: "product_id_s",
+      max: "sum(cscore(),price_d)",
+      nullPolicy: "collapse",
+      hint: "top_fc",
+      size: 100,
+      cost: 200
+    }
+  });
+
+  const filters = requestedUrl?.searchParams.getAll("fq");
+  assert.equal(filters?.[0], "status_s:active");
+  assert.equal(filters?.[1], "{!collapse field='product_id_s' max='sum(cscore(),price_d)' nullPolicy=collapse hint=top_fc size=100 cost=200}");
+});
+
+test("collapse rejects conflicting selectors and invalid numeric options", async () => {
+  const client = createClient(() => undefined);
+  await assert.rejects(
+    client.query({ query: "*:*", collapse: { field: "product_id_s", min: "price_d", max: "price_d" } }),
+    /only one of min, max, or sort/
+  );
+  await assert.rejects(
+    client.query({ query: "*:*", collapse: { field: "product_id_s", size: -1 } }),
+    /size must be a non-negative integer/
+  );
+});
