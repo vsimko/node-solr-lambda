@@ -23,3 +23,11 @@ const metrics = await admin.metrics({ group: "jvm" });
 ```
 
 Check the API coverage matrix for endpoint-specific models and version tests. The action parameter is typed. Some action parameters still use a general key-value map.
+
+## Replica lifecycle parameters
+
+`collections("ADDREPLICA", params)` accepts the exported `AddReplicaParams` model. It exposes the target collection and shard, replica type (`NRT`, `TLOG`, or `PULL`), placement node or candidate node set, optional replica name, final-state wait, and async request ID.
+
+`collections("DELETEREPLICA", params)` accepts `DeleteReplicaParams`, including the target replica and explicit directory/index deletion flags. Both parameter models expose `customParams` for additional Solr options not yet modelled. These deletion flags are destructive; leave them unset unless the corresponding on-disk data should be removed.
+
+The types improve editor completion but do not guarantee that a requested placement is possible in a particular SolrCloud topology. Runtime compatibility and safe lifecycle behavior must be verified against each supported Solr version.

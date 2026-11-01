@@ -4,6 +4,57 @@ export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAM
 export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
+/** Replica types accepted by the SolrCloud Collections API. */
+export type CollectionReplicaType = "NRT" | "TLOG" | "PULL";
+
+/** Parameters for Collections API ADDREPLICA. */
+export interface AddReplicaParams {
+  /** Additional Collections API parameters not modelled here. */
+  customParams?: SolrAdminParams;
+  /** Target collection. */
+  collection?: string;
+  /** Target shard; omit when the collection has a single shard. */
+  shard?: string;
+  /** Optional explicit replica name. */
+  name?: string;
+  /** Replica type; defaults to the collection's configured replica type. */
+  type?: CollectionReplicaType;
+  /** Node name on which to place the replica. */
+  node?: string;
+  /** Comma-separated candidate node names for placement. */
+  createNodeSet?: string;
+  /** Wait until the replica reaches an active state before returning. */
+  waitForFinalState?: boolean;
+  /** Async request identifier. */
+  async?: string;
+}
+
+/** Parameters for Collections API DELETEREPLICA. */
+export interface DeleteReplicaParams {
+  /** Additional Collections API parameters not modelled here. */
+  customParams?: SolrAdminParams;
+  /** Target collection. */
+  collection?: string;
+  /** Target shard. */
+  shard?: string;
+  /** Replica name to remove. */
+  replica?: string;
+  /** Delete the replica's instance directory from its node. */
+  deleteInstanceDir?: boolean;
+  /** Delete the replica's data directory from its node. */
+  deleteDataDir?: boolean;
+  /** Delete the replica's index directory from its node. */
+  deleteIndex?: boolean;
+  /** Async request identifier. */
+  async?: string;
+}
+
+/** Action-specific parameter models for replica lifecycle operations. */
+export type CollectionAdminParams<A extends CollectionAdminAction> =
+  A extends "ADDREPLICA" ? AddReplicaParams :
+  A extends "DELETEREPLICA" ? DeleteReplicaParams :
+  SolrAdminParams;
+
 export type SolrAuth =
   | { type: "basic"; username: string; password?: string }
   | { type: "bearer"; token: string };

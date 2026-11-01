@@ -10,7 +10,7 @@ import { systemInfo as systemInfoApi } from "./apis/system.js";
 import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import type {
-  CollectionAdminAction, CommitOptions, CoreAdminAction, RequestControlOptions, SolrAdminParams,
+  CollectionAdminAction, CollectionAdminParams, CommitOptions, CoreAdminAction, RequestControlOptions, SolrAdminParams,
   SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, UpdateOptions
 } from "./types.js";
 
@@ -72,7 +72,7 @@ export class SolrClient extends SolrTransport {
     return coreAdminApi<T>(this, action, params, requestOptions);
   }
 
-  collections<T = unknown>(action: CollectionAdminAction, params: SolrAdminParams = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
 
