@@ -54,8 +54,9 @@ jobs:
           exit 1
       - name: Create isolated integration core
         run: |
-          curl --fail --silent --show-error \
-            "http://localhost:8983/solr/admin/cores?action=CREATE&name=integration&instanceDir=integration&configSet=_default&wt=json"
+          container_id="$(docker ps --filter "ancestor=solr:${{ matrix.solr-version }}" --format '{{.ID}}' | head -n 1)"
+          test -n "$container_id"
+          docker exec "$container_id" solr create_core -c integration
       - name: Run Solr integration smoke tests
         run: npm run test:integration
         env:
