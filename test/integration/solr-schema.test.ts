@@ -10,7 +10,7 @@ integrationTest("Schema API adds and reads an isolated field definition", async 
   await addSchemaField(name);
 
   const schema = await client.request<{ fields?: Array<{ name?: string; type?: string; stored?: boolean; indexed?: boolean }> }>(
-    "/schema/fields",
+    `/${process.env.SOLR_CORE}/schema/fields`,
     { method: "GET" }
   );
 
