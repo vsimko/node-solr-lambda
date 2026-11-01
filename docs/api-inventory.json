@@ -283,7 +283,7 @@
         "test/modules.test.ts",
         "test/integration/solr-config-security.test.ts"
       ],
-      "notes": "Config API set-user-property passes on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property. Security payloads are test data only; live Security API remains unverified (CI #145)."
+      "notes": "Config API set-user-property passes on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property. Live Security API authentication and authorization checks pass in the dedicated security matrix (CI #162)."
     },
     {
       "id": "admin.core",
