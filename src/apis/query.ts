@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetDateOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrRangeFacetMethod, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -17,10 +17,10 @@ function setFacetSettings(params: Record<string, unknown>, prefix: string, optio
   if (options.method !== undefined) params[`${prefix}.method`] = options.method;
 }
 
-function setDateOrRangeOptions(
+function setRangeOptions(
   params: Record<string, unknown>,
   prefix: string,
-  options: SolrFacetDateOptions | SolrFacetRangeOptions
+  options: SolrFacetRangeOptions
 ): void {
   params[`${prefix}.start`] = options.start;
   params[`${prefix}.end`] = options.end;
@@ -28,6 +28,7 @@ function setDateOrRangeOptions(
   if (options.hardEnd !== undefined) params[`${prefix}.hardend`] = options.hardEnd;
   if (options.other !== undefined) params[`${prefix}.other`] = options.other;
   if (options.include !== undefined) params[`${prefix}.include`] = options.include;
+  if (options.method !== undefined) params[`${prefix}.method`] = options.method;
 }
 
 function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassicFacetOptions): void {
@@ -41,6 +42,7 @@ function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassic
   if (facets.missing !== undefined) params["facet.missing"] = facets.missing;
   if (facets.prefix !== undefined) params["facet.prefix"] = facets.prefix;
   if (facets.method !== undefined) params["facet.method"] = facets.method;
+  if (facets.rangeMethod !== undefined) params["facet.range.method"] = facets.rangeMethod;
 
   if (facets.fields !== undefined) {
     const fields = typeof facets.fields === "string" ? [facets.fields] : facets.fields;
@@ -53,18 +55,11 @@ function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassic
   if (facets.queries !== undefined) {
     params["facet.query"] = typeof facets.queries === "string" ? [facets.queries] : facets.queries;
   }
-  if (facets.dates !== undefined) {
-    const dates = typeof facets.dates === "string" ? [facets.dates] : facets.dates;
-    params["facet.date"] = dates.map(date => typeof date === "string" ? date : date.field);
-    for (const date of dates) {
-      if (typeof date !== "string") setDateOrRangeOptions(params, `f.${date.field}.facet.date`, date);
-    }
-  }
   if (facets.ranges !== undefined) {
     const ranges = typeof facets.ranges === "string" ? [facets.ranges] : facets.ranges;
     params["facet.range"] = ranges.map(range => typeof range === "string" ? range : range.field);
     for (const range of ranges) {
-      if (typeof range !== "string") setDateOrRangeOptions(params, `f.${range.field}.facet.range`, range);
+      if (typeof range !== "string") setRangeOptions(params, `f.${range.field}.facet.range`, range);
     }
   }
 }
