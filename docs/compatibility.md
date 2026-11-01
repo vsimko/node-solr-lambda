@@ -37,7 +37,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Test authored in PR #139 follow-up; CI pending |
 | `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified: isolated security.json fixture data added; live security plugin configuration and requests are not enabled in standalone CI |
 | `stream()` — `/stream` | Documented | Documented | Documented | Test authored in PR #139 follow-up; CI pending |
-| `export()` — `/export` | Documented | Documented | Documented | Unverified |
+| `export()` — `/export` | Documented | Documented | Documented | Raw response/docValues integration test authored in PR #139 follow-up; CI pending |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
 
 The matrix records that the official guides describe these endpoint families. It does not certify the current request parameters, response models, or all action variants. Integration evidence is still required.
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, basic-query, and cursorMark tests on Node.js 22. CI #123 passed on all three pinned Solr images. New JSON Request API, optimize, system info, metrics, and Streaming Expressions tests are authored in the PR follow-up; CI pending. Collections tests are opt-in and require SolrCloud; live security plugin tests remain unverified:
+CI starts pinned official Solr images and runs CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, basic-query, and cursorMark tests on Node.js 22. CI #123 passed on all three pinned Solr images. New JSON Request API, optimize, system info, metrics, Streaming Expressions, and Export tests are authored in the PR follow-up; CI pending. Collections tests are opt-in and require SolrCloud; live security plugin tests remain unverified:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
