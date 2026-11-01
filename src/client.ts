@@ -25,7 +25,7 @@ export class SolrClient extends SolrTransport {
   }
 
   queryJson<T = unknown>(request: SolrJsonQueryRequest, requestOptions?: RequestControlOptions): Promise<T>;
-  queryJson<T = unknown>(request: Readonly<Record<string, unknown>>, requestOptions?: RequestControlOptions): Promise<T>;
+  queryJson<T = unknown>(request: Readonly<Record<string, unknown>> & { facet?: never }, requestOptions?: RequestControlOptions): Promise<T>;
   queryJson<T = unknown>(request: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return queryApi.queryJson<T>(this, this.endpoint("/query"), request, requestOptions);
   }
