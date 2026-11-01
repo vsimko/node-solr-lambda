@@ -32,11 +32,11 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /{core}/schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Tested: CREATE, STATUS, RELOAD, and fixture UNLOAD cleanup on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | SolrCloud CREATE/LIST/DELETE test authored with dedicated 8/9/10 cloud CI matrix; pending |
+| `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Tested: SolrCloud CREATE/LIST/DELETE on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Tested: system metadata on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Tested: JVM metrics on pinned 8.11.4 / 9.11.0 / 10.1.0; Solr 8/9 return JSON, Solr 10.1 Prometheus text |
 | `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified: isolated security.json fixture data added; live security plugin configuration and requests are not enabled in standalone CI |
-| `stream()` — `/stream` | Documented | Documented | Documented | SolrCloud search expression test authored; CI pending |
+| `stream()` — `/stream` | Documented | Documented | Documented | Tested: Streaming Expressions search against a disposable SolrCloud collection on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `export()` — `/export` | Documented | Documented | Documented | Tested: raw response with docValues sort field on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
 
@@ -73,14 +73,14 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 - Target Solr server lines are 8.x, 9.x, and 10.x.
 - The minimum supported patch release for each line is **not established**.
-- No Solr major line is runtime-certified by this repository yet.
-- Treat all operations in the endpoint matrix as **unverified** until the integration matrix passes.
+- The selected endpoint behaviors listed as Tested have passed against the pinned patch images; this does not certify every endpoint or all patch releases in a major line.
+- Treat only the explicitly listed operations as **Tested**; other actions, options, and response models remain unverified.
 - A successful TypeScript build, unit test, or documentation lookup is not server compatibility evidence.
 - If an endpoint differs by version, record the difference here and add a focused test before changing its status.
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, JSON Request API, optimize, system info, metrics, export, basic-query, and cursorMark tests on Node.js 22. CI #138 standalone jobs passed on Solr 8.11.4, 9.11.0, and 10.1.0. Collections and Streaming Expressions are exercised by a separate SolrCloud matrix; that matrix is still being validated. Live security plugin tests remain unverified:
+CI starts pinned official Solr images and runs the standalone and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #145 passed all Node.js 20/22/24 checks, standalone integration jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE and Streaming Expressions search. Live security plugin tests remain unverified:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -94,7 +94,7 @@ Run the same suite locally after starting a Solr container and creating an isola
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
 ```
 
-Existing passing tests establish service startup, document CRUD, hard commit, basic query, and cursorMark pagination. PR #139 CI #123 passed soft commit, rollback, ping, schema field lifecycle, config user properties, and CoreAdmin core lifecycle on all three pinned Solr images. They do not certify every endpoint, query option, update command, or action in the compatibility matrix.
+CI #145 passed standalone and SolrCloud integration jobs on all three pinned Solr images. Covered behavior includes CRUD, hard/soft commit, rollback, ping, schema field lifecycle, config user properties, CoreAdmin core lifecycle, JSON Request API, optimize, system info, metrics, export, Collections CREATE/LIST/DELETE, Streaming Expressions search, and basic query/cursorMark pagination. These results do not certify every endpoint, query option, update command, or action in the compatibility matrix.
 
 ## Required integration evidence
 
