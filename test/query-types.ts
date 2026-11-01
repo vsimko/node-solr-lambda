@@ -107,9 +107,11 @@ void solr.query({
       { field: "price", limit: 10, offset: 5, sort: "count", minCount: 1, missing: true, prefix: "1", method: "fc" }
     ],
     queries: ["price:[0 TO 10]"],
-    ranges: [{ field: "created_at", start: "NOW/DAY", end: "NOW", gap: "+1DAY", hardEnd: true, other: "before", include: ["lower", "upper"], method: "filter" }],
+    ranges: [
+      { field: "created_at", start: "NOW/DAY", end: "NOW", gap: "+1DAY", hardEnd: true, other: "before", include: ["lower", "upper"], method: "filter" },
+      { field: "price", start: 0, end: 100, gap: 10, other: "between", include: "edge" }
+    ],
     rangeMethod: "dv",
-    ranges: [{ field: "price", start: 0, end: 100, gap: 10, other: "between", include: "edge" }],
     limit: 20,
     offset: 0,
     sort: "index",
