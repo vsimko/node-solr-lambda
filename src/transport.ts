@@ -23,7 +23,7 @@ function hasQueryKey(query: RequestOptions["query"], key: string): boolean {
 }
 
 function withDefaultParams(
-  defaults: SolrClientConfig["requestDefaults"] extends infer T ? T extends { params?: infer P } ? P : never : never,
+  defaults: SolrRequestDefaults["params"],
   query: RequestOptions["query"]
 ): RequestOptions["query"] {
   if (!defaults || Object.keys(defaults).length === 0) return query;
