@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { z } from "zod";
 import { createSolrClient, SolrHttpError } from "../src/index.js";
 
 test("base URL prefixes, bearer auth, request defaults, and header precedence work together", async () => {
@@ -30,6 +31,21 @@ test("base URL prefixes, bearer auth, request defaults, and header precedence wo
   assert.equal(requestedHeaders?.get("authorization"), "Bearer secret-token");
   assert.equal(requestedHeaders?.get("x-default"), "default");
   assert.equal(requestedHeaders?.get("x-order"), "client");
+});
+
+test("request defaults preserve object inputs for optional validation", async () => {
+  let requestedUrl = "";
+  const client = createSolrClient({
+    core: "catalog",
+    requestDefaults: { params: { wt: "json" } },
+    validation: { inputs: { query: z.object({ q: z.string(), wt: z.string() }) } },
+    fetch: async input => {
+      requestedUrl = String(input);
+      return new Response(JSON.stringify({ response: { numFound: 0, docs: [] } }));
+    }
+  });
+  await client.query({ query: "book" });
+  assert.equal(new URL(requestedUrl).searchParams.get("wt"), "json");
 });
 
 test("legacy username and password still use Basic authentication", async () => {
