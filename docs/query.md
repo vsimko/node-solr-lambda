@@ -58,6 +58,39 @@ await solr.query({
 
 Some query parsers instead accept an `excludeTags` local parameter. Keep it in that parser's local-params prefix, for example `solrLocalParams({ type: "parent", which: "type:parent", excludeTags: solrExcludeTags("category") }, query)`. Exclusion is contextual: this client does not globally remove tagged filters.
 
+## Typed query responses
+
+`query<T>()` lets the caller choose the complete response type. For the standard `/select` handler, `SolrQueryResponse<TDocument, TJsonFacet>` provides named sections for document metadata, classic facets, JSON facets, highlighting, grouping, statistics, and debug information. The first generic parameter controls the document shape; the second describes the JSON Facet API's `facets` object.
+
+```ts
+import type { SolrQueryResponse } from "node-solr-lambda";
+
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+}
+
+interface ProductFacets {
+  count: number;
+  categories: { buckets: { val: string; count: number }[] };
+}
+
+const page = await solr.query<SolrQueryResponse<Product, ProductFacets>>({
+  query: "inStock:true",
+  fields: ["id", "title", "price"],
+  params: { hl: true, "hl.fl": "title", facet: true, "facet.field": "category" }
+});
+
+const products: Product[] = page.response?.docs ?? [];
+const total = page.response?.numFound;
+const firstSnippet = page.highlighting?.[products[0]?.id ?? ""]?.title?.[0];
+const classicFacetCount = page.facet_counts?.facet_queries?.["inStock:true"];
+const categoryBuckets = page.facets?.categories.buckets;
+```
+
+The existing `SolrResponse<TDocument>` remains available and keeps its original one-parameter usage; it now also exposes the common optional response sections. Use `SolrQueryResponse` when you want an explicit query-response name or a typed JSON Facet shape. Solr omits sections that were not requested, and exact facet/group/debug payloads depend on the query components and Solr version. These interfaces describe expected JSON shapes; they do not enable a component or certify server-side support. The second generic is intentionally caller-defined because JSON Facet responses are shaped by the requested facet tree.
+
 ## CursorMark pagination
 
 Cursor pagination is useful for walking large sorted result sets without increasing the `start` offset. The first request uses `cursorMark: "*"`; pass the response's `nextCursorMark` into the next request. Stop when the returned mark equals the mark used for that request:
