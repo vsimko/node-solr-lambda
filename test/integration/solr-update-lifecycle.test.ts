@@ -21,10 +21,11 @@ integrationTest("soft commit makes pending updates searchable", async ({
 integrationTest("rollback discards an update that has not been committed", async ({
   client,
   createId,
+  addDocuments,
   commit
 }) => {
   const id = createId("rollback");
-  await client.add({ id, label_s: "must-be-rolled-back" });
+  await addDocuments([{ id, label_s: "must-be-rolled-back" }]);
   await client.rollback();
   await commit();
 
