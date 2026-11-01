@@ -53,7 +53,7 @@ test("Collections replica lifecycle parameters are serialized", async () => {
   await client.collections("ADDREPLICA", {
     collection: "books",
     shard: "shard1",
-    type: "NRT",
+    type: "nrt",
     node: "node1",
     waitForFinalState: true,
     customParams: { "property.zone": "hot" }
@@ -70,7 +70,7 @@ test("Collections replica lifecycle parameters are serialized", async () => {
   const add = new URL(requested[0]!);
   assert.equal(add.searchParams.get("action"), "ADDREPLICA");
   assert.equal(add.searchParams.get("collection"), "books");
-  assert.equal(add.searchParams.get("type"), "NRT");
+  assert.equal(add.searchParams.get("type"), "nrt");
   assert.equal(add.searchParams.get("waitForFinalState"), "true");
   assert.equal(add.searchParams.get("property.zone"), "hot");
 
