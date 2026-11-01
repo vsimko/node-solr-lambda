@@ -447,12 +447,12 @@ test("query serializes collapse as an additional filter query", async () => {
 
 test("collapse rejects conflicting selectors and invalid numeric options", async () => {
   const client = createClient(() => undefined);
-  await assert.rejects(
-    client.query({ query: "*:*", collapse: { field: "product_id_s", min: "price_d", max: "price_d" } }),
+  assert.throws(
+    () => client.query({ query: "*:*", collapse: { field: "product_id_s", min: "price_d", max: "price_d" } }),
     /only one of min, max, or sort/
   );
-  await assert.rejects(
-    client.query({ query: "*:*", collapse: { field: "product_id_s", size: -1 } }),
+  assert.throws(
+    () => client.query({ query: "*:*", collapse: { field: "product_id_s", size: -1 } }),
     /size must be a non-negative integer/
   );
 });
