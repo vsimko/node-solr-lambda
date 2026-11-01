@@ -54,6 +54,9 @@ jobs:
           echo "Solr integration core did not become healthy within five minutes"
           docker logs solr
           exit 1
+      - name: Prepare a reusable configset for CoreAdmin lifecycle fixtures
+        run: |
+          docker exec solr bash -lc 'mkdir -p /var/solr/data/configsets && cp -a /opt/solr/server/solr/configsets/_default /var/solr/data/configsets/_default'
       - name: Run Solr integration smoke tests
         run: npm run test:integration
         env:
@@ -62,3 +65,138 @@ jobs:
       - name: Print Solr logs
         if: always()
         run: docker logs solr || true
+
+  security-integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        solr-version: ["8.11.4", "9.11.0", "10.1.0"]
+    runs-on: ubuntu-latest
+    env:
+      SOLR_USERNAME: integration-admin
+      SOLR_PASSWORD: integration-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Generate isolated BasicAuth security configuration
+        run: |
+          node --input-type=module <<'NODE'
+          import { createHash, randomBytes } from "node:crypto";
+          import { writeFileSync } from "node:fs";
+          const username = process.env.SOLR_USERNAME;
+          const password = process.env.SOLR_PASSWORD;
+          const salt = randomBytes(32);
+          const firstHash = createHash("sha256")
+            .update(Buffer.concat([salt, Buffer.from(password)]))
+            .digest();
+          const credential = `${createHash("sha256").update(firstHash).digest("base64")} ${salt.toString("base64")}`;
+          const security = {
+            authentication: {
+              class: "solr.BasicAuthPlugin",
+              blockUnknown: true,
+              credentials: { [username]: credential }
+            },
+            authorization: {
+              class: "solr.RuleBasedAuthorizationPlugin",
+              "user-role": { [username]: ["admin"] },
+              permissions: [{ name: "all", role: "admin" }]
+            }
+          };
+          writeFileSync("security.json", JSON.stringify(security));
+          NODE
+          chmod 666 security.json
+      - name: Start Solr with security enabled
+        run: |
+          docker create \
+            --name solr-secure \
+            --publish 8983:8983 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            --entrypoint /bin/bash \
+            "solr:${{ matrix.solr-version }}" \
+            -lc 'mkdir -p /var/solr/data && cp /tmp/security.json /var/solr/data/security.json && chmod 666 /var/solr/data/security.json && exec docker-entrypoint.sh solr-precreate integration'
+          docker cp security.json solr-secure:/tmp/security.json
+          docker start solr-secure
+      - name: Wait for authenticated Solr core
+        run: |
+          for attempt in {1..60}; do
+            if curl --fail --silent --user "$SOLR_USERNAME:$SOLR_PASSWORD" "http://localhost:8983/solr/admin/cores?action=STATUS&core=integration&wt=json" > /dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Secure Solr integration core did not become healthy within five minutes"
+          docker logs solr-secure
+          exit 1
+      - name: Prepare a reusable configset for CoreAdmin lifecycle fixtures
+        run: |
+          docker exec solr-secure bash -lc 'mkdir -p /var/solr/data/configsets && cp -a /opt/solr/server/solr/configsets/_default /var/solr/data/configsets/_default'
+      - name: Run authenticated Solr integration tests
+        run: npm run test:integration
+        env:
+          SOLR_BASE_URL: http://localhost:8983/solr
+          SOLR_CORE: integration
+          SOLR_SECURITY: "true"
+          SOLR_USERNAME: integration-admin
+          SOLR_PASSWORD: integration-password
+      - name: Print secure Solr logs
+        if: always()
+        run: docker logs solr-secure || true
+
+  cloud-integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        solr-version: ["8.11.4", "9.11.0", "10.1.0"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Start SolrCloud
+        run: |
+          docker run --detach \
+            --name solr-cloud \
+            --publish 8983:8983 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            "solr:${{ matrix.solr-version }}" \
+            solr-foreground -c
+      - name: Wait for SolrCloud
+        run: |
+          for attempt in {1..60}; do
+            if curl --fail --silent "http://localhost:8983/solr/" > /dev/null; then
+              echo "SolrCloud HTTP endpoint is ready"
+              break
+            fi
+            sleep 5
+          done
+          if ! curl --fail --silent "http://localhost:8983/solr/" > /dev/null; then
+            echo "SolrCloud HTTP endpoint did not become healthy within five minutes"
+            docker logs solr-cloud
+            exit 1
+          fi
+          for attempt in {1..30}; do
+            if docker exec solr-cloud bash -lc 'solr zk ls / -z localhost:9983' > /dev/null 2>&1; then
+              echo "Embedded ZooKeeper is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Embedded ZooKeeper did not become healthy within one minute"
+          docker logs solr-cloud
+          exit 1
+      - name: Upload the default configset to ZooKeeper
+        run: |
+          docker exec solr-cloud bash -lc 'solr zk upconfig -n _default -d /opt/solr/server/solr/configsets/_default -z localhost:9983'
+      - name: Run SolrCloud integration tests
+        run: npm run test:integration
+        env:
+          SOLR_BASE_URL: http://localhost:8983/solr
+          SOLR_CLOUD: "true"
+      - name: Print SolrCloud logs
+        if: always()
+        run: docker logs solr-cloud || true

@@ -1,0 +1,44 @@
+import assert from "node:assert/strict";
+import { integrationTest } from "./fixtures.js";
+
+integrationTest("soft commit makes pending updates searchable", async ({
+  client,
+  createId,
+  addDocuments
+}) => {
+  const id = createId("soft_commit");
+  await addDocuments([{ id, label_s: "visible-after-soft-commit" }]);
+  await client.softCommit();
+
+  let foundIds: string[] = [];
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const result = await client.query<{ response?: { docs?: Array<{ id: string }> } }>({
+      query: `id:${id}`,
+      fields: ["id"],
+      limit: 1
+    });
+    foundIds = result.response?.docs?.map(document => document.id) ?? [];
+    if (foundIds.includes(id)) break;
+    await new Promise(resolve => setTimeout(resolve, 25));
+  }
+  assert.deepEqual(foundIds, [id]);
+});
+
+integrationTest("rollback discards an update that has not been committed", async ({
+  client,
+  createId,
+  addDocuments,
+  commit
+}) => {
+  const id = createId("rollback");
+  await addDocuments([{ id, label_s: "must-be-rolled-back" }]);
+  await client.rollback();
+  await commit();
+
+  const result = await client.query<{ response?: { numFound?: number } }>({
+    query: `id:${id}`,
+    fields: ["id"],
+    limit: 1
+  });
+  assert.equal(result.response?.numFound, 0);
+});
