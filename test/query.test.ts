@@ -167,24 +167,28 @@ test("query serializes typed classic field, query, date, and range facets", asyn
         "author"
       ],
       queries: ["price:[10 TO 20]", "inStock:true"],
-      dates: [{
-        field: "created_at",
-        start: "NOW/DAY",
-        end: "NOW",
-        gap: "+1DAY",
-        hardEnd: true,
-        other: ["before", "after"],
-        include: ["lower", "upper"]
-      }],
-      ranges: [{
-        field: "price",
-        start: 0,
-        end: 100,
-        gap: 10,
-        hardEnd: true,
-        other: "between",
-        include: "edge"
-      }],
+      ranges: [
+        {
+          field: "created_at",
+          start: "2025-01-01T00:00:00Z",
+          end: "2025-01-03T00:00:00Z",
+          gap: "+1DAY",
+          hardEnd: true,
+          other: ["before", "after"],
+          include: ["lower", "upper"],
+          method: "filter"
+        },
+        {
+          field: "price",
+          start: 0,
+          end: 100,
+          gap: 10,
+          hardEnd: true,
+          other: "between",
+          include: "edge"
+        }
+      ],
+      rangeMethod: "dv",
       limit: 10,
       offset: 0,
       sort: "index",
@@ -198,8 +202,8 @@ test("query serializes typed classic field, query, date, and range facets", asyn
   assert.equal(requestedUrl?.searchParams.get("facet"), "true");
   assert.deepEqual(requestedUrl?.searchParams.getAll("facet.field"), ["category", "author"]);
   assert.deepEqual(requestedUrl?.searchParams.getAll("facet.query"), ["price:[10 TO 20]", "inStock:true"]);
-  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.date"), ["created_at"]);
-  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.range"), ["price"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.range"), ["created_at", "price"]);
+  assert.equal(requestedUrl?.searchParams.get("facet.range.method"), "dv");
   assert.equal(requestedUrl?.searchParams.get("facet.limit"), "10");
   assert.equal(requestedUrl?.searchParams.get("facet.offset"), "0");
   assert.equal(requestedUrl?.searchParams.get("facet.sort"), "index");
@@ -214,12 +218,13 @@ test("query serializes typed classic field, query, date, and range facets", asyn
   assert.equal(requestedUrl?.searchParams.get("f.category.facet.missing"), "true");
   assert.equal(requestedUrl?.searchParams.get("f.category.facet.prefix"), "bo");
   assert.equal(requestedUrl?.searchParams.get("f.category.facet.method"), "fc");
-  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.start"), "NOW/DAY");
-  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.end"), "NOW");
-  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.gap"), "+1DAY");
-  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.hardend"), "true");
-  assert.deepEqual(requestedUrl?.searchParams.getAll("f.created_at.facet.date.other"), ["before", "after"]);
-  assert.deepEqual(requestedUrl?.searchParams.getAll("f.created_at.facet.date.include"), ["lower", "upper"]);
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.range.start"), "2025-01-01T00:00:00Z");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.range.end"), "2025-01-03T00:00:00Z");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.range.gap"), "+1DAY");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.range.hardend"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("f.created_at.facet.range.other"), ["before", "after"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("f.created_at.facet.range.include"), ["lower", "upper"]);
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.range.method"), "filter");
   assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.start"), "0");
   assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.end"), "100");
   assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.gap"), "10");
@@ -228,13 +233,11 @@ test("query serializes typed classic field, query, date, and range facets", asyn
   assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.include"), "edge");
 });
 
-test("query preserves raw date and range facet field names", async () => {
+test("query preserves raw range facet field names", async () => {
   let requestedUrl: URL | undefined;
   const client = createClient(url => { requestedUrl = url; });
-  await client.query({ query: "*:*", facets: { dates: "created_at", ranges: "price" } });
+  await client.query({ query: "*:*", facets: { ranges: "created_at" } });
   assert.equal(requestedUrl?.searchParams.get("facet"), "true");
-  assert.equal(requestedUrl?.searchParams.get("facet.date"), "created_at");
-  assert.equal(requestedUrl?.searchParams.get("facet.range"), "price");
-  assert.equal(requestedUrl?.searchParams.has("f.created_at.facet.date.start"), false);
-  assert.equal(requestedUrl?.searchParams.has("f.price.facet.range.start"), false);
+  assert.equal(requestedUrl?.searchParams.get("facet.range"), "created_at");
+  assert.equal(requestedUrl?.searchParams.has("f.created_at.facet.range.start"), false);
 });
