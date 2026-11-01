@@ -103,7 +103,8 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "ADDREPLICA" ? AddReplicaParams :
   A extends "DELETEREPLICA" ? DeleteReplicaParams :
   A extends "MOVEREPLICA" ? MoveReplicaParams :
-  A extends "BALANCESHARDUNIQUE" ? BalanceShardUniqueParams :\n  A extends "REBALANCELEADERS" ? RebalanceLeadersParams :
+  A extends "BALANCESHARDUNIQUE" ? BalanceShardUniqueParams :
+  A extends "REBALANCELEADERS" ? RebalanceLeadersParams :
   A extends "ADDREPLICAPROP" ? AddReplicaPropertyParams :
   A extends "DELETEREPLICAPROP" ? DeleteReplicaPropertyParams :
   SolrAdminParams;
