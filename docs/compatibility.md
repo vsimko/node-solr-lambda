@@ -24,7 +24,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
-| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Basic smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Basic query and cursorMark pagination tests on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Unverified |
 | `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Add/delete smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Commit smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images; remaining commands unverified |
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs a health check plus a basic update/query/delete smoke test on Node.js 22:
+CI starts pinned official Solr images and runs a health check plus update/query/delete and cursorMark multi-page tests on Node.js 22:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -94,7 +94,7 @@ Run the same suite locally after starting a Solr container and creating an isola
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
 ```
 
-These smoke tests establish that the service starts and basic document/query operations work on the pinned image. They do not certify every endpoint or action in the compatibility matrix.
+These tests establish that the service starts, basic document/query operations work, and cursorMark pagination returns all matching documents across pages on the pinned image. They do not certify every endpoint or action in the compatibility matrix.
 
 ## Required integration evidence
 

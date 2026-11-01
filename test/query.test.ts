@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { SolrClient } from "../src/index.js";
+import type { SolrQuery, SolrResponse } from "../src/index.js";
 
 const createClient = (capture: (url: URL) => void) => new SolrClient({
   baseUrl: "http://localhost:8983/solr",
@@ -101,4 +102,46 @@ test("query serializes a single structured filter and preserves local parameter 
 
   assert.equal(requestedUrl?.searchParams.get("fq"), '{!type=lucene df=name cache=false}name:foo bar');
   assert.equal(requestedUrl?.searchParams.getAll("fq").length, 1);
+});
+
+
+test("cursor pagination serializes cursorMark and returns the next mark across pages", async () => {
+  const requestedUrls: URL[] = [];
+  const pages = [
+    { response: { docs: [{ id: "1" }, { id: "2" }] }, nextCursorMark: "mark-2" },
+    { response: { docs: [{ id: "3" }] }, nextCursorMark: "mark-2" }
+  ];
+  const client = new SolrClient({
+    baseUrl: "http://localhost:8983/solr",
+    core: "testcore",
+    fetch: async input => {
+      requestedUrls.push(new URL(String(input)));
+      const page = pages.shift();
+      return new Response(JSON.stringify(page), { status: 200, headers: { "content-type": "application/json" } });
+    }
+  });
+
+  const query = { query: "*:*", sort: "updatedAt asc,id asc", limit: 2 };
+  const first = await client.query<SolrResponse<{ id: string }>>({ ...query, cursorMark: "*" });
+  const second = await client.query<SolrResponse<{ id: string }>>({ ...query, cursorMark: first.nextCursorMark! });
+  const ids = [...(first.response?.docs ?? []), ...(second.response?.docs ?? [])].map(doc => doc.id);
+  const firstUrl = requestedUrls[0];
+  const secondUrl = requestedUrls[1];
+  assert.ok(firstUrl);
+  assert.ok(secondUrl);
+
+  assert.equal(firstUrl.searchParams.get("cursorMark"), "*");
+  assert.equal(secondUrl.searchParams.get("cursorMark"), "mark-2");
+  assert.equal(firstUrl.searchParams.get("sort"), "updatedAt asc,id asc");
+  assert.deepEqual(ids, ["1", "2", "3"]);
+  assert.equal(new Set(ids).size, ids.length);
+});
+
+test("cursor pagination rejects a missing sort or a non-zero offset at runtime", async () => {
+  const client = createClient(() => undefined);
+  const missingSort = { query: "*:*", cursorMark: "*" } as unknown as SolrQuery;
+  const withOffset = { query: "*:*", sort: "id asc", cursorMark: "*", offset: 10 } as unknown as SolrQuery;
+
+  assert.throws(() => client.query(missingSort), /cursorMark requires a non-empty sort expression/);
+  assert.throws(() => client.query(withOffset), /cursorMark cannot be combined with a non-zero offset/);
 });
