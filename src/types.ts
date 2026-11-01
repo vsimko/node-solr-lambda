@@ -26,6 +26,8 @@ export interface SolrQuery {
 }
 export type SolrDocument = Readonly<Record<string,unknown>>;
 export type SolrDelete = string | {id:string} | {query:string};
+export interface UpdateOptions { overwrite?:boolean; commitWithin?:number; boost?:number; }
+export interface CommitOptions { waitSearcher?:boolean; softCommit?:boolean; expungeDeletes?:boolean; maxSegments?:number; }
 export interface SolrResponse<T=unknown> {
   responseHeader?: {status?:number;QTime?:number};
   response?: {numFound?:number;start?:number;docs?:T[]};
