@@ -159,8 +159,8 @@ jobs:
       - run: npm ci
       - name: Start SolrCloud
         run: |
-          docker run --detach \
           docker network create solr-cloud-net
+          docker run --detach \
             --name solr-cloud \
             --publish 8983:8983 \
             --network solr-cloud-net \
@@ -206,7 +206,7 @@ jobs:
             solr-foreground -c -z solr-cloud:9983
           for attempt in {1..60}; do
             live_nodes=$(docker exec solr-cloud bash -lc 'solr zk ls /live_nodes -z localhost:9983' 2>/dev/null || true)
-            if [ "$(printf '%s\\n' "$live_nodes" | grep -c '_solr' || true)" -ge 2 ]; then
+            if [ "$(printf '%s\n' "$live_nodes" | grep -c '_solr' || true)" -ge 2 ]; then
               echo "Both SolrCloud nodes joined the cluster"
               exit 0
             fi
@@ -224,3 +224,4 @@ jobs:
       - name: Print SolrCloud logs
         if: always()
         run: docker logs solr-cloud || true
+          docker logs solr-cloud-2 || true
