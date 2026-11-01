@@ -38,7 +38,7 @@
         "test/integration/solr-smoke.test.ts",
         "test/integration/solr-cursor.test.ts"
       ],
-      "notes": "Basic query serialization and document retrieval plus cursorMark multi-page traversal are tested on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. This does not certify all query options or response sections."
+      "notes": "Generic SolrResponse<TDocument> and SolrQueryResponse<TDocument, TJsonFacet> types expose document metadata, classic facet counts, caller-shaped JSON facets, highlighting, grouping, stats, and debug sections. Consumer compile tests verify document inference and response-section property types. Basic query serialization and document retrieval plus cursorMark multi-page traversal are tested on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; typed declarations do not certify every optional response section at runtime."
     },
     {
       "id": "query.json",
