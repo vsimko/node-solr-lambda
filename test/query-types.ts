@@ -1,4 +1,4 @@
-import type { SolrClient, SolrResponse } from "../src/index.js";
+import type { SolrClient, SolrQueryResponse, SolrResponse } from "../src/index.js";
 import { solrExcludeTags, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort } from "../src/index.js";
 
 declare const solr: SolrClient;
@@ -64,3 +64,36 @@ void solr.query<SolrResponse<{ id: string }>>({
 void solr.query({ query: "*:*", cursorMark: "*" });
 // @ts-expect-error Cursor pagination cannot use a non-zero offset.
 void solr.query({ query: "*:*", cursorMark: "*", sort: "id asc", offset: 10 });
+
+interface ProductDocument {
+  id: string;
+  title: string;
+  price: number;
+}
+
+interface ProductFacets {
+  count: number;
+  categories: { buckets: { val: string; count: number }[] };
+}
+
+void solr.query<SolrQueryResponse<ProductDocument, ProductFacets>>({ query: "*:*" }).then(page => {
+  const documents: ProductDocument[] = page.response?.docs ?? [];
+  const total: number | undefined = page.response?.numFound;
+  const offset: number | undefined = page.response?.start;
+  const maxScore: number | undefined = page.response?.maxScore;
+  const titleSnippet: string | undefined = page.highlighting?.["product-1"]?.title?.[0];
+  const facetCount: number | undefined = page.facet_counts?.facet_queries?.["inStock:true"];
+  const jsonFacetCount: number | undefined = page.facets?.count;
+  const groupedMatches: number | undefined = page.grouped?.category?.matches;
+  const averagePrice: number | undefined = page.stats?.stats_fields?.price?.mean;
+  const explanation: string | undefined = page.debug?.explain?.["product-1"];
+  const queryTime: number | undefined = page.responseHeader?.QTime;
+  void [documents, total, offset, maxScore, titleSnippet, facetCount, jsonFacetCount, groupedMatches, averagePrice, explanation, queryTime];
+  for (const document of documents) {
+    const id: string = document.id;
+    const price: number = document.price;
+    // @ts-expect-error Document fields retain the caller-provided generic type.
+    const invalidId: number = document.id;
+    void [id, price, invalidId];
+  }
+});
