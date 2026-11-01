@@ -92,6 +92,22 @@ test("POST update requests are not retried by default", async () => {
   assert.equal(attempts, 1);
 });
 
+test("POST requests retry only when the method is explicitly enabled", async () => {
+  let attempts = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    retry: { maxAttempts: 2, baseDelayMs: 0, methods: ["GET", "POST"], retryableStatuses: [503] },
+    fetch: async () => {
+      attempts += 1;
+      return attempts === 1
+        ? new Response("temporarily unavailable", { status: 503 })
+        : new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+  await client.add({ id: "one" });
+  assert.equal(attempts, 2);
+});
+
 test("an already aborted caller signal prevents retries", async () => {
   let attempts = 0;
   const controller = new AbortController();
@@ -113,4 +129,6 @@ test("invalid transport configuration fails at construction", () => {
   assert.throws(() => createSolrClient({ timeoutMs: 0 }), /timeoutMs/);
   assert.throws(() => createSolrClient({ username: "user", auth: { type: "bearer", token: "token" } }), /not both/);
   assert.throws(() => createSolrClient({ auth: { type: "bearer", token: " " } }), /non-empty token/);
+  assert.throws(() => createSolrClient({ baseUrl: "https://user:pass@solr.example" }), /embedded credentials/);
+  assert.throws(() => createSolrClient({ retry: { maxAttempts: 0 } }), /positive integer/);
 });
