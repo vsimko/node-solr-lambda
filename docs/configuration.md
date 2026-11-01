@@ -86,7 +86,7 @@ const solr = createSolrClient({
 - The default methods list contains only `GET`.
 - Network failures can be retried by default. The client does not retry when the caller has aborted the request.
 - The delay uses exponential backoff and is capped by `maxDelayMs`.
-- A per-request `AbortSignal` takes precedence over `timeoutMs`.
+- A per-request `AbortSignal` is combined with the timeout. The first one to fire cancels the request.
 - Set `retry: false` to disable retries.
 
 Only add `POST`, `PUT`, or `DELETE` to the retry method list when the operation is safe to repeat. A retry can send the same request more than once.
@@ -98,3 +98,31 @@ The constructor checks the base URL, timeout, authentication combination, and re
 Optional Zod input and output validation is separate. See [Validation](validation.md).
 
 Transport options do not certify Solr server compatibility. See the [Solr compatibility matrix](compatibility.md) for documented endpoint coverage and runtime test status.
+
+## Per-request cancellation and timeout
+
+Every typed client method accepts an optional final `RequestControlOptions` argument. It supports a per-request timeout, an `AbortSignal`, and request-specific headers.
+
+```ts
+const controller = new AbortController();
+
+const result = await solr.query(
+  { query: "title:solr", limit: 10 },
+  { signal: controller.signal, timeoutMs: 5000 }
+);
+
+// Cancel the request when the application no longer needs the result.
+controller.abort();
+```
+
+For methods with existing options, pass request controls after those options. For example:
+
+```ts
+await solr.add(
+  { id: "book-1", title: "Solr" },
+  { overwrite: true },
+  { timeoutMs: 5000 }
+);
+```
+
+The client combines the caller signal with the timeout. Caller cancellation throws `SolrAbortError`. A timeout throws `SolrTimeoutError`. The timeout applies while the client receives the response body. For `export()`, the signal remains active until the returned response stream is consumed or cancelled.
