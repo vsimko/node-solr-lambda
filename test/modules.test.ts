@@ -61,7 +61,7 @@ test("System, Metrics, and Security modules share the transport", async () => {
   await client.systemInfo();
   await client.metrics({ group: "jvm" });
   await client.security("authentication");
-  await client.security("authorization", { set-user: { name: "reader" } });
+  await client.security("authorization", { "set-user": { name: "reader" } });
   assert.deepEqual(calls, [
     { path: "/solr/admin/info/system", method: "GET", query: null },
     { path: "/solr/admin/metrics", method: "GET", query: "jvm" },
@@ -76,7 +76,7 @@ test("Streaming Expressions delegate to the advanced API module", async () => {
     collection: "catalog",
     fetch: async input => {
       url = String(input);
-      return new Response(JSON.stringify({ result-set: { docs: [] } }));
+      return new Response(JSON.stringify({ "result-set": { docs: [] } }));
     }
   });
   await client.stream("search(catalog, q=*:*)");
