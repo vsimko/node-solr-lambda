@@ -65,3 +65,46 @@ jobs:
       - name: Print Solr logs
         if: always()
         run: docker logs solr || true
+
+  cloud-integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        solr-version: ["8.11.4", "9.11.0", "10.1.0"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Start SolrCloud
+        run: |
+          docker run --detach \
+            --name solr-cloud \
+            --publish 8983:8983 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            "solr:${{ matrix.solr-version }}" \
+            solr -c
+      - name: Wait for SolrCloud
+        run: |
+          for attempt in {1..60}; do
+            if curl --fail --silent "http://localhost:8983/solr/admin/collections?action=CLUSTERSTATUS&wt=json" > /dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "SolrCloud did not become healthy within five minutes"
+          docker logs solr-cloud
+          exit 1
+      - name: Upload the default configset to ZooKeeper
+        run: |
+          docker exec solr-cloud bash -lc 'solr zk upconfig -n _default -d /opt/solr/server/solr/configsets/_default'
+      - name: Run SolrCloud integration tests
+        run: npm run test:integration
+        env:
+          SOLR_BASE_URL: http://localhost:8983/solr
+          SOLR_CLOUD: "true"
+      - name: Print SolrCloud logs
+        if: always()
+        run: docker logs solr-cloud || true
