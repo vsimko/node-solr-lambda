@@ -9,13 +9,18 @@ const result = await solr.query({
   fields: ["id", "title"],
   sort: "publishedAt desc",
   limit: 25,
-  offset: 0
+  offset: 0,
+  params: {
+    "q.op": "AND"
+  }
 });
 ```
 
-The client maps `query`, `filter`, `fields`, `limit`, and `offset` to Solr parameters `q`, `fq`, `fl`, `rows`, and `start`. Pass other Solr query parameters by name.
+The client maps `query`, `filter`, `fields`, `limit`, and `offset` to Solr parameters `q`, `fq`, `fl`, `rows`, and `start`. The `params` property is the explicit escape hatch for additional Solr query parameters that do not yet have a dedicated option type. Do not rely on arbitrary top-level property names as a substitute for typed API support.
 
-Use `queryJson()` to send a JSON Request API body.
+The public query model is being expanded to make supported parameters, parser options, nested facets, and response sections discoverable through TypeScript IDE autocomplete. Track the work in [Issue #121](https://github.com/vsimko/node-solr-lambda/issues/121) and the [development roadmap](roadmap.md).
+
+Use `queryJson()` to send a JSON Request API body. The current method accepts a generic object; dedicated typed models for common JSON Request API structures are part of the query API roadmap.
 
 ```ts
 const result = await solr.queryJson({
