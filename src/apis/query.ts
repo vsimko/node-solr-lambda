@@ -215,7 +215,6 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.highlighting;
   delete params.grouping;
   delete params.collapse;
-  delete params.expand;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" ||
