@@ -176,6 +176,7 @@ export function cloudIntegrationTest(
           name,
           numShards: 1,
           replicationFactor: 1,
+          maxShardsPerNode: 2,
           "collection.configName": "_default"
         });
         createdCollections.add(name);
@@ -188,6 +189,7 @@ export function cloudIntegrationTest(
           "router.name": "implicit",
           shards: "shard1",
           replicationFactor: 1,
+          maxShardsPerNode: 2,
           "collection.configName": "_default"
         });
         createdCollections.add(name);
