@@ -17,6 +17,9 @@ test("Security API reads and updates BasicAuth and RuleBasedAuthorization config
     auth: { type: "basic", username: username!, password: password! }
   });
 
+  const anonymousResponse = await fetch(`${baseUrl}/admin/authentication`);
+  assert.equal(anonymousResponse.status, 401, "blockUnknown must reject anonymous Security API requests");
+
   const authentication = await client.security<{
     authentication?: { class?: string; blockUnknown?: boolean };
   }>("authentication");
