@@ -4,6 +4,7 @@ import { cloudIntegrationTest } from "./fixtures.js";
 cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated collection", async ({
   client,
   createCollection,
+  createImplicitCollection,
   createAlias
 }) => {
   const name = await createCollection();
@@ -20,22 +21,23 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
   const aliases = await client.collections<{ aliases?: Record<string, string> }>("LISTALIASES");
   assert.equal(aliases.aliases?.[alias], name);
 
+  const implicitName = await createImplicitCollection();
   const shard = "integration_shard";
-  await client.collections("CREATESHARD", { collection: name, shard });
+  await client.collections("CREATESHARD", { collection: implicitName, shard });
   const withShard = await client.collections<{
     cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
-  }>("CLUSTERSTATUS", { collection: name });
+  }>("CLUSTERSTATUS", { collection: implicitName });
   assert.ok(
-    withShard.cluster?.collections?.[name]?.shards?.[shard],
+    withShard.cluster?.collections?.[implicitName]?.shards?.[shard],
     `cluster status should contain shard ${shard}`
   );
 
-  await client.collections("DELETESHARD", { collection: name, shard });
+  await client.collections("DELETESHARD", { collection: implicitName, shard });
   const withoutShard = await client.collections<{
     cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
-  }>("CLUSTERSTATUS", { collection: name });
+  }>("CLUSTERSTATUS", { collection: implicitName });
   assert.equal(
-    withoutShard.cluster?.collections?.[name]?.shards?.[shard],
+    withoutShard.cluster?.collections?.[implicitName]?.shards?.[shard],
     undefined,
     `cluster status should not contain deleted shard ${shard}`
   );
