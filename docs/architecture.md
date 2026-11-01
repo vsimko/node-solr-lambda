@@ -6,7 +6,7 @@ The v4 client uses one HTTP transport and separate API modules. Public methods o
 
 | Module | Responsibility |
 | --- | --- |
-| `transport.ts` | Fetch, base URL, core/collection paths, headers, Basic authentication, timeout, validation, JSON parsing, and HTTP errors. |
+| `transport.ts` | Fetch, base URL resolution, Basic/Bearer authentication, headers, timeout, request defaults, retry policy, validation, JSON parsing, and HTTP errors. |
 | `apis/query.ts` | Standard query and JSON Request API calls. |
 | `apis/update.ts` | Add, update, delete, commit, soft commit, optimize, and rollback. |
 | `apis/schema.ts` | Schema API requests. |
