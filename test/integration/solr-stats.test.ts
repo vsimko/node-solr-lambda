@@ -26,7 +26,7 @@ integrationTest("Solr Stats Component returns numeric statistics and facet break
     query: `id:(${ids.join(" OR ")})`,
     limit: 0,
     stats: {
-      fields: [{ field: "price_d", percentiles: [50, 90], cardinality: 0.5 }],
+      fields: [{ field: "price_d", percentiles: [50, 90], cardinality: 0.5, distinctValues: true, countDistinct: true }],
       facets: "category_s",
       calcDistinct: true
     }
