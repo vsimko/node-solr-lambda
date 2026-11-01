@@ -104,9 +104,7 @@ test("an already aborted caller signal prevents retries", async () => {
       throw new Error("aborted");
     }
   });
-  await assert.rejects(client.query({ query: "*:*" }).catch(() => {
-    throw new Error("request should not succeed");
-  }));
+  await assert.rejects(client.request("/solr/catalog/select", { signal: controller.signal, operation: "query" }), /aborted/);
   assert.equal(attempts, 1);
 });
 
