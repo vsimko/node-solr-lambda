@@ -88,7 +88,7 @@ export class SolrClient {
     return this.request<T>(`/solr/admin/${area}`,{method:command===undefined?"GET":"POST",...(command===undefined?{}:{body:command}),operation:"security"});
   }
   stream<T=unknown>(expression:string):Promise<T> {
-    return this.request<T>(this.endpoint("/stream"),{method:"POST",body:{expr:expression},operation:"stream"});
+    return this.request<T>(this.endpoint("/stream"),{query:{expr:expression,wt:"json"},operation:"stream"});
   }
   export<T=unknown>(params:import("./types.js").SolrAdminParams):Promise<T> {
     return this.request<T>(this.endpoint("/export"),{query:params,operation:"export"});
