@@ -25,7 +25,8 @@ export class SolrClient {
   }
   async request<T=unknown>(path:string,options:RequestOptions={}):Promise<T> {
     const method=options.method??"GET";
-    const operation=options.operation??method;\n    const input=await this.validate(operation,"inputs",options.body??options.query);
+    const operation=options.operation??method;
+    const input=await this.validate(operation,"inputs",options.body??options.query);
     const url=new URL(path.replace(/^\//,""),this.config.baseUrl??DEFAULT_BASE_URL);
     appendQuery(url,options.body===undefined ? input as RequestOptions["query"] : options.query);
     const headers:Record<string,string>={
@@ -47,7 +48,8 @@ export class SolrClient {
     return `/solr/${encodeURIComponent(target)}${path}`;
   }
   query<T=unknown>(query:SolrQuery):Promise<T> {
-    const params:Record<string,unknown>={...(query.params??{}),...query};\n    if(query.query!==undefined)params.q=query.query;
+    const params:Record<string,unknown>={...(query.params??{}),...query};
+    if(query.query!==undefined)params.q=query.query;
     if(query.filter!==undefined)params.fq=query.filter;
     if(query.fields!==undefined)params.fl=query.fields;
     if(query.limit!==undefined)params.rows=query.limit;
