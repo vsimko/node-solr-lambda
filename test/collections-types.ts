@@ -75,3 +75,10 @@ void moveClient.collections("DELETEREPLICAPROP", deleteReplicaProperty);
 // @ts-expect-error MOVEREPLICA requires a target node.
 const invalidMove: import("../src/index.js").MoveReplicaParams = { collection: "books" };
 void invalidMove;
+
+const rebalanceParams = {
+  collection: "books",
+  maxAtOnce: 2,
+  maxWaitSeconds: 30
+} satisfies import("../src/index.js").RebalanceLeadersParams;
+void moveClient.collections("REBALANCELEADERS", rebalanceParams);
