@@ -237,12 +237,62 @@ The `type` discriminator selects the TypeScript option set and is not sent to So
 
 The client maps `query`, `filter`, `fields`, `limit`, and `offset` to `q`, `fq`, `fl`, `rows`, and `start`. Unknown top-level properties are rejected by TypeScript.
 
-Use `queryJson()` to send a JSON Request API body. The current method accepts a generic object; dedicated typed models for common JSON Request API structures remain separate work.
+Use `queryJson()` to send a JSON Request API body. The method accepts the typed `SolrJsonQueryRequest` model for common query properties and recursive JSON Facet API definitions. A compatibility overload remains for custom request bodies that do not use a `facet` property; put additional top-level parameters in the explicit `params` property when using the typed request.
+
+## JSON Facet API
+
+The JSON Facet API models terms, query, and range facets as a recursive tree. Each facet can contain nested facets or metrics, and can apply a domain transformation before evaluating its buckets.
 
 ```ts
-const result = await solr.queryJson({
-  query: "title:typescript",
-  limit: 25,
-  fields: ["id", "title"]
-});
+import type { SolrJsonQueryRequest, SolrJsonQueryResponse } from "node-solr-lambda";
+
+interface Product { id: string; category_s: string; price_d: number; }
+interface ProductFacets {
+  count: number;
+  categories: { buckets: { val: string; count: number; averagePrice: number }[] };
+  expensive: { count: number; maxPrice: number };
+}
+
+const request: SolrJsonQueryRequest = {
+  query: "*:*",
+  filter: "{!tag=stock}inStock_b:true",
+  limit: 0,
+  facet: {
+    categories: {
+      type: "terms",
+      field: "category_s",
+      limit: 20,
+      sort: "count desc",
+      domain: { excludeTags: "stock" },
+      facet: {
+        averagePrice: "avg(price_d)",
+        nestedRanges: {
+          type: "range",
+          field: "price_d",
+          start: 0,
+          end: 100,
+          gap: 10,
+          facet: { count: "count()" }
+        }
+      }
+    },
+    expensive: {
+      type: "query",
+      q: "price_d:[50 TO *]",
+      facet: { maxPrice: { type: "func", func: "max(price_d)" } }
+    }
+  }
+};
+
+const result = await solr.queryJson<SolrJsonQueryResponse<Product, ProductFacets>>(request);
+const categoryBuckets = result.facets?.categories.buckets;
 ```
+
+- **Terms facets** support field, limit, offset, sort, mincount, missing, prefix, method, and nested metrics/facets.
+- **Query facets** count arbitrary query expressions and can include nested metrics/facets.
+- **Range facets** support numeric values and date math for start/end/gap, plus hardend, include, other, and mincount.
+- **Metrics** accept function expressions such as `avg(price_d)` or the explicit `{ type: "func", func: "..." }` form.
+- **Domain changes** support filter, query, excludeTags, blockParent, blockChildren, and join transformations.
+- The response's `facets` section is caller-typed through the second `SolrJsonQueryResponse` generic. The library does not infer a response shape from the requested facet tree at runtime.
+
+The JSON Facet API is documented in the [Solr Reference Guide](https://solr.apache.org/guide/solr/9_8/query-guide/json-facet-api.html). Check the version-specific guide when using advanced facet options or domain transformations.
