@@ -135,8 +135,8 @@ jobs:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CORE: integration
           SOLR_SECURITY: "true"
-          SOLR_USERNAME: ${{ env.SOLR_USERNAME }}
-          SOLR_PASSWORD: ${{ env.SOLR_PASSWORD }}
+          SOLR_USERNAME: integration-admin
+          SOLR_PASSWORD: integration-password
       - name: Print secure Solr logs
         if: always()
         run: docker logs solr-secure || true
