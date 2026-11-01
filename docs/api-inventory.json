@@ -57,9 +57,10 @@
       },
       "documentation": "docs/query.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-json-query.test.ts"
       ],
-      "notes": "Request and response values use generic record types."
+      "notes": "JSON Request API query body and matching-document response test authored; CI pending."
     },
     {
       "id": "update.add",
@@ -190,9 +191,10 @@
       },
       "documentation": "docs/documents.md",
       "testFiles": [
-        "test/client.test.ts"
+        "test/client.test.ts",
+        "test/integration/solr-optimize.test.ts"
       ],
-      "notes": "Action and response behavior need versioned integration evidence."
+      "notes": "Optimize followed by a query asserting committed documents remain available; CI pending."
     },
     {
       "id": "update.rollback",
@@ -343,9 +345,10 @@
       },
       "documentation": "docs/administration.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "Response model remains generic."
+      "notes": "System info metadata response test authored; CI pending."
     },
     {
       "id": "metrics.api",
@@ -364,9 +367,10 @@
       },
       "documentation": "docs/administration.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "Metric group and response models remain generic."
+      "notes": "Metrics API JVM group response test authored; CI pending."
     },
     {
       "id": "security.api",
@@ -406,9 +410,10 @@
       },
       "documentation": "docs/administration.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-streaming.test.ts"
       ],
-      "notes": "Expression is a string; typed expression builders and response models remain future work."
+      "notes": "Streaming Expressions search and result-set document assertion authored; CI pending."
     },
     {
       "id": "export.api",
