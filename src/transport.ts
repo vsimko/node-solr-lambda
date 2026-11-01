@@ -27,15 +27,18 @@ function withDefaultParams(
   query: RequestOptions["query"]
 ): RequestOptions["query"] {
   if (!defaults || Object.keys(defaults).length === 0) return query;
-  const merged = new URLSearchParams();
-  for (const [key, value] of Object.entries(defaults)) {
-    if (!hasQueryKey(query, key)) {
-      const values = Array.isArray(value) ? value : [value];
-      for (const item of values) merged.append(key, String(item));
+  if (query instanceof URLSearchParams) {
+    const merged = new URLSearchParams();
+    for (const [key, value] of Object.entries(defaults)) {
+      if (!query.has(key)) {
+        const values = Array.isArray(value) ? value : [value];
+        for (const item of values) merged.append(key, String(item));
+      }
     }
+    appendSearchParams(merged, query);
+    return merged;
   }
-  appendSearchParams(merged, query);
-  return merged;
+  return { ...defaults, ...query };
 }
 
 function resolveUrl(path: string, baseUrl: string): URL {
