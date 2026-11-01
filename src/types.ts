@@ -1,4 +1,7 @@
 export type SolrVersion = "8" | "9" | "10";
+export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
+export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
+export type SolrAdminParams = Readonly<Record<string,string|number|boolean>>;
 export interface ValidationSchema {
   safeParseAsync(value: unknown): Promise<
     | { success: true; data: unknown }
