@@ -8,34 +8,34 @@ function appendQuery(url:URL, query:RequestOptions["query"]):void {
   for(const [key,value] of entries)url.searchParams.append(key,value);
 }
 export class SolrClient {
-  readonly config:Readonly<SolrClientConfig>;
+  readonly clientConfig:Readonly<SolrClientConfig>;
   private readonly requestFetch:typeof fetch;
   constructor(config:SolrClientConfig={}) {
-    this.config=Object.freeze({...config});
+    this.clientConfig=Object.freeze({...config});
     this.requestFetch=config.fetch??globalThis.fetch;
     if(!this.requestFetch)throw new Error("Node.js 20 or later with global fetch is required");
   }
   private async validate(operation:string,direction:"inputs"|"outputs",value:unknown):Promise<unknown> {
-    const schema:ValidationSchema|undefined=this.config.validation?.[direction]?.[operation];
+    const schema:ValidationSchema|undefined=this.clientConfig.validation?.[direction]?.[operation];
     if(!schema)return value;
     const result=await schema.safeParseAsync(value);
     if(result.success)return result.data;
-    if(this.config.validation?.onError==="ignore")return value;
+    if(this.clientConfig.validation?.onError==="ignore")return value;
     throw new SolrValidationError(operation,result.error.issues);
   }
   async request<T=unknown>(path:string,options:RequestOptions={}):Promise<T> {
     const method=options.method??"GET";
     const operation=options.operation??method;
     const input=await this.validate(operation,"inputs",options.body??options.query);
-    const url=new URL(path.replace(/^\//,""),this.config.baseUrl??DEFAULT_BASE_URL);
+    const url=new URL(path.replace(/^\//,""),this.clientConfig.baseUrl??DEFAULT_BASE_URL);
     appendQuery(url,options.body===undefined ? input as RequestOptions["query"] : options.query);
     const headers:Record<string,string>={
       accept:"application/json",
       ...(options.body===undefined?{}:{"content-type":"application/json"}),
-      ...(this.config.username!==undefined?{authorization:`Basic ${btoa(`${this.config.username}:${this.config.password??""}`)}`}:{}),
-      ...this.config.headers,...options.headers
+      ...(this.clientConfig.username!==undefined?{authorization:`Basic ${btoa(`${this.clientConfig.username}:${this.clientConfig.password??""}`)}`}:{}),
+      ...this.clientConfig.headers,...options.headers
     };
-    const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.config.timeoutMs??30_000)});
+    const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
     const text=await response.text();
     let payload:unknown;
     if(text){try{payload=JSON.parse(text) as unknown;}catch{payload=text;}}
@@ -43,7 +43,7 @@ export class SolrClient {
     return await this.validate(operation,"outputs",payload) as T;
   }
   private endpoint(path:string):string {
-    const target=this.config.core??this.config.collection;
+    const target=this.clientConfig.core??this.clientConfig.collection;
     if(!target)throw new Error("Set 'core' or 'collection' in the Solr client configuration");
     return `/solr/${encodeURIComponent(target)}${path}`;
   }
