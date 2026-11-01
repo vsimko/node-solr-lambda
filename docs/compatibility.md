@@ -35,7 +35,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Tested: SolrCloud CREATE/LIST/DELETE on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Tested: system metadata on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Tested: JVM metrics on pinned 8.11.4 / 9.11.0 / 10.1.0; Solr 8/9 return JSON, Solr 10.1 Prometheus text |
-| `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified: isolated security.json fixture data added; live security plugin configuration and requests are not enabled in standalone CI |
+| `security()` — authentication and authorization handlers | Documented | Documented | Documented | Pending CI: dedicated authenticated standalone matrix added for anonymous rejection, authentication/authorization GET, and authentication `set-property` read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `stream()` — `/stream` | Documented | Documented | Documented | Tested: Streaming Expressions search against a disposable SolrCloud collection on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `export()` — `/export` | Documented | Documented | Documented | Tested: raw response with docValues sort field on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs the standalone and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #145 passed all Node.js 20/22/24 checks, standalone integration jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE and Streaming Expressions search. Live security plugin tests remain unverified:
+CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #145 passed the Node.js 20/22/24 checks, standalone integration jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE and Streaming Expressions search. The new security-enabled matrix is pending its first CI result:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -92,11 +92,14 @@ Run the same suite locally after starting a Solr container and creating an isola
 
 ```sh
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
+
+# For the security-enabled job, also set:
+SOLR_SECURITY=true SOLR_USERNAME=integration-admin SOLR_PASSWORD=integration-password
 ```
 
 CI #145 passed standalone and SolrCloud integration jobs on all three pinned Solr images. Covered behavior includes CRUD, hard/soft commit, rollback, ping, schema field lifecycle, config user properties, CoreAdmin core lifecycle, JSON Request API, optimize, system info, metrics, export, Collections CREATE/LIST/DELETE, Streaming Expressions search, and basic query/cursorMark pagination. These results do not certify every endpoint, query option, update command, or action in the compatibility matrix.
 
-## Required integration evidence
+## Remaining integration evidence
 
 For each target Solr line, expand the integration suite across the endpoint families below and record the exact image tag and test result.
 
@@ -108,7 +111,7 @@ The suite must cover:
 4. Schema and Config API mutations and read-back where supported by the public client method.
 5. CoreAdmin and Collections actions.
 6. System information and Metrics API.
-7. Authentication and authorization requests with a test security configuration.
+7. Authentication and authorization requests with a test security configuration (new CI matrix added; pending pass).
 8. Streaming Expressions and export response handling.
 
 Do not mark a row as supported until the relevant integration test passes. Record unsupported or unavailable operations as such, with the exact server version and reason.
