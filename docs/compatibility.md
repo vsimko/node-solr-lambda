@@ -27,15 +27,15 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query and cursorMark pagination on pinned 8.11.4 / 9.11.0 / 10.1.0 images; other query options remain unverified |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Unverified |
 | `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Tested: add, full-document update, and delete by ID on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit with waitSearcher on pinned 8.11.4 / 9.11.0 / 10.1.0 images; soft commit, optimize, and rollback remain unverified |
-| `ping()` — `/admin/ping` | Documented | Documented | Documented | Unverified |
-| `schema()` — `/schema` | Documented | Documented | Documented | Unverified |
-| `config()` — `/config` | Documented | Documented | Documented | Unverified |
-| `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Unverified |
-| `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Unverified |
+| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; optimize remains unverified |
+| `ping()` — `/admin/ping` | Documented | Documented | Documented | Tested: OK response on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Tested: CREATE, STATUS, and RELOAD with fixture UNLOAD cleanup on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Unverified: optional SolrCloud test added; current standalone CI does not provision SolrCloud |
 | `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Unverified |
 | `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Unverified |
-| `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified |
+| `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified: isolated security.json fixture data added; live security plugin configuration and requests are not enabled in standalone CI |
 | `stream()` — `/stream` | Documented | Documented | Documented | Unverified |
 | `export()` — `/export` | Documented | Documented | Documented | Unverified |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs a health check plus add/update/delete, hard-commit, basic-query, and cursorMark multi-page tests on Node.js 22:
+CI starts pinned official Solr images and runs a health check plus CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, basic-query, and cursorMark multi-page tests on Node.js 22. Collections tests are opt-in and require SolrCloud; live security plugin tests remain unverified:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -94,7 +94,7 @@ Run the same suite locally after starting a Solr container and creating an isola
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
 ```
 
-These tests establish that the service starts, document add/update/delete and hard commit work, basic queries return matching documents, and cursorMark pagination returns all matching documents across pages on each pinned image. They do not certify every endpoint, query option, update command, or action in the compatibility matrix.
+These tests establish that the service starts, document CRUD and hard/soft commit plus rollback work, ping returns OK, schema fields can be added/read/deleted, config user properties can be set/unset, CoreAdmin can create/status/reload/unload cores, basic queries return matching documents, and cursorMark pagination returns all matching documents across pages on each pinned image. They do not certify every endpoint, query option, update command, or action in the compatibility matrix.
 
 ## Required integration evidence
 
@@ -105,7 +105,7 @@ The suite must cover:
 1. Query and JSON Request API.
 2. Add, update, delete, commit, soft commit, optimize, and rollback.
 3. Ping and error response parsing.
-4. Schema and Config API reads and writes.
+4. Schema and Config API mutations and read-back where supported by the public client method.
 5. CoreAdmin and Collections actions.
 6. System information and Metrics API.
 7. Authentication and authorization requests with a test security configuration.
