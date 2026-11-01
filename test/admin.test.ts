@@ -66,13 +66,13 @@ test("Collections replica lifecycle parameters are serialized", async () => {
     deleteIndex: true
   });
 
-  const add = new URL(requested[0]);
+  const add = new URL(requested[0]!);
   assert.equal(add.searchParams.get("action"), "ADDREPLICA");
   assert.equal(add.searchParams.get("collection"), "books");
   assert.equal(add.searchParams.get("type"), "NRT");
   assert.equal(add.searchParams.get("waitForFinalState"), "true");
 
-  const remove = new URL(requested[1]);
+  const remove = new URL(requested[1]!);
   assert.equal(remove.searchParams.get("action"), "DELETEREPLICA");
   assert.equal(remove.searchParams.get("replica"), "core_node2");
   assert.equal(remove.searchParams.get("deleteDataDir"), "true");
