@@ -1,30 +1,22 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import test from "node:test";
-import { SolrClient } from "../../src/index.js";
+import { integrationTest } from "./fixtures.js";
 
-const baseUrl = process.env.SOLR_BASE_URL;
-const core = process.env.SOLR_CORE;
+integrationTest("Solr supports basic add, commit, query, and delete operations", async ({
+  client,
+  createId,
+  addDocuments,
+  commit
+}) => {
+  const id = createId("integration");
 
-test("Solr supports basic add, commit, query, and delete operations", {
-  skip: !baseUrl || !core
-}, async () => {
-  const client = new SolrClient({ baseUrl: baseUrl!, core: core!, timeoutMs: 30_000 });
-  const id = `integration_${randomUUID().replaceAll("-", "")}`;
+  await addDocuments([{ id }]);
+  await commit();
 
-  try {
-    await client.add({ id });
-    await client.commit({ waitSearcher: true });
+  const result = await client.query<{ response?: { docs?: Array<{ id: string }> } }>({
+    query: `id:${id}`,
+    fields: ["id"],
+    limit: 10
+  });
 
-    const result = await client.query<{ response?: { docs?: Array<{ id: string }> } }>({
-      query: `id:${id}`,
-      fields: ["id"],
-      limit: 10
-    });
-
-    assert.deepEqual(result.response?.docs?.map(document => document.id), [id]);
-  } finally {
-    await client.delete({ id });
-    await client.commit({ waitSearcher: true });
-  }
+  assert.deepEqual(result.response?.docs?.map(document => document.id), [id]);
 });
