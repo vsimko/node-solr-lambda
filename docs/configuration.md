@@ -96,3 +96,5 @@ Only add `POST`, `PUT`, or `DELETE` to the retry method list when the operation 
 The constructor checks the base URL, timeout, authentication combination, and retry values. It throws a configuration error before the first request when a value is invalid.
 
 Optional Zod input and output validation is separate. See [Validation](validation.md).
+
+Transport options do not certify Solr server compatibility. See the [Solr compatibility matrix](compatibility.md) for documented endpoint coverage and runtime test status.
