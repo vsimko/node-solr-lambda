@@ -145,3 +145,96 @@ test("cursor pagination rejects a missing sort or a non-zero offset at runtime",
   assert.throws(() => client.query(missingSort), /cursorMark requires a non-empty sort expression/);
   assert.throws(() => client.query(withOffset), /cursorMark cannot be combined with a non-zero offset/);
 });
+
+test("query serializes typed classic field, query, date, and range facets", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    facets: {
+      fields: [
+        {
+          field: "category",
+          limit: 5,
+          offset: 2,
+          sort: "count",
+          minCount: 1,
+          missing: true,
+          prefix: "bo",
+          method: "fc"
+        },
+        "author"
+      ],
+      queries: ["price:[10 TO 20]", "inStock:true"],
+      dates: [{
+        field: "created_at",
+        start: "NOW/DAY",
+        end: "NOW",
+        gap: "+1DAY",
+        hardEnd: true,
+        other: ["before", "after"],
+        include: ["lower", "upper"]
+      }],
+      ranges: [{
+        field: "price",
+        start: 0,
+        end: 100,
+        gap: 10,
+        hardEnd: true,
+        other: "between",
+        include: "edge"
+      }],
+      limit: 10,
+      offset: 0,
+      sort: "index",
+      minCount: 1,
+      missing: false,
+      prefix: "A",
+      method: "fc"
+    }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("facet"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.field"), ["category", "author"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.query"), ["price:[10 TO 20]", "inStock:true"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.date"), ["created_at"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("facet.range"), ["price"]);
+  assert.equal(requestedUrl?.searchParams.get("facet.limit"), "10");
+  assert.equal(requestedUrl?.searchParams.get("facet.offset"), "0");
+  assert.equal(requestedUrl?.searchParams.get("facet.sort"), "index");
+  assert.equal(requestedUrl?.searchParams.get("facet.mincount"), "1");
+  assert.equal(requestedUrl?.searchParams.get("facet.missing"), "false");
+  assert.equal(requestedUrl?.searchParams.get("facet.prefix"), "A");
+  assert.equal(requestedUrl?.searchParams.get("facet.method"), "fc");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.limit"), "5");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.offset"), "2");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.sort"), "count");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.mincount"), "1");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.missing"), "true");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.prefix"), "bo");
+  assert.equal(requestedUrl?.searchParams.get("f.category.facet.method"), "fc");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.start"), "NOW/DAY");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.end"), "NOW");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.gap"), "+1DAY");
+  assert.equal(requestedUrl?.searchParams.get("f.created_at.facet.date.hardend"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("f.created_at.facet.date.other"), ["before", "after"]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("f.created_at.facet.date.include"), ["lower", "upper"]);
+  assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.start"), "0");
+  assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.end"), "100");
+  assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.gap"), "10");
+  assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.hardend"), "true");
+  assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.other"), "between");
+  assert.equal(requestedUrl?.searchParams.get("f.price.facet.range.include"), "edge");
+});
+
+test("query preserves raw date and range facet field names", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({ query: "*:*", facets: { dates: "created_at", ranges: "price" } });
+  assert.equal(requestedUrl?.searchParams.get("facet"), "true");
+  assert.equal(requestedUrl?.searchParams.get("facet.date"), "created_at");
+  assert.equal(requestedUrl?.searchParams.get("facet.range"), "price");
+  assert.equal(requestedUrl?.searchParams.has("f.created_at.facet.date.start"), false);
+  assert.equal(requestedUrl?.searchParams.has("f.price.facet.range.start"), false);
+});
