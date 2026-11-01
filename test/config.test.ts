@@ -124,7 +124,7 @@ test("POST requests retry only when the method is explicitly enabled", async () 
   assert.equal(attempts, 2);
 });
 
-test("an already aborted caller signal prevents retries", async () => {
+test("an already aborted caller signal prevents the request from starting", async () => {
   let attempts = 0;
   const controller = new AbortController();
   controller.abort();
@@ -137,7 +137,7 @@ test("an already aborted caller signal prevents retries", async () => {
     }
   });
   await assert.rejects(client.request("/solr/catalog/select", { signal: controller.signal, operation: "query" }), /aborted/);
-  assert.equal(attempts, 1);
+  assert.equal(attempts, 0);
 });
 
 test("invalid transport configuration fails at construction", () => {
