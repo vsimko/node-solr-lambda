@@ -40,3 +40,40 @@ test("export returns a raw response stream", async () => {
   assert.equal(response.headers.get("content-type"), "text/csv");
   assert.equal(await response.text(), "id,title\n1,Example");
 });
+
+test("Collections replica lifecycle parameters are serialized", async () => {
+  const requested: string[] = [];
+  const client = createSolrClient({
+    fetch: async (input) => {
+      requested.push(String(input));
+      return new Response(JSON.stringify({ success: true }));
+    }
+  });
+
+  await client.collections("ADDREPLICA", {
+    collection: "books",
+    shard: "shard1",
+    type: "NRT",
+    node: "node1",
+    waitForFinalState: true
+  });
+  await client.collections("DELETEREPLICA", {
+    collection: "books",
+    shard: "shard1",
+    replica: "core_node2",
+    deleteInstanceDir: false,
+    deleteDataDir: true,
+    deleteIndex: true
+  });
+
+  const add = new URL(requested[0]);
+  assert.equal(add.searchParams.get("action"), "ADDREPLICA");
+  assert.equal(add.searchParams.get("collection"), "books");
+  assert.equal(add.searchParams.get("type"), "NRT");
+  assert.equal(add.searchParams.get("waitForFinalState"), "true");
+
+  const remove = new URL(requested[1]);
+  assert.equal(remove.searchParams.get("action"), "DELETEREPLICA");
+  assert.equal(remove.searchParams.get("replica"), "core_node2");
+  assert.equal(remove.searchParams.get("deleteDataDir"), "true");
+});
