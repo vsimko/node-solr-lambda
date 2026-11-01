@@ -1,9 +1,25 @@
 # Core and collection administration
 
-Use `ping()` to check a core or collection.
+Create a client without a core name to use global administration endpoints.
+
+Use `coreAdmin()` to send a Core Admin action.
 
 ```ts
-const status = await solr.ping();
+const admin = createSolrClient({ baseUrl: "http://localhost:8983" });
+const status = await admin.coreAdmin("STATUS", { core: "catalog" });
 ```
 
-Core Admin and Collections APIs use different endpoint paths and request models. The current v4 implementation exposes core-scoped ping. The full administrative API is tracked in the API coverage matrix. Do not use a core endpoint to manage a SolrCloud collection.
+Use `collections()` to send a SolrCloud Collections API action.
+
+```ts
+const result = await admin.collections("LIST");
+```
+
+Use `systemInfo()` to read system information. Use `metrics()` to read metrics. Use `security()` to read or update authentication and authorization settings.
+
+```ts
+const system = await admin.systemInfo();
+const metrics = await admin.metrics({ group: "jvm" });
+```
+
+Check the API coverage matrix for endpoint-specific models and version tests. The action parameter is typed. Some action parameters still use a general key-value map.
