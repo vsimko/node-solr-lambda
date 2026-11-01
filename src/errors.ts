@@ -16,7 +16,7 @@ function readSolrError(payload: unknown): SolrErrorDetail | undefined {
 }
 
 export class SolrHttpError extends Error {
-  readonly solrError?: SolrErrorDetail;
+  readonly solrError: SolrErrorDetail | undefined;
 
   constructor(
     readonly status: number,
