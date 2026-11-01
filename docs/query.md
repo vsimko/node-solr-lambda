@@ -13,4 +13,16 @@ const result = await solr.query({
 });
 ```
 
-The client maps `filter`, `fields`, `limit`, and `offset` to Solr parameters `fq`, `fl`, `rows`, and `start`. Pass other Solr query parameters by name. Use Solr's JSON Request API for complex query parsers, facets, highlighting, grouping, and JSON Facet API features.
+The client maps `query`, `filter`, `fields`, `limit`, and `offset` to Solr parameters `q`, `fq`, `fl`, `rows`, and `start`. Pass other Solr query parameters by name.
+
+Use `queryJson()` to send a JSON Request API body.
+
+```ts
+const result = await solr.queryJson({
+  query: "title:typescript",
+  limit: 25,
+  fields: ["id", "title"]
+});
+```
+
+Use the JSON Request API for complex query parsers, facets, highlighting, grouping, and JSON Facet API features.
