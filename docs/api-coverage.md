@@ -1,5 +1,7 @@
 # Solr API coverage
 
+See [Client architecture](architecture.md) for the module boundaries and shared request conventions.
+
 This table tracks the v4 implementation. A generic request method does not mean that every endpoint has a typed wrapper or tested version support.
 
 | API area | Current v4 surface | Remaining work |
