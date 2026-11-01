@@ -25,9 +25,9 @@ export class SolrClient {
   }
   async request<T=unknown>(path:string,options:RequestOptions={}):Promise<T> {
     const method=options.method??"GET";
-    const input=await this.validate(method,"inputs",options.body??options.query);
+    const operation=options.operation??method;\n    const input=await this.validate(operation,"inputs",options.body??options.query);
     const url=new URL(path.replace(/^\//,""),this.config.baseUrl??DEFAULT_BASE_URL);
-    appendQuery(url,options.query);
+    appendQuery(url,options.body===undefined ? input as RequestOptions["query"] : options.query);
     const headers:Record<string,string>={
       accept:"application/json",
       ...(options.body===undefined?{}:{"content-type":"application/json"}),
@@ -39,7 +39,7 @@ export class SolrClient {
     let payload:unknown;
     if(text){try{payload=JSON.parse(text) as unknown;}catch{payload=text;}}
     if(!response.ok)throw new SolrHttpError(response.status,response.statusText,payload);
-    return await this.validate(method,"outputs",payload) as T;
+    return await this.validate(operation,"outputs",payload) as T;
   }
   private endpoint(path:string):string {
     const target=this.config.core??this.config.collection;
@@ -47,25 +47,25 @@ export class SolrClient {
     return `/solr/${encodeURIComponent(target)}${path}`;
   }
   query<T=unknown>(query:SolrQuery):Promise<T> {
-    const params:Record<string,unknown>={...query};
+    const params:Record<string,unknown>={...(query.params??{}),...query};\n    if(query.query!==undefined)params.q=query.query;
     if(query.filter!==undefined)params.fq=query.filter;
     if(query.fields!==undefined)params.fl=query.fields;
     if(query.limit!==undefined)params.rows=query.limit;
     if(query.offset!==undefined)params.start=query.offset;
-    delete params.filter;delete params.fields;delete params.limit;delete params.offset;
+    delete params.query;delete params.params;delete params.filter;delete params.fields;delete params.limit;delete params.offset;
     const flat:Record<string,string|number|boolean|readonly (string|number)[]>={};
     for(const [key,value] of Object.entries(params))if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"||(Array.isArray(value)&&value.every(x=>typeof x==="string"||typeof x==="number")))flat[key]=value as string|number|boolean|readonly (string|number)[];
-    return this.request<T>(this.endpoint("/select"),{method:"GET",query:flat});
+    return this.request<T>(this.endpoint("/select"),{method:"GET",query:flat,operation:"query"});
   }
   add<T=unknown>(documents:SolrDocument|readonly SolrDocument[]):Promise<T> {
-    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents]});
+    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents],operation:"add"});
   }
   delete<T=unknown>(command:SolrDelete):Promise<T> {
-    return this.request<T>(this.endpoint("/update"),{method:"POST",body:{delete:typeof command==="string"?{id:command}:command}});
+    return this.request<T>(this.endpoint("/update"),{method:"POST",body:{delete:typeof command==="string"?{id:command}:command},operation:"delete"});
   }
-  commit<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{commit:{}}});}
-  rollback<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{rollback:{}}});}
-  ping<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/admin/ping"));}
-  schema<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/schema"),{method:"POST",body:command});}
-  config<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/config"),{method:"POST",body:command});}
+  commit<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{commit:{}},operation:"commit"});}
+  rollback<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{rollback:{}},operation:"rollback"});}
+  ping<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/admin/ping"),{operation:"ping"});}
+  schema<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/schema"),{method:"POST",body:command,operation:"schema"});}
+  config<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/config"),{method:"POST",body:command,operation:"config"});}
 }
