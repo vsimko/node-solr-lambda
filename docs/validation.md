@@ -21,6 +21,6 @@ const solr = createSolrClient({
 });
 ```
 
-Use `inputs` to validate request data. Use `outputs` to validate response data. The operation key is the client method name. The current keys include `query`, `queryJson`, `add`, `delete`, `commit`, `rollback`, `ping`, `schema`, `config`, `coreAdmin`, `collections`, `systemInfo`, `metrics`, `security`, `stream`, and `export`. A failed check throws `SolrValidationError`. Set `onError: "ignore"` to return the original value after a failed check.
+Use `inputs` to validate request data. Use `outputs` to validate response data. The operation key is the client method name. The keys match the client method names. They include `query`, `queryJson`, `add`, `update`, `delete`, `commit`, `softCommit`, `optimize`, `rollback`, `ping`, `schema`, `config`, `coreAdmin`, `collections`, `systemInfo`, `metrics`, `security`, `stream`, and `export`. The raw `export()` response is not output-validated. A failed check throws `SolrValidationError`. Set `onError: "ignore"` to return the original value after a failed check.
 
 The application owns the schemas. This design keeps Zod out of the client's default runtime path.
