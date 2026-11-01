@@ -1,6 +1,6 @@
 # Getting started
 
-Use Node.js 20, 22, or 24. Use Apache Solr 8.x, 9.x, or 10.x.
+Use Node.js 20, 22, or 24. The v4.0 target versions are Apache Solr 8.x, 9.x, and 10.x. Real-server compatibility is not yet verified. Check the [API coverage matrix](api-coverage.md) before you depend on a Solr endpoint.
 
 Install the package:
 
