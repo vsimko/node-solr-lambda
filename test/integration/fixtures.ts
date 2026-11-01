@@ -47,6 +47,7 @@ export interface SolrCloudIntegrationFixture {
   client: SolrClient;
   clientForCollection(name: string): SolrClient;
   createCollection(prefix?: string): Promise<string>;
+  createAlias(collection: string, prefix?: string): Promise<string>;
 }
 
 /**
@@ -162,6 +163,7 @@ export function cloudIntegrationTest(
   test(name, { skip: !baseUrl || !cloudEnabled }, async () => {
     const client = new SolrClient({ baseUrl: baseUrl!, timeoutMs: 30_000 });
     const createdCollections = new Set<string>();
+    const createdAliases = new Set<string>();
     const fixture: SolrCloudIntegrationFixture = {
       client,
       clientForCollection(name) {
@@ -177,6 +179,12 @@ export function cloudIntegrationTest(
         });
         createdCollections.add(name);
         return name;
+      },
+      async createAlias(collection, prefix = "integration_alias") {
+        const name = `${prefix}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
+        await client.collections("CREATEALIAS", { name, collections: collection });
+        createdAliases.add(name);
+        return name;
       }
     };
 
@@ -184,6 +192,13 @@ export function cloudIntegrationTest(
     try {
       await run(fixture);
     } finally {
+      for (const name of createdAliases) {
+        try {
+          await client.collections("DELETEALIAS", { name });
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
       for (const name of createdCollections) {
         try {
           await client.collections("DELETE", { name });
