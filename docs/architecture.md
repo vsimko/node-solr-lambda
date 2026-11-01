@@ -6,7 +6,7 @@ The v4 client uses one HTTP transport and separate API modules. Public methods o
 
 | Module | Responsibility |
 | --- | --- |
-| `transport.ts` | Fetch, base URL resolution, Basic/Bearer authentication, headers, timeout, request defaults, retry policy, validation, JSON parsing, and HTTP errors. |
+| `transport.ts` | Fetch, base URL resolution, Basic/Bearer authentication, headers, request defaults, retries, combined caller cancellation and timeout signals, response-stream cleanup, validation, JSON parsing, and errors. |
 | `apis/query.ts` | Standard query and JSON Request API calls. |
 | `apis/update.ts` | Add, update, delete, commit, soft commit, optimize, and rollback. |
 | `apis/schema.ts` | Schema API requests. |
@@ -23,7 +23,7 @@ The v4 client uses one HTTP transport and separate API modules. Public methods o
 
 - API modules receive the shared transport and the endpoint path from the client facade.
 - API modules call `request()` for JSON responses. The transport applies headers, authentication, timeout, optional validation, JSON parsing, and `SolrHttpError` handling.
-- API modules call `requestRaw()` only when the caller needs the original Fetch `Response`, such as export.
+- API modules call `requestRaw()` only when the caller needs a raw Fetch `Response`, such as export. The transport keeps cancellation active until the response stream is consumed or cancelled.
 - Every API method sets an operation name. The validation layer uses this name to select input and output schemas.
 - API modules do not create their own Fetch instances or parse HTTP errors.
 - Keep public methods on `SolrClient` backward-compatible when changing an internal module.

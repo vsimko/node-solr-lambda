@@ -1,9 +1,18 @@
 import { Buffer } from "node:buffer";
-import { SolrHttpError, SolrNetworkError, SolrValidationError } from "./errors.js";
-import type { RequestOptions, SolrAuth, SolrClientConfig, SolrHttpMethod, SolrRequestDefaults, SolrRetryPolicy, ValidationSchema } from "./types.js";
+import { SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "./errors.js";
+import type {
+  RequestOptions, SolrAuth, SolrClientConfig, SolrHttpMethod, SolrRequestDefaults,
+  SolrRetryPolicy, ValidationSchema
+} from "./types.js";
 
 const DEFAULT_BASE_URL = "http://localhost:8983/";
 const DEFAULT_RETRY_STATUSES = [408, 429, 500, 502, 503, 504] as const;
+
+interface RequestSignalContext {
+  signal: AbortSignal;
+  cleanup(): void;
+  classify(cause?: unknown): SolrAbortError | SolrTimeoutError | undefined;
+}
 
 function appendSearchParams(target: URLSearchParams, query: RequestOptions["query"]): void {
   if (!query) return;
@@ -58,6 +67,85 @@ function parseBody(text: string): unknown {
   if (!text) return undefined;
   try { return JSON.parse(text) as unknown; }
   catch { return text; }
+}
+
+function isTimeoutError(error: unknown): boolean {
+  return error instanceof SolrTimeoutError ||
+    (error instanceof Error && error.name === "TimeoutError");
+}
+
+function createRequestSignal(callerSignal: AbortSignal | undefined, timeoutMs: number, endpoint: string): RequestSignalContext {
+  const controller = new AbortController();
+  let timedOut = false;
+  let cleaned = false;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  const abortFromCaller = (): void => controller.abort(callerSignal?.reason);
+  if (callerSignal?.aborted) abortFromCaller();
+  else callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
+
+  timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort(new SolrTimeoutError(endpoint, timeoutMs));
+  }, timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      if (cleaned) return;
+      cleaned = true;
+      if (timeout !== undefined) clearTimeout(timeout);
+      callerSignal?.removeEventListener("abort", abortFromCaller);
+    },
+    classify: (cause?: unknown) => {
+      if (callerSignal?.aborted) return new SolrAbortError(endpoint, callerSignal.reason, cause);
+      if (timedOut || controller.signal.aborted || isTimeoutError(cause)) {
+        return new SolrTimeoutError(endpoint, timeoutMs, cause);
+      }
+      return undefined;
+    }
+  };
+}
+
+function wrapResponse(response: Response, context: RequestSignalContext, endpoint: string): Response {
+  if (!response.body) {
+    context.cleanup();
+    return response;
+  }
+  context.signal.addEventListener("abort", context.cleanup, { once: true });
+  const reader = response.body.getReader();
+  const stream = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const result = await reader.read();
+        if (result.done) {
+          controller.close();
+          context.cleanup();
+        } else {
+          controller.enqueue(result.value);
+        }
+      } catch (error) {
+        const classified = context.classify(error);
+        context.cleanup();
+        controller.error(classified ?? new SolrNetworkError(endpoint, error));
+      }
+    },
+    async cancel(reason) {
+      try { await reader.cancel(reason); }
+      finally { context.cleanup(); }
+    }
+  });
+  const wrapped = new Response(stream, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers
+  });
+  Object.defineProperties(wrapped, {
+    url: { value: response.url },
+    redirected: { value: response.redirected },
+    type: { value: response.type }
+  });
+  return wrapped;
 }
 
 /** Shared HTTP transport. Domain APIs use this class for all Solr requests. */
@@ -118,6 +206,14 @@ export class SolrTransport {
     }
   }
 
+  private requestTimeout(options: RequestOptions): number {
+    const timeoutMs = options.timeoutMs ?? this.clientConfig.timeoutMs ?? 30_000;
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw new RangeError("Request timeoutMs must be a positive number");
+    }
+    return timeoutMs;
+  }
+
   private async validate(operation: string, direction: "inputs" | "outputs", value: unknown): Promise<unknown> {
     const schema: ValidationSchema | undefined = this.clientConfig.validation?.[direction]?.[operation];
     if (!schema) return value;
@@ -144,8 +240,9 @@ export class SolrTransport {
     method: SolrHttpMethod,
     headers: Record<string, string>,
     body: string | undefined,
-    callerSignal?: AbortSignal
-  ): Promise<Response> {
+    callerSignal: AbortSignal | undefined,
+    timeoutMs: number
+  ): Promise<{ response: Response; signalContext: RequestSignalContext }> {
     const policy: SolrRetryPolicy = this.clientConfig.retry === false ? {} : (this.clientConfig.retry ?? {});
     const maxAttempts = policy.maxAttempts ?? 1;
     const retryMethods = policy.methods ?? ["GET"];
@@ -153,30 +250,37 @@ export class SolrTransport {
     const retryNetworkErrors = policy.retryNetworkErrors ?? true;
     const baseDelayMs = policy.baseDelayMs ?? 100;
     const maxDelayMs = policy.maxDelayMs ?? 2_000;
+    const endpoint = endpointFor(url);
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      const signal = callerSignal ?? AbortSignal.timeout(this.clientConfig.timeoutMs ?? 30_000);
+      if (callerSignal?.aborted) throw new SolrAbortError(endpoint, callerSignal.reason);
+      const signalContext = createRequestSignal(callerSignal, timeoutMs, endpoint);
       try {
         const response = await this.requestFetch(url, {
           method,
           headers,
           ...(body === undefined ? {} : { body }),
-          signal
+          signal: signalContext.signal
         });
+        const abortError = signalContext.classify();
+        if (abortError) throw abortError;
         if (attempt < maxAttempts && retryMethods.includes(method) && retryStatuses.includes(response.status)) {
-          try { await response.body?.cancel(); } catch {}
-          const delay = Math.min(maxDelayMs, baseDelayMs * (2 ** (attempt - 1)));
-          await wait(delay);
+          try { await response.body?.cancel(); }
+          finally { signalContext.cleanup(); }
+          await wait(Math.min(maxDelayMs, baseDelayMs * (2 ** (attempt - 1))));
           continue;
         }
-        return response;
+        return { response, signalContext };
       } catch (error) {
-        if (callerSignal?.aborted) throw error;
-        if (attempt >= maxAttempts || !retryMethods.includes(method) || !retryNetworkErrors) {
-          throw new SolrNetworkError(endpointFor(url), error);
+        const classified = signalContext.classify(error);
+        signalContext.cleanup();
+        if (classified instanceof SolrAbortError) throw classified;
+        if (attempt < maxAttempts && retryMethods.includes(method) && retryNetworkErrors) {
+          await wait(Math.min(maxDelayMs, baseDelayMs * (2 ** (attempt - 1))));
+          continue;
         }
-        const delay = Math.min(maxDelayMs, baseDelayMs * (2 ** (attempt - 1)));
-        await wait(delay);
+        if (classified instanceof SolrTimeoutError) throw classified;
+        throw new SolrNetworkError(endpoint, error);
       }
     }
     throw new Error("Solr request retry loop ended unexpectedly");
@@ -199,17 +303,26 @@ export class SolrTransport {
       ...this.clientConfig.headers,
       ...options.headers
     };
-    const response = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal
+    const { response, signalContext } = await this.fetchWithRetry(
+      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal, this.requestTimeout(options)
     );
-    let body: string;
-    try { body = await response.text(); }
-    catch (error) { throw new SolrNetworkError(endpointFor(url), error); }
-    const payload = parseBody(body);
-    if (!response.ok) {
-      throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, payload);
+    try {
+      let body: string;
+      try { body = await response.text(); }
+      catch (error) {
+        const classified = signalContext.classify(error);
+        throw classified ?? new SolrNetworkError(endpointFor(url), error);
+      }
+      const abortError = signalContext.classify();
+      if (abortError) throw abortError;
+      const payload = parseBody(body);
+      if (!response.ok) {
+        throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, payload);
+      }
+      return (this.clientConfig.validation ? await this.validate(operation, "outputs", payload) : payload) as T;
+    } finally {
+      signalContext.cleanup();
     }
-    return (this.clientConfig.validation ? await this.validate(operation, "outputs", payload) : payload) as T;
   }
 
   protected endpoint(path: string): string {
@@ -230,20 +343,29 @@ export class SolrTransport {
     const headers: Record<string, string> = {
       accept: "*/*",
       ...(options.body === undefined ? {} : { "content-type": "application/json" }),
-      ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
       ...this.clientConfig.requestDefaults?.headers,
+      ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
       ...this.clientConfig.headers,
       ...options.headers
     };
-    const response = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal
+    const { response, signalContext } = await this.fetchWithRetry(
+      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal, this.requestTimeout(options)
     );
     if (!response.ok) {
-      let body: string;
-      try { body = await response.text(); }
-      catch (error) { throw new SolrNetworkError(endpointFor(url), error); }
-      throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, parseBody(body));
+      try {
+        const body = await response.text();
+        const abortError = signalContext.classify();
+        if (abortError) throw abortError;
+        throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, parseBody(body));
+      } catch (error) {
+        const classified = signalContext.classify(error);
+        if (classified) throw classified;
+        if (error instanceof SolrHttpError) throw error;
+        throw new SolrNetworkError(endpointFor(url), error);
+      } finally {
+        signalContext.cleanup();
+      }
     }
-    return response;
+    return wrapResponse(response, signalContext, endpointFor(url));
   }
 }

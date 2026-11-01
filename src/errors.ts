@@ -40,6 +40,20 @@ export class SolrNetworkError extends Error {
   }
 }
 
+export class SolrTimeoutError extends Error {
+  constructor(readonly endpoint: string, readonly timeoutMs: number, cause?: unknown) {
+    super(`Solr request to ${endpoint} timed out after ${timeoutMs} ms`, cause === undefined ? undefined : { cause });
+    this.name = "SolrTimeoutError";
+  }
+}
+
+export class SolrAbortError extends Error {
+  constructor(readonly endpoint: string, readonly reason: unknown, cause?: unknown) {
+    super(`Solr request to ${endpoint} was aborted`, cause === undefined ? { cause: reason } : { cause });
+    this.name = "SolrAbortError";
+  }
+}
+
 export class SolrValidationError extends Error {
   constructor(readonly operation: string, readonly issues: readonly { path: readonly PropertyKey[]; message: string }[]) {
     super(`Solr validation failed for ${operation}`);

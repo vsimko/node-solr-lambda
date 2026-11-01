@@ -73,11 +73,18 @@ export interface SolrResponse<T = unknown> {
   response?: { numFound?: number; start?: number; docs?: T[] };
   [key: string]: unknown;
 }
-export interface RequestOptions {
+export interface RequestControlOptions {
+  /** Cancel this request. The caller signal and timeout are combined. */
+  signal?: AbortSignal;
+  /** Override the client timeout for this request, in milliseconds. */
+  timeoutMs?: number;
+  /** Headers that apply to this request only. */
+  headers?: Readonly<Record<string, string>>;
+}
+
+export interface RequestOptions extends RequestControlOptions {
   method?: SolrHttpMethod;
   query?: URLSearchParams | Record<string, string | number | boolean | readonly (string | number)[]>;
   body?: unknown;
-  headers?: Readonly<Record<string, string>>;
-  signal?: AbortSignal;
   operation?: string;
 }
