@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -73,6 +73,66 @@ function applyHighlighting(params: Record<string, unknown>, highlighting: SolrHi
   }
 }
 
+
+function applyGrouping(params: Record<string, unknown>, grouping: SolrGroupingOptions): void {
+  params.group = grouping.enabled ?? true;
+  if (grouping.enabled === false) return;
+  if (grouping.fields !== undefined) params["group.field"] = grouping.fields;
+  if (grouping.functions !== undefined) params["group.func"] = grouping.functions;
+  if (grouping.queries !== undefined) params["group.query"] = grouping.queries;
+  if (grouping.limit !== undefined) params["group.limit"] = grouping.limit;
+  if (grouping.offset !== undefined) params["group.offset"] = grouping.offset;
+  if (grouping.sort !== undefined) params.sort = grouping.sort;
+  if (grouping.groupSort !== undefined) params["group.sort"] = grouping.groupSort;
+  if (grouping.format !== undefined) params["group.format"] = grouping.format;
+  if (grouping.main !== undefined) params["group.main"] = grouping.main;
+  if (grouping.numGroups !== undefined) params["group.ngroups"] = grouping.numGroups;
+  if (grouping.truncate !== undefined) params["group.truncate"] = grouping.truncate;
+  if (grouping.facet !== undefined) params["group.facet"] = grouping.facet;
+  if (grouping.facetLimit !== undefined) params["group.facet.limit"] = grouping.facetLimit;
+  if (grouping.cachePercent !== undefined) params["group.cache.percent"] = grouping.cachePercent;
+}
+
+function applyExpand(params: Record<string, unknown>, expand: SolrExpandOptions): void {
+  params.expand = expand.enabled ?? true;
+  if (expand.enabled === false) return;
+  if (expand.field !== undefined) params["expand.field"] = expand.field;
+  if (expand.sort !== undefined) params["expand.sort"] = expand.sort;
+  if (expand.rows !== undefined) params["expand.rows"] = expand.rows;
+  if (expand.query !== undefined) params["expand.q"] = expand.query;
+  if (expand.filter !== undefined) params["expand.fq"] = expand.filter;
+  if (expand.nullGroup !== undefined) params["expand.nullGroup"] = expand.nullGroup;
+}
+
+function quoteLocalParam(value: string): string {
+  return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+}
+
+function serializeCollapse(options: SolrCollapseOptions): string {
+  if (options.field.trim() === "") throw new TypeError("collapse field must be a non-empty string");
+  const selectors = [options.min, options.max, options.sort].filter(value => value !== undefined);
+  if (selectors.length > 1) throw new TypeError("collapse accepts only one of min, max, or sort");
+  if (options.min !== undefined && options.min.trim() === "") throw new TypeError("collapse min must be a non-empty string");
+  if (options.max !== undefined && options.max.trim() === "") throw new TypeError("collapse max must be a non-empty string");
+  if (options.sort !== undefined && options.sort.trim() === "") throw new TypeError("collapse sort must be a non-empty string");
+  if (options.size !== undefined && (!Number.isInteger(options.size) || options.size < 0)) {
+    throw new TypeError("collapse size must be a non-negative integer");
+  }
+  if (options.cost !== undefined && (!Number.isFinite(options.cost) || options.cost < 0)) {
+    throw new TypeError("collapse cost must be a non-negative number");
+  }
+
+  const params = [`field=${quoteLocalParam(options.field)}`];
+  if (options.min !== undefined) params.push(`min=${quoteLocalParam(options.min)}`);
+  if (options.max !== undefined) params.push(`max=${quoteLocalParam(options.max)}`);
+  if (options.sort !== undefined) params.push(`sort=${quoteLocalParam(options.sort)}`);
+  if (options.nullPolicy !== undefined) params.push(`nullPolicy=${options.nullPolicy}`);
+  if (options.hint !== undefined) params.push(`hint=${options.hint}`);
+  if (options.size !== undefined) params.push(`size=${options.size}`);
+  if (options.cost !== undefined) params.push(`cost=${options.cost}`);
+  return `{!collapse ${params.join(" ")}}`;
+}
+
 function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassicFacetOptions): void {
   params.facet = facets.enabled ?? true;
   if (facets.enabled === false) return;
@@ -131,6 +191,15 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.offset !== undefined) params.start = query.offset;
   if (query.facets !== undefined) applyClassicFacets(params, query.facets);
   if (query.highlighting !== undefined) applyHighlighting(params, query.highlighting);
+  if (query.grouping !== undefined) applyGrouping(params, query.grouping);
+  if (query.expand !== undefined) applyExpand(params, query.expand);
+  if (query.collapse !== undefined) {
+    const filters = query.filter === undefined
+      ? (Array.isArray(params.fq) ? params.fq.filter((value): value is string => typeof value === "string") : typeof params.fq === "string" ? [params.fq] : [])
+      : Array.isArray(query.filter) ? query.filter.map(filter => serializeFilter(filter)) : [serializeFilter(query.filter as SolrFilter)];
+    filters.push(serializeCollapse(query.collapse));
+    params.fq = filters.length === 1 ? filters[0] : filters;
+  }
   if (query.parserOptions !== undefined) {
     const { type: _parserType, ...parserOptions } = query.parserOptions;
     Object.assign(params, parserOptions);
@@ -144,6 +213,9 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.parserOptions;
   delete params.facets;
   delete params.highlighting;
+  delete params.grouping;
+  delete params.collapse;
+  delete params.expand;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" ||
