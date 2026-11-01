@@ -160,17 +160,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
-        "test/client.test.ts"
+        "test/client.test.ts",
+        "test/integration/solr-update-lifecycle.test.ts"
       ],
-      "notes": "Uses the commit update command with softCommit enabled."
+      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "update.optimize",
@@ -202,17 +203,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
-        "test/client.test.ts"
+        "test/client.test.ts",
+        "test/integration/solr-update-lifecycle.test.ts"
       ],
-      "notes": "Action and response behavior need versioned integration evidence."
+      "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "admin.ping",
@@ -223,18 +225,19 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
-        "test/cancellation.test.ts"
+        "test/cancellation.test.ts",
+        "test/integration/solr-core-lifecycle.test.ts"
       ],
-      "notes": "Health check response models remain generic."
+      "notes": "Ping response status OK is asserted on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "schema.api",
@@ -245,17 +248,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/schema.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-schema.test.ts"
       ],
-      "notes": "Command and response models remain generic."
+      "notes": "Schema API add-field and GET /schema/fields read-back are exercised on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup deletes the field."
     },
     {
       "id": "config.api",
@@ -266,17 +270,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/config.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-config-security.test.ts"
       ],
-      "notes": "Command and response models remain generic."
+      "notes": "Config API set-user-property is exercised on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property. Security payloads are test data only and the live security endpoint remains unverified."
     },
     {
       "id": "admin.core",
@@ -287,17 +292,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
-        "test/admin.test.ts"
+        "test/admin.test.ts",
+        "test/integration/solr-core-lifecycle.test.ts"
       ],
-      "notes": "Action names are a literal union; action-specific parameter and response models remain incomplete."
+      "notes": "CoreAdmin CREATE, STATUS, and RELOAD are exercised with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them."
     },
     {
       "id": "admin.collections",
