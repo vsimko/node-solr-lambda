@@ -17,10 +17,10 @@ const querySchema = z.object({ q: z.string().min(1) });
 const responseSchema = z.object({ response: z.object({ numFound: z.number() }) });
 const solr = createSolrClient({
   core: "catalog",
-  validation: { inputs: { GET: querySchema }, outputs: { GET: responseSchema }, onError: "throw" }
+  validation: { inputs: { query: querySchema }, outputs: { query: responseSchema }, onError: "throw" }
 });
 ```
 
-Use `inputs` to validate request data. Use `outputs` to validate response data. The operation key is the HTTP method. A failed check throws `SolrValidationError`. Set `onError: "ignore"` to return the original value after a failed check.
+Use `inputs` to validate request data. Use `outputs` to validate response data. The operation key is the client method name. The current keys include `query`, `queryJson`, `add`, `delete`, `commit`, `rollback`, `ping`, `schema`, `config`, `coreAdmin`, `collections`, `systemInfo`, `metrics`, `security`, `stream`, and `export`. A failed check throws `SolrValidationError`. Set `onError: "ignore"` to return the original value after a failed check.
 
 The application owns the schemas. This design keeps Zod out of the client's default runtime path.
