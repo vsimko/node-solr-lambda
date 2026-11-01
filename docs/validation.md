@@ -25,6 +25,18 @@ Use `inputs` to validate request data. Use `outputs` to validate response data. 
 
 The application owns the schemas. This design keeps Zod out of the client's default runtime path.
 
+## Validation behavior
+
+- If validation is not configured, the client does not call a schema parser.
+- If no schema exists for an operation and direction, the value passes through unchanged.
+- The client awaits `safeParseAsync()`. Async refinements are supported.
+- A schema rejection throws `SolrValidationError` with the operation and issue list.
+- If a schema parser itself throws, the client throws `SolrValidationError` with the original exception in `cause`. The issue list is empty because the parser did not return a validation result.
+- `onError: "ignore"` returns the original value after a normal schema rejection. It does not suppress exceptions thrown by the schema parser.
+
+Use the `cause` property to diagnose schema implementation errors. Use `issues` to display input or output validation messages.
+
+
 ## Verify an install without Zod
 
 The CI workflow builds the package, packs it, installs it into a clean temporary consumer without Zod, and imports the public client. This checks that the default package entry point does not require Zod at runtime.

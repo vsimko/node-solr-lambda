@@ -217,7 +217,12 @@ export class SolrTransport {
   private async validate(operation: string, direction: "inputs" | "outputs", value: unknown): Promise<unknown> {
     const schema: ValidationSchema | undefined = this.clientConfig.validation?.[direction]?.[operation];
     if (!schema) return value;
-    const result = await schema.safeParseAsync(value);
+    let result: Awaited<ReturnType<ValidationSchema["safeParseAsync"]>>;
+    try {
+      result = await schema.safeParseAsync(value);
+    } catch (cause) {
+      throw new SolrValidationError(operation, [], cause);
+    }
     if (result.success) return result.data;
     if (this.clientConfig.validation?.onError === "ignore") return value;
     throw new SolrValidationError(operation, result.error.issues);

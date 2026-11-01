@@ -8,7 +8,7 @@ This table tracks the v4 implementation. A generic request method does not mean 
 | --- | --- | --- |
 | Client transport | Typed base URL, core/collection, Basic/Bearer auth, headers, client and per-request timeouts, AbortSignal controls, custom fetch, request defaults, and opt-in retries | Advanced auth mechanisms and retry telemetry. |
 | Errors | `SolrHttpError`, `SolrNetworkError`, `SolrTimeoutError`, `SolrAbortError`, and `SolrValidationError` | Solr-version-specific error payloads still need integration evidence. |
-| Validation | Optional input/output schema interface; optional Zod peer; disabled by default | Additional schema adapters and operation-specific schema examples. |
+| Validation | Optional input/output schema interface; optional Zod peer; async parsing; rejection and thrown-parser errors; disabled by default | Additional schema adapters and operation-specific schema examples. |
 | Standard Query | `query()`, `queryJson()` | Typed parsers, facets, highlighting, grouping, stats, cursors, JSON Facet models, version tests. |
 | Update / Documents | `add()`, `delete()`, `commit()`, `rollback()` | Atomic update models, soft commit options, optimize, extract, update parameter coverage. |
 | Schema | `schema(command)` | Typed field, dynamic field, field type, copy field and schema response models. |
