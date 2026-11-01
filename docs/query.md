@@ -7,7 +7,10 @@ Use `query()` to send a standard Solr query request. Common options are typed di
 ```ts
 const result = await solr.query({
   query: "title:typescript",
-  filter: ["status:published", "language:en"],
+  filter: [
+    "status:published",
+    { query: "category:books", tag: "category" }
+  ],
   fields: ["id", "title"],
   sort: solrSort(
     { expression: "publishedAt", direction: "desc" },
@@ -20,6 +23,37 @@ const result = await solr.query({
   wt: "json"
 });
 ```
+
+## Filter queries, tags, and local parameters
+
+The `filter` property accepts one filter or an array. Arrays are sent as repeated `fq` parameters; raw strings remain unchanged. Structured filters support tags and Solr filter-cache hints:
+
+```ts
+await solr.query({
+  query: "*:*",
+  filter: [
+    { query: "category:books", tag: "category" },
+    { query: "inStock:true", tag: ["stock", "availability"] },
+    { query: "price:[10 TO 50]", cache: false, cost: 25 }
+  ]
+});
+```
+
+The structured filter serializes to Solr local params, for example `{!tag=category}`, `cache=false`, and `cost=25`. Additional filter-local parameters can be supplied through `localParams`; use raw strings or `solrLocalParams()` when you need syntax outside the structured properties.
+
+Tagged filters can be excluded from supported Solr components or parsers by passing their tags through the relevant `excludeTags` parameter. The `solrExcludeTags()` helper joins tag names for those parameter values:
+
+```ts
+import { solrExcludeTags } from "node-solr-lambda";
+
+await solr.query({
+  query: "*:*",
+  filter: [{ query: "category:books", tag: "category" }],
+  params: { "facet.excludeTags": solrExcludeTags("category") }
+});
+```
+
+Solr local parameters are scoped to the query parameter they prefix. For example, `excludeTags` used by a parser belongs in that parser's local-params prefix; facet or query-elevation exclusion uses the corresponding request parameter. This client does not reinterpret or globally apply exclusions.
 
 ## Sort, field-list, and expression helpers
 
@@ -42,20 +76,19 @@ const fields = solrFields(
   "[explain]"
 );
 
-// Equivalent single-item alias helper:
 const priceField = solrFieldAlias("sales_price", "price");
-
-// Local params are prefixed to the query value; values with whitespace are quoted.
 const query = solrLocalParams({ type: "lucene", df: "title", "q.op": "AND" }, "distributed search");
 
 await solr.query({ query, sort, fields });
 ```
 
-- `solrSort()` accepts structured `{ expression, direction }` clauses or raw Solr sort strings. Function-based sorts are supported through `expression` or raw strings.
+- `solrSort()` accepts structured `{ expression, direction }` clauses or raw Solr sort strings.
 - `solrFields()` accepts raw field-list items or `{ alias, expression }` entries. Raw items retain support for wildcards, functions, and document transformers.
 - `solrFieldAlias(alias, expression)` returns Solr's `displayName:expression` syntax.
 - `solrFunction(name, ...args)` builds function-call expressions and can be nested.
-- `solrLocalParams(params, value?)` creates a `{!...}` prefix and can append the associated query value. Local-param values containing whitespace or quotes are escaped.
+- `solrLocalParams(params, value?)` creates a `{!...}` prefix and can append the associated query value.
+- `solrFilter(query, options)` builds a structured filter with tags, cache/cost hints, and additional local parameters.
+- `solrExcludeTags(...tags)` joins tags for Solr parameters that accept comma-separated exclusions.
 
 These helpers only compose request strings. Solr validates field names, functions, local parameters, sortability, and transformer availability at query time. Keep raw strings when using Solr syntax not represented by the structured helpers.
 
