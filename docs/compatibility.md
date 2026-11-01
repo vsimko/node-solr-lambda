@@ -15,14 +15,14 @@ Documentation evidence does not prove that every patch release behaves in the sa
 | Solr line | Documentation baseline | Documentation |
 | --- | --- | --- |
 | 8.x | 8.11 | [Solr 8.11 Reference Guide](https://solr.apache.org/guide/8_11/index.html) |
-| 9.x | 9.10 | [Solr 9.10 Reference Guide](https://solr.apache.org/guide/solr/9_10/index.html) |
+| 9.x | 9.11 | [Solr 9.11 Reference Guide](https://solr.apache.org/guide/solr/9_11/index.html) |
 | 10.x | 10.1 | [Solr 10.1 Reference Guide](https://solr.apache.org/guide/solr/10_1/) |
 
-The 8.11, 9.10, and 10.1 guides describe the API families below. These baselines are references for review. They do not define a minimum supported patch release.
+The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines are references for review. They do not define a minimum supported patch release.
 
 ## Endpoint matrix
 
-| Client operation | Solr 8.11 docs | Solr 9.10 docs | Solr 10.1 docs | Runtime test |
+| Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
 | `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Basic smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Unverified |
@@ -52,7 +52,7 @@ Solr 8.11 introduced additional authentication and authorization plugins, includ
 
 ### Solr 9.x
 
-Use the 9.10 guide as the documentation baseline. It documents both V1 and V2 API surfaces for several administration and configuration areas.
+Use the 9.11 guide as the documentation baseline. It documents both V1 and V2 API surfaces for several administration and configuration areas.
 
 The current client uses the V1 paths for CoreAdmin and Collections operations. Do not assume that V1 and V2 request paths or response shapes are interchangeable.
 
@@ -116,6 +116,6 @@ Do not mark a row as supported until the relevant integration test passes. Recor
 ## Reference notes
 
 - [Solr 8.11.4 release notes](https://solr.apache.org/docs/8_11_4/changes/Changes.html) record the final 8.11 patch release and security-related changes.
-- [Solr 9.10.1 release notes](https://solr.apache.org/docs/9_10_1/changes/Changes.html) record V2 API additions and changes in the 9.10 line.
+- [Solr 9.11.1 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) record V2 API additions and changes in the 9.11 line.
 - [Solr 10.1 upgrade notes](https://solr.apache.org/guide/solr/10_1/upgrade-notes/major-changes-in-solr-10.html) describe the V2 API, PKI authentication, and JWT default changes.
 - [Solr 10.1 release notes](https://solr.apache.org/docs/10_1_0/changes/Changes.html) record release-specific changes.
