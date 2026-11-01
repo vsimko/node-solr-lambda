@@ -1,6 +1,8 @@
 # Query API
 
-Use `query()` to send a standard Solr query request.
+Use `query()` to send a standard Solr query request. Common options are typed directly on the query object; parser-specific options are grouped under `parserOptions` and flattened into Solr request parameters.
+
+## Standard query
 
 ```ts
 const result = await solr.query({
@@ -12,20 +14,50 @@ const result = await solr.query({
   offset: 0,
   defType: "edismax",
   "q.op": "AND",
-  wt: "json",
-  params: {
-    "facet.field": "category"
+  wt: "json"
+});
+```
+
+## eDisMax
+
+```ts
+const result = await solr.query({
+  query: "typescript solr client",
+  defType: "edismax",
+  parserOptions: {
+    type: "edismax",
+    qf: "title^10 description",
+    pf: "title^20",
+    pf2: "title description",
+    mm: "2<75%",
+    tie: 0.1,
+    "mm.autoRelax": true,
+    uf: "* -internal"
   }
 });
 ```
 
-The client maps `query`, `filter`, `fields`, `limit`, and `offset` to Solr parameters `q`, `fq`, `fl`, `rows`, and `start`. The `defType`, `q.op`, and `wt` properties are also typed and available through IDE completion. Built-in parser and response-writer values are suggested, while custom names remain accepted for Solr plugins.
+## DisMax and Lucene
 
-The `params` property is the explicit escape hatch for additional Solr query parameters that do not yet have a dedicated option type. Unknown top-level properties are rejected by TypeScript, which catches common spelling mistakes instead of silently accepting them.
+```ts
+await solr.query({
+  query: "distributed search",
+  defType: "dismax",
+  parserOptions: { type: "dismax", qf: "title^2 body", mm: "2", tie: 0.1 }
+});
 
-The broader autocomplete-first work, including parser-specific nested options, facets, highlighting, grouping, and response sections, is tracked in [Issue #121](https://github.com/vsimko/node-solr-lambda/issues/121) and the [development roadmap](roadmap.md).
+await solr.query({
+  query: "title:distributed",
+  defType: "lucene",
+  parserOptions: { type: "lucene", df: "text", sow: true }
+});
+```
 
-Use `queryJson()` to send a JSON Request API body. The current method accepts a generic object; dedicated typed models for common JSON Request API structures are part of the query API roadmap.
+The `type` discriminator selects the TypeScript option set and is not sent to Solr. The option keys themselves are serialized using Solr's parameter names (including dotted names such as `mm.autoRelax`). Set `defType` to the same parser as `parserOptions.type`; TypeScript intentionally keeps these separate so custom parser names remain supported. For Solr-specific or plugin-specific parameters not yet modelled, use the explicit `params` property. Parser parameters are documented by the [Solr Reference Guide](https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html); verify parser availability and behavior against the Solr version you deploy.
+
+The client maps `query`, `filter`, `fields`, `limit`, and `offset` to `q`, `fq`, `fl`, `rows`, and `start`. Unknown top-level properties are rejected by TypeScript.
+
+Use `queryJson()` to send a JSON Request API body. The current method accepts a generic object; dedicated typed models for common JSON Request API structures remain separate work.
 
 ```ts
 const result = await solr.queryJson({
@@ -34,5 +66,3 @@ const result = await solr.queryJson({
   fields: ["id", "title"]
 });
 ```
-
-Use the JSON Request API for complex query parsers, facets, highlighting, grouping, and JSON Facet API features.

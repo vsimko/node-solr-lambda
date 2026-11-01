@@ -68,12 +68,57 @@ export type SolrQueryOperator = "AND" | "OR";
 /** Common Solr response writers. Custom writer names remain accepted. */
 export type SolrResponseWriter = "json" | "xml" | "csv" | "javabin" | (string & {});
 
+export type SolrQueryParamValue = string | number | boolean | readonly (string | number)[];
+
+/** Parameters accepted by Solr's standard Lucene query parser. */
+export interface SolrLuceneQueryOptions {
+  type: "lucene";
+  df?: string;
+  sow?: boolean;
+  uf?: string;
+}
+
+/** Parameters accepted by Solr's DisMax query parser. */
+export interface SolrDisMaxQueryOptions {
+  type: "dismax";
+  qf?: string;
+  mm?: string;
+  tie?: number;
+  bq?: string | readonly string[];
+  bf?: string | readonly string[];
+  pf?: string;
+  ps?: number;
+  qs?: number;
+  "q.alt"?: string;
+}
+
+/** Parameters accepted by Solr's Extended DisMax query parser. */
+export interface SolrExtendedDisMaxQueryOptions extends Omit<SolrDisMaxQueryOptions, "type"> {
+  type: "edismax";
+  pf2?: string;
+  pf3?: string;
+  ps2?: number;
+  ps3?: number;
+  boost?: string;
+  uf?: string;
+  sow?: boolean;
+  lowercaseOperators?: boolean;
+  stopwords?: boolean;
+  splitOnWhitespace?: boolean;
+  "mm.autoRelax"?: boolean;
+}
+
+/** Parser-specific parameters. The type discriminator is not sent to Solr. */
+export type SolrQueryParserOptions =
+  | SolrLuceneQueryOptions
+  | SolrDisMaxQueryOptions
+  | SolrExtendedDisMaxQueryOptions;
+
 /**
  * Options for the standard /select query handler.
  *
- * Use the named properties for common Solr parameters so IDEs can provide
- * completion and catch misspellings. Put additional Solr parameters in the
- * params property; arbitrary top-level keys are intentionally rejected.
+ * Use parserOptions for discoverable parser-specific parameters. Put additional
+ * Solr parameters in params; arbitrary top-level keys are intentionally rejected.
  */
 export interface SolrQuery {
   /** Query expression, serialized as Solr's q parameter. */
@@ -90,12 +135,14 @@ export interface SolrQuery {
   offset?: number;
   /** Query parser name, serialized as defType. */
   defType?: SolrQueryParser;
+  /** Parser-specific options, flattened into individual Solr request parameters. */
+  parserOptions?: SolrQueryParserOptions;
   /** Boolean query operator, serialized as q.op. */
   "q.op"?: SolrQueryOperator;
   /** Response writer, serialized as wt. */
   wt?: SolrResponseWriter;
   /** Additional Solr parameters not yet exposed as dedicated options. */
-  params?: Readonly<Record<string, string | number | boolean | readonly (string | number)[]>>;
+  params?: Readonly<Record<string, SolrQueryParamValue>>;
 }
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };

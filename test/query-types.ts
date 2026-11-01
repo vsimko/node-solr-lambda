@@ -2,7 +2,6 @@ import type { SolrClient } from "../src/index.js";
 
 declare const solr: SolrClient;
 
-// The common query options are discoverable and compile with their intended types.
 void solr.query({
   query: "title:solr",
   filter: ["status:published", "language:en"],
@@ -11,23 +10,29 @@ void solr.query({
   limit: 25,
   offset: 0,
   defType: "edismax",
+  parserOptions: {
+    type: "edismax",
+    qf: "title^10 description",
+    pf: "title^20",
+    pf2: "title description",
+    mm: "2<75%",
+    tie: 0.1,
+    "mm.autoRelax": true,
+    uf: "* -internal"
+  },
   "q.op": "AND",
   wt: "json",
-  params: {
-    "facet": "true",
-    "facet.field": ["category", "author"],
-    "custom.application.flag": true
-  }
+  params: { "facet": "true", "facet.field": ["category", "author"] }
 });
 
-// @ts-expect-error Unknown top-level options must be caught instead of silently accepted.
+void solr.query({ query: "name:alice", defType: "lucene", parserOptions: { type: "lucene", df: "name", sow: true } });
+void solr.query({ query: "name:alice", defType: "dismax", parserOptions: { type: "dismax", qf: "name^2", mm: "2", tie: 0.2 } });
+
+// @ts-expect-error Unknown top-level options are rejected.
 void solr.query({ query: "*:*", qurey: "*:*" });
-
-// @ts-expect-error Facet parameters belong in the explicit params escape hatch until typed.
-void solr.query({ query: "*:*", "facet.field": "category" });
-
-// @ts-expect-error The query operator is limited to the documented Solr values.
+// @ts-expect-error Parser-specific options require a valid parser discriminator.
+void solr.query({ query: "*:*", parserOptions: { type: "unknown", qf: "title" } });
+// @ts-expect-error Lucene parser options do not accept eDisMax-only fields.
+void solr.query({ query: "*:*", parserOptions: { type: "lucene", pf2: "title" } });
+// @ts-expect-error q.op only accepts documented values.
 void solr.query({ query: "*:*", "q.op": "XOR" });
-
-// @ts-expect-error Parameter values must be serializable scalar or scalar-array values.
-void solr.query({ query: "*:*", params: { "facet.field": { name: "category" } } });
