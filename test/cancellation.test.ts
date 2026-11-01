@@ -20,6 +20,21 @@ test("client timeout aborts a pending request with SolrTimeoutError", async () =
   });
 });
 
+test("timeout remains active while a JSON response body is being read", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    timeoutMs: 10,
+    fetch: async (_input, init) => new Response(new ReadableStream<Uint8Array>({
+      start(streamController) {
+        const signal = init?.signal;
+        signal?.addEventListener("abort", () => streamController.error(signal.reason), { once: true });
+      }
+    }))
+  });
+
+  await assert.rejects(client.ping(), SolrTimeoutError);
+});
+
 test("per-request timeout overrides the client timeout", async () => {
   const client = createSolrClient({
     core: "catalog",
