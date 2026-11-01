@@ -34,7 +34,7 @@ export interface SolrIntegrationFixture {
   addDocuments(documents: readonly (SolrDocument & { id: string })[]): Promise<void>;
   commit(): Promise<void>;
   createCore(prefix?: string): Promise<string>;
-  addSchemaField(name: string, type?: string): Promise<void>;
+  addSchemaField(name: string, type?: string, docValues?: boolean): Promise<void>;
   setUserProperty(name: string, value: string | number | boolean): Promise<void>;
   securityData: SolrSecurityFixtureData;
 }
@@ -77,8 +77,8 @@ export function integrationTest(
         createdCores.add(name);
         return name;
       },
-      async addSchemaField(name, type = "string") {
-        await client.schema({ "add-field": { name, type, stored: true, indexed: true } });
+      async addSchemaField(name, type = "string", docValues = false) {
+        await client.schema({ "add-field": { name, type, stored: true, indexed: true, docValues } });
         schemaFields.add(name);
       },
       async setUserProperty(name, value) {
