@@ -139,3 +139,41 @@ cloudIntegrationTest("Collections API adds, balances, and deletes replica proper
   });
   assert.equal(balanced.responseHeader?.status, 0, "BALANCESHARDUNIQUE should succeed");
 });
+
+cloudIntegrationTest("Collections API moves a replica between live SolrCloud nodes", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection("integration_move", 1);
+  type Replica = { state?: string; node_name?: string; leader?: string };
+  type ClusterStatus = {
+    cluster?: {
+      live_nodes?: string[];
+      collections?: Record<string, {
+        shards?: Record<string, { replicas?: Record<string, Replica> }>;
+      }>;
+    };
+  };
+
+  const before = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const liveNodes = before.cluster?.live_nodes ?? [];
+  assert.ok(liveNodes.length >= 2, "multi-node SolrCloud should report at least two live nodes");
+  const replicas = before.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  const [replicaName, replica] = Object.entries(replicas)[0] ?? [];
+  assert.ok(replicaName && replica?.node_name, "fixture should expose the source replica and node");
+  const targetNode = liveNodes.find(node => node !== replica.node_name);
+  assert.ok(targetNode, "a live target node distinct from the source should exist");
+
+  await client.collections("MOVEREPLICA", {
+    collection,
+    replica: replicaName,
+    targetNode,
+    timeout: 120
+  });
+
+  const after = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const movedReplicas = after.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  const activeReplicas = Object.values(movedReplicas).filter(item => item.state === "active");
+  assert.equal(activeReplicas.length, 1, "move should leave exactly one active replica");
+  assert.equal(activeReplicas[0]?.node_name, targetNode, "replica should be active on the requested target node");
+}, true);
