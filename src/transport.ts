@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import { SolrHttpError, SolrValidationError } from "./errors.js";
-import type { RequestOptions, SolrAuth, SolrClientConfig, SolrHttpMethod, SolrRetryPolicy, ValidationSchema } from "./types.js";
+import type { RequestOptions, SolrAuth, SolrClientConfig, SolrHttpMethod, SolrRequestDefaults, SolrRetryPolicy, ValidationSchema } from "./types.js";
 
 const DEFAULT_BASE_URL = "http://localhost:8983/";
 const DEFAULT_RETRY_STATUSES = [408, 429, 500, 502, 503, 504] as const;
