@@ -5,7 +5,7 @@ This page records the current client compatibility policy. It separates document
 ## Status terms
 
 - **Documented** means the endpoint or feature appears in the official reference guide for the listed Solr documentation baseline.
-- **Unverified** means this repository has not run an integration test against that Solr server version.
+- **Tested** means the exact behavior named in the runtime-test column passed against the pinned Docker image for that Solr line; it does not certify other parameters or actions.\n- **Unverified** means this repository has not run an integration test for that operation against that Solr server version.
 - **Not covered** means the current typed client does not provide a dedicated method for that endpoint.
 
 Documentation evidence does not prove that every patch release behaves in the same way.
@@ -24,10 +24,10 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
-| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Basic query and cursorMark pagination tests on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query and cursorMark pagination on pinned 8.11.4 / 9.11.0 / 10.1.0 images; other query options remain unverified |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Unverified |
-| `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Add/delete smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Commit smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images; remaining commands unverified |
+| `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Tested: add, full-document update, and delete by ID on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit with waitSearcher on pinned 8.11.4 / 9.11.0 / 10.1.0 images; soft commit, optimize, and rollback remain unverified |
 | `ping()` — `/admin/ping` | Documented | Documented | Documented | Unverified |
 | `schema()` — `/schema` | Documented | Documented | Documented | Unverified |
 | `config()` — `/config` | Documented | Documented | Documented | Unverified |
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs a health check plus update/query/delete and cursorMark multi-page tests on Node.js 22:
+CI starts pinned official Solr images and runs a health check plus add/update/delete, hard-commit, basic-query, and cursorMark multi-page tests on Node.js 22:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -94,7 +94,7 @@ Run the same suite locally after starting a Solr container and creating an isola
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
 ```
 
-These tests establish that the service starts, basic document/query operations work, and cursorMark pagination returns all matching documents across pages on the pinned image. They do not certify every endpoint or action in the compatibility matrix.
+These tests establish that the service starts, document add/update/delete and hard commit work, basic queries return matching documents, and cursorMark pagination returns all matching documents across pages on each pinned image. They do not certify every endpoint, query option, update command, or action in the compatibility matrix.
 
 ## Required integration evidence
 
