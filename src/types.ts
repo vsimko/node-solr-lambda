@@ -12,7 +12,7 @@ export interface AddReplicaParams {
   /** Additional Collections API parameters not modelled here. */
   customParams?: SolrAdminParams;
   /** Target collection. */
-  collection?: string;
+  collection: string;
   /** Target shard; omit when the collection has a single shard. */
   shard?: string;
   /** Optional explicit replica name. */
@@ -34,11 +34,11 @@ export interface DeleteReplicaParams {
   /** Additional Collections API parameters not modelled here. */
   customParams?: SolrAdminParams;
   /** Target collection. */
-  collection?: string;
+  collection: string;
   /** Target shard. */
-  shard?: string;
+  shard: string;
   /** Replica name to remove. */
-  replica?: string;
+  replica: string;
   /** Delete the replica's instance directory from its node. */
   deleteInstanceDir?: boolean;
   /** Delete the replica's data directory from its node. */
@@ -50,16 +50,19 @@ export interface DeleteReplicaParams {
 }
 
 /** Parameters for Collections API MOVEREPLICA. */
-export interface MoveReplicaParams {
+export interface MoveReplicaBaseParams {
   collection: string;
   targetNode: string;
-  replica?: string;
-  sourceNode?: string;
-  shard?: string;
   timeout?: number;
   inPlaceMove?: boolean;
   async?: string;
 }
+
+/** A move identifies either one replica or a source node and shard. */
+export type MoveReplicaParams = MoveReplicaBaseParams & (
+  | { replica: string; sourceNode?: never; shard?: never }
+  | { replica?: never; sourceNode: string; shard: string }
+);
 
 /** Parameters for Collections API BALANCESHARDUNIQUE. */
 export interface BalanceShardUniqueParams {
