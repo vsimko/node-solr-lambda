@@ -218,6 +218,10 @@ cloudIntegrationTest("Collections API rebalances a shard leader to its preferred
   });
   assert.equal(propertyResult.responseHeader?.status, 0, "preferredLeader property should be assigned");
 
+  // Replica properties are written to ZooKeeper; allow the cluster-state watchers
+  // on the Solr nodes to observe the preferredLeader change before rebalancing.
+  await new Promise(resolve => setTimeout(resolve, 500));
+
   const rebalanceResult = await client.collections<{ responseHeader?: { status?: number } }>("REBALANCELEADERS", {
     collection,
     maxAtOnce: 1,
@@ -225,11 +229,17 @@ cloudIntegrationTest("Collections API rebalances a shard leader to its preferred
   });
   assert.equal(rebalanceResult.responseHeader?.status, 0, "REBALANCELEADERS should succeed");
 
-  const after = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
-  const replicasAfterRebalance = after.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  let preferredReplicaIsLeader = false;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const after = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+    const replicasAfterRebalance = after.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+    preferredReplicaIsLeader = isLeader(replicasAfterRebalance[preferredReplicaName] ?? {});
+    if (preferredReplicaIsLeader) break;
+    await new Promise(resolve => setTimeout(resolve, 250));
+  }
   assert.equal(
-    isLeader(replicasAfterRebalance[preferredReplicaName] ?? {}),
+    preferredReplicaIsLeader,
     true,
-    "preferred active replica should become the shard leader"
+    "preferred active replica should become the shard leader within five seconds"
   );
 }, true);
