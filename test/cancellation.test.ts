@@ -26,7 +26,7 @@ test("timeout remains active while a JSON response body is being read", async ()
     timeoutMs: 10,
     fetch: async (_input, init) => new Response(new ReadableStream<Uint8Array>({
       start(streamController) {
-        const signal = init?.signal;
+        const signal = init?.signal ?? undefined;
         signal?.addEventListener("abort", () => streamController.error(signal.reason), { once: true });
       }
     }))
@@ -82,7 +82,7 @@ test("successful JSON requests clear the timeout", async () => {
     core: "catalog",
     timeoutMs: 10,
     fetch: async (_input, init) => {
-      signal = init?.signal;
+      signal = init?.signal ?? undefined;
       return new Response(JSON.stringify({ status: "ok" }));
     }
   });
@@ -100,7 +100,7 @@ test("raw export keeps cancellation active while its body is consumed", async ()
     timeoutMs: 1000,
     fetch: async (_input, init) => new Response(new ReadableStream<Uint8Array>({
       start(streamController) {
-        const signal = init?.signal;
+        const signal = init?.signal ?? undefined;
         signal?.addEventListener("abort", () => streamController.error(signal.reason), { once: true });
       }
     }))
@@ -119,7 +119,7 @@ test("raw export clears timeout when the response body is consumed", async () =>
     core: "catalog",
     timeoutMs: 10,
     fetch: async (_input, init) => {
-      signal = init?.signal;
+      signal = init?.signal ?? undefined;
       return new Response("id\n1\n");
     }
   });
