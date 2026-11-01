@@ -97,3 +97,56 @@ cloudIntegrationTest("Collections API adds and deletes a named replica", async (
     "DELETEREPLICA should remove only the named replica"
   );
 });
+
+
+cloudIntegrationTest("Collections API adds, balances, and deletes replica properties", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection();
+  type Replica = Record<string, unknown>;
+  type ClusterStatus = {
+    cluster?: {
+      collections?: Record<string, {
+        shards?: Record<string, { replicas?: Record<string, Replica> }>;
+      }>;
+    };
+  };
+  const readReplicas = async () => {
+    const status = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+    return status.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  };
+
+  const initial = await readReplicas();
+  const replica = Object.keys(initial)[0];
+  assert.ok(replica, "fixture collection should expose its initial replica");
+
+  await client.collections("ADDREPLICAPROP", {
+    collection,
+    shard: "shard1",
+    replica,
+    property: "integrationFlag",
+    "property.value": "enabled"
+  });
+  const withProperty = await readReplicas();
+  assert.equal(withProperty[replica]?.["property.integrationFlag"], "enabled");
+
+  await client.collections("DELETEREPLICAPROP", {
+    collection,
+    shard: "shard1",
+    replica,
+    property: "integrationFlag"
+  });
+  const withoutProperty = await readReplicas();
+  assert.equal(withoutProperty[replica]?.["property.integrationFlag"], undefined);
+
+  await client.collections("BALANCESHARDUNIQUE", {
+    collection,
+    property: "preferredLeader"
+  });
+  const balanced = await readReplicas();
+  const preferred = Object.values(balanced).filter(
+    item => item["property.preferredLeader"] === "true" || item["property.preferredLeader"] === true
+  );
+  assert.equal(preferred.length, 1, "BALANCESHARDUNIQUE should assign preferredLeader to one replica");
+});
