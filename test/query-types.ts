@@ -97,3 +97,50 @@ void solr.query<SolrQueryResponse<ProductDocument, ProductFacets>>({ query: "*:*
     void [id, price, invalidId];
   }
 });
+
+void solr.query({
+  query: "*:*",
+  facets: {
+    enabled: true,
+    fields: [
+      "category",
+      { field: "price", limit: 10, offset: 5, sort: "count", minCount: 1, missing: true, prefix: "1", method: "fc" }
+    ],
+    queries: ["price:[0 TO 10]"],
+    ranges: [
+      { field: "created_at", start: "NOW/DAY", end: "NOW", gap: "+1DAY", hardEnd: true, other: "before", include: ["lower", "upper"], method: "filter" },
+      { field: "price", start: 0, end: 100, gap: 10, other: "between", include: "edge" }
+    ],
+    rangeMethod: "dv",
+    limit: 20,
+    offset: 0,
+    sort: "index",
+    minCount: 1,
+    missing: false,
+    prefix: "A",
+    method: "fc"
+  }
+});
+
+// @ts-expect-error Classic facet sort is limited to count or index.
+void solr.query({ facets: { sort: "ascending" } });
+// @ts-expect-error Field facet sort is limited to count or index.
+void solr.query({ facets: { fields: [{ field: "category", sort: "ascending" }] } });
+// @ts-expect-error Range facets require a gap.
+void solr.query({ facets: { ranges: [{ field: "price", start: 0, end: 100 }] } });
+// @ts-expect-error Legacy facet.date is not available in Solr 8, 9, or 10; use a date range facet.
+void solr.query({ facets: { dates: [{ field: "created_at", start: "NOW", end: "NOW", gap: "+1DAY" }] } });
+// @ts-expect-error Range facet methods are limited to filter or dv.
+void solr.query({ facets: { rangeMethod: "enum" } });
+// @ts-expect-error Facet minCount must be numeric.
+void solr.query({ facets: { minCount: "one" } });
+// @ts-expect-error Unsupported facet methods are rejected.
+void solr.query({ facets: { method: "unknown" } });
+
+void solr.query<SolrQueryResponse<{ id: string }>>({ query: "*:*" }).then(page => {
+  const categoryValues: readonly (string | number)[] | undefined = page.facet_counts?.facet_fields?.category_s;
+  const rangeCounts: readonly (string | number)[] | undefined = page.facet_counts?.facet_ranges?.price_d?.counts;
+  const rangeStart: string | number | undefined = page.facet_counts?.facet_ranges?.price_d?.start;
+  const queryFacetCount: number | undefined = page.facet_counts?.facet_queries?.["price_d:[10 TO 20]"];
+  void [categoryValues, rangeCounts, rangeStart, queryFacetCount];
+});

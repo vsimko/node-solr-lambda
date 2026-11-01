@@ -24,7 +24,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Man
 
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
-| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query and cursorMark pagination on pinned 8.11.4 / 9.11.0 / 10.1.0 images; other query options remain unverified |
+| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query, cursorMark pagination, and classic field/query/numeric-range/date-range facets on pinned 8.11.4 / 9.11.0 / 10.1.0 images; other query options remain unverified |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Tested: JSON query round-trip on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Tested: add, full-document update, and delete by ID on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; Tested: optimize preserves committed documents on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
@@ -40,7 +40,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Man
 | `export()` — `/export` | Documented | Documented | Documented | Tested: raw response with docValues sort field on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
 
-The matrix records that the official guides describe these endpoint families. It does not certify the current request parameters, response models, or all action variants. Integration evidence is still required.
+The matrix records that the official guides describe these endpoint families. It does not certify the current request parameters, response models, or all action variants. Integration evidence is still required. The classic Facet Component coverage is limited to the field, query, and numeric/date range combinations exercised by the integration suite; legacy `facet.date` is not supported because it was removed in Solr 6.
 
 ## Version-specific notes
 

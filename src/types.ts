@@ -235,6 +235,62 @@ export type SolrQueryParserOptions =
   | SolrDisMaxQueryOptions
   | SolrExtendedDisMaxQueryOptions;
 
+/** Sort order for classic field facets. */
+export type SolrFacetSort = "count" | "index";
+
+/** Classic facet algorithms documented by Solr. */
+export type SolrFacetMethod = "enum" | "fc" | "fcs";
+export type SolrRangeFacetMethod = "filter" | "dv";
+
+/** Values accepted by classic date/range facet include and other options. */
+export type SolrFacetInclude = "lower" | "upper" | "edge" | "outer" | "all";
+export type SolrFacetOther = "before" | "after" | "between" | "none" | "all";
+
+/** Per-field overrides for a classic field facet. */
+export interface SolrFacetFieldOptions {
+  field: string;
+  limit?: number;
+  offset?: number;
+  sort?: SolrFacetSort;
+  minCount?: number;
+  missing?: boolean;
+  prefix?: string;
+  method?: SolrFacetMethod;
+}
+
+/** Configuration for a classic range facet. */
+export interface SolrFacetRangeOptions {
+  field: string;
+  start: string | number;
+  end: string | number;
+  gap: string | number;
+  hardEnd?: boolean;
+  other?: SolrFacetOther | readonly SolrFacetOther[];
+  include?: SolrFacetInclude | readonly SolrFacetInclude[];
+  method?: SolrRangeFacetMethod;
+}
+
+/** Options for Solr's classic Facet Component. */
+export interface SolrClassicFacetOptions {
+  /** Explicitly enable or disable classic faceting. Defaults to true when supplied. */
+  enabled?: boolean;
+  /** Fields to facet on, with optional field-specific overrides. */
+  fields?: string | readonly (string | SolrFacetFieldOptions)[];
+  /** Raw query expressions to count as separate facets. */
+  queries?: string | readonly string[];
+  /** Numeric or date range facets. */
+  ranges?: string | readonly SolrFacetRangeOptions[];
+  /** Global field-facet defaults. */
+  limit?: number;
+  offset?: number;
+  sort?: SolrFacetSort;
+  minCount?: number;
+  missing?: boolean;
+  prefix?: string;
+  method?: SolrFacetMethod;
+  rangeMethod?: SolrRangeFacetMethod;
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -260,6 +316,8 @@ export interface SolrStandardQueryOptions {
   defType?: SolrQueryParser;
   /** Parser-specific options, flattened into individual Solr request parameters. */
   parserOptions?: SolrQueryParserOptions;
+  /** Typed options for the classic Facet Component. */
+  facets?: SolrClassicFacetOptions;
   /** Boolean query operator, serialized as q.op. */
   "q.op"?: SolrQueryOperator;
   /** Response writer, serialized as wt. */
@@ -327,12 +385,25 @@ export interface SolrResponseHeader {
   [key: string]: unknown;
 }
 
+/** One classic numeric or date range-facet response. */
+export interface SolrFacetRangeResult {
+  counts?: readonly (string | number)[];
+  start?: string | number;
+  end?: string | number;
+  gap?: string | number;
+  before?: number;
+  after?: number;
+  between?: number;
+  [key: string]: unknown;
+}
+
 /** Classic Facet API response sections. */
 export interface SolrFacetCounts {
   facet_queries?: Readonly<Record<string, number>>;
+  /** Alternating term and count values, as returned by Solr's JSON response. */
   facet_fields?: Readonly<Record<string, readonly (string | number)[]>>;
-  facet_dates?: Readonly<Record<string, unknown>>;
-  facet_ranges?: Readonly<Record<string, unknown>>;
+  /** Date ranges use facet_ranges; the legacy facet_dates section is not supported. */
+  facet_ranges?: Readonly<Record<string, SolrFacetRangeResult>>;
   facet_intervals?: Readonly<Record<string, unknown>>;
   [key: string]: unknown;
 }
