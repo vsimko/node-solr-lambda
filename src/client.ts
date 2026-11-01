@@ -27,7 +27,7 @@ export class SolrClient {
   async request<T=unknown>(path:string,options:RequestOptions={}):Promise<T> {
     const method=options.method??"GET";
     const operation=options.operation??method;
-    const input=await this.validate(operation,"inputs",options.body??options.query);
+    const input=this.clientConfig.validation?await this.validate(operation,"inputs",options.body??options.query):(options.body??options.query);
     const url=new URL(path.replace(/^\//,""),this.clientConfig.baseUrl??DEFAULT_BASE_URL);
     appendQuery(url,options.body===undefined ? input as RequestOptions["query"] : options.query);
     const headers:Record<string,string>={
@@ -41,7 +41,7 @@ export class SolrClient {
     let payload:unknown;
     if(text){try{payload=JSON.parse(text) as unknown;}catch{payload=text;}}
     if(!response.ok)throw new SolrHttpError(response.status,response.statusText,payload);
-    return await this.validate(operation,"outputs",payload) as T;
+    return (this.clientConfig.validation?await this.validate(operation,"outputs",payload):payload) as T;
   }
   private endpoint(path:string):string {
     const target=this.clientConfig.core??this.clientConfig.collection;
