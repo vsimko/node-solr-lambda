@@ -434,9 +434,10 @@
       "testFiles": [
         "test/client.test.ts",
         "test/errors.test.ts",
-        "test/cancellation.test.ts"
+        "test/cancellation.test.ts",
+        "test/integration/solr-export.test.ts"
       ],
-      "notes": "Returns a raw Response stream. Export field and response constraints need typed models and integration tests."
+      "notes": "Raw export response with a docValues sort field is tested by an authored integration test; CI pending."
     },
     {
       "id": "transport.request",
