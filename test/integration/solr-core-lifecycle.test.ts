@@ -5,6 +5,9 @@ integrationTest("CoreAdmin creates, reports, reloads, and cleans up an isolated 
   client,
   createCore
 }) => {
+  const ping = await client.ping<{ status?: string }>();
+  assert.equal(ping.status, "OK");
+
   const name = await createCore();
   const status = await client.coreAdmin<{ status?: Record<string, { name?: string }> }>(
     "STATUS",
