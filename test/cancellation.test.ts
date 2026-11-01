@@ -7,7 +7,7 @@ test("client timeout aborts a pending request with SolrTimeoutError", async () =
     core: "catalog",
     timeoutMs: 15,
     fetch: async (_input, init) => new Promise((_resolve, reject) => {
-      const signal = init?.signal;
+      const signal = init?.signal ?? undefined;
       signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
     })
   });
