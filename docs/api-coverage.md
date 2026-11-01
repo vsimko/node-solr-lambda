@@ -7,6 +7,7 @@ This table tracks the v4 implementation. A generic request method does not mean 
 | API area | Current v4 surface | Remaining work |
 | --- | --- | --- |
 | Client transport | Typed base URL, core/collection, Basic/Bearer auth, headers, timeout, custom fetch, request defaults, and opt-in retries | Advanced auth mechanisms and retry telemetry. |
+| Errors | `SolrHttpError`, `SolrNetworkError`, and `SolrValidationError` | Timeout and caller-abort error classification is tracked in Issue #34. |
 | Standard Query | `query()`, `queryJson()` | Typed parsers, facets, highlighting, grouping, stats, cursors, JSON Facet models, version tests. |
 | Update / Documents | `add()`, `delete()`, `commit()`, `rollback()` | Atomic update models, soft commit options, optimize, extract, update parameter coverage. |
 | Schema | `schema(command)` | Typed field, dynamic field, field type, copy field and schema response models. |

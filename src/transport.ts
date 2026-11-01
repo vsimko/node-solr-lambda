@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { SolrHttpError, SolrValidationError } from "./errors.js";
+import { SolrHttpError, SolrNetworkError, SolrValidationError } from "./errors.js";
 import type { RequestOptions, SolrAuth, SolrClientConfig, SolrHttpMethod, SolrRequestDefaults, SolrRetryPolicy, ValidationSchema } from "./types.js";
 
 const DEFAULT_BASE_URL = "http://localhost:8983/";
@@ -48,6 +48,16 @@ function resolveUrl(path: string, baseUrl: string): URL {
 
 function wait(milliseconds: number): Promise<void> {
   return milliseconds <= 0 ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+function endpointFor(url: URL): string {
+  return `${url.origin}${url.pathname}`;
+}
+
+function parseBody(text: string): unknown {
+  if (!text) return undefined;
+  try { return JSON.parse(text) as unknown; }
+  catch { return text; }
 }
 
 /** Shared HTTP transport. Domain APIs use this class for all Solr requests. */
@@ -161,8 +171,9 @@ export class SolrTransport {
         }
         return response;
       } catch (error) {
-        if (callerSignal?.aborted || attempt >= maxAttempts || !retryMethods.includes(method) || !retryNetworkErrors) {
-          throw error;
+        if (callerSignal?.aborted) throw error;
+        if (attempt >= maxAttempts || !retryMethods.includes(method) || !retryNetworkErrors) {
+          throw new SolrNetworkError(endpointFor(url), error);
         }
         const delay = Math.min(maxDelayMs, baseDelayMs * (2 ** (attempt - 1)));
         await wait(delay);
@@ -191,13 +202,13 @@ export class SolrTransport {
     const response = await this.fetchWithRetry(
       url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal
     );
-    const text = await response.text();
-    let payload: unknown;
-    if (text) {
-      try { payload = JSON.parse(text) as unknown; }
-      catch { payload = text; }
+    let body: string;
+    try { body = await response.text(); }
+    catch (error) { throw new SolrNetworkError(endpointFor(url), error); }
+    const payload = parseBody(body);
+    if (!response.ok) {
+      throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, payload);
     }
-    if (!response.ok) throw new SolrHttpError(response.status, response.statusText, payload);
     return (this.clientConfig.validation ? await this.validate(operation, "outputs", payload) : payload) as T;
   }
 
@@ -228,10 +239,10 @@ export class SolrTransport {
       url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal
     );
     if (!response.ok) {
-      const text = await response.text();
-      let payload: unknown = text;
-      try { payload = text ? JSON.parse(text) as unknown : undefined; } catch {}
-      throw new SolrHttpError(response.status, response.statusText, payload);
+      let body: string;
+      try { body = await response.text(); }
+      catch (error) { throw new SolrNetworkError(endpointFor(url), error); }
+      throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, parseBody(body));
     }
     return response;
   }
