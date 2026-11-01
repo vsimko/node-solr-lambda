@@ -1,39 +1,15 @@
 {
-  "name": "node-solr-lambda",
-  "version": "3.0.6",
-  "description": "Minimalistic Solr client written in functional programming style",
-  "main": "src/index",
-  "repository": "https://github.com/vsimko/node-solr-lambda.git",
-  "author": "Viliam Simko <viliam.simko@gmail.com>",
-  "license": "MIT",
-  "dependencies": {
-    "axios": "^0.27.2"
+  "name":"node-solr-lambda","version":"4.0.0-beta.0","description":"A typed Apache Solr client for Node.js","license":"MIT",
+  "repository":{"type":"git","url":"https://github.com/vsimko/node-solr-lambda.git"},
+  "type":"module","main":"./dist/cjs/index.js","module":"./dist/esm/index.js","types":"./dist/types/index.d.ts",
+  "exports":{".":{"types":"./dist/types/index.d.ts","import":"./dist/esm/index.js","require":"./dist/cjs/index.js"}},
+  "files":["dist","README.md","LICENSE","docs"],
+  "engines":{"node":"^20.0.0 || ^22.0.0 || ^24.0.0"},
+  "peerDependencies":{"zod":"^3.23.0 || ^4.0.0"},"peerDependenciesMeta":{"zod":{"optional":true}},
+  "scripts":{
+    "clean":"node -e \"import('node:fs').then(fs => fs.rmSync('dist',{recursive:true,force:true}))\"",
+    "build":"npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && node --input-type=module -e \"import {writeFileSync} from 'node:fs'; writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "typecheck":"tsc --noEmit -p tsconfig.json","test":"tsx --test test/*.test.ts","test:types":"tsc --noEmit -p test/tsconfig.json"
   },
-  "engines": {
-    "node": ">=8.0.0"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.3.5",
-    "@types/mocha": "^10.0.1",
-    "chai": "^4.3.7",
-    "chai-as-promised": "^7.1.1",
-    "eslint": "^8.43.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-n": "^16.0.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "mocha": "10.1.0",
-    "standard-version": "^9.5.0"
-  },
-  "resolutions": {},
-  "scripts": {
-    "git-cred": "git config credential.helper store",
-    "lint": "eslint .",
-    "test": "mocha",
-    "test:prepare": "docker-compose -f test/docker-compose.yml up",
-    "release": "standard-version",
-    "release:push": "git push --follow-tags origin master",
-    "release:npm": "yarn publish"
-  }
+  "devDependencies":{"@types/node":"^22.15.0","tsx":"^4.19.3","typescript":"^5.8.3","zod":"^4.0.0"}
 }
