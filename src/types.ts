@@ -239,7 +239,8 @@ export type SolrQueryParserOptions =
 export type SolrFacetSort = "count" | "index";
 
 /** Classic facet algorithms documented by Solr. */
-export type SolrFacetMethod = "enum" | "fc" | "fcs" | "dv" | "dvhash";
+export type SolrFacetMethod = "enum" | "fc" | "fcs";
+export type SolrRangeFacetMethod = "filter" | "dv";
 
 /** Values accepted by classic date/range facet include and other options. */
 export type SolrFacetInclude = "lower" | "upper" | "edge" | "outer" | "all";
@@ -257,17 +258,6 @@ export interface SolrFacetFieldOptions {
   method?: SolrFacetMethod;
 }
 
-/** Configuration for a classic date facet. */
-export interface SolrFacetDateOptions {
-  field: string;
-  start: string;
-  end: string;
-  gap: string;
-  hardEnd?: boolean;
-  other?: SolrFacetOther | readonly SolrFacetOther[];
-  include?: SolrFacetInclude | readonly SolrFacetInclude[];
-}
-
 /** Configuration for a classic range facet. */
 export interface SolrFacetRangeOptions {
   field: string;
@@ -277,6 +267,7 @@ export interface SolrFacetRangeOptions {
   hardEnd?: boolean;
   other?: SolrFacetOther | readonly SolrFacetOther[];
   include?: SolrFacetInclude | readonly SolrFacetInclude[];
+  method?: SolrRangeFacetMethod;
 }
 
 /** Options for Solr's classic Facet Component. */
@@ -287,8 +278,6 @@ export interface SolrClassicFacetOptions {
   fields?: string | readonly (string | SolrFacetFieldOptions)[];
   /** Raw query expressions to count as separate facets. */
   queries?: string | readonly string[];
-  /** Date facets, using Solr date math for start/end/gap values. */
-  dates?: string | readonly SolrFacetDateOptions[];
   /** Numeric or date range facets. */
   ranges?: string | readonly SolrFacetRangeOptions[];
   /** Global field-facet defaults. */
@@ -299,6 +288,7 @@ export interface SolrClassicFacetOptions {
   missing?: boolean;
   prefix?: string;
   method?: SolrFacetMethod;
+  rangeMethod?: SolrRangeFacetMethod;
 }
 
 /**
