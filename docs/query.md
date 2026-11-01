@@ -182,6 +182,49 @@ Result Grouping and Collapse/Expand are separate Solr features. They cannot be e
 
 See the official [Result Grouping guide](https://solr.apache.org/guide/solr/10_1/query-guide/result-grouping.html) and [Collapse and Expand guide](https://solr.apache.org/guide/solr/10_1/query-guide/collapse-and-expand-results.html) for version-specific limitations.
 
+## Stats Component
+
+Use the typed `stats` property to request statistics for one or more fields. Each field can select individual statistics with local parameters, request percentiles or approximate cardinality, and attach a key/tag for integration with other components. `facets` breaks each field's statistics down by the requested facet fields.
+
+```ts
+const result = await solr.query<SolrQueryResponse<Product>>({
+  query: "*:*",
+  limit: 0,
+  stats: {
+    fields: [
+      "price_d",
+      {
+        field: "price_d",
+        key: "price_summary",
+        tag: "price_pivot",
+        min: true,
+        max: true,
+        mean: true,
+        percentiles: [50, 90],
+        cardinality: 0.5
+      }
+    ],
+    facets: ["category_s", "brand_s"],
+    calcDistinct: true
+  }
+});
+
+const priceStats = result.stats?.stats_fields?.price_summary;
+const median = priceStats?.percentiles?.["50.0"];
+const booksMean = priceStats?.facets?.category_s?.books?.mean;
+```
+
+- `fields` accepts field names or per-field options. Per-field statistic flags include `min`, `max`, `sum`, `count`, `missing`, `sumOfSquares`, `mean`, `stddev`, `distinctValues`, and `countDistinct`.
+- `percentiles` accepts numeric cut-off values from 0 to 100 and uses Solr's approximate T-Digest calculation. `tdigestCompression` controls its accuracy/memory trade-off.
+- `cardinality` accepts `true` or an accuracy value from 0 to 1 and requests an approximate distinct count using HyperLogLog.
+- `tag`, `excludeTags`, and `key` map to Stats Component local parameters, allowing statistics to participate in pivot faceting or exclude tagged filters.
+- `facets` maps to `stats.facet`; `calcDistinct` maps to `stats.calcdistinct` for all requested fields.
+- Results are available under `stats.stats_fields`. Each field result includes typed numeric statistics, optional percentile values, approximate cardinality, distinct values, and nested per-facet statistics.
+
+Statistics supported depend on field type; for example, sum/mean/stddev are meaningful for numeric/date fields, while percentile calculations require numeric fields. Distinct value collection and exact distinct counts can be expensive for high-cardinality fields.
+
+See the official [Stats Component reference](https://solr.apache.org/guide/solr/9_0/query-guide/stats-component.html) for supported statistics and local-parameter behavior. The integration suite verifies the common numeric statistics, distinct counts, and facet breakdowns on Solr 8.11.4, 9.11.0, and 10.1.0.
+
 ## Typed query responses
 
 `query<T>()` lets the caller choose the complete response type. For the standard `/select` handler, `SolrQueryResponse<TDocument, TJsonFacet>` provides named sections for document metadata, classic facets, JSON facets, highlighting, grouping, statistics, and debug information. The first generic parameter controls the document shape; the second describes the JSON Facet API's `facets` object.
