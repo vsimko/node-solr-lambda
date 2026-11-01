@@ -49,18 +49,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/query.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-json-query.test.ts"
       ],
-      "notes": "JSON Request API query body and matching-document response test authored; CI pending."
+      "notes": "JSON Request API query body and matching-document response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "update.add",
@@ -183,18 +183,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-optimize.test.ts"
       ],
-      "notes": "Optimize followed by a query asserting committed documents remain available; CI pending."
+      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "update.rollback",
@@ -338,18 +338,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "System info metadata response test authored; CI pending."
+      "notes": "System info metadata response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "metrics.api",
@@ -360,18 +360,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "Metrics API group=jvm returns Prometheus exposition text; integration test now asserts the response contains JVM metric names. CI pending."
+      "notes": "JVM Metrics API response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Solr 8/9 return the classic JSON registry; Solr 10.1 returns Prometheus exposition text."
     },
     {
       "id": "security.api",
@@ -425,11 +425,11 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
@@ -438,7 +438,7 @@
         "test/cancellation.test.ts",
         "test/integration/solr-export.test.ts"
       ],
-      "notes": "Raw export response with a docValues sort field is tested by an authored integration test; CI pending."
+      "notes": "Raw Export response with a docValues sort field passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "transport.request",
