@@ -326,6 +326,87 @@ export interface SolrStandardQueryOptions {
   params?: Readonly<Record<string, SolrQueryParamValue>>;
 }
 
+/** JSON Facet API domain transformations for a facet's input document set. */
+export interface SolrJsonFacetDomain {
+  filter?: string | readonly string[];
+  query?: string;
+  excludeTags?: string | readonly string[];
+  blockParent?: string;
+  blockChildren?: string;
+  join?: { from: string; to: string };
+}
+
+/** A named metric expression inside a JSON Facet API facet tree. */
+export type SolrJsonFacetMetric = string | { type: "func"; func: string };
+
+/** Sort expression accepted by a JSON terms facet. */
+export type SolrJsonFacetSort = string | Readonly<Record<string, "asc" | "desc">>;
+
+interface SolrJsonFacetBase {
+  /** Nested metrics and facets, evaluated for each bucket or query result. */
+  facet?: SolrJsonFacetMap;
+  /** Optional domain changes applied before evaluating this facet. */
+  domain?: SolrJsonFacetDomain;
+}
+
+/** JSON terms facet over the distinct values of a field. */
+export interface SolrJsonTermsFacet extends SolrJsonFacetBase {
+  type: "terms";
+  field: string;
+  limit?: number;
+  offset?: number;
+  sort?: SolrJsonFacetSort;
+  mincount?: number;
+  missing?: boolean;
+  prefix?: string;
+  method?: "dv" | "uif" | "dvhash" | "enum" | "stream" | "smart";
+  allBuckets?: boolean;
+  numBuckets?: boolean;
+  refine?: boolean;
+  overrequest?: number;
+  overrefine?: number;
+}
+
+/** JSON query facet over an arbitrary Solr query. */
+export interface SolrJsonQueryFacet extends SolrJsonFacetBase {
+  type: "query";
+  q: string;
+}
+
+/** JSON range facet over a numeric or date field. */
+export interface SolrJsonRangeFacet extends SolrJsonFacetBase {
+  type: "range";
+  field: string;
+  start: string | number;
+  end: string | number;
+  gap: string | number;
+  hardend?: boolean;
+  other?: SolrFacetOther | readonly SolrFacetOther[];
+  include?: SolrFacetInclude | readonly SolrFacetInclude[];
+  mincount?: number;
+}
+
+/** Recursive JSON Facet API tree. Values may be named facet definitions or metrics. */
+export type SolrJsonFacetDefinition = SolrJsonTermsFacet | SolrJsonQueryFacet | SolrJsonRangeFacet;
+export type SolrJsonFacetMap = Readonly<Record<string, SolrJsonFacetDefinition | SolrJsonFacetMetric>>;
+
+/** Typed request body for Solr's JSON Request API. */
+export interface SolrJsonQueryRequest {
+  query?: string | Readonly<Record<string, unknown>>;
+  filter?: string | Readonly<Record<string, unknown>> | readonly (string | Readonly<Record<string, unknown>>)[];
+  fields?: string | readonly string[];
+  sort?: string | readonly string[];
+  limit?: number;
+  offset?: number;
+  facet?: boolean | SolrJsonFacetMap;
+  params?: Readonly<Record<string, SolrQueryParamValue>>;
+  debug?: boolean | string | readonly string[];
+  useParams?: string | readonly string[];
+}
+
+/** Typed response shape for a JSON Request API query. */
+export interface SolrJsonQueryResponse<TDocument = unknown, TJsonFacet = unknown> extends SolrResponse<TDocument, TJsonFacet> {}
+
 /** Cursor requests require a sort expression and cannot use a non-zero offset. */
 export interface SolrCursorQuery extends Omit<SolrStandardQueryOptions, "sort" | "offset" | "cursorMark"> {
   /** Initial value "*" or the nextCursorMark returned by the previous page. */

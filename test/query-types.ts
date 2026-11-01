@@ -1,4 +1,4 @@
-import type { SolrClient, SolrQueryResponse, SolrResponse } from "../src/index.js";
+import type { SolrClient, SolrJsonQueryRequest, SolrJsonQueryResponse, SolrQueryResponse, SolrResponse } from "../src/index.js";
 import { solrExcludeTags, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort } from "../src/index.js";
 
 declare const solr: SolrClient;
@@ -144,3 +144,82 @@ void solr.query<SolrQueryResponse<{ id: string }>>({ query: "*:*" }).then(page =
   const queryFacetCount: number | undefined = page.facet_counts?.facet_queries?.["price_d:[10 TO 20]"];
   void [categoryValues, rangeCounts, rangeStart, queryFacetCount];
 });
+
+const jsonFacetRequest: SolrJsonQueryRequest = {
+  query: { lucene: "*:*" },
+  filter: ["inStock:true"],
+  fields: ["id", "category_s", "price_d"],
+  limit: 20,
+  offset: 0,
+  sort: ["price_d asc"],
+  facet: {
+    categories: {
+      type: "terms",
+      field: "category_s",
+      limit: 10,
+      offset: 0,
+      sort: "count desc",
+      mincount: 1,
+      missing: true,
+      prefix: "b",
+      method: "dvhash",
+      domain: { filter: ["inStock:true"], excludeTags: ["stock"] },
+      facet: {
+        averagePrice: "avg(price_d)",
+        minimumPrice: { type: "func", func: "min(price_d)" },
+        nestedPrices: {
+          type: "range",
+          field: "price_d",
+          start: 0,
+          end: 100,
+          gap: 10,
+          hardend: true,
+          include: ["lower", "upper"],
+          other: "between",
+          facet: { count: "count()" }
+        }
+      }
+    },
+    expensiveProducts: {
+      type: "query",
+      q: "price_d:[50 TO *]",
+      domain: { query: "*:*", join: { from: "id", to: "product_id" } },
+      facet: { total: "count()" }
+    },
+    priceRanges: {
+      type: "range",
+      field: "price_d",
+      start: 0,
+      end: 100,
+      gap: 10,
+      facet: { average: "avg(price_d)" }
+    }
+  }
+};
+void solr.queryJson(jsonFacetRequest);
+
+void solr.queryJson<SolrJsonQueryResponse<{ id: string }, {
+  count: number;
+  categories: { buckets: { val: string; count: number; averagePrice: number }[] };
+}>>(jsonFacetRequest).then(result => {
+  const total: number | undefined = result.facets?.count;
+  const firstBucketCount: number | undefined = result.facets?.categories.buckets[0]?.count;
+  const firstAverage: number | undefined = result.facets?.categories.buckets[0]?.averagePrice;
+  void [total, firstBucketCount, firstAverage];
+});
+
+// @ts-expect-error JSON terms facets require a field name.
+const invalidTermsFacet: SolrJsonQueryRequest = { facet: { categories: { type: "terms", limit: 10 } } };
+// @ts-expect-error JSON range facets require a gap.
+const invalidRangeFacet: SolrJsonQueryRequest = { facet: { price: { type: "range", field: "price_d", start: 0, end: 100 } } };
+// @ts-expect-error JSON query facets require a query expression.
+const invalidQueryFacet: SolrJsonQueryRequest = { facet: { expensive: { type: "query" } } };
+// @ts-expect-error Unsupported JSON facet discriminators are rejected.
+const invalidFacetKind: SolrJsonQueryRequest = { facet: { bad: { type: "pivot", field: "category_s" } } };
+// @ts-expect-error JSON terms sort direction is constrained.
+const invalidFacetSort: SolrJsonQueryRequest = { facet: { categories: { type: "terms", field: "category_s", sort: { count: "sideways" } } } };
+void [invalidTermsFacet, invalidRangeFacet, invalidQueryFacet, invalidFacetKind, invalidFacetSort];
+
+// @ts-expect-error Classic facet methods such as fcs are not JSON terms facet methods.
+const invalidJsonTermsMethod: SolrJsonQueryRequest = { facet: { categories: { type: "terms", field: "category_s", method: "fcs" } } };
+void invalidJsonTermsMethod;

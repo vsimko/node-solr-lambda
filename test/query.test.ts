@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { SolrClient } from "../src/index.js";
-import type { SolrQuery, SolrResponse } from "../src/index.js";
+import type { SolrJsonQueryRequest, SolrQuery, SolrResponse } from "../src/index.js";
 
 const createClient = (capture: (url: URL) => void) => new SolrClient({
   baseUrl: "http://localhost:8983/solr",
@@ -240,4 +240,52 @@ test("query preserves raw range facet field names", async () => {
   assert.equal(requestedUrl?.searchParams.get("facet"), "true");
   assert.equal(requestedUrl?.searchParams.get("facet.range"), "created_at");
   assert.equal(requestedUrl?.searchParams.has("f.created_at.facet.range.start"), false);
+});
+
+test("queryJson preserves nested JSON Facet API definitions in the request body", async () => {
+  let requestBody: unknown;
+  const client = new SolrClient({
+    baseUrl: "http://localhost:8983/solr",
+    collection: "catalog",
+    fetch: async (_input, init) => {
+      requestBody = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  const request: SolrJsonQueryRequest = {
+    query: { lucene: "*:*" },
+    filter: ["inStock:true"],
+    facet: {
+      categories: {
+        type: "terms",
+        field: "category_s",
+        limit: 10,
+        sort: "count desc",
+        domain: { filter: ["inStock:true"], excludeTags: ["stock"] },
+        facet: {
+          averagePrice: "avg(price_d)",
+          nestedRange: {
+            type: "range",
+            field: "price_d",
+            start: 0,
+            end: 100,
+            gap: 10,
+            facet: { count: "count()" }
+          }
+        }
+      },
+      expensiveProducts: {
+        type: "query",
+        q: "price_d:[50 TO *]",
+        facet: { total: "count()" }
+      }
+    }
+  };
+
+  await client.queryJson(request);
+  assert.deepEqual(requestBody, request);
 });

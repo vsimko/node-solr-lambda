@@ -4,6 +4,7 @@ import "./solr-core-lifecycle.test.js";
 import "./solr-export.test.js";
 import "./solr-facets.test.js";
 import "./solr-json-query.test.js";
+import "./solr-json-facets.test.js";
 import "./solr-optimize.test.js";
 import "./solr-cursor.test.js";
 import "./solr-schema.test.js";

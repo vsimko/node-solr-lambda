@@ -11,7 +11,7 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CommitOptions, CoreAdminAction, RequestControlOptions, SolrAdminParams,
-  SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, UpdateOptions
+  SolrClientConfig, SolrDelete, SolrDocument, SolrJsonQueryRequest, SolrQuery, UpdateOptions
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -24,6 +24,8 @@ export class SolrClient extends SolrTransport {
     return queryApi.query<T>(this, this.endpoint("/select"), query, requestOptions);
   }
 
+  queryJson<T = unknown>(request: SolrJsonQueryRequest, requestOptions?: RequestControlOptions): Promise<T>;
+  queryJson<T = unknown>(request: Readonly<Record<string, unknown>> & { facet?: never }, requestOptions?: RequestControlOptions): Promise<T>;
   queryJson<T = unknown>(request: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return queryApi.queryJson<T>(this, this.endpoint("/query"), request, requestOptions);
   }
