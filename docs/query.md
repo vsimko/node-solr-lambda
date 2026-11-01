@@ -58,6 +58,41 @@ await solr.query({
 
 Some query parsers instead accept an `excludeTags` local parameter. Keep it in that parser's local-params prefix, for example `solrLocalParams({ type: "parent", which: "type:parent", excludeTags: solrExcludeTags("category") }, query)`. Exclusion is contextual: this client does not globally remove tagged filters.
 
+## Classic field, query, and range facets
+
+Use the typed `facets` property for the classic Facet Component. It supports field facets, query facets, and numeric or date range facets. Global field-facet defaults can be overridden per field.
+
+```ts
+const result = await solr.query<SolrQueryResponse<Product>>({
+  query: "*:*",
+  facets: {
+    fields: [{ field: "category_s", limit: 10, sort: "count", minCount: 1 }, "brand_s"],
+    queries: ["price_d:[0 TO 20]", "inStock_b:true"],
+    ranges: [
+      { field: "price_d", start: 0, end: 100, gap: 10, hardEnd: true, other: "between" },
+      { field: "created_dt", start: "NOW/DAY-30DAYS", end: "NOW/DAY", gap: "+1DAY" }
+    ],
+    limit: 20,
+    offset: 0,
+    sort: "count",
+    minCount: 1,
+    missing: true,
+    method: "fc",
+    rangeMethod: "filter"
+  }
+});
+
+const categoryCounts = result.facet_counts?.facet_fields?.category_s;
+const priceRangeCounts = result.facet_counts?.facet_ranges?.price_d?.counts;
+```
+
+- Field facets accept raw field names or objects with per-field `limit`, `offset`, `sort`, `minCount`, `missing`, `prefix`, and `method` overrides. Field methods are `enum`, `fc`, or `fcs`.
+- Query facets accept raw Solr query expressions. Query values are sent as repeated `facet.query` parameters.
+- Range facets accept numeric values or date math strings for `start`, `end`, and `gap`. They support `hardEnd`, repeated `include` and `other` values, and the range methods `filter` and `dv`.
+- Date bucketing is expressed with range facets on a date field. The legacy `facet.date` parameters were removed in Solr 6, so they are not supported by the target Solr 8/9/10 versions. See the [Solr 10.1 upgrade notes](https://solr.apache.org/guide/solr/10_1/upgrade-notes/major-changes-in-solr-6.html) and [Solr faceting reference](https://solr.apache.org/guide/solr/9_8/query-guide/faceting.html).
+- `facet_counts.facet_fields` uses Solr's alternating term/count array representation. Query counts are in `facet_queries`; numeric and date range counts are in `facet_ranges`.
+- The `params` escape hatch remains available for facet parameters not represented by these models. Runtime behavior is covered by the pinned Solr integration matrix; verify any server-specific or uncommon facet option against the version you deploy.
+
 ## Typed query responses
 
 `query<T>()` lets the caller choose the complete response type. For the standard `/select` handler, `SolrQueryResponse<TDocument, TJsonFacet>` provides named sections for document metadata, classic facets, JSON facets, highlighting, grouping, statistics, and debug information. The first generic parameter controls the document shape; the second describes the JSON Facet API's `facets` object.
