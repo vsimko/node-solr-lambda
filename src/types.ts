@@ -5,7 +5,7 @@ export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "M
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
 /** Replica types accepted by the SolrCloud Collections API. */
-export type CollectionReplicaType = "NRT" | "TLOG" | "PULL";
+export type CollectionReplicaType = "nrt" | "tlog" | "pull";
 
 /** Parameters for Collections API ADDREPLICA. */
 export interface AddReplicaParams {
