@@ -12,7 +12,7 @@ const requiredMethods = [
 
 assert.equal(inventory.schemaVersion, 1);
 assert.equal(inventory.runtimeCertification, "unverified");
-assert.deepEqual(inventory.documentationBaselines, { "8": "8.11", "9": "9.10", "10": "10.1" });
+assert.deepEqual(inventory.documentationBaselines, { "8": "8.11", "9": "9.11", "10": "10.1" });
 assert.ok(Array.isArray(inventory.entries) && inventory.entries.length >= requiredMethods.length);
 
 const ids = new Set();
