@@ -30,7 +30,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; Tested: optimize preserves committed documents on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `ping()` — `/admin/ping` | Documented | Documented | Documented | Tested: ping returns OK on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /{core}/schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property and GET /config/overlay userProps read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #166) |
 | `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Tested: CREATE, STATUS, RELOAD, and fixture UNLOAD cleanup on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Tested: SolrCloud CREATE/LIST/DELETE on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Tested: system metadata on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
