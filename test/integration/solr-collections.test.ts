@@ -69,7 +69,7 @@ cloudIntegrationTest("Collections API adds and deletes a named replica", async (
     collection,
     shard: "shard1",
     node: liveNode,
-    type: "NRT",
+    type: "nrt",
     waitForFinalState: true
   });
 
