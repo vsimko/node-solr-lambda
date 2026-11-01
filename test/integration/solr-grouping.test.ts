@@ -54,6 +54,7 @@ integrationTest("Solr result grouping returns typed groups and collapse/expand s
   const headIds = heads.map(document => document.id);
   assert.ok(headIds.includes(ids[1]!));
   assert.ok(headIds.includes(ids[2]!));
-  assert.equal(collapsed.expanded?.[ids[1]!]?.docs?.length, 2);
-  assert.equal(collapsed.expanded?.[ids[2]!]?.docs?.length, 2);
+  const expandedGroups = Object.values(collapsed.expanded ?? {});
+  assert.equal(expandedGroups.length, 2);
+  assert.deepEqual(expandedGroups.map(group => group.docs?.length), [2, 2]);
 });
