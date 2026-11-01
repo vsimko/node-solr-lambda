@@ -106,15 +106,17 @@ jobs:
           };
           writeFileSync("security.json", JSON.stringify(security));
           NODE
+          chmod 666 security.json
       - name: Start Solr with security enabled
         run: |
-          docker run --detach \
+          docker create \
             --name solr-secure \
             --publish 8983:8983 \
-            --volume "$PWD/security.json:/var/solr/data/security.json:ro" \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             "solr:${{ matrix.solr-version }}" \
             solr-precreate integration
+          docker cp security.json solr-secure:/var/solr/data/security.json
+          docker start solr-secure
       - name: Wait for authenticated Solr core
         run: |
           for attempt in {1..60}; do
