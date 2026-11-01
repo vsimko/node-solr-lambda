@@ -46,7 +46,7 @@ export interface SolrIntegrationFixture {
 export interface SolrCloudIntegrationFixture {
   client: SolrClient;
   clientForCollection(name: string): SolrClient;
-  createCollection(prefix?: string): Promise<string>;
+  createCollection(prefix?: string, replicationFactor?: number): Promise<string>;
   createImplicitCollection(prefix?: string): Promise<string>;
   createAlias(collection: string, prefix?: string): Promise<string>;
 }
@@ -159,9 +159,10 @@ export function integrationTest(
 /** Run tests that require a SolrCloud node; set SOLR_CLOUD=true to enable them. */
 export function cloudIntegrationTest(
   name: string,
-  run: (fixture: SolrCloudIntegrationFixture) => Promise<void>
+  run: (fixture: SolrCloudIntegrationFixture) => Promise<void>,
+  requiresMultipleNodes = false
 ): void {
-  test(name, { skip: !baseUrl || !cloudEnabled }, async () => {
+  test(name, { skip: !baseUrl || !cloudEnabled || (requiresMultipleNodes && process.env.SOLR_MULTINODE !== "true") }, async () => {
     const client = new SolrClient({ baseUrl: baseUrl!, timeoutMs: 30_000 });
     const createdCollections = new Set<string>();
     const createdAliases = new Set<string>();
@@ -170,12 +171,12 @@ export function cloudIntegrationTest(
       clientForCollection(name) {
         return new SolrClient({ baseUrl: baseUrl!, collection: name, timeoutMs: 30_000 });
       },
-      async createCollection(prefix = "integration_collection") {
+      async createCollection(prefix = "integration_collection", replicationFactor = 1) {
         const name = `${prefix}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
         await client.collections("CREATE", {
           name,
           numShards: 1,
-          replicationFactor: 1,
+          replicationFactor,
           maxShardsPerNode: 2,
           "collection.configName": "_default"
         });

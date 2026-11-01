@@ -328,7 +328,7 @@
         "test/integration/solr-collections.test.ts",
         "test/collections-types.ts"
       ],
-      "notes": "SolrCloud CREATE/LIST/DELETE, alias lifecycle, implicit-router shard lifecycle, named ADDREPLICA/DELETEREPLICA lifecycle, and replica property add/delete plus BALANCESHARDUNIQUE successful responses verified on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #177, #192, #209). ADDREPLICA creates an active NRT replica on a live node; DELETEREPLICA removes only that replica and preserves the original. Replica property actions are checked for successful server responses (CLUSTERSTATUS does not expose these property values in the tested response). MOVEREPLICA and REBALANCELEADERS have exported action-specific parameter models and serialization tests, but lack runtime multi-node/leader-reassignment tests. Snapshot, backup, and cluster-state response models remain unverified."
+      "notes": "SolrCloud CREATE/LIST/DELETE, alias lifecycle, implicit-router shard lifecycle, named ADDREPLICA/DELETEREPLICA lifecycle, replica property add/delete and BALANCESHARDUNIQUE responses, plus multi-node MOVEREPLICA and REBALANCELEADERS leader reassignment are tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #177, #192, #209, and PR #142 CI #224). MOVEREPLICA verifies the named replica becomes active on a different live node. REBALANCELEADERS assigns preferredLeader to an active non-leader and verifies it becomes shard leader. Snapshot, backup, and cluster-state response models remain unverified."
     },
     {
       "id": "system.info",

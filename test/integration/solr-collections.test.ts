@@ -139,3 +139,107 @@ cloudIntegrationTest("Collections API adds, balances, and deletes replica proper
   });
   assert.equal(balanced.responseHeader?.status, 0, "BALANCESHARDUNIQUE should succeed");
 });
+
+cloudIntegrationTest("Collections API moves a replica between live SolrCloud nodes", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection("integration_move", 1);
+  type Replica = { state?: string; node_name?: string; leader?: string };
+  type ClusterStatus = {
+    cluster?: {
+      live_nodes?: string[];
+      collections?: Record<string, {
+        shards?: Record<string, { replicas?: Record<string, Replica> }>;
+      }>;
+    };
+  };
+
+  const before = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const liveNodes = before.cluster?.live_nodes ?? [];
+  assert.ok(liveNodes.length >= 2, "multi-node SolrCloud should report at least two live nodes");
+  const replicas = before.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  const [replicaName, replica] = Object.entries(replicas)[0] ?? [];
+  assert.ok(replicaName && replica?.node_name, "fixture should expose the source replica and node");
+  const targetNode = liveNodes.find(node => node !== replica.node_name);
+  assert.ok(targetNode, "a live target node distinct from the source should exist");
+
+  await client.collections("MOVEREPLICA", {
+    collection,
+    replica: replicaName,
+    targetNode,
+    timeout: 120
+  });
+
+  const after = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const movedReplicas = after.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  const activeReplicas = Object.values(movedReplicas).filter(item => item.state === "active");
+  assert.equal(activeReplicas.length, 1, "move should leave exactly one active replica");
+  assert.equal(activeReplicas[0]?.node_name, targetNode, "replica should be active on the requested target node");
+}, true);
+
+cloudIntegrationTest("Collections API rebalances a shard leader to its preferred replica", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection("integration_rebalance_leaders", 2);
+  type Replica = { state?: string; node_name?: string; leader?: string | boolean };
+  type ClusterStatus = {
+    cluster?: {
+      collections?: Record<string, {
+        shards?: Record<string, { replicas?: Record<string, Replica> }>;
+      }>;
+    };
+  };
+
+  const before = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const replicas = before.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  const activeReplicas = Object.entries(replicas).filter(([, replica]) => replica.state === "active");
+  assert.equal(activeReplicas.length, 2, "two-replica fixture should have two active replicas");
+  assert.notEqual(
+    activeReplicas[0]?.[1].node_name,
+    activeReplicas[1]?.[1].node_name,
+    "replicas should be placed on distinct live nodes"
+  );
+
+  const isLeader = (replica: Replica): boolean =>
+    replica.leader === true || replica.leader === "true";
+  const currentLeaders = activeReplicas.filter(([, replica]) => isLeader(replica));
+  assert.equal(currentLeaders.length, 1, "shard should have exactly one active leader");
+  const [preferredReplicaName] = activeReplicas.find(([, replica]) => !isLeader(replica)) ?? [];
+  assert.ok(preferredReplicaName, "fixture should expose an active non-leader replica");
+
+  const propertyResult = await client.collections<{ responseHeader?: { status?: number } }>("ADDREPLICAPROP", {
+    collection,
+    shard: "shard1",
+    replica: preferredReplicaName,
+    property: "preferredLeader",
+    "property.value": "true"
+  });
+  assert.equal(propertyResult.responseHeader?.status, 0, "preferredLeader property should be assigned");
+
+  // Replica properties are written to ZooKeeper; allow the cluster-state watchers
+  // on the Solr nodes to observe the preferredLeader change before rebalancing.
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const rebalanceResult = await client.collections<{ responseHeader?: { status?: number } }>("REBALANCELEADERS", {
+    collection,
+    maxAtOnce: 1,
+    maxWaitSeconds: 30
+  });
+  assert.equal(rebalanceResult.responseHeader?.status, 0, "REBALANCELEADERS should succeed");
+
+  let preferredReplicaIsLeader = false;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const after = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+    const replicasAfterRebalance = after.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+    preferredReplicaIsLeader = isLeader(replicasAfterRebalance[preferredReplicaName] ?? {});
+    if (preferredReplicaIsLeader) break;
+    await new Promise(resolve => setTimeout(resolve, 250));
+  }
+  assert.equal(
+    preferredReplicaIsLeader,
+    true,
+    "preferred active replica should become the shard leader within five seconds"
+  );
+}, true);
