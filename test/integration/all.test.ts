@@ -2,6 +2,7 @@ import "./solr-collections.test.js";
 import "./solr-config-security.test.js";
 import "./solr-core-lifecycle.test.js";
 import "./solr-export.test.js";
+import "./solr-facets.test.js";
 import "./solr-json-query.test.js";
 import "./solr-optimize.test.js";
 import "./solr-cursor.test.js";
