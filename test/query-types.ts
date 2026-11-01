@@ -134,3 +134,11 @@ void solr.query({ facets: { rangeMethod: "enum" } });
 void solr.query({ facets: { minCount: "one" } });
 // @ts-expect-error Unsupported facet methods are rejected.
 void solr.query({ facets: { method: "unknown" } });
+
+void solr.query<SolrQueryResponse<{ id: string }>>({ query: "*:*" }).then(page => {
+  const categoryValues: readonly (string | number)[] | undefined = page.facet_counts?.facet_fields?.category_s;
+  const rangeCounts: readonly (string | number)[] | undefined = page.facet_counts?.facet_ranges?.price_d?.counts;
+  const rangeStart: string | number | undefined = page.facet_counts?.facet_ranges?.price_d?.start;
+  const queryFacetCount: number | undefined = page.facet_counts?.facet_queries?.["price_d:[10 TO 20]"];
+  void [categoryValues, rangeCounts, rangeStart, queryFacetCount];
+});
