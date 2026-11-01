@@ -74,6 +74,9 @@ export class SolrTransport {
     if (baseUrl.search || baseUrl.hash) {
       throw new TypeError("Solr baseUrl must not include a query string or fragment");
     }
+    if (baseUrl.username || baseUrl.password) {
+      throw new TypeError("Solr baseUrl must not include embedded credentials");
+    }
     if (config.timeoutMs !== undefined && (!Number.isFinite(config.timeoutMs) || config.timeoutMs <= 0)) {
       throw new RangeError("timeoutMs must be a positive number");
     }
@@ -184,8 +187,8 @@ export class SolrTransport {
     const headers: Record<string, string> = {
       accept: "application/json",
       ...(options.body === undefined ? {} : { "content-type": "application/json" }),
-      ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
       ...this.clientConfig.requestDefaults?.headers,
+      ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
       ...this.clientConfig.headers,
       ...options.headers
     };
