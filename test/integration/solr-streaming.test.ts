@@ -13,7 +13,7 @@ integrationTest("Streaming Expressions search returns matching documents", async
 
   const result = await client.stream<{
     "result-set"?: { docs?: Array<{ id?: string }> };
-  }>(`search(integration, q="id:${id}", fl="id", sort="id asc")`);
+  }>(`search(integration, q="id:${id}", fl="id", sort="id asc", solrUrl="${process.env.SOLR_BASE_URL}")`);
 
   const ids = result["result-set"]?.docs
     ?.map(document => document.id)
