@@ -5,3 +5,5 @@ The client throws `SolrHttpError` when Solr returns a non-success HTTP status. T
 The client throws `SolrValidationError` when an enabled schema rejects a request or response.
 
 Network errors and abort errors from the Fetch API pass to the caller. Catch these errors at the application boundary. Do not assume that every failed request includes a Solr error response.
+
+The `export()` method returns the raw Fetch API `Response`. Read its body as a stream. It does not parse the export body as JSON.
