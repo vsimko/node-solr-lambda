@@ -49,6 +49,8 @@ console.log(result.response.docs);
 
 The common query properties are typed. The `params` property is the explicit escape hatch for additional Solr parameters; it preserves flexibility without making arbitrary top-level properties part of the standard query interface.
 
+Both ESM and CommonJS consumers are supported. The package provides conditional TypeScript declarations for each module system. See [getting started](docs/getting-started.md) for import examples.
+
 ## Documentation
 
 - [Getting started](docs/getting-started.md)

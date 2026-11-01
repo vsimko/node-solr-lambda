@@ -6,6 +6,7 @@ A generic request method does not mean that every endpoint has a typed wrapper, 
 
 | API area | Current public surface | Remaining work |
 | --- | --- | --- |
+| Package exports | ESM and CommonJS runtime entries; conditional TypeScript declarations for both module systems | Older TypeScript resolution modes use the top-level declaration entry. |
 | Client transport | Typed base URL, core/collection, Basic/Bearer auth, headers, client and per-request timeouts, AbortSignal controls, custom fetch, request defaults, and opt-in retries | Advanced auth mechanisms and retry telemetry. |
 | Errors | `SolrHttpError`, `SolrNetworkError`, `SolrTimeoutError`, `SolrAbortError`, and `SolrValidationError` | Solr-version-specific error payloads still need integration evidence. |
 | Validation | Optional input/output schema interface; optional Zod peer; async parsing; rejection and thrown-parser errors; disabled by default | Additional schema adapters and operation-specific schema examples. |

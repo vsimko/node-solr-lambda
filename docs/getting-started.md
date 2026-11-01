@@ -26,6 +26,26 @@ Common query properties are typed. The type model is being expanded so that supp
 
 The client does not create a core or collection. Create it before you send a request.
 
+## ESM, CommonJS, and TypeScript
+
+The package provides separate ESM and CommonJS runtime exports. Node.js selects the matching entry point.
+
+ESM:
+
+```js
+import { createSolrClient } from "node-solr-lambda";
+const solr = createSolrClient({ collection: "catalog" });
+```
+
+CommonJS:
+
+```js
+const { createSolrClient } = require("node-solr-lambda");
+const solr = createSolrClient({ collection: "catalog" });
+```
+
+TypeScript consumers use conditional declarations for the selected module system. The package also keeps a top-level `types` entry for TypeScript tooling that does not use NodeNext package conditions.
+
 ## Local development
 
 Install the exact dependency tree from the lockfile and run the checks:
