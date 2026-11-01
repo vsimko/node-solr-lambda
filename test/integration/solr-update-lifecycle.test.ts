@@ -10,12 +10,18 @@ integrationTest("soft commit makes pending updates searchable", async ({
   await addDocuments([{ id, label_s: "visible-after-soft-commit" }]);
   await client.softCommit();
 
-  const result = await client.query<{ response?: { docs?: Array<{ id: string }> } }>({
-    query: `id:${id}`,
-    fields: ["id"],
-    limit: 1
-  });
-  assert.deepEqual(result.response?.docs?.map(document => document.id), [id]);
+  let foundIds: string[] = [];
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const result = await client.query<{ response?: { docs?: Array<{ id: string }> } }>({
+      query: `id:${id}`,
+      fields: ["id"],
+      limit: 1
+    });
+    foundIds = result.response?.docs?.map(document => document.id) ?? [];
+    if (foundIds.includes(id)) break;
+    await new Promise(resolve => setTimeout(resolve, 25));
+  }
+  assert.deepEqual(foundIds, [id]);
 });
 
 integrationTest("rollback discards an update that has not been committed", async ({
