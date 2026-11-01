@@ -45,6 +45,7 @@
     "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && node scripts/copy-declarations.mjs && node --input-type=module -e \"import {writeFileSync} from 'node:fs'; writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'})); writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "tsx --test test/*.test.ts",
+    "test:integration": "tsx --test test/integration/*.test.ts",
     "test:types": "tsc --noEmit -p test/tsconfig.json",
     "release:check": "npm run test:api-inventory && npm run test:consumer:no-zod && npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",

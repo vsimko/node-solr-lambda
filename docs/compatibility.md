@@ -15,19 +15,19 @@ Documentation evidence does not prove that every patch release behaves in the sa
 | Solr line | Documentation baseline | Documentation |
 | --- | --- | --- |
 | 8.x | 8.11 | [Solr 8.11 Reference Guide](https://solr.apache.org/guide/8_11/index.html) |
-| 9.x | 9.10 | [Solr 9.10 Reference Guide](https://solr.apache.org/guide/solr/9_10/index.html) |
+| 9.x | 9.11 | [Solr 9.11 Reference Guide](https://solr.apache.org/guide/solr/9_11/index.html) |
 | 10.x | 10.1 | [Solr 10.1 Reference Guide](https://solr.apache.org/guide/solr/10_1/) |
 
-The 8.11, 9.10, and 10.1 guides describe the API families below. These baselines are references for review. They do not define a minimum supported patch release.
+The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines are references for review. They do not define a minimum supported patch release.
 
 ## Endpoint matrix
 
-| Client operation | Solr 8.11 docs | Solr 9.10 docs | Solr 10.1 docs | Runtime test |
+| Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
-| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Unverified |
+| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Basic smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Unverified |
-| `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Unverified |
-| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Unverified |
+| `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Add/delete smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Commit smoke test on pinned 8.11.4 / 9.11.0 / 10.1.0 images; remaining commands unverified |
 | `ping()` — `/admin/ping` | Documented | Documented | Documented | Unverified |
 | `schema()` — `/schema` | Documented | Documented | Documented | Unverified |
 | `config()` — `/config` | Documented | Documented | Documented | Unverified |
@@ -52,7 +52,7 @@ Solr 8.11 introduced additional authentication and authorization plugins, includ
 
 ### Solr 9.x
 
-Use the 9.10 guide as the documentation baseline. It documents both V1 and V2 API surfaces for several administration and configuration areas.
+Use the 9.11 guide as the documentation baseline. It documents both V1 and V2 API surfaces for several administration and configuration areas.
 
 The current client uses the V1 paths for CoreAdmin and Collections operations. Do not assume that V1 and V2 request paths or response shapes are interchangeable.
 
@@ -78,9 +78,27 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 - A successful TypeScript build, unit test, or documentation lookup is not server compatibility evidence.
 - If an endpoint differs by version, record the difference here and add a focused test before changing its status.
 
+## Integration test infrastructure
+
+CI starts pinned official Solr images and runs a health check plus a basic update/query/delete smoke test on Node.js 22:
+
+| Solr line | Pinned Docker image |
+| --- | --- |
+| 8.x | `solr:8.11.4` |
+| 9.x | `solr:9.11.0` |
+| 10.x | `solr:10.1.0` |
+
+Run the same suite locally after starting a Solr container and creating an isolated core:
+
+```sh
+SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
+```
+
+These smoke tests establish that the service starts and basic document/query operations work on the pinned image. They do not certify every endpoint or action in the compatibility matrix.
+
 ## Required integration evidence
 
-For each target Solr line, run the same integration suite against a pinned patch release. Record the exact image tag and test result.
+For each target Solr line, expand the integration suite across the endpoint families below and record the exact image tag and test result.
 
 The suite must cover:
 
@@ -98,6 +116,6 @@ Do not mark a row as supported until the relevant integration test passes. Recor
 ## Reference notes
 
 - [Solr 8.11.4 release notes](https://solr.apache.org/docs/8_11_4/changes/Changes.html) record the final 8.11 patch release and security-related changes.
-- [Solr 9.10.1 release notes](https://solr.apache.org/docs/9_10_1/changes/Changes.html) record V2 API additions and changes in the 9.10 line.
+- [Solr 9.11.1 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) record V2 API additions and changes in the 9.11 line.
 - [Solr 10.1 upgrade notes](https://solr.apache.org/guide/solr/10_1/upgrade-notes/major-changes-in-solr-10.html) describe the V2 API, PKI authentication, and JWT default changes.
 - [Solr 10.1 release notes](https://solr.apache.org/docs/10_1_0/changes/Changes.html) record release-specific changes.
