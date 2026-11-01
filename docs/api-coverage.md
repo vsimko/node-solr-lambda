@@ -2,6 +2,8 @@
 
 See [Client architecture](architecture.md) for module boundaries, type-model guidelines, and shared request conventions. The [roadmap](roadmap.md) tracks priorities and links to implementation issues.
 
+See the [machine-readable API inventory](api-inventory.json) for each operation, request path, type coverage, unit-test status, and per-version integration status.
+
 A generic request method does not mean that every endpoint has a typed wrapper, useful IDE autocomplete, or tested version support. For supported features, the primary public API should expose named TypeScript properties and nested models that IDEs can complete and validate. Custom parameters remain available through an explicit escape hatch.
 
 | API area | Current public surface | Remaining work |

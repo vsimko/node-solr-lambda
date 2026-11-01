@@ -1,0 +1,468 @@
+{
+  "schemaVersion": 1,
+  "package": "node-solr-lambda",
+  "clientVersion": "4.0.0-beta.0",
+  "documentationBaselines": {
+    "8": "8.11",
+    "9": "9.10",
+    "10": "10.1"
+  },
+  "runtimeCertification": "unverified",
+  "statusDefinitions": {
+    "methodImplemented": "A public client method exists for this operation.",
+    "typeCoverage": "complete means common request and response options have dedicated exported types; partial means a generic record or escape hatch remains.",
+    "unitTests": "present means at least one unit test covers the method or shared transport path; it does not mean every action is covered.",
+    "integrationTests": "not-run means no real Solr server test has been executed for this operation."
+  },
+  "entries": [
+    {
+      "id": "query.select",
+      "area": "Query",
+      "clientMethod": "query",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/select",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/query.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/modules.test.ts"
+      ],
+      "notes": "Common query options exist. The public query type still needs a dedicated autocomplete-first model for all Solr parameters."
+    },
+    {
+      "id": "query.json",
+      "area": "Query",
+      "clientMethod": "queryJson",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/query",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/query.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Request and response values use generic record types."
+    },
+    {
+      "id": "update.add",
+      "area": "Update",
+      "clientMethod": "add",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/config.test.ts"
+      ],
+      "notes": "Document and update option types are available; response models and update command variants remain incomplete."
+    },
+    {
+      "id": "update.update",
+      "area": "Update",
+      "clientMethod": "update",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/client.test.ts"
+      ],
+      "notes": "Currently shares the add request implementation. Atomic and JSON update commands need dedicated models."
+    },
+    {
+      "id": "update.delete",
+      "area": "Update",
+      "clientMethod": "delete",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Supports ID and query delete command forms."
+    },
+    {
+      "id": "update.commit",
+      "area": "Update",
+      "clientMethod": "commit",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/client.test.ts"
+      ],
+      "notes": "Commit option type exists; exact server response behavior needs integration tests."
+    },
+    {
+      "id": "update.softCommit",
+      "area": "Update",
+      "clientMethod": "softCommit",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/client.test.ts"
+      ],
+      "notes": "Uses the commit update command with softCommit enabled."
+    },
+    {
+      "id": "update.optimize",
+      "area": "Update",
+      "clientMethod": "optimize",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/client.test.ts"
+      ],
+      "notes": "Action and response behavior need versioned integration evidence."
+    },
+    {
+      "id": "update.rollback",
+      "area": "Update",
+      "clientMethod": "rollback",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/documents.md",
+      "testFiles": [
+        "test/client.test.ts"
+      ],
+      "notes": "Action and response behavior need versioned integration evidence."
+    },
+    {
+      "id": "admin.ping",
+      "area": "Core Admin",
+      "clientMethod": "ping",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/admin/ping",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/cancellation.test.ts"
+      ],
+      "notes": "Health check response models remain generic."
+    },
+    {
+      "id": "schema.api",
+      "area": "Schema",
+      "clientMethod": "schema",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/schema",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/schema.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Command and response models remain generic."
+    },
+    {
+      "id": "config.api",
+      "area": "Config",
+      "clientMethod": "config",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/config",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/config.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Command and response models remain generic."
+    },
+    {
+      "id": "admin.core",
+      "area": "Core Admin",
+      "clientMethod": "coreAdmin",
+      "httpMethod": "GET",
+      "path": "/solr/admin/cores?action={action}",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts"
+      ],
+      "notes": "Action names are a literal union; action-specific parameter and response models remain incomplete."
+    },
+    {
+      "id": "admin.collections",
+      "area": "Collections",
+      "clientMethod": "collections",
+      "httpMethod": "GET",
+      "path": "/solr/admin/collections?action={action}",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts"
+      ],
+      "notes": "Action names are a literal union; action-specific parameter and response models remain incomplete."
+    },
+    {
+      "id": "system.info",
+      "area": "System",
+      "clientMethod": "systemInfo",
+      "httpMethod": "GET",
+      "path": "/solr/admin/info/system",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Response model remains generic."
+    },
+    {
+      "id": "metrics.api",
+      "area": "Metrics",
+      "clientMethod": "metrics",
+      "httpMethod": "GET",
+      "path": "/solr/admin/metrics",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Metric group and response models remain generic."
+    },
+    {
+      "id": "security.api",
+      "area": "Security",
+      "clientMethod": "security",
+      "httpMethod": "GET|POST",
+      "path": "/solr/admin/{authentication|authorization}",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Authentication and authorization command models remain generic."
+    },
+    {
+      "id": "streaming.api",
+      "area": "Streaming",
+      "clientMethod": "stream",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/stream",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/modules.test.ts"
+      ],
+      "notes": "Expression is a string; typed expression builders and response models remain future work."
+    },
+    {
+      "id": "export.api",
+      "area": "Export",
+      "clientMethod": "export",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/export",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/errors.test.ts",
+        "test/cancellation.test.ts"
+      ],
+      "notes": "Returns a raw Response stream. Export field and response constraints need typed models and integration tests."
+    },
+    {
+      "id": "transport.request",
+      "area": "Transport",
+      "clientMethod": "request",
+      "httpMethod": "GET|POST|PUT|DELETE",
+      "path": "caller-defined path",
+      "methodImplemented": true,
+      "typeCoverage": "generic-by-design",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/architecture.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/config.test.ts",
+        "test/cancellation.test.ts"
+      ],
+      "notes": "Generic escape hatch. It does not imply typed support for every Solr endpoint."
+    },
+    {
+      "id": "transport.requestRaw",
+      "area": "Transport",
+      "clientMethod": "requestRaw",
+      "httpMethod": "GET|POST|PUT|DELETE",
+      "path": "caller-defined path",
+      "methodImplemented": true,
+      "typeCoverage": "generic-by-design",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/architecture.md",
+      "testFiles": [
+        "test/errors.test.ts",
+        "test/cancellation.test.ts"
+      ],
+      "notes": "Generic raw-response escape hatch. It does not imply typed support for every Solr endpoint."
+    }
+  ]
+}
