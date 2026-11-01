@@ -324,9 +324,10 @@
       },
       "documentation": "docs/administration.md",
       "testFiles": [
-        "test/admin.test.ts"
+        "test/admin.test.ts",
+        "test/integration/solr-collections.test.ts"
       ],
-      "notes": "Action names are a literal union; action-specific parameter and response models remain incomplete."
+      "notes": "SolrCloud CREATE/LIST/DELETE lifecycle test runs in a dedicated SolrCloud CI matrix for Solr 8.11.4, 9.11.0, and 10.1.0; CI pending."
     },
     {
       "id": "system.info",
@@ -370,7 +371,7 @@
         "test/modules.test.ts",
         "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "Metrics API JVM group response test authored; CI pending."
+      "notes": "Metrics API group=jvm returns Prometheus exposition text; integration test now asserts the response contains JVM metric names. CI pending."
     },
     {
       "id": "security.api",
@@ -413,7 +414,7 @@
         "test/modules.test.ts",
         "test/integration/solr-streaming.test.ts"
       ],
-      "notes": "Streaming Expressions search and result-set document assertion authored; CI pending."
+      "notes": "Streaming Expressions search is tested in a SolrCloud collection (not standalone mode); cloud integration matrix added, CI pending."
     },
     {
       "id": "export.api",
