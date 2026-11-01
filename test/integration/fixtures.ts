@@ -22,7 +22,7 @@ export function createSecurityFixtureData(username = "integration-admin", passwo
     },
     authorization: {
       class: "solr.RuleBasedAuthorizationPlugin",
-      user-role: { [username]: ["admin"] },
+      "user-role": { [username]: ["admin"] },
       permissions: [{ name: "all", role: "admin" }]
     }
   };
