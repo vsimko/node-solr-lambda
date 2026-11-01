@@ -17,10 +17,10 @@ A generic request method does not mean that every endpoint has a typed wrapper, 
 | Schema | `schema(command)` | Add-field and GET field read-back pass CI #123 on pinned Solr 8.11.4/9.11.0/10.1.0. Broader schema commands and typed response models remain. See Issues #68–#72. |
 | Config | `config(command)` | Set/unset user property passes CI #123 on pinned Solr 8.11.4/9.11.0/10.1.0. Typed handlers, components, caches, listeners, update handlers, and property models remain. See Issues #73–#76. |
 | Core Admin | `coreAdmin(action, params)`, `ping()` | Ping plus CREATE, STATUS, RELOAD, and cleanup UNLOAD pass CI #123 on pinned Solr 8.11.4/9.11.0/10.1.0. Other action-specific request/response models remain. See Issues #77–#79. |
-| Collections | `collections(action, params)` | Optional SolrCloud fixture and CREATE/LIST/DELETE integration test added; not run in standalone CI yet. Action-specific models for aliases, shards, replicas, snapshots, backups, and cluster state remain. See Issues #80–#85. |
+| Collections | `collections(action, params)` | SolrCloud fixture and CREATE/LIST/DELETE integration test are included in a dedicated Solr 8/9/10 cloud CI matrix. Action-specific models for aliases, shards, replicas, snapshots, backups, and cluster state remain. See Issues #80–#85. |
 | Security | `security(area, command)` | Reusable isolated BasicAuth/RuleBasedAuthorization test payloads added; live security endpoint tests remain unverified because standalone CI does not enable a security plugin. See Issues #86–#88. |
 | System / Metrics | `systemInfo()`, `metrics()` | System info and JVM Metrics API integration tests authored in PR #139 follow-up; CI pending. Typed system, metric, health, and node response models. See Issues #89–#91. |
-| Streaming / Export | `stream()`, `export()` | Streaming Expressions integration test authored in PR #139 follow-up; CI pending. Typed expression builders, streaming response handling, and raw export stream support. See Issues #92–#94. |
+| Streaming / Export | `stream()`, `export()` | Streaming Expressions search test runs against a SolrCloud collection; CI pending. Typed expression builders, streaming response handling, and raw export stream support. See Issues #92–#94. |
 | Advanced / Raw | Raw request support and generic endpoint access | A documented typed raw-request escape hatch with safe request options. See Issue #98. |
 
 ## Request controls
