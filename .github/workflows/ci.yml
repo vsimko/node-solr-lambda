@@ -56,7 +56,7 @@ jobs:
         run: |
           container_id="$(docker ps --filter "ancestor=solr:${{ matrix.solr-version }}" --format '{{.ID}}' | head -n 1)"
           test -n "$container_id"
-          docker exec "$container_id" solr create_core -c integration
+          docker exec "$container_id" solr create -c integration
       - name: Run Solr integration smoke tests
         run: npm run test:integration
         env:
