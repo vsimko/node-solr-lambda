@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { SolrClient } from "../src/index.js";
-import type { SolrQuery, SolrResponse } from "../src/index.js";
+import type { SolrJsonQueryRequest, SolrQuery, SolrResponse } from "../src/index.js";
 
 const createClient = (capture: (url: URL) => void) => new SolrClient({
   baseUrl: "http://localhost:8983/solr",
@@ -256,7 +256,7 @@ test("queryJson preserves nested JSON Facet API definitions in the request body"
     }
   });
 
-  const request = {
+  const request: SolrJsonQueryRequest = {
     query: { lucene: "*:*" },
     filter: ["inStock:true"],
     facet: {
