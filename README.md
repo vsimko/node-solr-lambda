@@ -27,3 +27,18 @@ console.log(result);
 
 Validation is disabled by default. See [validation](docs/validation.md).
 Read the [API coverage matrix](docs/api-coverage.md) before you depend on an endpoint.
+
+## Development
+
+Use npm with Node.js 20, 22, or 24:
+
+```sh
+npm ci
+npm run typecheck
+npm run test:types
+npm test
+npm run build
+npm run release:check
+```
+
+To publish a release, run `npm run release:publish` manually after review. CI and pull request merges do not publish the package.
