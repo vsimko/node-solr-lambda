@@ -1,7 +1,7 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
-export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
+export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
 /** Replica types accepted by the SolrCloud Collections API. */
@@ -72,6 +72,14 @@ export interface BalanceShardUniqueParams {
   shardUnique?: boolean;
 }
 
+/** Parameters for Collections API REBALANCELEADERS. */
+export interface RebalanceLeadersParams {
+  collection: string;
+  maxAtOnce?: number;
+  maxWaitSeconds?: number;
+  async?: string;
+}
+
 /** Parameters for Collections API ADDREPLICAPROP. */
 export interface AddReplicaPropertyParams {
   collection: string;
@@ -95,7 +103,7 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "ADDREPLICA" ? AddReplicaParams :
   A extends "DELETEREPLICA" ? DeleteReplicaParams :
   A extends "MOVEREPLICA" ? MoveReplicaParams :
-  A extends "BALANCESHARDUNIQUE" ? BalanceShardUniqueParams :
+  A extends "BALANCESHARDUNIQUE" ? BalanceShardUniqueParams :\n  A extends "REBALANCELEADERS" ? RebalanceLeadersParams :
   A extends "ADDREPLICAPROP" ? AddReplicaPropertyParams :
   A extends "DELETEREPLICAPROP" ? DeleteReplicaPropertyParams :
   SolrAdminParams;
