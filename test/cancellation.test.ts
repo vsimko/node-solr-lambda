@@ -7,7 +7,8 @@ test("client timeout aborts a pending request with SolrTimeoutError", async () =
     core: "catalog",
     timeoutMs: 15,
     fetch: async (_input, init) => new Promise((_resolve, reject) => {
-      init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+      const signal = init?.signal;
+      signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
     })
   });
 
@@ -80,7 +81,8 @@ test("raw export keeps cancellation active while its body is consumed", async ()
     timeoutMs: 1000,
     fetch: async (_input, init) => new Response(new ReadableStream<Uint8Array>({
       start(streamController) {
-        init?.signal?.addEventListener("abort", () => streamController.error(init.signal?.reason), { once: true });
+        const signal = init?.signal;
+        signal?.addEventListener("abort", () => streamController.error(signal.reason), { once: true });
       }
     }))
   });
