@@ -25,19 +25,19 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
 | `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query and cursorMark pagination on pinned 8.11.4 / 9.11.0 / 10.1.0 images; other query options remain unverified |
-| `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Test authored in PR #139 follow-up; CI pending |
+| `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Tested: JSON query round-trip on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Tested: add, full-document update, and delete by ID on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; optimize test authored in PR #139 follow-up, CI pending |
+| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; Tested: optimize preserves committed documents on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `ping()` — `/admin/ping` | Documented | Documented | Documented | Tested: ping returns OK on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /{core}/schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Tested: CREATE, STATUS, RELOAD, and fixture UNLOAD cleanup on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | SolrCloud CREATE/LIST/DELETE test authored with dedicated 8/9/10 cloud CI matrix; pending |
-| `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Test authored in PR #139 follow-up; CI pending |
-| `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | JVM group Prometheus response test authored; CI pending |
+| `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Tested: system metadata on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Tested: JVM metrics on pinned 8.11.4 / 9.11.0 / 10.1.0; Solr 8/9 return JSON, Solr 10.1 Prometheus text |
 | `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified: isolated security.json fixture data added; live security plugin configuration and requests are not enabled in standalone CI |
 | `stream()` — `/stream` | Documented | Documented | Documented | SolrCloud search expression test authored; CI pending |
-| `export()` — `/export` | Documented | Documented | Documented | Raw response/docValues integration test authored in PR #139 follow-up; CI pending |
+| `export()` — `/export` | Documented | Documented | Documented | Tested: raw response with docValues sort field on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
 
 The matrix records that the official guides describe these endpoint families. It does not certify the current request parameters, response models, or all action variants. Integration evidence is still required.
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, basic-query, and cursorMark tests on Node.js 22. CI #123 passed on all three pinned Solr images. New JSON Request API, optimize, system info, metrics, Streaming Expressions, and Export tests are authored in the PR follow-up; CI pending. Collections and Streaming Expressions run in a dedicated SolrCloud CI matrix; live security plugin tests remain unverified:
+CI starts pinned official Solr images and runs CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, JSON Request API, optimize, system info, metrics, export, basic-query, and cursorMark tests on Node.js 22. CI #138 standalone jobs passed on Solr 8.11.4, 9.11.0, and 10.1.0. Collections and Streaming Expressions are exercised by a separate SolrCloud matrix; that matrix is still being validated. Live security plugin tests remain unverified:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
