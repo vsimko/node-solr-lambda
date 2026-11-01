@@ -97,3 +97,37 @@ void solr.query<SolrQueryResponse<ProductDocument, ProductFacets>>({ query: "*:*
     void [id, price, invalidId];
   }
 });
+
+void solr.query({
+  query: "*:*",
+  facets: {
+    enabled: true,
+    fields: [
+      "category",
+      { field: "price", limit: 10, offset: 5, sort: "count", minCount: 1, missing: true, prefix: "1", method: "fc" }
+    ],
+    queries: ["price:[0 TO 10]"],
+    dates: [{ field: "created_at", start: "NOW/DAY", end: "NOW", gap: "+1DAY", hardEnd: true, other: "before", include: ["lower", "upper"] }],
+    ranges: [{ field: "price", start: 0, end: 100, gap: 10, other: "between", include: "edge" }],
+    limit: 20,
+    offset: 0,
+    sort: "index",
+    minCount: 1,
+    missing: false,
+    prefix: "A",
+    method: "fc"
+  }
+});
+
+// @ts-expect-error Classic facet sort is limited to count or index.
+void solr.query({ facets: { sort: "ascending" } });
+// @ts-expect-error Field facet sort is limited to count or index.
+void solr.query({ facets: { fields: [{ field: "category", sort: "ascending" }] } });
+// @ts-expect-error Range facets require a gap.
+void solr.query({ facets: { ranges: [{ field: "price", start: 0, end: 100 }] } });
+// @ts-expect-error Date facets require an explicit start, end, and gap.
+void solr.query({ facets: { dates: [{ field: "created_at", start: "NOW", end: "NOW" }] } });
+// @ts-expect-error Facet minCount must be numeric.
+void solr.query({ facets: { minCount: "one" } });
+// @ts-expect-error Unsupported facet methods are rejected.
+void solr.query({ facets: { method: "unknown" } });
