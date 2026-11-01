@@ -6,7 +6,7 @@ import type {
 } from "../src/index.js";
 import type { SolrClient } from "../src/client.js";
 
-const replicaType: CollectionReplicaType = "NRT";
+const replicaType: CollectionReplicaType = "nrt";
 const addReplica = {
   collection: "books",
   shard: "shard1",
