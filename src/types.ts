@@ -359,7 +359,7 @@ export interface SolrJsonTermsFacet extends SolrJsonFacetBase {
   mincount?: number;
   missing?: boolean;
   prefix?: string;
-  method?: "enum" | "fc" | "fcs";
+  method?: "dv" | "uif" | "dvhash" | "enum" | "stream" | "smart";
   allBuckets?: boolean;
   numBuckets?: boolean;
   refine?: boolean;
