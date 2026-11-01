@@ -261,7 +261,6 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.facets;
   delete params.highlighting;
   delete params.grouping;
-  delete params.stats;
   delete params.collapse;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
