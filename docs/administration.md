@@ -42,8 +42,8 @@ The ADDREPLICA and DELETEREPLICA request parameters follow the official [Solr 8.
 
 ## Replica movement and properties
 
-The Collections API also exposes action-specific parameter models for `MOVEREPLICA`, `BALANCESHARDUNIQUE`, `ADDREPLICAPROP`, and `DELETEREPLICAPROP`. These map to the V1 Collections API actions documented by Apache Solr.
+The Collections API also exposes action-specific parameter models for `MOVEREPLICA`, `BALANCESHARDUNIQUE`, `REBALANCELEADERS`, `ADDREPLICAPROP`, and `DELETEREPLICAPROP`. These map to the V1 Collections API actions documented by Apache Solr.
 
 `MOVEREPLICA` requires a destination node and either a replica name or the source node plus shard. Solr implements a move by creating the destination replica and then deleting the source replica. A timeout can leave an extra replica; it does not roll back the add operation. The client has serialization/type coverage, but a real multi-node move has not yet been exercised by this repository's single-node SolrCloud CI topology.
 
-`BALANCESHARDUNIQUE` balances a shard-unique property such as `preferredLeader`. `ADDREPLICAPROP` and `DELETEREPLICAPROP` manage an individual replica's property. The integration suite now includes property add/delete and preferred-leader balancing tests; their Solr 8/9/10 CI results are pending. These operations do not demonstrate multi-node placement balance when the test cluster contains only one node.
+`BALANCESHARDUNIQUE` balances a shard-unique property such as `preferredLeader`. `ADDREPLICAPROP` and `DELETEREPLICAPROP` manage an individual replica's property. Property add/delete and preferred-leader balancing return successful responses on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #209). This verifies that the actions are accepted, not a cluster-state property read-back; the one-node topology cannot demonstrate cross-node distribution. `REBALANCELEADERS` has a typed request model and serialization coverage, but no runtime leader reassignment test.
