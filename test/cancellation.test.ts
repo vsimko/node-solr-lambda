@@ -40,7 +40,9 @@ test("per-request timeout overrides the client timeout", async () => {
     core: "catalog",
     timeoutMs: 1000,
     fetch: async (_input, init) => new Promise((_resolve, reject) => {
-      init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+      if (!init?.signal) throw new Error("expected request signal");
+      const signal = init.signal;
+      signal.addEventListener("abort", () => reject(signal.reason), { once: true });
     })
   });
 
