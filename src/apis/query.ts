@@ -1,7 +1,7 @@
 import type { SolrTransport } from "../transport.js";
-import type { SolrQuery } from "../types.js";
+import type { RequestControlOptions, SolrQuery } from "../types.js";
 
-export function query<T>(client: SolrTransport, path: string, query: SolrQuery): Promise<T> {
+export function query<T>(client: SolrTransport, path: string, query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {
   const params: Record<string, unknown> = { ...(query.params ?? {}), ...query };
   if (query.query !== undefined) params.q = query.query;
   if (query.filter !== undefined) params.fq = query.filter;
@@ -21,9 +21,9 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery):
       flat[key] = value as string | number | boolean | readonly (string | number)[];
     }
   }
-  return client.request<T>(path, { method: "GET", query: flat, operation: "query" });
+  return client.request<T>(path, { ...requestOptions, method: "GET", query: flat, operation: "query" });
 }
 
-export function queryJson<T>(client: SolrTransport, path: string, request: Readonly<Record<string, unknown>>): Promise<T> {
-  return client.request<T>(path, { method: "POST", body: request, operation: "queryJson" });
+export function queryJson<T>(client: SolrTransport, path: string, request: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
+  return client.request<T>(path, { ...requestOptions, method: "POST", body: request, operation: "queryJson" });
 }
