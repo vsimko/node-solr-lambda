@@ -8,5 +8,5 @@ integrationTest("System info endpoint returns server information", async ({ clie
 
 integrationTest("Metrics API returns JVM metrics", async ({ client }) => {
   const result = await client.metrics<{ metrics?: Record<string, unknown> }>({ group: "jvm" });
-  assert.ok(result.metrics && Object.keys(result.metrics).length > 0, "JVM metrics should be present");
+  assert.ok(result.metrics && Object.keys(result.metrics).length > 0, `JVM metrics should be present: ${JSON.stringify(result)}`);
 });
