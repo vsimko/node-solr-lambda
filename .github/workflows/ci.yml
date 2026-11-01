@@ -160,8 +160,11 @@ jobs:
       - name: Start SolrCloud
         run: |
           docker run --detach \
+          docker network create solr-cloud-net
             --name solr-cloud \
             --publish 8983:8983 \
+            --network solr-cloud-net \
+            --network-alias solr-cloud \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             "solr:${{ matrix.solr-version }}" \
             solr-foreground -c
@@ -194,12 +197,12 @@ jobs:
           docker exec solr-cloud bash -lc 'solr zk upconfig -n _default -d /opt/solr/server/solr/configsets/_default -z localhost:9983'
       - name: Start a second SolrCloud node
         run: |
-          docker run --detach \\
-            --name solr-cloud-2 \\
-            --network solr-cloud-net \\
-            --publish 8984:8983 \\
-            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \\
-            "solr:${{ matrix.solr-version }}" \\
+          docker run --detach \
+            --name solr-cloud-2 \
+            --network solr-cloud-net \
+            --publish 8984:8983 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            "solr:${{ matrix.solr-version }}" \
             solr-foreground -c -z solr-cloud:9983
           for attempt in {1..60}; do
             live_nodes=$(docker exec solr-cloud bash -lc 'solr zk ls /live_nodes -z localhost:9983' 2>/dev/null || true)
