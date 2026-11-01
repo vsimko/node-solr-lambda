@@ -20,6 +20,31 @@ test("query maps options to Solr parameters", async () => {
   assert.equal(url.searchParams.get("start"), "10");
 });
 
+test("query serializes typed parser, operator, writer, and custom parameters", async () => {
+  let requestedUrl = "";
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async input => {
+      requestedUrl = String(input);
+      return new Response(JSON.stringify({ response: { numFound: 0, docs: [] } }));
+    }
+  });
+
+  await client.query({
+    query: "title:solr",
+    defType: "edismax",
+    "q.op": "AND",
+    wt: "json",
+    params: { "facet.field": "category" }
+  });
+
+  const params = new URL(requestedUrl).searchParams;
+  assert.equal(params.get("defType"), "edismax");
+  assert.equal(params.get("q.op"), "AND");
+  assert.equal(params.get("wt"), "json");
+  assert.equal(params.get("facet.field"), "category");
+});
+
 test("add sends a document array", async () => {
   let body = "";
   const client = createSolrClient({

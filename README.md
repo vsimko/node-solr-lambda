@@ -38,16 +38,19 @@ const result = await solr.query<{ response: { numFound: number; docs: Book[] } }
   sort: "title asc",
   limit: 20,
   offset: 0,
+  defType: "edismax",
+  "q.op": "AND",
+  wt: "json",
   params: {
     // Custom Solr parameters not yet represented by a dedicated option.
-    "q.op": "AND"
+    "facet.field": "category"
   }
 });
 
 console.log(result.response.docs);
 ```
 
-The common query properties are typed. The `params` property is the explicit escape hatch for additional Solr parameters; it preserves flexibility without making arbitrary top-level properties part of the standard query interface.
+Common query properties are explicitly typed, including the parser, query operator, and response writer. Misspelled or unsupported top-level properties fail TypeScript checks. The `params` property is the escape hatch for additional Solr parameters that do not yet have a dedicated type.
 
 Both ESM and CommonJS consumers are supported. The package provides conditional TypeScript declarations for each module system. See [getting started](docs/getting-started.md) for import examples.
 
@@ -63,7 +66,7 @@ Both ESM and CommonJS consumers are supported. The package provides conditional 
 
 ## Development
 
-Use npm with Node.js 20, 22, or 24:
+Use npm with Node.js 20, 22, and 24:
 
 ```sh
 npm ci

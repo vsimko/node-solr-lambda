@@ -33,9 +33,10 @@
       "documentation": "docs/query.md",
       "testFiles": [
         "test/client.test.ts",
+        "test/query-types.ts",
         "test/modules.test.ts"
       ],
-      "notes": "Common query options exist. The public query type still needs a dedicated autocomplete-first model for all Solr parameters."
+      "notes": "Common query options, parser selection, query operator, and response writer have dedicated exported types. Parser-specific nested options, facets, highlighting, grouping, and other Solr parameters remain incomplete."
     },
     {
       "id": "query.json",
