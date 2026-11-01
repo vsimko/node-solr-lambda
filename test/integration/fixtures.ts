@@ -1,5 +1,5 @@
 import test from "node:test";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { SolrClient } from "../../src/index.js";
 import type { SolrDocument } from "../../src/index.js";
 
@@ -14,11 +14,15 @@ export interface SolrSecurityFixtureData {
 
 /** Return isolated BasicAuth and RuleBasedAuthorization payloads for security.json tests. */
 export function createSecurityFixtureData(username = "integration-admin", password = "integration-only-password"): SolrSecurityFixtureData {
+  const salt = randomBytes(32);
+  const saltedPassword = Buffer.concat([salt, Buffer.from(password)]);
+  const firstHash = createHash("sha256").update(saltedPassword).digest();
+  const credential = `${createHash("sha256").update(firstHash).digest("base64")} ${salt.toString("base64")}`;
   return {
     authentication: {
       class: "solr.BasicAuthPlugin",
       blockUnknown: true,
-      credentials: { [username]: createHash("sha256").update(password).digest("hex") }
+      credentials: { [username]: credential }
     },
     authorization: {
       class: "solr.RuleBasedAuthorizationPlugin",
@@ -54,7 +58,14 @@ export function integrationTest(
   run: (fixture: SolrIntegrationFixture) => Promise<void>
 ): void {
   test(name, { skip: !baseUrl || !core }, async () => {
-    const client = new SolrClient({ baseUrl: baseUrl!, core: core!, timeoutMs: 30_000 });
+    const username = process.env.SOLR_USERNAME;
+    const password = process.env.SOLR_PASSWORD;
+    const client = new SolrClient({
+      baseUrl: baseUrl!,
+      core: core!,
+      timeoutMs: 30_000,
+      ...(username && password ? { auth: { type: "basic" as const, username, password } } : {})
+    });
     const documentIds = new Set<string>();
     const createdCores = new Set<string>();
     const schemaFields = new Set<string>();
