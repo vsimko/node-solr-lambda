@@ -18,3 +18,15 @@ console.log(result);
 ```
 
 The client does not create a core or collection. Create it before you send a request.
+
+## Local development
+
+Install the exact dependency tree from the lockfile and run the checks:
+
+```sh
+npm ci
+npm run typecheck
+npm run test:types
+npm test
+npm run build
+```
