@@ -47,6 +47,7 @@ export interface SolrCloudIntegrationFixture {
   client: SolrClient;
   clientForCollection(name: string): SolrClient;
   createCollection(prefix?: string): Promise<string>;
+  createImplicitCollection(prefix?: string): Promise<string>;
   createAlias(collection: string, prefix?: string): Promise<string>;
 }
 
@@ -174,6 +175,18 @@ export function cloudIntegrationTest(
         await client.collections("CREATE", {
           name,
           numShards: 1,
+          replicationFactor: 1,
+          "collection.configName": "_default"
+        });
+        createdCollections.add(name);
+        return name;
+      },
+      async createImplicitCollection(prefix = "integration_implicit") {
+        const name = `${prefix}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
+        await client.collections("CREATE", {
+          name,
+          "router.name": "implicit",
+          shards: "shard1",
           replicationFactor: 1,
           "collection.configName": "_default"
         });
