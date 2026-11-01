@@ -1,115 +1,98 @@
-import { Buffer } from "node:buffer";
-import { SolrHttpError, SolrValidationError } from "./errors.js";
-import type { CommitOptions, RequestOptions, SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, UpdateOptions, ValidationSchema } from "./types.js";
+import { SolrTransport } from "./transport.js";
+import * as queryApi from "./apis/query.js";
+import * as updateApi from "./apis/update.js";
+import { schema as schemaApi } from "./apis/schema.js";
+import { config as configApi } from "./apis/config.js";
+import { coreAdmin as coreAdminApi } from "./apis/core-admin.js";
+import { collections as collectionsApi } from "./apis/collections.js";
+import { security as securityApi } from "./apis/security.js";
+import { systemInfo as systemInfoApi } from "./apis/system.js";
+import { metrics as metricsApi } from "./apis/metrics.js";
+import * as advancedApi from "./apis/advanced.js";
+import type {
+  CollectionAdminAction, CommitOptions, CoreAdminAction, SolrAdminParams,
+  SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, UpdateOptions
+} from "./types.js";
 
-const DEFAULT_BASE_URL="http://localhost:8983/";
-function appendQuery(url:URL, query:RequestOptions["query"]):void {
-  if(!query)return;
-  const entries=query instanceof URLSearchParams ? query.entries() : Object.entries(query).flatMap(([key,value])=>(Array.isArray(value)?value:[value]).map(item=>[key,String(item)] as [string,string]));
-  for(const [key,value] of entries)url.searchParams.append(key,value);
-}
-export class SolrClient {
-  readonly clientConfig:Readonly<SolrClientConfig>;
-  private readonly requestFetch:typeof fetch;
-  constructor(config:SolrClientConfig={}) {
-    this.clientConfig=Object.freeze({...config});
-    this.requestFetch=config.fetch??globalThis.fetch;
-    if(!this.requestFetch)throw new Error("Node.js 20 or later with global fetch is required");
+/** Public Solr client. API methods delegate to domain modules over one transport. */
+export class SolrClient extends SolrTransport {
+  constructor(config: SolrClientConfig = {}) {
+    super(config);
   }
-  private async validate(operation:string,direction:"inputs"|"outputs",value:unknown):Promise<unknown> {
-    const schema:ValidationSchema|undefined=this.clientConfig.validation?.[direction]?.[operation];
-    if(!schema)return value;
-    const result=await schema.safeParseAsync(value);
-    if(result.success)return result.data;
-    if(this.clientConfig.validation?.onError==="ignore")return value;
-    throw new SolrValidationError(operation,result.error.issues);
-  }
-  async request<T=unknown>(path:string,options:RequestOptions={}):Promise<T> {
-    const method=options.method??"GET";
-    const operation=options.operation??method;
-    const input=this.clientConfig.validation?await this.validate(operation,"inputs",options.body??options.query):(options.body??options.query);
-    const url=new URL(path.replace(/^\//,""),this.clientConfig.baseUrl??DEFAULT_BASE_URL);
-    appendQuery(url,options.body===undefined ? input as RequestOptions["query"] : options.query);
-    const headers:Record<string,string>={
-      accept:"application/json",
-      ...(options.body===undefined?{}:{"content-type":"application/json"}),
-      ...(this.clientConfig.username!==undefined?{authorization:`Basic ${Buffer.from(`${this.clientConfig.username}:${this.clientConfig.password??""}`).toString("base64")}`}:{}),
-      ...this.clientConfig.headers,...options.headers
-    };
-    const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
-    const text=await response.text();
-    let payload:unknown;
-    if(text){try{payload=JSON.parse(text) as unknown;}catch{payload=text;}}
-    if(!response.ok)throw new SolrHttpError(response.status,response.statusText,payload);
-    return (this.clientConfig.validation?await this.validate(operation,"outputs",payload):payload) as T;
-  }
-  private endpoint(path:string):string {
-    const target=this.clientConfig.core??this.clientConfig.collection;
-    if(!target)throw new Error("Set 'core' or 'collection' in the Solr client configuration");
-    return `/solr/${encodeURIComponent(target)}${path}`;
-  }
-  query<T=unknown>(query:SolrQuery):Promise<T> {
-    const params:Record<string,unknown>={...(query.params??{}),...query};
-    if(query.query!==undefined)params.q=query.query;
-    if(query.filter!==undefined)params.fq=query.filter;
-    if(query.fields!==undefined)params.fl=query.fields;
-    if(query.limit!==undefined)params.rows=query.limit;
-    if(query.offset!==undefined)params.start=query.offset;
-    delete params.query;delete params.params;delete params.filter;delete params.fields;delete params.limit;delete params.offset;
-    const flat:Record<string,string|number|boolean|readonly (string|number)[]>={};
-    for(const [key,value] of Object.entries(params))if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"||(Array.isArray(value)&&value.every(x=>typeof x==="string"||typeof x==="number")))flat[key]=value as string|number|boolean|readonly (string|number)[];
-    return this.request<T>(this.endpoint("/select"),{method:"GET",query:flat,operation:"query"});
-  }
-  add<T=unknown>(documents:SolrDocument|readonly SolrDocument[],options:UpdateOptions={}):Promise<T> {
-    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents],query:{...options},operation:"add"});
-  }
-  update<T=unknown>(documents:SolrDocument|readonly SolrDocument[],options:UpdateOptions={}):Promise<T> {
-    return this.add<T>(documents,options);
-  }
-  delete<T=unknown>(command:SolrDelete):Promise<T> {
-    return this.request<T>(this.endpoint("/update"),{method:"POST",body:{delete:typeof command==="string"?{id:command}:command},operation:"delete"});
-  }
-  commit<T=unknown>(options:CommitOptions={}):Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{commit:options},operation:"commit"});}
-  softCommit<T=unknown>():Promise<T>{return this.commit<T>({softCommit:true,waitSearcher:false});}
-  optimize<T=unknown>(maxSegments=1):Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{optimize:{maxSegments}},operation:"optimize"});}
-  rollback<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{rollback:{}},operation:"rollback"});}
-  ping<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/admin/ping"),{operation:"ping"});}
-  schema<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/schema"),{method:"POST",body:command,operation:"schema"});}
-  config<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/config"),{method:"POST",body:command,operation:"config"});}
 
-  queryJson<T=unknown>(request:Readonly<Record<string,unknown>>):Promise<T> {
-    return this.request<T>(this.endpoint("/query"),{method:"POST",body:request,operation:"queryJson"});
+  query<T = unknown>(query: SolrQuery): Promise<T> {
+    return queryApi.query<T>(this, this.endpoint("/select"), query);
   }
-  coreAdmin<T=unknown>(action:import("./types.js").CoreAdminAction,params:import("./types.js").SolrAdminParams={}):Promise<T> {
-    return this.request<T>("/solr/admin/cores",{query:{action,...params},operation:"coreAdmin"});
+
+  queryJson<T = unknown>(request: Readonly<Record<string, unknown>>): Promise<T> {
+    return queryApi.queryJson<T>(this, this.endpoint("/query"), request);
   }
-  collections<T=unknown>(action:import("./types.js").CollectionAdminAction,params:import("./types.js").SolrAdminParams={}):Promise<T> {
-    return this.request<T>("/solr/admin/collections",{query:{action,...params},operation:"collections"});
+
+  add<T = unknown>(documents: SolrDocument | readonly SolrDocument[], options: UpdateOptions = {}): Promise<T> {
+    return updateApi.add<T>(this, this.endpoint("/update"), documents, options);
   }
-  systemInfo<T=unknown>():Promise<T> {
-    return this.request<T>("/solr/admin/info/system",{operation:"systemInfo"});
+
+  update<T = unknown>(documents: SolrDocument | readonly SolrDocument[], options: UpdateOptions = {}): Promise<T> {
+    return updateApi.update<T>(this, this.endpoint("/update"), documents, options);
   }
-  metrics<T=unknown>(params:import("./types.js").SolrAdminParams={}):Promise<T> {
-    return this.request<T>("/solr/admin/metrics",{query:params,operation:"metrics"});
+
+  delete<T = unknown>(command: SolrDelete): Promise<T> {
+    return updateApi.deleteDocuments<T>(this, this.endpoint("/update"), command);
   }
-  security<T=unknown>(area:"authentication"|"authorization",command?:Readonly<Record<string,unknown>>):Promise<T> {
-    return this.request<T>(`/solr/admin/${area}`,{method:command===undefined?"GET":"POST",...(command===undefined?{}:{body:command}),operation:"security"});
+
+  commit<T = unknown>(options: CommitOptions = {}): Promise<T> {
+    return updateApi.commit<T>(this, this.endpoint("/update"), options);
   }
-  stream<T=unknown>(expression:string):Promise<T> {
-    return this.request<T>(this.endpoint("/stream"),{query:{expr:expression,wt:"json"},operation:"stream"});
+
+  softCommit<T = unknown>(): Promise<T> {
+    return updateApi.softCommit<T>(this, this.endpoint("/update"));
   }
-  async requestRaw(path:string,options:RequestOptions={}):Promise<Response> {
-    const method=options.method??"GET";
-    const operation=options.operation??method;
-    const input=this.clientConfig.validation?await this.validate(operation,"inputs",options.body??options.query):(options.body??options.query);
-    const url=new URL(path.startsWith("/")?path.slice(1):path,this.clientConfig.baseUrl??DEFAULT_BASE_URL);
-    appendQuery(url,options.body===undefined?input as RequestOptions["query"]:options.query);
-    const headers:Record<string,string>={accept:"*/*",...(options.body===undefined?{}:{"content-type":"application/json"}),...(this.clientConfig.username!==undefined?{authorization:`Basic ${Buffer.from(`${this.clientConfig.username}:${this.clientConfig.password??""}`).toString("base64")}`}:{}),...this.clientConfig.headers,...options.headers};
-    const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
-    if(!response.ok){const text=await response.text();let payload:unknown=text;try{payload=text?JSON.parse(text) as unknown:undefined;}catch{}throw new SolrHttpError(response.status,response.statusText,payload);}
-    return response;
+
+  optimize<T = unknown>(maxSegments = 1): Promise<T> {
+    return updateApi.optimize<T>(this, this.endpoint("/update"), maxSegments);
   }
-  export(params:import("./types.js").SolrAdminParams):Promise<Response> {
-    return this.requestRaw(this.endpoint("/export"),{query:params,operation:"export"});
+
+  rollback<T = unknown>(): Promise<T> {
+    return updateApi.rollback<T>(this, this.endpoint("/update"));
+  }
+
+  ping<T = unknown>(): Promise<T> {
+    return this.request<T>(this.endpoint("/admin/ping"), { operation: "ping" });
+  }
+
+  schema<T = unknown>(command: Readonly<Record<string, unknown>>): Promise<T> {
+    return schemaApi<T>(this, this.endpoint("/schema"), command);
+  }
+
+  config<T = unknown>(command: Readonly<Record<string, unknown>>): Promise<T> {
+    return configApi<T>(this, this.endpoint("/config"), command);
+  }
+
+  coreAdmin<T = unknown>(action: CoreAdminAction, params: SolrAdminParams = {}): Promise<T> {
+    return coreAdminApi<T>(this, action, params);
+  }
+
+  collections<T = unknown>(action: CollectionAdminAction, params: SolrAdminParams = {}): Promise<T> {
+    return collectionsApi<T>(this, action, params);
+  }
+
+  systemInfo<T = unknown>(): Promise<T> {
+    return systemInfoApi<T>(this);
+  }
+
+  metrics<T = unknown>(params: SolrAdminParams = {}): Promise<T> {
+    return metricsApi<T>(this, params);
+  }
+
+  security<T = unknown>(area: "authentication" | "authorization", command?: Readonly<Record<string, unknown>>): Promise<T> {
+    return securityApi<T>(this, area, command);
+  }
+
+  stream<T = unknown>(expression: string): Promise<T> {
+    return advancedApi.stream<T>(this, this.endpoint("/stream"), expression);
+  }
+
+  export(params: SolrAdminParams): Promise<Response> {
+    return advancedApi.exportResults(this, this.endpoint("/export"), params);
   }
 }
