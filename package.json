@@ -42,8 +42,9 @@
     "test": "tsx --test test/*.test.ts",
     "test:types": "tsc --noEmit -p test/tsconfig.json",
     "release:check": "npm pack --dry-run",
-    "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",
-    "release:publish": "npm publish --access public"
+    "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run test:consumer:no-zod && npm run release:check",
+    "release:publish": "npm publish --access public",
+    "test:consumer:no-zod": "node test/no-zod-consumer.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
