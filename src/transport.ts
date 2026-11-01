@@ -358,7 +358,9 @@ export class SolrTransport {
         throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, parseBody(body));
       } catch (error) {
         const classified = signalContext.classify(error);
-        throw classified ?? error;
+        if (classified) throw classified;
+        if (error instanceof SolrHttpError) throw error;
+        throw new SolrNetworkError(endpointFor(url), error);
       } finally {
         signalContext.cleanup();
       }
