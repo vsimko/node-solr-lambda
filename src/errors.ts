@@ -55,8 +55,13 @@ export class SolrAbortError extends Error {
 }
 
 export class SolrValidationError extends Error {
-  constructor(readonly operation: string, readonly issues: readonly { path: readonly PropertyKey[]; message: string }[]) {
-    super(`Solr validation failed for ${operation}`);
+  constructor(
+    readonly operation: string,
+    readonly issues: readonly { path: readonly PropertyKey[]; message: string }[],
+    cause?: unknown
+  ) {
+    const detail = cause instanceof Error ? `: ${cause.message}` : "";
+    super(`Solr validation failed for ${operation}${detail}`, cause === undefined ? undefined : { cause });
     this.name = "SolrValidationError";
   }
 }
