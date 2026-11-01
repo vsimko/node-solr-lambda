@@ -29,8 +29,7 @@ void solr.query({
   wt: "json",
   params: {
     facet: "true",
-    "facet.field": ["category", "author"],
-    "facet.excludeTags": solrExcludeTags("category", "availability")
+    "facet.field": solrLocalParams({ ex: solrExcludeTags("category", "availability") }, "category")
   }
 });
 

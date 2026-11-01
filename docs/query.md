@@ -39,21 +39,24 @@ await solr.query({
 });
 ```
 
-The structured filter serializes to Solr local params, for example `{!tag=category}`, `cache=false`, and `cost=25`. Additional filter-local parameters can be supplied through `localParams`; use raw strings or `solrLocalParams()` when you need syntax outside the structured properties.
+A structured filter serializes to Solr local params, for example `{!tag=category}`, `cache=false`, and `cost=25`. Additional filter-local parameters can be supplied through `localParams`; use raw strings or `solrLocalParams()` when you need syntax outside the structured properties.
 
-Tagged filters can be excluded from supported Solr components or parsers by passing their tags through the relevant `excludeTags` parameter. The `solrExcludeTags()` helper joins tag names for those parameter values:
+Tagged filters can be excluded from supported facets or query parsers by passing their tags through the relevant local parameter. For a classic facet field, Solr uses the `ex` local param:
 
 ```ts
-import { solrExcludeTags } from "node-solr-lambda";
+import { solrExcludeTags, solrLocalParams } from "node-solr-lambda";
 
 await solr.query({
   query: "*:*",
   filter: [{ query: "category:books", tag: "category" }],
-  params: { "facet.excludeTags": solrExcludeTags("category") }
+  params: {
+    "facet": "true",
+    "facet.field": solrLocalParams({ ex: solrExcludeTags("category") }, "category")
+  }
 });
 ```
 
-Solr local parameters are scoped to the query parameter they prefix. For example, `excludeTags` used by a parser belongs in that parser's local-params prefix; facet or query-elevation exclusion uses the corresponding request parameter. This client does not reinterpret or globally apply exclusions.
+Some query parsers instead accept an `excludeTags` local parameter. Keep it in that parser's local-params prefix, for example `solrLocalParams({ type: "parent", which: "type:parent", excludeTags: solrExcludeTags("category") }, query)`. Exclusion is contextual: this client does not globally remove tagged filters.
 
 ## Sort, field-list, and expression helpers
 
@@ -88,7 +91,7 @@ await solr.query({ query, sort, fields });
 - `solrFunction(name, ...args)` builds function-call expressions and can be nested.
 - `solrLocalParams(params, value?)` creates a `{!...}` prefix and can append the associated query value.
 - `solrFilter(query, options)` builds a structured filter with tags, cache/cost hints, and additional local parameters.
-- `solrExcludeTags(...tags)` joins tags for Solr parameters that accept comma-separated exclusions.
+- `solrExcludeTags(...tags)` joins tags for Solr local parameters that accept comma-separated exclusions.
 
 These helpers only compose request strings. Solr validates field names, functions, local parameters, sortability, and transformer availability at query time. Keep raw strings when using Solr syntax not represented by the structured helpers.
 
