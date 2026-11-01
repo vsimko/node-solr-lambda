@@ -1,5 +1,5 @@
 import { SolrHttpError, SolrValidationError } from "./errors.js";
-import type { RequestOptions, SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, ValidationSchema } from "./types.js";
+import type { CommitOptions, RequestOptions, SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, UpdateOptions, ValidationSchema } from "./types.js";
 
 const DEFAULT_BASE_URL="http://localhost:8983/";
 function appendQuery(url:URL, query:RequestOptions["query"]):void {
@@ -65,7 +65,9 @@ export class SolrClient {
   delete<T=unknown>(command:SolrDelete):Promise<T> {
     return this.request<T>(this.endpoint("/update"),{method:"POST",body:{delete:typeof command==="string"?{id:command}:command},operation:"delete"});
   }
-  commit<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{commit:{}},operation:"commit"});}
+  commit<T=unknown>(options:CommitOptions={}):Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{commit:options},operation:"commit"});}
+  softCommit<T=unknown>():Promise<T>{return this.commit<T>({softCommit:true,waitSearcher:false});}
+  optimize<T=unknown>(maxSegments=1):Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{optimize:{maxSegments}},operation:"optimize"});}
   rollback<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/update"),{method:"POST",body:{rollback:{}},operation:"rollback"});}
   ping<T=unknown>():Promise<T>{return this.request<T>(this.endpoint("/admin/ping"),{operation:"ping"});}
   schema<T=unknown>(command:Readonly<Record<string,unknown>>):Promise<T>{return this.request<T>(this.endpoint("/schema"),{method:"POST",body:command,operation:"schema"});}
