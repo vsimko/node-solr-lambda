@@ -93,6 +93,45 @@ const priceRangeCounts = result.facet_counts?.facet_ranges?.price_d?.counts;
 - `facet_counts.facet_fields` uses Solr's alternating term/count array representation. Query counts are in `facet_queries`; numeric and date range counts are in `facet_ranges`.
 - The `params` escape hatch remains available for facet parameters not represented by these models. Runtime behavior is covered by the pinned Solr integration matrix; verify any server-specific or uncommon facet option against the version you deploy.
 
+## Highlighting
+
+Use the typed `highlighting` property to configure the Solr Highlighting component. The response snippets are returned separately from `response.docs`, keyed first by document unique key and then by field name.
+
+```ts
+const result = await solr.query<SolrQueryResponse<Product>>({
+  query: "title_txt:distributed",
+  fields: ["id", "title_txt"],
+  highlighting: {
+    fields: ["title_txt"],
+    method: "unified",
+    snippets: 3,
+    fragmentSize: 120,
+    requireFieldMatch: true,
+    alternateField: "summary_txt",
+    maxAlternateFieldLength: 200,
+    usePhraseHighlighter: true,
+    highlightMultiTerm: true,
+    encoder: "html",
+    tagPre: "<mark>",
+    tagPost: "</mark>",
+    perField: {
+      title_txt: { snippets: 2, fragmentSize: 80 }
+    }
+  }
+});
+
+const snippets = result.highlighting?.[result.response?.docs?.[0]?.id ?? ""]?.title_txt;
+```
+
+- `fields` maps to `hl.fl`; `snippets` and `fragmentSize` map to `hl.snippets` and `hl.fragsize`.
+- `method` selects `unified`, `original`, or `fastVector`. Highlighter options differ by implementation; for example, `mergeContiguous` and `formatter` apply to the Original Highlighter.
+- `alternateField` and `maxAlternateFieldLength` configure fallback summaries. `usePhraseHighlighter` and `highlightMultiTerm` control phrase and multi-term query highlighting.
+- `encoder` accepts `html` or `simple`. `tagPre` and `tagPost` configure common highlighter tags; `simplePre` and `simplePost` configure the Original Highlighter's simple formatter.
+- `perField` applies supported overrides using Solr's `f.<field>.hl.*` parameter syntax.
+- The `highlighting` response section is typed as document ID → field name → snippet array. Solr returns it only when highlighting is enabled and a requested field has a matching snippet.
+
+The [Solr Highlighting reference](https://solr.apache.org/guide/solr/10_1/query-guide/highlighting.html) describes highlighter-specific behavior and schema/performance requirements. Highlighting fields must be stored, and the schema's unique key is used to associate snippets with documents.
+
 ## Typed query responses
 
 `query<T>()` lets the caller choose the complete response type. For the standard `/select` handler, `SolrQueryResponse<TDocument, TJsonFacet>` provides named sections for document metadata, classic facets, JSON facets, highlighting, grouping, statistics, and debug information. The first generic parameter controls the document shape; the second describes the JSON Facet API's `facets` object.

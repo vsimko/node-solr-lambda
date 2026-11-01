@@ -223,3 +223,36 @@ void [invalidTermsFacet, invalidRangeFacet, invalidQueryFacet, invalidFacetKind,
 // @ts-expect-error Classic facet methods such as fcs are not JSON terms facet methods.
 const invalidJsonTermsMethod: SolrJsonQueryRequest = { facet: { categories: { type: "terms", field: "category_s", method: "fcs" } } };
 void invalidJsonTermsMethod;
+
+void solr.query({
+  query: "quick",
+  highlighting: {
+    fields: ["title_txt", "description_txt"],
+    method: "unified",
+    snippets: 3,
+    fragmentSize: 120,
+    requireFieldMatch: true,
+    maxAnalyzedChars: 10_000,
+    alternateField: "summary_txt",
+    maxAlternateFieldLength: 200,
+    usePhraseHighlighter: true,
+    highlightMultiTerm: true,
+    encoder: "html",
+    tagPre: "<mark>",
+    tagPost: "</mark>",
+    perField: {
+      title_txt: { method: "original", snippets: 2, fragmentSize: 80, alternateField: "summary_txt" }
+    }
+  }
+});
+
+// @ts-expect-error Highlighter names are restricted to Solr's supported implementations.
+void solr.query({ query: "quick", highlighting: { method: "custom" } });
+// @ts-expect-error The Original Highlighter's formatter is the only supported formatter value.
+void solr.query({ query: "quick", highlighting: { formatter: "fancy" } });
+// @ts-expect-error Highlight encoders are restricted to html or simple.
+void solr.query({ query: "quick", highlighting: { encoder: "xml" } });
+// @ts-expect-error Fragment size must be numeric.
+void solr.query({ query: "quick", highlighting: { fragmentSize: "large" } });
+// @ts-expect-error Per-field snippet count must be numeric.
+void solr.query({ query: "quick", highlighting: { perField: { title_txt: { snippets: "two" } } } });

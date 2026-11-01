@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -29,6 +29,48 @@ function setRangeOptions(
   if (options.other !== undefined) params[`${prefix}.other`] = options.other;
   if (options.include !== undefined) params[`${prefix}.include`] = options.include;
   if (options.method !== undefined) params[`${prefix}.method`] = options.method;
+}
+
+
+function setFieldHighlightOptions(params: Record<string, unknown>, prefix: string, options: SolrFieldHighlightOptions): void {
+  if (options.method !== undefined) params[`${prefix}.method`] = options.method;
+  if (options.snippets !== undefined) params[`${prefix}.snippets`] = options.snippets;
+  if (options.fragmentSize !== undefined) params[`${prefix}.fragsize`] = options.fragmentSize;
+  if (options.requireFieldMatch !== undefined) params[`${prefix}.requireFieldMatch`] = options.requireFieldMatch;
+  if (options.alternateField !== undefined) params[`${prefix}.alternateField`] = options.alternateField;
+  if (options.maxAlternateFieldLength !== undefined) params[`${prefix}.maxAlternateFieldLength`] = options.maxAlternateFieldLength;
+}
+
+function applyHighlighting(params: Record<string, unknown>, highlighting: SolrHighlightingOptions): void {
+  params.hl = highlighting.enabled ?? true;
+  if (highlighting.enabled === false) return;
+
+  if (highlighting.fields !== undefined) params["hl.fl"] = highlighting.fields;
+  if (highlighting.method !== undefined) params["hl.method"] = highlighting.method;
+  if (highlighting.snippets !== undefined) params["hl.snippets"] = highlighting.snippets;
+  if (highlighting.fragmentSize !== undefined) params["hl.fragsize"] = highlighting.fragmentSize;
+  if (highlighting.mergeContiguous !== undefined) params["hl.mergeContiguous"] = highlighting.mergeContiguous;
+  if (highlighting.requireFieldMatch !== undefined) params["hl.requireFieldMatch"] = highlighting.requireFieldMatch;
+  if (highlighting.maxAnalyzedChars !== undefined) params["hl.maxAnalyzedChars"] = highlighting.maxAnalyzedChars;
+  if (highlighting.alternateField !== undefined) params["hl.alternateField"] = highlighting.alternateField;
+  if (highlighting.maxAlternateFieldLength !== undefined) params["hl.maxAlternateFieldLength"] = highlighting.maxAlternateFieldLength;
+  if (highlighting.formatter !== undefined) params["hl.formatter"] = highlighting.formatter;
+  if (highlighting.tagPre !== undefined) params["hl.tag.pre"] = highlighting.tagPre;
+  if (highlighting.tagPost !== undefined) params["hl.tag.post"] = highlighting.tagPost;
+  if (highlighting.simplePre !== undefined) params["hl.simple.pre"] = highlighting.simplePre;
+  if (highlighting.simplePost !== undefined) params["hl.simple.post"] = highlighting.simplePost;
+  if (highlighting.encoder !== undefined) params["hl.encoder"] = highlighting.encoder;
+  if (highlighting.highlightMultiTerm !== undefined) params["hl.highlightMultiTerm"] = highlighting.highlightMultiTerm;
+  if (highlighting.usePhraseHighlighter !== undefined) params["hl.usePhraseHighlighter"] = highlighting.usePhraseHighlighter;
+  if (highlighting.payloads !== undefined) params["hl.payloads"] = highlighting.payloads;
+  if (highlighting.offsetSource !== undefined) params["hl.offsetSource"] = highlighting.offsetSource;
+  if (highlighting.fragAlignRatio !== undefined) params["hl.fragAlignRatio"] = highlighting.fragAlignRatio;
+
+  if (highlighting.perField !== undefined) {
+    for (const [field, options] of Object.entries(highlighting.perField)) {
+      setFieldHighlightOptions(params, `f.${field}.hl`, options);
+    }
+  }
 }
 
 function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassicFacetOptions): void {
@@ -88,6 +130,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.limit !== undefined) params.rows = query.limit;
   if (query.offset !== undefined) params.start = query.offset;
   if (query.facets !== undefined) applyClassicFacets(params, query.facets);
+  if (query.highlighting !== undefined) applyHighlighting(params, query.highlighting);
   if (query.parserOptions !== undefined) {
     const { type: _parserType, ...parserOptions } = query.parserOptions;
     Object.assign(params, parserOptions);
@@ -100,6 +143,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.offset;
   delete params.parserOptions;
   delete params.facets;
+  delete params.highlighting;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" ||

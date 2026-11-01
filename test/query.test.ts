@@ -289,3 +289,80 @@ test("queryJson preserves nested JSON Facet API definitions in the request body"
   await client.queryJson(request);
   assert.deepEqual(requestBody, request);
 });
+
+test("query serializes typed highlighting and per-field overrides", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "quick",
+    highlighting: {
+      fields: ["title_txt", "description_txt"],
+      method: "unified",
+      snippets: 3,
+      fragmentSize: 120,
+      mergeContiguous: true,
+      requireFieldMatch: true,
+      maxAnalyzedChars: 10_000,
+      alternateField: "summary_txt",
+      maxAlternateFieldLength: 200,
+      formatter: "simple",
+      tagPre: "<mark>",
+      tagPost: "</mark>",
+      simplePre: "<strong>",
+      simplePost: "</strong>",
+      encoder: "html",
+      highlightMultiTerm: true,
+      usePhraseHighlighter: true,
+      payloads: false,
+      offsetSource: "POSTINGS",
+      fragAlignRatio: 0.25,
+      perField: {
+        title_txt: {
+          method: "original",
+          snippets: 2,
+          fragmentSize: 80,
+          requireFieldMatch: false,
+          alternateField: "summary_txt",
+          maxAlternateFieldLength: 40
+        }
+      }
+    }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("hl"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("hl.fl"), ["title_txt", "description_txt"]);
+  assert.equal(requestedUrl?.searchParams.get("hl.method"), "unified");
+  assert.equal(requestedUrl?.searchParams.get("hl.snippets"), "3");
+  assert.equal(requestedUrl?.searchParams.get("hl.fragsize"), "120");
+  assert.equal(requestedUrl?.searchParams.get("hl.mergeContiguous"), "true");
+  assert.equal(requestedUrl?.searchParams.get("hl.requireFieldMatch"), "true");
+  assert.equal(requestedUrl?.searchParams.get("hl.maxAnalyzedChars"), "10000");
+  assert.equal(requestedUrl?.searchParams.get("hl.alternateField"), "summary_txt");
+  assert.equal(requestedUrl?.searchParams.get("hl.maxAlternateFieldLength"), "200");
+  assert.equal(requestedUrl?.searchParams.get("hl.formatter"), "simple");
+  assert.equal(requestedUrl?.searchParams.get("hl.tag.pre"), "<mark>");
+  assert.equal(requestedUrl?.searchParams.get("hl.tag.post"), "</mark>");
+  assert.equal(requestedUrl?.searchParams.get("hl.simple.pre"), "<strong>");
+  assert.equal(requestedUrl?.searchParams.get("hl.simple.post"), "</strong>");
+  assert.equal(requestedUrl?.searchParams.get("hl.encoder"), "html");
+  assert.equal(requestedUrl?.searchParams.get("hl.highlightMultiTerm"), "true");
+  assert.equal(requestedUrl?.searchParams.get("hl.usePhraseHighlighter"), "true");
+  assert.equal(requestedUrl?.searchParams.get("hl.payloads"), "false");
+  assert.equal(requestedUrl?.searchParams.get("hl.offsetSource"), "POSTINGS");
+  assert.equal(requestedUrl?.searchParams.get("hl.fragAlignRatio"), "0.25");
+  assert.equal(requestedUrl?.searchParams.get("f.title_txt.hl.method"), "original");
+  assert.equal(requestedUrl?.searchParams.get("f.title_txt.hl.snippets"), "2");
+  assert.equal(requestedUrl?.searchParams.get("f.title_txt.hl.fragsize"), "80");
+  assert.equal(requestedUrl?.searchParams.get("f.title_txt.hl.requireFieldMatch"), "false");
+  assert.equal(requestedUrl?.searchParams.get("f.title_txt.hl.alternateField"), "summary_txt");
+  assert.equal(requestedUrl?.searchParams.get("f.title_txt.hl.maxAlternateFieldLength"), "40");
+});
+
+test("query can explicitly disable highlighting", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({ query: "*:*", highlighting: { enabled: false, fields: ["title_txt"] } });
+  assert.equal(requestedUrl?.searchParams.get("hl"), "false");
+  assert.equal(requestedUrl?.searchParams.has("hl.fl"), false);
+});
