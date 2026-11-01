@@ -85,7 +85,7 @@ jobs:
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             "solr:${{ matrix.solr-version }}" \
-            solr -c
+            -c
       - name: Wait for SolrCloud
         run: |
           for attempt in {1..60}; do
