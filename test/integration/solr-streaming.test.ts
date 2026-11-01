@@ -18,5 +18,5 @@ integrationTest("Streaming Expressions search returns matching documents", async
   const ids = result["result-set"]?.docs
     ?.map(document => document.id)
     .filter((value): value is string => typeof value === "string");
-  assert.ok(ids?.includes(id), "streaming result should contain the matching document");
+  assert.ok(ids?.includes(id), `streaming result should contain the matching document: ${JSON.stringify(result)}`);
 });
