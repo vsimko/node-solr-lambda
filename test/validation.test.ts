@@ -33,3 +33,21 @@ test("validation is disabled when no schema is configured", async () => {
   });
   assert.deepEqual(await client.ping(), { arbitrary: true });
 });
+
+test("validation does not call schemas when no operation schema is configured", async () => {
+  let parseCalls = 0;
+  const unusedSchema = {
+    safeParseAsync: async (value: unknown) => {
+      parseCalls += 1;
+      return { success: true as const, data: value };
+    }
+  };
+  const client = createSolrClient({
+    core: "catalog",
+    validation: { inputs: { unused: unusedSchema }, outputs: { unused: unusedSchema } },
+    fetch: async () => new Response(JSON.stringify({ status: "ok" }))
+  });
+
+  await client.ping();
+  assert.equal(parseCalls, 0);
+});

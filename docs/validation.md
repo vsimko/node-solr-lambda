@@ -1,6 +1,6 @@
 # Runtime validation
 
-Validation is disabled by default. The client does not import Zod. The default request path does not call a schema parser.
+Validation is disabled by default. Zod is an optional peer dependency. The client does not import Zod from its runtime modules, and a normal package install does not need Zod. Install Zod only when your application uses Zod schemas. The default request path does not call a schema parser.
 
 Install Zod when you need validation:
 
@@ -24,3 +24,8 @@ const solr = createSolrClient({
 Use `inputs` to validate request data. Use `outputs` to validate response data. The operation key is the client method name. The keys match the client method names. They include `query`, `queryJson`, `add`, `update`, `delete`, `commit`, `softCommit`, `optimize`, `rollback`, `ping`, `schema`, `config`, `coreAdmin`, `collections`, `systemInfo`, `metrics`, `security`, `stream`, and `export`. The raw `export()` response is not output-validated. A failed check throws `SolrValidationError`. Set `onError: "ignore"` to return the original value after a failed check.
 
 The application owns the schemas. This design keeps Zod out of the client's default runtime path.
+
+## Verify an install without Zod
+
+The CI workflow builds the package, packs it, installs it into a clean temporary consumer without Zod, and imports the public client. This checks that the default package entry point does not require Zod at runtime.
+
