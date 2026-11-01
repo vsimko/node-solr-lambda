@@ -60,7 +60,7 @@
         "test/modules.test.ts",
         "test/integration/solr-json-query.test.ts"
       ],
-      "notes": "JSON Request API query body and matching-document response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
+      "notes": "JSON Request API query body now has a typed SolrJsonQueryRequest model and recursive JSON Facet API terms/query/range definitions, nested metrics, and domain transformations. SolrJsonQueryResponse<TDocument, TJsonFacet> exposes caller-typed facet results. Unit and consumer type tests cover nested serialization and invalid discriminators; integration tests verify terms/query/range facets, nested metrics, and excludeTags domain behavior on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Other JSON Request API options remain available through params or the legacy custom-body overload."
     },
     {
       "id": "update.add",
