@@ -162,7 +162,7 @@ const jsonFacetRequest: SolrJsonQueryRequest = {
       mincount: 1,
       missing: true,
       prefix: "b",
-      method: "fc",
+      method: "dvhash",
       domain: { filter: ["inStock:true"], excludeTags: ["stock"] },
       facet: {
         averagePrice: "avg(price_d)",
@@ -219,3 +219,7 @@ const invalidFacetKind: SolrJsonQueryRequest = { facet: { bad: { type: "pivot", 
 // @ts-expect-error JSON terms sort direction is constrained.
 const invalidFacetSort: SolrJsonQueryRequest = { facet: { categories: { type: "terms", field: "category_s", sort: { count: "sideways" } } } };
 void [invalidTermsFacet, invalidRangeFacet, invalidQueryFacet, invalidFacetKind, invalidFacetSort];
+
+// @ts-expect-error Classic facet methods such as fcs are not JSON terms facet methods.
+const invalidJsonTermsMethod: SolrJsonQueryRequest = { facet: { categories: { type: "terms", field: "category_s", method: "fcs" } } };
+void invalidJsonTermsMethod;
