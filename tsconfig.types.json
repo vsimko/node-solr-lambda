@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","compilerOptions":{"emitDeclarationOnly":true,"outDir":"dist/types","declaration":true,"sourceMap":false}}
