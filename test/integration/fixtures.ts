@@ -158,7 +158,7 @@ export function cloudIntegrationTest(
           name,
           numShards: 1,
           replicationFactor: 1,
-          collectionConfigName: "_default"
+          "collection.configName": "_default"
         });
         createdCollections.add(name);
         return name;
