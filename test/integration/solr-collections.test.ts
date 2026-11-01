@@ -129,7 +129,7 @@ cloudIntegrationTest("Collections API adds, balances, and deletes replica proper
     "property.value": "enabled"
   });
   const withProperty = await readReplicas();
-  assert.equal(withProperty[replica]?.["property.integrationFlag"], "enabled");
+  assert.equal(withProperty[replica]?.["property.integrationflag"], "enabled");
 
   await client.collections("DELETEREPLICAPROP", {
     collection,
@@ -138,7 +138,7 @@ cloudIntegrationTest("Collections API adds, balances, and deletes replica proper
     property: "integrationFlag"
   });
   const withoutProperty = await readReplicas();
-  assert.equal(withoutProperty[replica]?.["property.integrationFlag"], undefined);
+  assert.equal(withoutProperty[replica]?.["property.integrationflag"], undefined);
 
   await client.collections("BALANCESHARDUNIQUE", {
     collection,
@@ -146,7 +146,7 @@ cloudIntegrationTest("Collections API adds, balances, and deletes replica proper
   });
   const balanced = await readReplicas();
   const preferred = Object.values(balanced).filter(
-    item => item["property.preferredLeader"] === "true" || item["property.preferredLeader"] === true
+    item => item["property.preferredleader"] === "true" || item["property.preferredleader"] === true
   );
   assert.equal(preferred.length, 1, "BALANCESHARDUNIQUE should assign preferredLeader to one replica");
 });
