@@ -1,6 +1,7 @@
 import test from "node:test";
 import { randomUUID } from "node:crypto";
 import { SolrClient } from "../../src/index.js";
+import type { SolrDocument } from "../../src/index.js";
 
 const baseUrl = process.env.SOLR_BASE_URL;
 const core = process.env.SOLR_CORE;
@@ -8,7 +9,7 @@ const core = process.env.SOLR_CORE;
 export interface SolrIntegrationFixture {
   client: SolrClient;
   createId(prefix?: string): string;
-  addDocuments(documents: readonly { id: string }[]): Promise<void>;
+  addDocuments(documents: readonly (SolrDocument & { id: string })[]): Promise<void>;
   commit(): Promise<void>;
 }
 

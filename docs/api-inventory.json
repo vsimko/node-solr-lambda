@@ -4,7 +4,7 @@
   "clientVersion": "4.0.0-beta.0",
   "documentationBaselines": {
     "8": "8.11",
-    "9": "9.10",
+    "9": "9.11",
     "10": "10.1"
   },
   "runtimeCertification": "unverified",
@@ -12,7 +12,7 @@
     "methodImplemented": "A public client method exists for this operation.",
     "typeCoverage": "complete means common request and response options have dedicated exported types; partial means a generic record or escape hatch remains.",
     "unitTests": "present means at least one unit test covers the method or shared transport path; it does not mean every action is covered.",
-    "integrationTests": "not-run means no real Solr server test has been executed for this operation."
+    "integrationTests": "tested means the exact operation behavior has passed an integration test on every pinned Solr version listed as tested; partial means some versions or behavior are tested; not-run means no real Solr server test has been executed for the operation."
   },
   "entries": [
     {
@@ -24,19 +24,21 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/query.md",
       "testFiles": [
         "test/client.test.ts",
         "test/query-types.ts",
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-smoke.test.ts",
+        "test/integration/solr-cursor.test.ts"
       ],
-      "notes": "Common query options, parser selection, query operator, and response writer have dedicated exported types. Parser-specific nested options, facets, highlighting, grouping, and other Solr parameters remain incomplete."
+      "notes": "Basic query serialization and document retrieval plus cursorMark multi-page traversal are tested on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. This does not certify all query options or response sections."
     },
     {
       "id": "query.json",
@@ -68,18 +70,19 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/config.test.ts"
+        "test/config.test.ts",
+        "test/integration/solr-smoke.test.ts"
       ],
-      "notes": "Document and update option types are available; response models and update command variants remain incomplete."
+      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "update.update",
@@ -90,17 +93,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
-        "test/client.test.ts"
+        "test/client.test.ts",
+        "test/integration/solr-update.test.ts"
       ],
-      "notes": "Currently shares the add request implementation. Atomic and JSON update commands need dedicated models."
+      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified."
     },
     {
       "id": "update.delete",
@@ -111,17 +115,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-smoke.test.ts"
       ],
-      "notes": "Supports ID and query delete command forms."
+      "notes": "Document deletion by ID is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "update.commit",
@@ -132,17 +137,19 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/documents.md",
       "testFiles": [
-        "test/client.test.ts"
+        "test/client.test.ts",
+        "test/integration/solr-smoke.test.ts",
+        "test/integration/solr-update.test.ts"
       ],
-      "notes": "Commit option type exists; exact server response behavior needs integration tests."
+      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
       "id": "update.softCommit",

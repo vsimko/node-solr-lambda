@@ -22,7 +22,7 @@ The aim is not to recreate every historical Solr client abstraction. Keep the na
 - Transport: Node.js Fetch API.
 - Optional runtime validation: Zod.
 - Target Solr server lines: 8.x, 9.x, and 10.x.
-- Runtime compatibility for all three Solr major lines remains **unverified** until integration tests pass.
+- Partial runtime evidence exists on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images for basic query/cursorMark and document add/update/delete/hard-commit behavior. Broad compatibility across all API operations remains **unverified**; see [compatibility.md](compatibility.md) and [api-inventory.json](api-inventory.json).
 - Package metadata currently identifies the package as `4.0.0-beta.0`; that release version does not imply a separate development branch.
 
 ## Priorities
