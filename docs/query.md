@@ -132,6 +132,56 @@ const snippets = result.highlighting?.[result.response?.docs?.[0]?.id ?? ""]?.ti
 
 The [Solr Highlighting reference](https://solr.apache.org/guide/solr/10_1/query-guide/highlighting.html) describes highlighter-specific behavior and schema/performance requirements. Highlighting fields must be stored, and the schema's unique key is used to associate snippets with documents.
 
+## Result grouping, collapsing, and expansion
+
+Use `grouping` for Solr Result Grouping, which returns a `grouped` response section containing each group and its document list. Field, function, and query grouping can be combined; `limit` and `offset` control each group's document list, while `groupSort` orders documents within a group.
+
+```ts
+const grouped = await solr.query<SolrQueryResponse<Product>>({
+  query: "*:*",
+  grouping: {
+    fields: "category_s",
+    functions: ["sum(price_d)"],
+    queries: ["price_d:[0 TO 20]", "price_d:[20 TO *]"],
+    limit: 3,
+    offset: 0,
+    sort: "score desc",
+    groupSort: "price_d desc",
+    numGroups: true,
+    format: "grouped"
+  }
+});
+
+const groups = grouped.grouped?.category_s?.groups;
+const topDocument = groups?.[0]?.doclist?.docs?.[0];
+```
+
+`grouping.fields` requires single-valued indexed string fields. Function grouping is not supported for distributed searches. `format: "simple"` and `main: true` return a flattened main result list instead of the usual grouped response structure.
+
+Use `collapse` to select one representative document per field value. The library serializes this as a Collapsing Query Parser filter query and combines it with any existing `filter` values.
+
+```ts
+const collapsed = await solr.query<SolrQueryResponse<Product>>({
+  query: "*:*",
+  collapse: {
+    field: "product_id_s",
+    max: "price_d",
+    nullPolicy: "collapse",
+    hint: "top_fc"
+  },
+  expand: { field: "product_id_s", rows: 5, sort: "price_d desc" }
+});
+
+const representatives = collapsed.response?.docs;
+const expandedGroups = collapsed.expanded;
+```
+
+`collapse` supports one representative selector (`min`, `max`, or `sort`), plus `nullPolicy`, `hint`, `size`, and `cost`. `expand` can return additional documents for each collapsed group head. Collapse is performed per core/shard; distributed deployments should co-locate documents by collapse key or account for shard-local behavior.
+
+Result Grouping and Collapse/Expand are separate Solr features. They cannot be enabled together in the same request. Prefer Collapse/Expand for most use cases when its per-shard semantics fit the deployment; use Result Grouping when its grouped response structure or distributed grouping behavior is required.
+
+See the official [Result Grouping guide](https://solr.apache.org/guide/solr/10_1/query-guide/result-grouping.html) and [Collapse and Expand guide](https://solr.apache.org/guide/solr/10_1/query-guide/collapse-and-expand-results.html) for version-specific limitations.
+
 ## Typed query responses
 
 `query<T>()` lets the caller choose the complete response type. For the standard `/select` handler, `SolrQueryResponse<TDocument, TJsonFacet>` provides named sections for document metadata, classic facets, JSON facets, highlighting, grouping, statistics, and debug information. The first generic parameter controls the document shape; the second describes the JSON Facet API's `facets` object.
