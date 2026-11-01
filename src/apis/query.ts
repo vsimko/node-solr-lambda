@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrRangeFacetMethod, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
