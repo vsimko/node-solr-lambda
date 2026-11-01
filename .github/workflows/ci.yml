@@ -116,7 +116,7 @@ jobs:
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             --entrypoint /bin/bash \
             "solr:${{ matrix.solr-version }}" \
-            -lc 'mkdir -p /var/solr/data && cp /tmp/security.json /var/solr/data/security.json && chmod 666 /var/solr/data/security.json && exec /opt/docker-solr/scripts/docker-entrypoint.sh solr-precreate integration'
+            -lc 'mkdir -p /var/solr/data && cp /tmp/security.json /var/solr/data/security.json && chmod 666 /var/solr/data/security.json && exec docker-entrypoint.sh solr-precreate integration'
           docker cp security.json solr-secure:/tmp/security.json
           docker start solr-secure
       - name: Wait for authenticated Solr core
