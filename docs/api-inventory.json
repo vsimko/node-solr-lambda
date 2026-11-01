@@ -390,9 +390,10 @@
       },
       "documentation": "docs/administration.md",
       "testFiles": [
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-security.test.ts"
       ],
-      "notes": "Authentication and authorization command models remain generic."
+      "notes": "A dedicated authenticated standalone CI matrix has been added for Solr 8.11.4, 9.11.0, and 10.1.0. It exercises anonymous rejection, authenticated GET for authentication/authorization, and authentication set-property/read-back. Status remains unverified until the new matrix passes."
     },
     {
       "id": "streaming.api",
