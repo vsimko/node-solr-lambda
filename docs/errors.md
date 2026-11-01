@@ -27,6 +27,16 @@ The client throws `SolrNetworkError` when Fetch fails before a response is recei
 
 The transport can retry configured network failures. When the retry policy is exhausted, the final error is `SolrNetworkError`.
 
+## `SolrTimeoutError`
+
+The client throws `SolrTimeoutError` when the configured client or per-request timeout expires. It includes the endpoint and timeout duration in milliseconds.
+
+## `SolrAbortError`
+
+The client throws `SolrAbortError` when the caller's `AbortSignal` cancels the request. It includes the endpoint and the caller's abort reason.
+
+Timeout and caller cancellation use different error classes. Do not treat a caller cancellation as a retryable network failure.
+
 ## `SolrValidationError`
 
 The client throws `SolrValidationError` when an enabled input or output schema rejects a value. The error includes the operation name and validation issues.
