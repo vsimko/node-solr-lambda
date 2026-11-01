@@ -3,6 +3,7 @@ export { SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, Solr
 export type { SolrErrorDetail, SolrErrorMetadata } from "./errors.js";
 export { solrExcludeTags, solrFieldAlias, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort } from "./query-helpers.js";
 export type { SolrFieldListEntry, SolrFunctionArgument, SolrLocalParamValue, SolrSortClause, SolrSortDirection, SolrSortInput } from "./query-helpers.js";
+export type { SolrCollapseHint, SolrCollapseNullPolicy, SolrCollapseOptions, SolrExpandOptions, SolrExpandedResult, SolrGroupFormat, SolrGroupingOptions } from "./types.js";
 export type { SolrFieldHighlightOptions, SolrHighlightEncoder, SolrHighlighterMethod, SolrHighlightingOptions } from "./types.js";
 export type { SolrJsonFacetDefinition, SolrJsonFacetDomain, SolrJsonFacetMap, SolrJsonFacetMetric, SolrJsonFacetSort, SolrJsonQueryRequest, SolrJsonQueryResponse, SolrJsonQueryFacet, SolrJsonRangeFacet, SolrJsonTermsFacet } from "./types.js";
 export type { SolrClassicFacetOptions, SolrFacetFieldOptions, SolrFacetInclude, SolrFacetMethod, SolrFacetOther, SolrFacetRangeOptions, SolrFacetRangeResult, SolrFacetSort, SolrRangeFacetMethod } from "./types.js";
