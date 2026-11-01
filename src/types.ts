@@ -70,6 +70,22 @@ export type SolrResponseWriter = "json" | "xml" | "csv" | "javabin" | (string & 
 
 export type SolrQueryParamValue = string | number | boolean | readonly (string | number)[];
 
+/** One structured filter query. Raw filter strings remain supported alongside this model. */
+export interface SolrFilterQuery {
+  /** Filter expression, without a local-params prefix. */
+  query: string;
+  /** Tags applied to this filter for use by facet/parser excludeTags options. */
+  tag?: string | readonly string[];
+  /** Whether this filter participates in the filter cache. */
+  cache?: boolean;
+  /** Evaluation cost hint for non-cached filters. */
+  cost?: number;
+  /** Additional local parameters for this filter. */
+  localParams?: Readonly<Record<string, string | number | boolean>>;
+}
+
+export type SolrFilter = string | SolrFilterQuery;
+
 /** Parameters accepted by Solr's standard Lucene query parser. */
 export interface SolrLuceneQueryOptions {
   type: "lucene";
@@ -124,7 +140,7 @@ export interface SolrQuery {
   /** Query expression, serialized as Solr's q parameter. */
   query?: string;
   /** One or more filter queries, serialized as repeated fq parameters. */
-  filter?: string | readonly string[];
+  filter?: SolrFilter | readonly SolrFilter[];
   /** Field list, serialized as Solr's fl parameter. */
   fields?: string | readonly string[];
   /** Solr sort expression, for example price desc, id asc. */

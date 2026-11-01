@@ -1,10 +1,19 @@
 import type { SolrTransport } from "../transport.js";
-import type { RequestControlOptions, SolrQuery, SolrQueryParamValue } from "../types.js";
+import { solrFilter } from "../query-helpers.js";
+import type { RequestControlOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+
+function serializeFilter(filter: SolrFilter): string {
+  return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
+}
 
 export function query<T>(client: SolrTransport, path: string, query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {
   const params: Record<string, unknown> = { ...(query.params ?? {}), ...query };
   if (query.query !== undefined) params.q = query.query;
-  if (query.filter !== undefined) params.fq = query.filter;
+  if (query.filter !== undefined) {
+    params.fq = Array.isArray(query.filter)
+      ? query.filter.map(filter => serializeFilter(filter))
+      : serializeFilter(query.filter as SolrFilter);
+  }
   if (query.fields !== undefined) params.fl = query.fields;
   if (query.limit !== undefined) params.rows = query.limit;
   if (query.offset !== undefined) params.start = query.offset;

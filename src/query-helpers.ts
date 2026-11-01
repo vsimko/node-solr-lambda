@@ -1,3 +1,5 @@
+import type { SolrFilterQuery } from "./types.js";
+
 /** Sort direction accepted by Solr. Raw Solr sort expressions remain supported. */
 export type SolrSortDirection = "asc" | "desc";
 
@@ -57,10 +59,7 @@ function formatLocalParamValue(value: SolrLocalParamValue): string {
   return `"${text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
-/**
- * Build a local-params prefix, optionally followed by the parameter value.
- * Values containing whitespace, quotes, or backslashes are quoted and escaped.
- */
+/** Build a local-params prefix, optionally followed by the parameter value. */
 export function solrLocalParams(
   params: Readonly<Record<string, SolrLocalParamValue>>,
   value?: string
@@ -69,4 +68,20 @@ export function solrLocalParams(
   if (entries.length === 0) throw new TypeError("At least one Solr local parameter is required");
   const prefix = `{!${entries.map(([key, item]) => `${key}=${formatLocalParamValue(item)}`).join(" ")}}`;
   return value === undefined ? prefix : prefix + value;
+}
+
+/** Join one or more Solr filter tags for use in an excludeTags parameter. */
+export function solrExcludeTags(...tags: readonly string[]): string {
+  return tags.join(",");
+}
+
+/** Build a tagged/cached filter query while preserving unrestricted raw filter syntax. */
+export function solrFilter(query: string, options: Omit<SolrFilterQuery, "query"> = {}): string {
+  const localParams: Record<string, SolrLocalParamValue> = { ...(options.localParams ?? {}) };
+  if (options.tag !== undefined) {
+    localParams.tag = Array.isArray(options.tag) ? options.tag.join(",") : options.tag as string;
+  }
+  if (options.cache !== undefined) localParams.cache = options.cache;
+  if (options.cost !== undefined) localParams.cost = options.cost;
+  return Object.keys(localParams).length === 0 ? query : solrLocalParams(localParams, query);
 }

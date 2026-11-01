@@ -1,30 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { solrFieldAlias, solrFields, solrFunction, solrLocalParams, solrSort } from "../src/index.js";
+import { solrExcludeTags, solrFilter } from "../src/index.js";
 
-test("solrSort builds structured multi-field sorts and preserves raw syntax", () => {
-  assert.equal(solrSort(
-    { expression: "price", direction: "asc" },
-    { expression: "score", direction: "desc" }
-  ), "price asc, score desc");
-  assert.equal(solrSort("div(popularity,price) desc", "id asc"), "div(popularity,price) desc, id asc");
+test("solrFilter builds tagged filters and retains raw query text", () => {
+  assert.equal(solrFilter("category:books", { tag: "category" }), "{!tag=category}category:books");
+  assert.equal(solrFilter("price:[1 TO 10]", { tag: ["price", "promotion"], cache: false, cost: 25 }),
+    "{!tag=price,promotion cache=false cost=25}price:[1 TO 10]");
 });
 
-test("field-list helpers support aliases, functions, transformers, and raw syntax", () => {
-  assert.equal(solrFieldAlias("sales_price", "price"), "sales_price:price");
-  assert.equal(solrFields("id", { alias: "sales_price", expression: "price" }, "sum(price, tax)", "[explain]"),
-    "id,sales_price:price,sum(price, tax),[explain]");
+test("solrFilter supports additional local parameters", () => {
+  assert.equal(solrFilter("name:foo bar", { localParams: { type: "lucene", df: "name", cache: false } }),
+    '{!type=lucene df=name cache=false}name:foo bar');
 });
 
-test("solrFunction builds nested function expressions", () => {
-  assert.equal(solrFunction("sum", "price", 10), "sum(price,10)");
-  assert.equal(solrFunction("div", solrFunction("sum", "price", 10), "quantity"), "div(sum(price,10),quantity)");
-  assert.equal(solrFunction("now"), "now()");
-});
-
-test("solrLocalParams formats values and appends the query value", () => {
-  assert.equal(solrLocalParams({ type: "lucene", df: "title" }, "solr rocks"), "{!type=lucene df=title}solr rocks");
-  assert.equal(solrLocalParams({ type: "edismax", qf: "title body", cache: false }), '{!type=edismax qf="title body" cache=false}');
-  assert.equal(solrLocalParams({ v: 'a "quoted" value' }), '{!v="a \\"quoted\\" value"}');
-  assert.throws(() => solrLocalParams({}), TypeError);
+test("solrExcludeTags joins tags for parser or request parameters", () => {
+  assert.equal(solrExcludeTags("category", "availability"), "category,availability");
 });

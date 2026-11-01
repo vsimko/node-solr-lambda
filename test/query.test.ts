@@ -70,3 +70,35 @@ test("query serializes eDisMax parser options including dotted parameters", asyn
   assert.equal(requestedUrl?.searchParams.get("lowercaseOperators"), "true");
   assert.equal(requestedUrl?.searchParams.has("type"), false);
 });
+
+test("query serializes multiple raw and tagged filters as repeated fq parameters", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    filter: [
+      "category:books AND title:\"The Solr Guide\"",
+      { query: "inStock:true", tag: "availability" },
+      { query: "price:[10 TO 50]", tag: ["price", "promotion"], cache: false, cost: 25 }
+    ]
+  });
+
+  assert.deepEqual(requestedUrl?.searchParams.getAll("fq"), [
+    'category:books AND title:"The Solr Guide"',
+    "{!tag=availability}inStock:true",
+    "{!tag=price,promotion cache=false cost=25}price:[10 TO 50]"
+  ]);
+});
+
+test("query serializes a single structured filter and preserves local parameter values", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    filter: { query: "name:foo bar", localParams: { type: "lucene", df: "name", cache: false } }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("fq"), '{!type=lucene df=name cache=false}name:foo bar');
+  assert.equal(requestedUrl?.searchParams.getAll("fq").length, 1);
+});
