@@ -291,6 +291,52 @@ export interface SolrClassicFacetOptions {
   rangeMethod?: SolrRangeFacetMethod;
 }
 
+/** Highlighter implementation selected by hl.method. */
+export type SolrHighlighterMethod = "unified" | "original" | "fastVector";
+
+/** HTML escaping behavior supported by Solr's highlighters. */
+export type SolrHighlightEncoder = "html" | "simple";
+
+/** Per-field overrides for Solr highlighting. */
+export interface SolrFieldHighlightOptions {
+  method?: SolrHighlighterMethod;
+  snippets?: number;
+  fragmentSize?: number;
+  requireFieldMatch?: boolean;
+  alternateField?: string;
+  maxAlternateFieldLength?: number;
+}
+
+/** Typed options for Solr's Highlighting component. */
+export interface SolrHighlightingOptions {
+  /** Explicitly enable or disable highlighting. Defaults to true when supplied. */
+  enabled?: boolean;
+  /** Fields to highlight; accepts one field or a list of stored text fields. */
+  fields?: string | readonly string[];
+  method?: SolrHighlighterMethod;
+  snippets?: number;
+  fragmentSize?: number;
+  mergeContiguous?: boolean;
+  requireFieldMatch?: boolean;
+  maxAnalyzedChars?: number;
+  alternateField?: string;
+  maxAlternateFieldLength?: number;
+  /** The Original Highlighter currently supports the simple formatter. */
+  formatter?: "simple";
+  tagPre?: string;
+  tagPost?: string;
+  simplePre?: string;
+  simplePost?: string;
+  encoder?: SolrHighlightEncoder;
+  highlightMultiTerm?: boolean;
+  usePhraseHighlighter?: boolean;
+  payloads?: boolean;
+  offsetSource?: "ANALYSIS" | "POSTINGS" | "POSTINGS_WITH_TERM_VECTORS" | "TERM_VECTORS";
+  fragAlignRatio?: number;
+  /** Field-specific highlighting overrides keyed by Solr field name. */
+  perField?: Readonly<Record<string, SolrFieldHighlightOptions>>;
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -318,6 +364,8 @@ export interface SolrStandardQueryOptions {
   parserOptions?: SolrQueryParserOptions;
   /** Typed options for the classic Facet Component. */
   facets?: SolrClassicFacetOptions;
+  /** Typed options for the Highlighting component. */
+  highlighting?: SolrHighlightingOptions;
   /** Boolean query operator, serialized as q.op. */
   "q.op"?: SolrQueryOperator;
   /** Response writer, serialized as wt. */
