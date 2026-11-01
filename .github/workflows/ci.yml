@@ -223,5 +223,6 @@ jobs:
           SOLR_MULTINODE: "true"
       - name: Print SolrCloud logs
         if: always()
-        run: docker logs solr-cloud || true
+        run: |
+          docker logs solr-cloud || true
           docker logs solr-cloud-2 || true
