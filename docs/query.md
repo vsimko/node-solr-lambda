@@ -9,7 +9,10 @@ const result = await solr.query({
   query: "title:typescript",
   filter: ["status:published", "language:en"],
   fields: ["id", "title"],
-  sort: "publishedAt desc",
+  sort: solrSort(
+    { expression: "publishedAt", direction: "desc" },
+    { expression: "id", direction: "asc" }
+  ),
   limit: 25,
   offset: 0,
   defType: "edismax",
@@ -17,6 +20,44 @@ const result = await solr.query({
   wt: "json"
 });
 ```
+
+## Sort, field-list, and expression helpers
+
+The helpers build Solr syntax strings; they do not parse or restrict the full Solr expression language. Raw strings remain supported for custom functions, transformers, local syntax, and server extensions.
+
+```ts
+import { solrFieldAlias, solrFields, solrFunction, solrLocalParams, solrSort } from "node-solr-lambda";
+
+const sort = solrSort(
+  { expression: "price", direction: "asc" },
+  { expression: "score", direction: "desc" },
+  "div(popularity,price) desc"
+);
+
+const fields = solrFields(
+  "id",
+  "title",
+  { alias: "sales_price", expression: "price" },
+  solrFunction("sum", "price", 10),
+  "[explain]"
+);
+
+// Equivalent single-item alias helper:
+const priceField = solrFieldAlias("sales_price", "price");
+
+// Local params are prefixed to the query value; values with whitespace are quoted.
+const query = solrLocalParams({ type: "lucene", df: "title", "q.op": "AND" }, "distributed search");
+
+await solr.query({ query, sort, fields });
+```
+
+- `solrSort()` accepts structured `{ expression, direction }` clauses or raw Solr sort strings. Function-based sorts are supported through `expression` or raw strings.
+- `solrFields()` accepts raw field-list items or `{ alias, expression }` entries. Raw items retain support for wildcards, functions, and document transformers.
+- `solrFieldAlias(alias, expression)` returns Solr's `displayName:expression` syntax.
+- `solrFunction(name, ...args)` builds function-call expressions and can be nested.
+- `solrLocalParams(params, value?)` creates a `{!...}` prefix and can append the associated query value. Local-param values containing whitespace or quotes are escaped.
+
+These helpers only compose request strings. Solr validates field names, functions, local parameters, sortability, and transformer availability at query time. Keep raw strings when using Solr syntax not represented by the structured helpers.
 
 ## eDisMax
 
