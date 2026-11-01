@@ -1,18 +1,20 @@
 # Solr API coverage
 
-This table tracks the v4 implementation. It does not claim full API coverage until each endpoint has typed models and integration tests.
+This table tracks the v4 implementation. A generic request method does not mean that every endpoint has a typed wrapper or tested version support.
 
-| API area | Current status | Planned coverage |
+| API area | Current v4 surface | Remaining work |
 | --- | --- | --- |
-| Standard Query | Initial | Parameters, JSON Request API, parsers, filters, facets, highlighting, grouping, stats, cursors, streaming expressions. |
-| Update / Documents | Initial | Add, overwrite, atomic update, delete by ID/query, commit, soft commit, rollback, optimize, extract. |
-| Schema | Initial transport | Fields, dynamic fields, field types, copy fields, schema versions, managed schema. |
-| Config | Initial transport | Request handlers, components, caches, listeners, update handlers, properties. |
-| Core Admin | Partial | Status, create, reload, unload, rename, swap, merge, split, request status. |
-| Collections | Planned | Create, delete, reload, modify, aliases, shards, replicas, cluster status. |
-| Security | Planned | Authentication, authorization, permissions, users, roles. |
-| System / Metrics | Planned | Ping, system info, metrics, health, node and JVM data. |
-| Streaming / Export | Planned | Export handler and streaming expressions. |
+| Standard Query | `query()`, `queryJson()` | Typed parsers, facets, highlighting, grouping, stats, cursors, JSON Facet models, version tests. |
+| Update / Documents | `add()`, `delete()`, `commit()`, `rollback()` | Atomic update models, soft commit options, optimize, extract, update parameter coverage. |
+| Schema | `schema(command)` | Typed field, dynamic field, field type, copy field and schema response models. |
+| Config | `config(command)` | Typed handlers, components, caches, listeners, update handlers and property models. |
+| Core Admin | `coreAdmin(action, params)`, `ping()` | Full action-specific request and response models; async status and action coverage. |
+| Collections | `collections(action, params)` | Action-specific models for aliases, shards, replicas, snapshots, backups and cluster state. |
+| Security | `security(area, command)` | Authentication and authorization schemas, permissions, users and roles. |
+| System / Metrics | `systemInfo()`, `metrics()` | Typed system, metric, health and node response models. |
+| Streaming / Export | `stream()`, `export()` | Streaming response handling and raw export stream support. |
+
+## Compatibility policy
 
 Test every supported endpoint against Solr 8.x, 9.x, and 10.x. Mark version-specific behavior in the endpoint documentation. Do not infer support from a successful TypeScript build.
 
