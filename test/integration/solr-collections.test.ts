@@ -19,4 +19,24 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
   const alias = await createAlias(name);
   const aliases = await client.collections<{ aliases?: Record<string, string> }>("LISTALIASES");
   assert.equal(aliases.aliases?.[alias], name);
+
+  const shard = "integration_shard";
+  await client.collections("CREATESHARD", { collection: name, shard });
+  const withShard = await client.collections<{
+    cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
+  }>("CLUSTERSTATUS", { collection: name });
+  assert.ok(
+    withShard.cluster?.collections?.[name]?.shards?.[shard],
+    `cluster status should contain shard ${shard}`
+  );
+
+  await client.collections("DELETESHARD", { collection: name, shard });
+  const withoutShard = await client.collections<{
+    cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
+  }>("CLUSTERSTATUS", { collection: name });
+  assert.equal(
+    withoutShard.cluster?.collections?.[name]?.shards?.[shard],
+    undefined,
+    `cluster status should not contain deleted shard ${shard}`
+  );
 });
