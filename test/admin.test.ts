@@ -100,6 +100,11 @@ test("Collections replica move and property actions are serialized", async () =>
     property: "preferredLeader",
     onlyactivenodes: true
   });
+  await client.collections("REBALANCELEADERS", {
+    collection: "books",
+    maxAtOnce: 2,
+    maxWaitSeconds: 30
+  });
   await client.collections("ADDREPLICAPROP", {
     collection: "books",
     shard: "shard1",
@@ -123,11 +128,16 @@ test("Collections replica move and property actions are serialized", async () =>
   assert.equal(balance.searchParams.get("action"), "BALANCESHARDUNIQUE");
   assert.equal(balance.searchParams.get("property"), "preferredLeader");
 
-  const addProperty = new URL(requested[2]!);
+  const rebalance = new URL(requested[2]!);
+  assert.equal(rebalance.searchParams.get("action"), "REBALANCELEADERS");
+  assert.equal(rebalance.searchParams.get("maxAtOnce"), "2");
+  assert.equal(rebalance.searchParams.get("maxWaitSeconds"), "30");
+
+  const addProperty = new URL(requested[3]!);
   assert.equal(addProperty.searchParams.get("action"), "ADDREPLICAPROP");
   assert.equal(addProperty.searchParams.get("property.value"), "true");
 
-  const deleteProperty = new URL(requested[3]!);
+  const deleteProperty = new URL(requested[4]!);
   assert.equal(deleteProperty.searchParams.get("action"), "DELETEREPLICAPROP");
   assert.equal(deleteProperty.searchParams.get("replica"), "core_node2");
 });
