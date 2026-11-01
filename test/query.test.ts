@@ -2,18 +2,18 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { SolrClient } from "../src/index.js";
 
+const createClient = (capture: (url: URL) => void) => new SolrClient({
+  baseUrl: "http://localhost:8983/solr",
+  core: "testcore",
+  fetch: async (input) => {
+    capture(new URL(String(input)));
+    return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
+  }
+});
+
 test("query serializes Lucene parser options", async () => {
   let requestedUrl: URL | undefined;
-  const client = new SolrClient({
-    baseUrl: "http://localhost:8983/solr",
-    fetch: async (input) => {
-      requestedUrl = new URL(String(input));
-      return new Response(JSON.stringify({ responseHeader: { status: 0 } }), {
-        status: 200,
-        headers: { "content-type": "application/json" }
-      });
-    }
-  });
+  const client = createClient(url => { requestedUrl = url; });
 
   await client.query({
     query: "title:solr",
@@ -31,13 +31,7 @@ test("query serializes Lucene parser options", async () => {
 
 test("query serializes DisMax parser options and repeated values", async () => {
   let requestedUrl: URL | undefined;
-  const client = new SolrClient({
-    baseUrl: "http://localhost:8983/solr",
-    fetch: async (input) => {
-      requestedUrl = new URL(String(input));
-      return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
-    }
-  });
+  const client = createClient(url => { requestedUrl = url; });
 
   await client.query({
     query: "solr client",
@@ -54,13 +48,7 @@ test("query serializes DisMax parser options and repeated values", async () => {
 
 test("query serializes eDisMax parser options including dotted parameters", async () => {
   let requestedUrl: URL | undefined;
-  const client = new SolrClient({
-    baseUrl: "http://localhost:8983/solr",
-    fetch: async (input) => {
-      requestedUrl = new URL(String(input));
-      return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
-    }
-  });
+  const client = createClient(url => { requestedUrl = url; });
 
   await client.query({
     query: "solr client",
