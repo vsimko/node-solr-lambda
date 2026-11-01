@@ -93,7 +93,7 @@ export class SolrTransport {
       throw new TypeError("A password requires a username");
     }
     const retry = config.retry;
-    if (retry && retry !== false) {
+    if (retry !== undefined && retry !== false) {
       if (retry.maxAttempts !== undefined && (!Number.isInteger(retry.maxAttempts) || retry.maxAttempts < 1)) {
         throw new RangeError("retry.maxAttempts must be a positive integer");
       }
