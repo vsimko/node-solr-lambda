@@ -256,3 +256,42 @@ void solr.query({ query: "quick", highlighting: { encoder: "xml" } });
 void solr.query({ query: "quick", highlighting: { fragmentSize: "large" } });
 // @ts-expect-error Per-field snippet count must be numeric.
 void solr.query({ query: "quick", highlighting: { perField: { title_txt: { snippets: "two" } } } });
+
+void solr.query<SolrQueryResponse<{ id: string }>>({
+  query: "*:*",
+  grouping: {
+    fields: ["category_s", "brand_s"],
+    functions: ["sum(price_d)"],
+    queries: ["price_d:[0 TO 20]"],
+    limit: 3,
+    offset: 1,
+    sort: "score desc",
+    groupSort: "price_d asc",
+    format: "grouped",
+    numGroups: true,
+    facet: true,
+    facetLimit: 10,
+    cachePercent: 25
+  },
+  collapse: {
+    field: "product_id_s",
+    max: "price_d",
+    nullPolicy: "collapse",
+    hint: "top_fc",
+    size: 100
+  },
+  expand: { field: "product_id_s", rows: 5, sort: "price_d desc", nullGroup: true }
+}).then(result => {
+  const groupedDocumentId: string | undefined = result.grouped?.category_s?.groups?.[0]?.doclist?.docs?.[0]?.id;
+  const expandedDocumentId: string | undefined = result.expanded?.["group-head-id"]?.docs?.[0]?.id;
+  void [groupedDocumentId, expandedDocumentId];
+});
+
+// @ts-expect-error Grouping format is restricted to grouped or simple.
+void solr.query({ grouping: { format: "nested" } });
+// @ts-expect-error Collapse null policies are restricted to ignore, expand, or collapse.
+void solr.query({ collapse: { field: "product_id_s", nullPolicy: "merge" } });
+// @ts-expect-error Collapse hints are restricted to top_fc or block.
+void solr.query({ collapse: { field: "product_id_s", hint: "cache" } });
+// @ts-expect-error Expand rows must be numeric.
+void solr.query({ expand: { rows: "five" } });
