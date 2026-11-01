@@ -400,6 +400,40 @@ export interface SolrExpandOptions {
 /** Expanded documents keyed by the collapsed group head document ID. */
 export type SolrExpandedResult<TDocument = unknown> = Readonly<Record<string, SolrQueryResult<TDocument>>>;
 
+/** Per-field local options for the Stats Component. */
+export interface SolrStatsFieldOptions {
+  field: string;
+  /** Rename this field's entry in stats_fields. */
+  key?: string;
+  tag?: string | readonly string[];
+  excludeTags?: string | readonly string[];
+  min?: boolean;
+  max?: boolean;
+  sum?: boolean;
+  count?: boolean;
+  missing?: boolean;
+  sumOfSquares?: boolean;
+  mean?: boolean;
+  stddev?: boolean;
+  percentiles?: readonly number[];
+  distinctValues?: boolean;
+  countDistinct?: boolean;
+  /** true uses Solr's default accuracy; a number selects cardinality accuracy (0..1). */
+  cardinality?: boolean | number;
+  tdigestCompression?: number;
+}
+
+/** Typed options for Solr's Stats Component. */
+export interface SolrStatsOptions {
+  enabled?: boolean;
+  /** Fields to compute statistics for, optionally with field-specific statistic selection. */
+  fields?: string | readonly (string | SolrStatsFieldOptions)[];
+  /** Fields to break statistics down by. */
+  facets?: string | readonly string[];
+  /** Calculate distinctValues and countDistinct for all requested fields. */
+  calcDistinct?: boolean;
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -429,6 +463,8 @@ export interface SolrStandardQueryOptions {
   facets?: SolrClassicFacetOptions;
   /** Typed options for the Highlighting component. */
   highlighting?: SolrHighlightingOptions;
+  /** Typed options for the Stats component. */
+  stats?: SolrStatsOptions;
   /** Typed options for Result Grouping. */
   grouping?: SolrGroupingOptions;
   /** Collapse duplicate results using the Collapsing Query Parser. */
@@ -636,6 +672,9 @@ export interface SolrFieldStats {
   sumOfSquares?: number;
   distinctValues?: readonly unknown[];
   countDistinct?: number;
+  cardinality?: number;
+  percentiles?: Readonly<Record<string, number>>;
+  facets?: Readonly<Record<string, Readonly<Record<string, SolrFieldStats>>>>;
   [key: string]: unknown;
 }
 
