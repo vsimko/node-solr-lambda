@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
-import { integrationTest } from "./fixtures.js";
+import { cloudIntegrationTest } from "./fixtures.js";
 
-integrationTest("Streaming Expressions search returns matching documents", async ({
-  client,
-  createId,
-  addDocuments,
-  commit
+cloudIntegrationTest("Streaming Expressions search returns matching SolrCloud documents", async ({
+  createCollection,
+  clientForCollection
 }) => {
-  const id = createId("streaming");
-  await addDocuments([{ id, title_s: "streaming-expression" }]);
-  await commit();
+  const collection = await createCollection("streaming");
+  const client = clientForCollection(collection);
+  const id = `streaming_${Date.now()}`;
+  await client.add([{ id, title_s: "streaming-expression" }]);
+  await client.commit({ waitSearcher: true });
 
   const result = await client.stream<{
     "result-set"?: { docs?: Array<{ id?: string }> };
-  }>(`search(integration, q="id:${id}", fl="id", sort="id asc", solrUrl="${process.env.SOLR_BASE_URL}")`);
+  }>(`search(${collection}, q="id:${id}", fl="id", sort="id asc")`);
 
   const ids = result["result-set"]?.docs
     ?.map(document => document.id)
