@@ -385,12 +385,25 @@ export interface SolrResponseHeader {
   [key: string]: unknown;
 }
 
+/** One classic numeric or date range-facet response. */
+export interface SolrFacetRangeResult {
+  counts?: readonly (string | number)[];
+  start?: string | number;
+  end?: string | number;
+  gap?: string | number;
+  before?: number;
+  after?: number;
+  between?: number;
+  [key: string]: unknown;
+}
+
 /** Classic Facet API response sections. */
 export interface SolrFacetCounts {
   facet_queries?: Readonly<Record<string, number>>;
+  /** Alternating term and count values, as returned by Solr's JSON response. */
   facet_fields?: Readonly<Record<string, readonly (string | number)[]>>;
-  facet_dates?: Readonly<Record<string, unknown>>;
-  facet_ranges?: Readonly<Record<string, unknown>>;
+  /** Date ranges use facet_ranges; the legacy facet_dates section is not supported. */
+  facet_ranges?: Readonly<Record<string, SolrFacetRangeResult>>;
   facet_intervals?: Readonly<Record<string, unknown>>;
   [key: string]: unknown;
 }
