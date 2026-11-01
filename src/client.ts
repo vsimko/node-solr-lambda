@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { SolrHttpError, SolrValidationError } from "./errors.js";
 import type { CommitOptions, RequestOptions, SolrClientConfig, SolrDelete, SolrDocument, SolrQuery, UpdateOptions, ValidationSchema } from "./types.js";
 
@@ -32,7 +33,7 @@ export class SolrClient {
     const headers:Record<string,string>={
       accept:"application/json",
       ...(options.body===undefined?{}:{"content-type":"application/json"}),
-      ...(this.clientConfig.username!==undefined?{authorization:`Basic ${btoa(`${this.clientConfig.username}:${this.clientConfig.password??""}`)}`}:{}),
+      ...(this.clientConfig.username!==undefined?{authorization:`Basic ${Buffer.from(`${this.clientConfig.username}:${this.clientConfig.password??""}`).toString("base64")}`}:{}),
       ...this.clientConfig.headers,...options.headers
     };
     const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
@@ -103,7 +104,7 @@ export class SolrClient {
     const input=await this.validate(operation,"inputs",options.body??options.query);
     const url=new URL(path.startsWith("/")?path.slice(1):path,this.clientConfig.baseUrl??DEFAULT_BASE_URL);
     appendQuery(url,options.body===undefined?input as RequestOptions["query"]:options.query);
-    const headers:Record<string,string>={accept:"*/*",...(options.body===undefined?{}:{"content-type":"application/json"}),...(this.clientConfig.username!==undefined?{authorization:`Basic ${btoa(`${this.clientConfig.username}:${this.clientConfig.password??""}`)}`}:{}),...this.clientConfig.headers,...options.headers};
+    const headers:Record<string,string>={accept:"*/*",...(options.body===undefined?{}:{"content-type":"application/json"}),...(this.clientConfig.username!==undefined?{authorization:`Basic ${Buffer.from(`${this.clientConfig.username}:${this.clientConfig.password??""}`).toString("base64")}`}:{}),...this.clientConfig.headers,...options.headers};
     const response=await this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
     if(!response.ok){const text=await response.text();let payload:unknown=text;try{payload=text?JSON.parse(text) as unknown:undefined;}catch{}throw new SolrHttpError(response.status,response.statusText,payload);}
     return response;
