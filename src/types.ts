@@ -1,18 +1,18 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
-export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
+export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
 /** Replica types accepted by the SolrCloud Collections API. */
-export type CollectionReplicaType = "NRT" | "TLOG" | "PULL";
+export type CollectionReplicaType = "nrt" | "tlog" | "pull";
 
 /** Parameters for Collections API ADDREPLICA. */
 export interface AddReplicaParams {
   /** Additional Collections API parameters not modelled here. */
   customParams?: SolrAdminParams;
   /** Target collection. */
-  collection?: string;
+  collection: string;
   /** Target shard; omit when the collection has a single shard. */
   shard?: string;
   /** Optional explicit replica name. */
@@ -34,11 +34,11 @@ export interface DeleteReplicaParams {
   /** Additional Collections API parameters not modelled here. */
   customParams?: SolrAdminParams;
   /** Target collection. */
-  collection?: string;
+  collection: string;
   /** Target shard. */
-  shard?: string;
+  shard: string;
   /** Replica name to remove. */
-  replica?: string;
+  replica: string;
   /** Delete the replica's instance directory from its node. */
   deleteInstanceDir?: boolean;
   /** Delete the replica's data directory from its node. */
@@ -49,10 +49,64 @@ export interface DeleteReplicaParams {
   async?: string;
 }
 
-/** Action-specific parameter models for replica lifecycle operations. */
+/** Parameters for Collections API MOVEREPLICA. */
+export interface MoveReplicaBaseParams {
+  collection: string;
+  targetNode: string;
+  timeout?: number;
+  inPlaceMove?: boolean;
+  async?: string;
+}
+
+/** A move identifies either one replica or a source node and shard. */
+export type MoveReplicaParams = MoveReplicaBaseParams & (
+  | { replica: string; sourceNode?: never; shard?: never }
+  | { replica?: never; sourceNode: string; shard: string }
+);
+
+/** Parameters for Collections API BALANCESHARDUNIQUE. */
+export interface BalanceShardUniqueParams {
+  collection: string;
+  property: string;
+  onlyactivenodes?: boolean;
+  shardUnique?: boolean;
+}
+
+/** Parameters for Collections API REBALANCELEADERS. */
+export interface RebalanceLeadersParams {
+  collection: string;
+  maxAtOnce?: number;
+  maxWaitSeconds?: number;
+  async?: string;
+}
+
+/** Parameters for Collections API ADDREPLICAPROP. */
+export interface AddReplicaPropertyParams {
+  collection: string;
+  shard: string;
+  replica: string;
+  property: string;
+  "property.value": string;
+  shardUnique?: boolean;
+}
+
+/** Parameters for Collections API DELETEREPLICAPROP. */
+export interface DeleteReplicaPropertyParams {
+  collection: string;
+  shard: string;
+  replica: string;
+  property: string;
+}
+
+/** Action-specific parameter models for replica lifecycle and property operations. */
 export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "ADDREPLICA" ? AddReplicaParams :
   A extends "DELETEREPLICA" ? DeleteReplicaParams :
+  A extends "MOVEREPLICA" ? MoveReplicaParams :
+  A extends "BALANCESHARDUNIQUE" ? BalanceShardUniqueParams :
+  A extends "REBALANCELEADERS" ? RebalanceLeadersParams :
+  A extends "ADDREPLICAPROP" ? AddReplicaPropertyParams :
+  A extends "DELETEREPLICAPROP" ? DeleteReplicaPropertyParams :
   SolrAdminParams;
 
 export type SolrAuth =

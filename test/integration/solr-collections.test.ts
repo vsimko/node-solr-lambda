@@ -42,3 +42,100 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
     `cluster status should not contain deleted shard ${shard}`
   );
 });
+
+
+cloudIntegrationTest("Collections API adds and deletes a named replica", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection();
+  type Replica = { state?: string; node_name?: string; type?: string };
+  type ClusterStatus = {
+    cluster?: {
+      live_nodes?: string[];
+      collections?: Record<string, {
+        shards?: Record<string, { replicas?: Record<string, Replica> }>;
+      }>;
+    };
+  };
+
+  const before = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const liveNode = before.cluster?.live_nodes?.[0];
+  const initialReplicas = before.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  assert.ok(liveNode, "cluster status should report a live node");
+  assert.equal(Object.keys(initialReplicas).length, 1, "fixture collection should start with one replica");
+
+  await client.collections("ADDREPLICA", {
+    collection,
+    shard: "shard1",
+    node: liveNode,
+    type: "nrt",
+    waitForFinalState: true
+  });
+
+  const afterAdd = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const replicasAfterAdd = afterAdd.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  assert.equal(Object.keys(replicasAfterAdd).length, 2, "ADDREPLICA should create a second replica");
+  const addedReplica = Object.keys(replicasAfterAdd).find(name => !(name in initialReplicas));
+  assert.ok(addedReplica, "cluster status should expose the newly added replica");
+  assert.equal(replicasAfterAdd[addedReplica]?.state, "active", "new replica should reach active state");
+
+  await client.collections("DELETEREPLICA", {
+    collection,
+    shard: "shard1",
+    replica: addedReplica,
+    deleteInstanceDir: true,
+    deleteDataDir: true,
+    deleteIndex: true
+  });
+
+  const afterDelete = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const replicasAfterDelete = afterDelete.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  assert.deepEqual(
+    Object.keys(replicasAfterDelete).sort(),
+    Object.keys(initialReplicas).sort(),
+    "DELETEREPLICA should remove only the named replica"
+  );
+});
+
+
+cloudIntegrationTest("Collections API adds, balances, and deletes replica properties", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection();
+  type ClusterStatus = {
+    cluster?: {
+      collections?: Record<string, {
+        shards?: Record<string, { replicas?: Record<string, unknown> }>;
+      }>;
+    };
+  };
+  const status = await client.collections<ClusterStatus>("CLUSTERSTATUS", { collection });
+  const replicas = status.cluster?.collections?.[collection]?.shards?.shard1?.replicas ?? {};
+  const replica = Object.keys(replicas)[0];
+  assert.ok(replica, "fixture collection should expose its initial replica");
+
+  const added = await client.collections<{ responseHeader?: { status?: number } }>("ADDREPLICAPROP", {
+    collection,
+    shard: "shard1",
+    replica,
+    property: "integrationFlag",
+    "property.value": "enabled"
+  });
+  assert.equal(added.responseHeader?.status, 0, "ADDREPLICAPROP should succeed");
+
+  const removed = await client.collections<{ responseHeader?: { status?: number } }>("DELETEREPLICAPROP", {
+    collection,
+    shard: "shard1",
+    replica,
+    property: "integrationFlag"
+  });
+  assert.equal(removed.responseHeader?.status, 0, "DELETEREPLICAPROP should succeed");
+
+  const balanced = await client.collections<{ responseHeader?: { status?: number } }>("BALANCESHARDUNIQUE", {
+    collection,
+    property: "preferredLeader"
+  });
+  assert.equal(balanced.responseHeader?.status, 0, "BALANCESHARDUNIQUE should succeed");
+});
