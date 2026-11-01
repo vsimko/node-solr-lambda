@@ -8,7 +8,9 @@ export type SolrAdminParams = Readonly<Record<string, string | number | boolean>
 export type CollectionReplicaType = "NRT" | "TLOG" | "PULL";
 
 /** Parameters for Collections API ADDREPLICA. */
-export interface AddReplicaParams extends SolrAdminParams {
+export interface AddReplicaParams {
+  /** Additional Collections API parameters not modelled here. */
+  customParams?: SolrAdminParams;
   /** Target collection. */
   collection?: string;
   /** Target shard; omit when the collection has a single shard. */
@@ -28,7 +30,9 @@ export interface AddReplicaParams extends SolrAdminParams {
 }
 
 /** Parameters for Collections API DELETEREPLICA. */
-export interface DeleteReplicaParams extends SolrAdminParams {
+export interface DeleteReplicaParams {
+  /** Additional Collections API parameters not modelled here. */
+  customParams?: SolrAdminParams;
   /** Target collection. */
   collection?: string;
   /** Target shard. */
