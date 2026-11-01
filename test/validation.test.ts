@@ -17,6 +17,83 @@ test("input validation can transform query parameters", async () => {
   assert.equal(new URL(requestedUrl).searchParams.get("q"), "BOOK");
 });
 
+test("input validation rejects invalid data before sending a request", async () => {
+  let fetchCalls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    validation: { inputs: { query: z.object({ q: z.string().min(1) }) } },
+    fetch: async () => {
+      fetchCalls += 1;
+      return new Response(JSON.stringify({ response: { numFound: 0 } }));
+    }
+  });
+
+  await assert.rejects(client.query({ query: "" }), (error: unknown) => {
+    assert.ok(error instanceof SolrValidationError);
+    assert.equal(error.operation, "query");
+    assert.equal(error.issues.length, 1);
+    return true;
+  });
+  assert.equal(fetchCalls, 0);
+});
+
+test("async schema refinements are awaited before the request", async () => {
+  let requestedQuery = "";
+  const client = createSolrClient({
+    core: "catalog",
+    validation: {
+      inputs: {
+        query: z.object({ q: z.string().refine(async value => value === "ASYNC") })
+      }
+    },
+    fetch: async input => {
+      requestedQuery = new URL(String(input)).searchParams.get("q") ?? "";
+      return new Response(JSON.stringify({ response: { numFound: 0 } }));
+    }
+  });
+
+  await client.query({ query: "ASYNC" });
+  assert.equal(requestedQuery, "ASYNC");
+});
+
+test("a throwing schema is wrapped with its original cause", async () => {
+  const cause = new Error("schema implementation failed");
+  const throwingSchema = {
+    safeParseAsync: async () => { throw cause; }
+  };
+  const client = createSolrClient({
+    core: "catalog",
+    validation: { inputs: { query: throwingSchema } },
+    fetch: async () => new Response(JSON.stringify({ response: { numFound: 0 } }))
+  });
+
+  await assert.rejects(client.query({ query: "*:*" }), (error: unknown) => {
+    assert.ok(error instanceof SolrValidationError);
+    assert.equal(error.operation, "query");
+    assert.deepEqual(error.issues, []);
+    assert.equal(error.cause, cause);
+    return true;
+  });
+});
+
+test("onError ignore returns original data after a schema rejection", async () => {
+  let requestedQuery = "";
+  const client = createSolrClient({
+    core: "catalog",
+    validation: {
+      inputs: { query: z.object({ q: z.string().min(5) }) },
+      onError: "ignore"
+    },
+    fetch: async input => {
+      requestedQuery = new URL(String(input)).searchParams.get("q") ?? "";
+      return new Response(JSON.stringify({ response: { numFound: 0 } }));
+    }
+  });
+
+  await client.query({ query: "abc" });
+  assert.equal(requestedQuery, "abc");
+});
+
 test("output validation rejects an invalid response", async () => {
   const client = createSolrClient({
     core: "catalog",
