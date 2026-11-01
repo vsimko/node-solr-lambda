@@ -25,18 +25,18 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
 | `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query and cursorMark pagination on pinned 8.11.4 / 9.11.0 / 10.1.0 images; other query options remain unverified |
-| `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Unverified |
+| `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Test authored in PR #139 follow-up; CI pending |
 | `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Tested: add, full-document update, and delete by ID on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Existing tested: hard commit on pinned 8.11.4 / 9.11.0 / 10.1.0 images. New soft commit and rollback tests authored; CI pending. Optimize remains unverified |
-| `ping()` — `/admin/ping` | Documented | Documented | Documented | Test authored for OK response; CI pending |
-| `schema()` — `/schema` | Documented | Documented | Documented | Add-field and GET /schema/fields read-back test authored; CI pending |
-| `config()` — `/config` | Documented | Documented | Documented | Set-user-property test authored; CI pending |
-| `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | CREATE, STATUS, and RELOAD test authored with fixture UNLOAD cleanup; CI pending |
+| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; optimize test authored in PR #139 follow-up, CI pending |
+| `ping()` — `/admin/ping` | Documented | Documented | Documented | Tested: ping returns OK on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /{core}/schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `coreAdmin()` — `/solr/admin/cores` | Documented | Documented | Documented | Tested: CREATE, STATUS, RELOAD, and fixture UNLOAD cleanup on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Unverified: optional SolrCloud test added; current standalone CI does not provision SolrCloud |
-| `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Unverified |
-| `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Unverified |
+| `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Test authored in PR #139 follow-up; CI pending |
+| `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Test authored in PR #139 follow-up; CI pending |
 | `security()` — authentication and authorization handlers | Documented | Documented | Documented | Unverified: isolated security.json fixture data added; live security plugin configuration and requests are not enabled in standalone CI |
-| `stream()` — `/stream` | Documented | Documented | Documented | Unverified |
+| `stream()` — `/stream` | Documented | Documented | Documented | Test authored in PR #139 follow-up; CI pending |
 | `export()` — `/export` | Documented | Documented | Documented | Unverified |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
 
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs a health check plus CRUD, hard-commit, basic-query, and cursorMark multi-page tests on Node.js 22. New tests for soft commit, rollback, ping, schema, config, and CoreAdmin are authored in PR #139; CI execution is pending. Collections tests are opt-in and require SolrCloud; live security plugin tests remain unverified:
+CI starts pinned official Solr images and runs CRUD, hard/soft commit, rollback, ping, schema, config, CoreAdmin, basic-query, and cursorMark tests on Node.js 22. CI #123 passed on all three pinned Solr images. New JSON Request API, optimize, system info, metrics, and Streaming Expressions tests are authored in the PR follow-up; CI pending. Collections tests are opt-in and require SolrCloud; live security plugin tests remain unverified:
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -94,7 +94,7 @@ Run the same suite locally after starting a Solr container and creating an isola
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:integration
 ```
 
-Existing passing tests establish service startup, document CRUD, hard commit, basic query, and cursorMark pagination. PR #139 adds tests for soft commit, rollback, ping, schema field lifecycle, config user properties, and CoreAdmin core lifecycle; do not count these as runtime evidence until CI passes. They do not certify every endpoint, query option, update command, or action in the compatibility matrix.
+Existing passing tests establish service startup, document CRUD, hard commit, basic query, and cursorMark pagination. PR #139 CI #123 passed soft commit, rollback, ping, schema field lifecycle, config user properties, and CoreAdmin core lifecycle on all three pinned Solr images. They do not certify every endpoint, query option, update command, or action in the compatibility matrix.
 
 ## Required integration evidence
 
