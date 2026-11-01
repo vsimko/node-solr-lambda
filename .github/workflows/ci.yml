@@ -117,6 +117,7 @@ jobs:
             solr-precreate integration
           docker cp security.json solr-secure:/var/solr/data/security.json
           docker start solr-secure
+          docker exec -u root solr-secure chmod 666 /var/solr/data/security.json
       - name: Wait for authenticated Solr core
         run: |
           for attempt in {1..60}; do
