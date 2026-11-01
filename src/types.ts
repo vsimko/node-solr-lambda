@@ -31,5 +31,5 @@ export interface SolrResponse<T=unknown> {
 export interface RequestOptions {
   method?:"GET"|"POST"|"PUT"|"DELETE";
   query?:URLSearchParams|Record<string,string|number|boolean|readonly (string|number)[]>;
-  body?:unknown; headers?:Readonly<Record<string,string>>; signal?:AbortSignal;
+  body?:unknown; headers?:Readonly<Record<string,string>>; signal?:AbortSignal; operation?:string;
 }
