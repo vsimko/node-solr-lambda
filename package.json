@@ -1,15 +1,54 @@
 {
-  "name":"node-solr-lambda","version":"4.0.0-beta.0","description":"A typed Apache Solr client for Node.js","license":"MIT",
-  "repository":{"type":"git","url":"https://github.com/vsimko/node-solr-lambda.git"},
-  "type":"module","main":"./dist/cjs/index.js","module":"./dist/esm/index.js","types":"./dist/types/index.d.ts",
-  "exports":{".":{"types":"./dist/types/index.d.ts","import":"./dist/esm/index.js","require":"./dist/cjs/index.js"}},
-  "files":["dist","README.md","LICENSE","docs"],
-  "engines":{"node":"^20.0.0 || ^22.0.0 || ^24.0.0"},
-  "peerDependencies":{"zod":"^3.23.0 || ^4.0.0"},"peerDependenciesMeta":{"zod":{"optional":true}},
-  "scripts":{
-    "clean":"node -e \"import('node:fs').then(fs => fs.rmSync('dist',{recursive:true,force:true}))\"",
-    "build":"npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && node --input-type=module -e \"import {writeFileSync} from 'node:fs'; writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
-    "typecheck":"tsc --noEmit -p tsconfig.json","test":"tsx --test test/*.test.ts","test:types":"tsc --noEmit -p test/tsconfig.json"
+  "name": "node-solr-lambda",
+  "version": "4.0.0-beta.0",
+  "description": "A typed Apache Solr client for Node.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vsimko/node-solr-lambda.git"
   },
-  "devDependencies":{"@types/node":"^22.15.0","tsx":"^4.19.3","typescript":"^5.8.3","zod":"^4.0.0"}
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "engines": {
+    "node": "^20.0.0 || ^22.0.0 || ^24.0.0"
+  },
+  "peerDependencies": {
+    "zod": "^3.23.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "clean": "node -e \"import('node:fs').then(fs => fs.rmSync('dist',{recursive:true,force:true}))\"",
+    "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && node --input-type=module -e \"import {writeFileSync} from 'node:fs'; writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test test/*.test.ts",
+    "test:types": "tsc --noEmit -p test/tsconfig.json",
+    "release:check": "npm pack --dry-run",
+    "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",
+    "release:publish": "npm publish --access public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "zod": "^4.0.0"
+  }
 }
