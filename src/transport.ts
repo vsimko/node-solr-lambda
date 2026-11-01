@@ -15,13 +15,6 @@ function appendSearchParams(target: URLSearchParams, query: RequestOptions["quer
   for (const [key, value] of entries) target.append(key, value);
 }
 
-function hasQueryKey(query: RequestOptions["query"], key: string): boolean {
-  if (!query) return false;
-  return query instanceof URLSearchParams
-    ? query.has(key)
-    : Object.prototype.hasOwnProperty.call(query, key);
-}
-
 function withDefaultParams(
   defaults: SolrRequestDefaults["params"],
   query: RequestOptions["query"]
