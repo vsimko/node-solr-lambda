@@ -54,6 +54,9 @@ jobs:
           echo "Solr integration core did not become healthy within five minutes"
           docker logs solr
           exit 1
+      - name: Prepare a reusable configset for CoreAdmin lifecycle fixtures
+        run: |
+          docker exec solr bash -lc 'mkdir -p /var/solr/data/configsets && cp -a /opt/solr/server/solr/configsets/_default /var/solr/data/configsets/_default'
       - name: Run Solr integration smoke tests
         run: npm run test:integration
         env:
