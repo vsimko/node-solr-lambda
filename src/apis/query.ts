@@ -54,17 +54,17 @@ function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassic
     params["facet.query"] = typeof facets.queries === "string" ? [facets.queries] : facets.queries;
   }
   if (facets.dates !== undefined) {
-    const dates = typeof facets.dates === "string" ? [{ field: facets.dates, start: "", end: "", gap: "" }] : facets.dates;
-    params["facet.date"] = dates.map(date => date.field);
+    const dates = typeof facets.dates === "string" ? [facets.dates] : facets.dates;
+    params["facet.date"] = dates.map(date => typeof date === "string" ? date : date.field);
     for (const date of dates) {
-      setDateOrRangeOptions(params, `f.${date.field}.facet.date`, date);
+      if (typeof date !== "string") setDateOrRangeOptions(params, `f.${date.field}.facet.date`, date);
     }
   }
   if (facets.ranges !== undefined) {
-    const ranges = typeof facets.ranges === "string" ? [{ field: facets.ranges, start: 0, end: 0, gap: 1 }] : facets.ranges;
-    params["facet.range"] = ranges.map(range => range.field);
+    const ranges = typeof facets.ranges === "string" ? [facets.ranges] : facets.ranges;
+    params["facet.range"] = ranges.map(range => typeof range === "string" ? range : range.field);
     for (const range of ranges) {
-      setDateOrRangeOptions(params, `f.${range.field}.facet.range`, range);
+      if (typeof range !== "string") setDateOrRangeOptions(params, `f.${range.field}.facet.range`, range);
     }
   }
 }
