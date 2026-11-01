@@ -67,6 +67,8 @@ Use the 10.1 guide as the documentation baseline.
 
 The client does not yet provide dedicated typed wrappers for the V2 API.
 
+See the [machine-readable API inventory](api-inventory.json) for operation-level test and version status.
+
 ## Current support policy
 
 - Target Solr server lines are 8.x, 9.x, and 10.x.
