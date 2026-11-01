@@ -337,6 +337,69 @@ export interface SolrHighlightingOptions {
   perField?: Readonly<Record<string, SolrFieldHighlightOptions>>;
 }
 
+/** Result Grouping response format. */
+export type SolrGroupFormat = "grouped" | "simple";
+
+/** Typed options for Solr Result Grouping (group=true). */
+export interface SolrGroupingOptions {
+  enabled?: boolean;
+  /** Group by one or more single-valued indexed string fields. */
+  fields?: string | readonly string[];
+  /** Group by one or more function queries; not supported for distributed searches. */
+  functions?: string | readonly string[];
+  /** Return one group for each supplied query expression. */
+  queries?: string | readonly string[];
+  /** Number of documents returned in each group. */
+  limit?: number;
+  /** Offset into each group's document list. */
+  offset?: number;
+  /** Sort order for groups, corresponding to the top-level sort parameter. */
+  sort?: string;
+  /** Sort order for documents within each group. */
+  groupSort?: string;
+  format?: SolrGroupFormat;
+  main?: boolean;
+  numGroups?: boolean;
+  truncate?: boolean;
+  facet?: boolean;
+  facetLimit?: number;
+  cachePercent?: number;
+}
+
+/** Null-value behavior for the Collapsing Query Parser. */
+export type SolrCollapseNullPolicy = "ignore" | "expand" | "collapse";
+export type SolrCollapseHint = "top_fc" | "block";
+
+/** Typed options for Solr's Collapsing Query Parser. */
+export interface SolrCollapseOptions {
+  /** Required single-valued string, integer, or float field. */
+  field: string;
+  /** Select the group head with the minimum value or function. */
+  min?: string;
+  /** Select the group head with the maximum value or function. */
+  max?: string;
+  /** Select the group head using a sort expression. */
+  sort?: string;
+  nullPolicy?: SolrCollapseNullPolicy;
+  hint?: SolrCollapseHint;
+  size?: number;
+  cost?: number;
+}
+
+/** Typed options for the Expand component used with collapsed results. */
+export interface SolrExpandOptions {
+  enabled?: boolean;
+  field?: string;
+  sort?: string;
+  rows?: number;
+  query?: string;
+  filter?: string | readonly string[];
+  nullGroup?: boolean;
+}
+
+/** Expanded documents keyed by the collapsed group head document ID. */
+export type SolrExpandedResult<TDocument = unknown> = Readonly<Record<string, SolrQueryResult<TDocument>>>;
+
 /**
  * Options for the standard /select query handler.
  *
@@ -366,6 +429,12 @@ export interface SolrStandardQueryOptions {
   facets?: SolrClassicFacetOptions;
   /** Typed options for the Highlighting component. */
   highlighting?: SolrHighlightingOptions;
+  /** Typed options for Result Grouping. */
+  grouping?: SolrGroupingOptions;
+  /** Collapse duplicate results using the Collapsing Query Parser. */
+  collapse?: SolrCollapseOptions;
+  /** Retrieve additional documents for collapsed groups. */
+  expand?: SolrExpandOptions;
   /** Boolean query operator, serialized as q.op. */
   "q.op"?: SolrQueryOperator;
   /** Response writer, serialized as wt. */
@@ -483,6 +552,8 @@ export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   highlighting?: SolrHighlighting;
   /** Grouped query results keyed by group field or function. */
   grouped?: Readonly<Record<string, SolrGroupedResult<TDocument>>>;
+  /** Additional documents returned by the Expand component. */
+  expanded?: SolrExpandedResult<TDocument>;
   /** Stats Component response. */
   stats?: SolrStats;
   /** Query parser and execution diagnostics, when debug is enabled. */
