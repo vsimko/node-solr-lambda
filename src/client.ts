@@ -59,8 +59,11 @@ export class SolrClient {
     for(const [key,value] of Object.entries(params))if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"||(Array.isArray(value)&&value.every(x=>typeof x==="string"||typeof x==="number")))flat[key]=value as string|number|boolean|readonly (string|number)[];
     return this.request<T>(this.endpoint("/select"),{method:"GET",query:flat,operation:"query"});
   }
-  add<T=unknown>(documents:SolrDocument|readonly SolrDocument[]):Promise<T> {
-    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents],operation:"add"});
+  add<T=unknown>(documents:SolrDocument|readonly SolrDocument[],options:UpdateOptions={}):Promise<T> {
+    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents],query:options,operation:"add"});
+  }
+  update<T=unknown>(documents:SolrDocument|readonly SolrDocument[],options:UpdateOptions={}):Promise<T> {
+    return this.add<T>(documents,options);
   }
   delete<T=unknown>(command:SolrDelete):Promise<T> {
     return this.request<T>(this.endpoint("/update"),{method:"POST",body:{delete:typeof command==="string"?{id:command}:command},operation:"delete"});
@@ -94,7 +97,16 @@ export class SolrClient {
   stream<T=unknown>(expression:string):Promise<T> {
     return this.request<T>(this.endpoint("/stream"),{query:{expr:expression,wt:"json"},operation:"stream"});
   }
-  export<T=unknown>(params:import("./types.js").SolrAdminParams):Promise<T> {
-    return this.request<T>(this.endpoint("/export"),{query:params,operation:"export"});
+  async requestRaw(path:string,options:RequestOptions={}):Promise<Response> {
+    const method=options.method??"GET";
+    const operation=options.operation??method;
+    const input=await this.validate(operation,"inputs",options.body??options.query);
+    const url=new URL(path.replace(/^\\//,""),this.clientConfig.baseUrl??DEFAULT_BASE_URL);
+    appendQuery(url,options.body===undefined?input as RequestOptions["query"]:options.query);
+    const headers:Record<string,string>={accept:"*/*",...(options.body===undefined?{}:{"content-type":"application/json"}),...(this.clientConfig.username!==undefined?{authorization:`Basic ${btoa(`${this.clientConfig.username}:${this.clientConfig.password??""}`)}`}:{}),...this.clientConfig.headers,...options.headers};
+    return this.requestFetch(url,{method,headers,...(options.body===undefined?{}:{body:JSON.stringify(input)}),signal:options.signal??AbortSignal.timeout(this.clientConfig.timeoutMs??30_000)});
+  }
+  export(params:import("./types.js").SolrAdminParams):Promise<Response> {
+    return this.requestRaw(this.endpoint("/export"),{query:params,operation:"export"});
   }
 }
