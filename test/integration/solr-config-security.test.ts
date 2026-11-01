@@ -9,6 +9,10 @@ integrationTest("Config API accepts an isolated user property and security fixtu
 }) => {
   const property = createId("fixture_property");
   await setUserProperty(property, "integration-value");
+  const overlay = await client.request<{
+    overlay?: { userProps?: Record<string, unknown> };
+  }>(`/${process.env.SOLR_CORE}/config/overlay`, { method: "GET" });
+  assert.equal(overlay.overlay?.userProps?.[property], "integration-value");
 
   assert.equal(securityData.authentication.class, "solr.BasicAuthPlugin");
   assert.equal(securityData.authentication.blockUnknown, true);
