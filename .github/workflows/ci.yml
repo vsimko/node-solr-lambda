@@ -84,7 +84,8 @@ jobs:
       - name: Generate isolated BasicAuth security configuration
         run: |
           node --input-type=module <<'NODE'
-          import { createHash, randomBytes, writeFileSync } from "node:crypto";
+          import { createHash, randomBytes } from "node:crypto";
+          import { writeFileSync } from "node:fs";
           const username = process.env.SOLR_USERNAME;
           const password = process.env.SOLR_PASSWORD;
           const salt = randomBytes(32);
