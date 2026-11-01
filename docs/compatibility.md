@@ -35,7 +35,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. These baselines
 | `collections()` — `/solr/admin/collections` | Documented | Documented | Documented | Tested: SolrCloud CREATE/LIST/DELETE on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `systemInfo()` — `/solr/admin/info/system` | Documented | Documented | Documented | Tested: system metadata on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `metrics()` — `/solr/admin/metrics` | Documented | Documented | Documented | Tested: JVM metrics on pinned 8.11.4 / 9.11.0 / 10.1.0; Solr 8/9 return JSON, Solr 10.1 Prometheus text |
-| `security()` — authentication and authorization handlers | Documented | Documented | Documented | Pending CI: dedicated authenticated standalone matrix added for anonymous rejection, authentication/authorization GET, and authentication `set-property` read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `security()` — authentication and authorization handlers | Documented | Documented | Documented | Tested: authenticated BasicAuth/RuleBasedAuthorization, anonymous rejection, authentication/authorization GET, and authentication `set-property` read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #162) |
 | `stream()` — `/stream` | Documented | Documented | Documented | Tested: Streaming Expressions search against a disposable SolrCloud collection on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `export()` — `/export` | Documented | Documented | Documented | Tested: raw response with docValues sort field on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
@@ -80,7 +80,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #145 passed the Node.js 20/22/24 checks, standalone integration jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE and Streaming Expressions search. The new security-enabled matrix is pending its first CI result:
+CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. CI #162 passed the Node.js 20/22/24 checks, standalone integration jobs, security-enabled standalone jobs, and SolrCloud jobs. The passing SolrCloud matrix includes Collections CREATE/LIST/DELETE and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection, authenticated authentication/authorization reads, and authentication property mutation/read-back.
 
 | Solr line | Pinned Docker image |
 | --- | --- |
@@ -111,7 +111,7 @@ The suite must cover:
 4. Schema and Config API mutations and read-back where supported by the public client method.
 5. CoreAdmin and Collections actions.
 6. System information and Metrics API.
-7. Authentication and authorization requests with a test security configuration (new CI matrix added; pending pass).
+7. Authentication and authorization requests with a test security configuration (CI #162 passed on all three pinned Solr versions).
 8. Streaming Expressions and export response handling.
 
 Do not mark a row as supported until the relevant integration test passes. Record unsupported or unavailable operations as such, with the exact server version and reason.
