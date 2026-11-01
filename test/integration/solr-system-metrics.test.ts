@@ -7,7 +7,12 @@ integrationTest("System info endpoint returns server information", async ({ clie
 });
 
 integrationTest("Metrics API returns JVM metrics", async ({ client }) => {
-  const result = await client.metrics<string>({ group: "jvm" });
-  assert.equal(typeof result, "string");
-  assert.match(result, /jvm_[a-z_]+/, "JVM metrics should contain Prometheus metric names");
+  const result = await client.metrics<string | { metrics?: Record<string, unknown> }>({ group: "jvm" });
+  if (typeof result === "string") {
+    // Newer Solr lines may negotiate the Prometheus exposition writer by default.
+    assert.match(result, /jvm_[a-z_]+/, "JVM metrics text should contain Prometheus metric names");
+  } else {
+    // Older Solr lines return the classic JSON metrics registry.
+    assert.ok(result.metrics && Object.keys(result.metrics).length > 0, "JVM metrics JSON should contain registry data");
+  }
 });
