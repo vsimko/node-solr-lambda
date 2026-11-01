@@ -12,7 +12,8 @@ const addReplica = {
   shard: "shard1",
   type: replicaType,
   node: "127.0.0.1:8983_solr",
-  waitForFinalState: true
+  waitForFinalState: true,
+  customParams: { "property.zone": "hot" }
 } satisfies AddReplicaParams;
 
 const deleteReplica = {
