@@ -107,7 +107,8 @@ void solr.query({
       { field: "price", limit: 10, offset: 5, sort: "count", minCount: 1, missing: true, prefix: "1", method: "fc" }
     ],
     queries: ["price:[0 TO 10]"],
-    dates: [{ field: "created_at", start: "NOW/DAY", end: "NOW", gap: "+1DAY", hardEnd: true, other: "before", include: ["lower", "upper"] }],
+    ranges: [{ field: "created_at", start: "NOW/DAY", end: "NOW", gap: "+1DAY", hardEnd: true, other: "before", include: ["lower", "upper"], method: "filter" }],
+    rangeMethod: "dv",
     ranges: [{ field: "price", start: 0, end: 100, gap: 10, other: "between", include: "edge" }],
     limit: 20,
     offset: 0,
@@ -125,8 +126,10 @@ void solr.query({ facets: { sort: "ascending" } });
 void solr.query({ facets: { fields: [{ field: "category", sort: "ascending" }] } });
 // @ts-expect-error Range facets require a gap.
 void solr.query({ facets: { ranges: [{ field: "price", start: 0, end: 100 }] } });
-// @ts-expect-error Date facets require an explicit start, end, and gap.
-void solr.query({ facets: { dates: [{ field: "created_at", start: "NOW", end: "NOW" }] } });
+// @ts-expect-error Legacy facet.date is not available in Solr 8, 9, or 10; use a date range facet.
+void solr.query({ facets: { dates: [{ field: "created_at", start: "NOW", end: "NOW", gap: "+1DAY" }] } });
+// @ts-expect-error Range facet methods are limited to filter or dv.
+void solr.query({ facets: { rangeMethod: "enum" } });
 // @ts-expect-error Facet minCount must be numeric.
 void solr.query({ facets: { minCount: "one" } });
 // @ts-expect-error Unsupported facet methods are rejected.
