@@ -61,7 +61,7 @@ export class SolrClient {
     return this.request<T>(this.endpoint("/select"),{method:"GET",query:flat,operation:"query"});
   }
   add<T=unknown>(documents:SolrDocument|readonly SolrDocument[],options:UpdateOptions={}):Promise<T> {
-    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents],query:options,operation:"add"});
+    return this.request<T>(this.endpoint("/update"),{method:"POST",body:Array.isArray(documents)?documents:[documents],query:{...options},operation:"add"});
   }
   update<T=unknown>(documents:SolrDocument|readonly SolrDocument[],options:UpdateOptions={}):Promise<T> {
     return this.add<T>(documents,options);
