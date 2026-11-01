@@ -55,7 +55,8 @@ test("Collections replica lifecycle parameters are serialized", async () => {
     shard: "shard1",
     type: "NRT",
     node: "node1",
-    waitForFinalState: true
+    waitForFinalState: true,
+    customParams: { "property.zone": "hot" }
   });
   await client.collections("DELETEREPLICA", {
     collection: "books",
@@ -71,6 +72,7 @@ test("Collections replica lifecycle parameters are serialized", async () => {
   assert.equal(add.searchParams.get("collection"), "books");
   assert.equal(add.searchParams.get("type"), "NRT");
   assert.equal(add.searchParams.get("waitForFinalState"), "true");
+  assert.equal(add.searchParams.get("property.zone"), "hot");
 
   const remove = new URL(requested[1]!);
   assert.equal(remove.searchParams.get("action"), "DELETEREPLICA");
