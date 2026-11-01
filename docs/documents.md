@@ -1,10 +1,10 @@
 # Document API
 
-Use `add()` to add one document or a list of documents.
+Use `add()` to add one document or a list of documents. Use `update()` for the same Solr update endpoint. Solr atomic update commands are document field values such as `{ set: value }`.
 
 ```ts
 await solr.add({ id: "item-1", title: "First item" });
-await solr.add([{ id: "item-2" }, { id: "item-3" }]);
+await solr.update({ id: "item-1", title: { set: "Updated title" } });
 await solr.commit();
 ```
 
@@ -16,4 +16,4 @@ await solr.delete({ id: "item-2" });
 await solr.delete({ query: "status:expired" });
 ```
 
-Use `rollback()` to cancel uncommitted update operations.
+Use `softCommit()` for a soft commit. Use `optimize()` to merge index segments. Use `rollback()` to cancel uncommitted update operations.
