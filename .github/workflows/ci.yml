@@ -99,7 +99,7 @@ jobs:
           exit 1
       - name: Upload the default configset to ZooKeeper
         run: |
-          docker exec solr-cloud bash -lc 'solr zk upconfig -n _default -d /opt/solr/server/solr/configsets/_default'
+          docker exec solr-cloud bash -lc 'solr zk upconfig -n _default -d /opt/solr/server/solr/configsets/_default -z localhost:9983'
       - name: Run SolrCloud integration tests
         run: npm run test:integration
         env:
