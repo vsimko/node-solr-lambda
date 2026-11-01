@@ -101,7 +101,7 @@ export class SolrClient {
   async requestRaw(path:string,options:RequestOptions={}):Promise<Response> {
     const method=options.method??"GET";
     const operation=options.operation??method;
-    const input=await this.validate(operation,"inputs",options.body??options.query);
+    const input=this.clientConfig.validation?await this.validate(operation,"inputs",options.body??options.query):(options.body??options.query);
     const url=new URL(path.startsWith("/")?path.slice(1):path,this.clientConfig.baseUrl??DEFAULT_BASE_URL);
     appendQuery(url,options.body===undefined?input as RequestOptions["query"]:options.query);
     const headers:Record<string,string>={accept:"*/*",...(options.body===undefined?{}:{"content-type":"application/json"}),...(this.clientConfig.username!==undefined?{authorization:`Basic ${Buffer.from(`${this.clientConfig.username}:${this.clientConfig.password??""}`).toString("base64")}`}:{}),...this.clientConfig.headers,...options.headers};
