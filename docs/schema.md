@@ -12,7 +12,38 @@ await solr.schema({ "replace-field": { name: "sku", type: "text_general", stored
 await solr.schema({ "delete-field": { name: "sku" } });
 ```
 
-## Modify dynamic fields, field types, and copy fields
+## Add, replace, and delete field types
+
+Field types support a shared analyzer or separate index/query analyzers. Tokenizers, filters, char filters, and similarity configuration are represented explicitly where common, with an extension index for plugin-specific options.
+
+```ts
+await solr.schema({
+  "add-field-type": {
+    name: "text_en",
+    class: "solr.TextField",
+    analyzer: {
+      tokenizer: { class: "solr.StandardTokenizerFactory" },
+      filters: [{ class: "solr.LowerCaseFilterFactory" }]
+    },
+    similarity: { class: "solr.SchemaSimilarityFactory" }
+  }
+});
+
+await solr.schema({
+  "replace-field-type": {
+    name: "text_en",
+    class: "solr.TextField",
+    indexAnalyzer: { tokenizer: { class: "solr.StandardTokenizerFactory" } },
+    queryAnalyzer: { tokenizer: { class: "solr.KeywordTokenizerFactory" } }
+  }
+});
+
+await solr.schema({ "delete-field-type": { name: "text_en" } });
+```
+
+The replace operation requires a complete field type definition. Analyzer plugin class names and parameters must exist on the target Solr distribution; TypeScript cannot validate server-side plugin availability.
+
+## Modify dynamic fields and copy fields
 
 ```ts
 const added = await solr.schema({
