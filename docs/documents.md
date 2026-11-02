@@ -1,10 +1,16 @@
 # Document API
 
-Use `add()` to add one document or a list of documents. Use `update()` for the same Solr update endpoint. Solr atomic update commands are document field values such as `{ set: value }`.
+Use `add()` to add one document or a list of documents. Use `update()` for full-document replacement. Use `atomicUpdate<TDocument>()` for field-specific partial updates with typed Solr modifiers.
 
 ```ts
 await solr.add({ id: "item-1", title: "First item" });
-await solr.update({ id: "item-1", title: { set: "Updated title" } });
+interface Item { id: string; title: string; count: number; tags: string[]; }
+await solr.atomicUpdate<Item>({
+  id: "item-1",
+  title: { set: "Updated title" },
+  count: { inc: 1 },
+  tags: { "add-distinct": "featured" }
+});
 await solr.commit();
 ```
 

@@ -84,9 +84,10 @@
         "test/client.test.ts",
         "test/config.test.ts",
         "test/integration/solr-smoke.test.ts",
-        "test/cancellation.types.ts"
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts"
       ],
-      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10."
+      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates."
     },
     {
       "id": "update.update",
@@ -109,7 +110,7 @@
         "test/integration/solr-update.test.ts",
         "test/cancellation.types.ts"
       ],
-      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10."
+      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates."
     },
     {
       "id": "update.delete",
@@ -131,7 +132,8 @@
         "test/modules.test.ts",
         "test/integration/solr-smoke.test.ts",
         "test/client.test.ts",
-        "test/cancellation.types.ts"
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts"
       ],
       "notes": "Document deletion by ID is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Delete-by-ID and delete-by-query serialization are covered by unit tests; SolrDeleteOptions expose route and commitWithin, with runtime verification of these request options remaining unverified on Solr 8/9/10."
     },
@@ -178,7 +180,8 @@
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update-lifecycle.test.ts",
-        "test/cancellation.types.ts"
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts"
       ],
       "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests."
     },
@@ -201,7 +204,8 @@
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-optimize.test.ts",
-        "test/cancellation.types.ts"
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts"
       ],
       "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions."
     },
@@ -224,7 +228,8 @@
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update-lifecycle.test.ts",
-        "test/cancellation.types.ts"
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts"
       ],
       "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests."
     },

@@ -29,6 +29,68 @@ await solr.update(
 
 `update()` is an alias for full-document replacement through the same add command. Atomic/partial document updates use a different command shape and are tracked separately in [Issue #61](https://github.com/vsimko/node-solr-lambda/issues/61).
 
+## Atomic and partial document updates
+
+Use `atomicUpdate<TDocument>()` when changing only selected fields. The unique-key field (by default `id`) remains a plain value; every changed field must use exactly one Solr modifier.
+
+```ts
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  tags: string[];
+}
+
+await solr.atomicUpdate<Product>({
+  id: "book-1",
+  title: { set: "Revised title" },
+  price: { inc: 2.5 },
+  tags: { "add-distinct": "featured" }
+});
+```
+
+The field-specific `SolrAtomicUpdateOperation<TValue>` model supports:
+
+- `set`: replace a field value (or clear it with `null`).
+- `add`, `add-distinct`, and `remove`: operate on fields modelled as arrays.
+- `removeregex`: remove values matching a regular expression from a string-array field (this is Solr's exact wire spelling).
+- `inc`: increment or decrement a numeric field.
+
+A custom unique-key field can be supplied as the second generic parameter when that key exists on the document type, for example `interface ProductWithSku extends Product { sku: string; }` followed by `SolrAtomicUpdateDocument<ProductWithSku, "sku">`. For nested documents, include `_root_` and, where needed, pass the root ID using the existing `route` option.
+
+Atomic updates require Solr schema fields to be stored or docValues-backed (subject to Solr's documented copyField/derived-field exceptions). The client validates that each update has one unique-key value and at least one valid modifier, and rejects malformed modifier objects before sending the request.
+
+## Atomic and partial document updates
+
+Use `atomicUpdate<TDocument>()` when changing selected fields without replacing the full document. The unique-key field (by default `id`) remains a plain value; every changed field must use exactly one Solr modifier.
+
+```ts
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  tags: string[];
+}
+
+await solr.atomicUpdate<Product>({
+  id: "book-1",
+  title: { set: "Revised title" },
+  price: { inc: 2.5 },
+  tags: { "add-distinct": "featured" }
+});
+```
+
+The field-specific `SolrAtomicUpdateOperation<TValue>` model supports:
+
+- `set`: replace a field value (or clear it with `null`).
+- `add`, `add-distinct`, and `remove`: operate on fields modelled as arrays.
+- `removeregex`: remove matching values from a string-array field (this is Solr's exact wire spelling).
+- `inc`: increment or decrement a numeric field.
+
+A custom unique-key field can be supplied as the second generic parameter, for example `SolrAtomicUpdateDocument<Product, "sku">`. For nested documents, include `_root_` and, where needed, pass the root ID using the existing `route` option.
+
+Atomic updates require schema fields to be stored or docValues-backed, subject to Solr's documented copyField and derived-field exceptions. The client validates that each update contains one unique-key value and at least one valid modifier, and rejects malformed modifier objects before sending the request.
+
 ## Delete by ID or query
 
 ```ts
