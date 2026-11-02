@@ -336,6 +336,11 @@ export class SolrTransport {
     return `/solr/${encodeURIComponent(target)}${path}`;
   }
 
+  /**
+   * Send a request and return the raw Response. String bodies are sent unchanged;
+   * callers must set their own Content-Type for non-JSON payloads. Other bodies
+   * are JSON serialized as before.
+   */
   async requestRaw(path: string, options: RequestOptions = {}): Promise<Response> {
     const method = options.method ?? "GET";
     const operation = options.operation ?? method;
@@ -345,16 +350,17 @@ export class SolrTransport {
       : (options.body ?? query);
     const url = resolveUrl(path, this.clientConfig.baseUrl ?? DEFAULT_BASE_URL);
     appendSearchParams(url.searchParams, options.body === undefined ? input as RequestOptions["query"] : query);
+    const rawStringBody = typeof input === "string";
     const headers: Record<string, string> = {
       accept: "*/*",
-      ...(options.body === undefined ? {} : { "content-type": "application/json" }),
+      ...(options.body === undefined || rawStringBody ? {} : { "content-type": "application/json" }),
       ...this.clientConfig.requestDefaults?.headers,
       ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
       ...this.clientConfig.headers,
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal, this.requestTimeout(options)
+      url, method, headers, options.body === undefined ? undefined : rawStringBody ? input as string : JSON.stringify(input), options.signal, this.requestTimeout(options)
     );
     if (!response.ok) {
       try {

@@ -29,6 +29,22 @@ await solr.update(
 
 `update()` is an alias for full-document replacement through the same add command. Atomic/partial document updates use a different command shape and are tracked separately in [Issue #61](https://github.com/vsimko/node-solr-lambda/issues/61).
 
+## XML update requests: deliberate exclusion
+
+There is no XML-specific convenience API. The typed update surface uses Solr's JSON formats; XML support would duplicate the command models and serializer without adding capabilities that are unavailable through the raw transport.
+
+When an existing integration requires XML, use `requestRaw()` with a string body and set the content type explicitly:
+
+```ts
+const response = await solr.requestRaw("/solr/catalog/update", {
+  method: "POST",
+  body: "<add><doc><field name=\"id\">book-1</field></doc></add>",
+  headers: { "content-type": "text/xml" }
+});
+```
+
+String bodies passed to `requestRaw()` are sent unchanged. Non-string bodies retain the existing JSON serialization behavior. The XML request path is a generic transport escape hatch, not a typed XML command API; XML runtime compatibility is not certified by the Solr 8/9/10 integration matrix.
+
 ## JSON update request forms
 
 `add()` and `update()` accept either one document or an array:
