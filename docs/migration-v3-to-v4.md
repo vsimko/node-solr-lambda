@@ -116,6 +116,50 @@ Per-request cancellation and timeouts use `AbortSignal` and `timeoutMs`. Retry b
 
 v3 relied on JSDoc annotations for editor type assistance. v4 ships TypeScript declarations and named public types. Runtime validation is separate and disabled by default. If the application uses Zod schemas, install Zod as an optional peer and configure input/output schemas; otherwise no Zod installation is required. See [runtime validation](validation.md).
 
+## End-to-end v4 replacement example
+
+The following is a complete replacement for the common v3 pattern of preparing a client, adding a document, querying it, replacing it, and deleting it. It uses the v4 factory and standard Solr handlers:
+
+```ts
+import { createSolrClient } from "node-solr-lambda";
+
+interface Book {
+  id: string;
+  title_s: string;
+}
+
+const solr = createSolrClient({
+  baseUrl: "http://localhost:8983",
+  core: "books"
+});
+
+const id = "migration-example-1";
+await solr.ping();
+
+await solr.add({ id, title_s: "Original title" });
+await solr.commit({ waitSearcher: true });
+
+const created = await solr.query<{ response?: { docs?: Book[] } }>({
+  query: `id:${id}`,
+  fields: ["id", "title_s"],
+  limit: 1
+});
+
+await solr.update({ id, title_s: "Updated title" });
+await solr.commit({ waitSearcher: true });
+
+const updated = await solr.query<{ response?: { docs?: Book[] } }>({
+  query: `id:${id}`,
+  fields: ["id", "title_s"],
+  limit: 1
+});
+
+await solr.delete(id);
+await solr.commit({ waitSearcher: true });
+```
+
+This workflow is exercised as an integration test against the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. A compile-only consumer fixture also verifies the v4 factory/configuration shape and rejects the removed v3 `hostname`/`port`/`protocol` configuration keys. The integration test uses a unique document ID and removes it after the assertions.
+
 ## Migration checklist
 
 - [ ] Upgrade the runtime to Node.js 20, 22, or 24.
