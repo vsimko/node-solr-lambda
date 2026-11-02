@@ -9,6 +9,7 @@
 - [Config API](config.md)
 - [Administration](administration.md)
 - [Error handling](errors.md)
+- [Raw requests](raw-requests.md)
 - [API coverage](api-coverage.md)
 - [Client architecture](architecture.md)
 - [Solr server compatibility](compatibility.md)

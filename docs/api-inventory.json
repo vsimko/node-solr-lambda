@@ -495,13 +495,14 @@
         "9": "unverified",
         "10": "unverified"
       },
-      "documentation": "docs/architecture.md",
+      "documentation": "docs/raw-requests.md",
       "testFiles": [
         "test/errors.test.ts",
         "test/cancellation.test.ts",
-        "test/client.test.ts"
+        "test/client.test.ts",
+        "test/raw-request.test.ts"
       ],
-      "notes": "Generic raw-response escape hatch. String bodies are passed through unchanged when callers supply an explicit Content-Type; XML has no dedicated typed update API and remains runtime-unverified across Solr 8/9/10."
+      "notes": "Generic raw-response escape hatch using the shared Solr transport. Supports typed methods, query parameters, headers, request bodies, cancellation, timeouts, retry policy, configured validation, and standard Solr error classes. Relative paths and same-origin absolute URLs are supported; cross-origin absolute URLs, embedded credentials, and fragments are rejected before Fetch to prevent credential leakage. String bodies are passed through unchanged when callers supply an explicit Content-Type. Custom endpoint behavior is unverified on Solr 8/9/10 until endpoint-specific integration tests are added."
     },
     {
       "id": "update.commands",
