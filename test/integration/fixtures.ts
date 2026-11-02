@@ -1,7 +1,7 @@
 import test from "node:test";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { SolrClient } from "../../src/index.js";
-import type { SolrDocument, SolrSchemaCommandResponse, SolrSchemaFieldType } from "../../src/index.js";
+import type { SolrDocument, SolrSchemaCommandResponse, SolrSchemaFieldType, SolrSchemaDynamicField, SolrSchemaCopyField } from "../../src/index.js";
 
 const baseUrl = process.env.SOLR_BASE_URL;
 const core = process.env.SOLR_CORE;
@@ -41,6 +41,10 @@ export interface SolrIntegrationFixture {
   addSchemaField(name: string, type?: string, docValues?: boolean): Promise<SolrSchemaCommandResponse>;
   deleteSchemaField(name: string): Promise<SolrSchemaCommandResponse>;
   addSchemaFieldType(fieldType: SolrSchemaFieldType): Promise<SolrSchemaCommandResponse>;
+  addSchemaDynamicField(field: SolrSchemaDynamicField): Promise<SolrSchemaCommandResponse>;
+  deleteSchemaDynamicField(name: string): Promise<SolrSchemaCommandResponse>;
+  addSchemaCopyField(rule: SolrSchemaCopyField): Promise<SolrSchemaCommandResponse>;
+  deleteSchemaCopyField(source: string, dest: string): Promise<SolrSchemaCommandResponse>;
   deleteSchemaFieldType(name: string): Promise<SolrSchemaCommandResponse>;
   setUserProperty(name: string, value: string | number | boolean): Promise<void>;
   securityData: SolrSecurityFixtureData;
@@ -75,6 +79,8 @@ export function integrationTest(
     const createdCores = new Set<string>();
     const schemaFields = new Set<string>();
     const schemaFieldTypes = new Set<string>();
+    const schemaDynamicFields = new Set<string>();
+    const schemaCopyFields = new Map<string, Set<string>>();
     const userProperties = new Set<string>();
 
     const fixture: SolrIntegrationFixture = {
@@ -115,6 +121,31 @@ export function integrationTest(
         schemaFieldTypes.delete(name);
         return response;
       },
+      async addSchemaDynamicField(field) {
+        const response = await client.schema({ "add-dynamic-field": field });
+        schemaDynamicFields.add(field.name);
+        return response;
+      },
+      async deleteSchemaDynamicField(name) {
+        const response = await client.schema({ "delete-dynamic-field": { name } });
+        schemaDynamicFields.delete(name);
+        return response;
+      },
+      async addSchemaCopyField(rule) {
+        const response = await client.schema({ "add-copy-field": rule });
+        const destinations = Array.isArray(rule.dest) ? rule.dest : [rule.dest];
+        const existing = schemaCopyFields.get(rule.source) ?? new Set<string>();
+        for (const destination of destinations) existing.add(destination);
+        schemaCopyFields.set(rule.source, existing);
+        return response;
+      },
+      async deleteSchemaCopyField(source, dest) {
+        const response = await client.schema({ "delete-copy-field": { source, dest } });
+        const destinations = schemaCopyFields.get(source);
+        destinations?.delete(dest);
+        if (destinations?.size === 0) schemaCopyFields.delete(source);
+        return response;
+      },
       async setUserProperty(name, value) {
         await client.config({ "set-user-property": { [name]: value } });
         userProperties.add(name);
@@ -126,9 +157,25 @@ export function integrationTest(
     try {
       await run(fixture);
     } finally {
+      for (const [source, destinations] of schemaCopyFields) {
+        for (const dest of destinations) {
+          try {
+            await client.schema({ "delete-copy-field": { source, dest } });
+          } catch (error) {
+            cleanupErrors.push(error);
+          }
+        }
+      }
       for (const name of schemaFields) {
         try {
           await client.schema({ "delete-field": { name } });
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
+      for (const name of schemaDynamicFields) {
+        try {
+          await client.schema({ "delete-dynamic-field": { name } });
         } catch (error) {
           cleanupErrors.push(error);
         }

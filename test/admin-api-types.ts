@@ -2,6 +2,8 @@ import type {
   SolrClient,
   SolrSchemaCommand,
   SolrSchemaFieldType,
+  SolrSchemaDynamicField,
+  SolrSchemaCopyField,
   SolrSchemaCommandResponse,
   SolrSchemaReadResponse,
   SolrSchemaFieldsResponse,
@@ -72,6 +74,35 @@ const addCopyField: SolrSchemaCommand = {
 };
 void client.schema(addDynamicField);
 void client.schema(addCopyField);
+
+const replaceDynamicField: SolrSchemaCommand = {
+  "replace-dynamic-field": { name: "*_sku", type: "text_general", stored: true, indexed: true }
+};
+const deleteDynamicField: SolrSchemaCommand = { "delete-dynamic-field": { name: "*_sku" } };
+const deleteCopyField: SolrSchemaCommand = {
+  "delete-copy-field": { source: "title", dest: "text" }
+};
+const dynamicFieldDefinition: SolrSchemaDynamicField = {
+  name: "sku_*",
+  type: "string",
+  stored: true,
+  indexed: true
+};
+const copyFieldDefinition: SolrSchemaCopyField = {
+  source: "title",
+  dest: ["text", "catchall"],
+  maxChars: 128
+};
+void client.schema(replaceDynamicField);
+void client.schema(deleteDynamicField);
+void client.schema(deleteCopyField);
+void client.schema({ "add-dynamic-field": dynamicFieldDefinition });
+void client.schema({ "add-copy-field": copyFieldDefinition });
+// @ts-expect-error Dynamic field definitions require a matching pattern and field type.
+const invalidDynamicField: SolrSchemaCommand = { "add-dynamic-field": { name: "sku_*" } };
+// @ts-expect-error Copy-field deletion requires both source and destination.
+const invalidCopyDelete: SolrSchemaCommand = { "delete-copy-field": { source: "title" } };
+void [invalidDynamicField, invalidCopyDelete];
 
 const commandResponse: Promise<SolrSchemaCommandResponse> = client.schema(addField);
 void commandResponse.then(result => {

@@ -140,6 +140,34 @@ test("Schema field type operations serialize analyzer, tokenizer, filter, and si
   ]);
 });
 
+test("Schema dynamic and copy field operations serialize add, replace, and delete commands", async () => {
+  const bodies: unknown[] = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 1 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  await client.schema({ "add-dynamic-field": { name: "*_sku", type: "string", stored: true } });
+  await client.schema({ "replace-dynamic-field": { name: "*_sku", type: "text_general", stored: true } });
+  await client.schema({ "delete-dynamic-field": { name: "*_sku" } });
+  await client.schema({ "add-copy-field": { source: "title", dest: ["text", "catchall"], maxChars: 128 } });
+  await client.schema({ "delete-copy-field": { source: "title", dest: "text" } });
+
+  assert.deepEqual(bodies, [
+    { "add-dynamic-field": { name: "*_sku", type: "string", stored: true } },
+    { "replace-dynamic-field": { name: "*_sku", type: "text_general", stored: true } },
+    { "delete-dynamic-field": { name: "*_sku" } },
+    { "add-copy-field": { source: "title", dest: ["text", "catchall"], maxChars: 128 } },
+    { "delete-copy-field": { source: "title", dest: "text" } }
+  ]);
+});
+
 test("Schema API preserves Solr HTTP failures", async () => {
   const client = createSolrClient({
     core: "catalog",

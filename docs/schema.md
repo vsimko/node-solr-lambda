@@ -43,7 +43,25 @@ await solr.schema({ "delete-field-type": { name: "text_en" } });
 
 The replace operation requires a complete field type definition. Analyzer plugin class names and parameters must exist on the target Solr distribution; TypeScript cannot validate server-side plugin availability.
 
-## Modify dynamic fields and copy fields
+## Add, replace, and delete dynamic fields
+
+Dynamic field rules use a single wildcard in the name. Add and replace commands require the complete rule definition; delete requires the exact wildcard pattern.
+
+```ts
+await solr.schema({ "add-dynamic-field": { name: "*_sku", type: "string", stored: true, indexed: true } });
+await solr.schema({ "replace-dynamic-field": { name: "*_sku", type: "text_general", stored: true, indexed: true } });
+await solr.schema({ "delete-dynamic-field": { name: "*_sku" } });
+```
+
+## Add and delete copy-field rules
+
+Copy-field add supports one or multiple destinations. Solr does not define a `replace-copy-field` command; replace a rule by deleting the old source/destination pair and adding the new rule. Delete requires one exact source/destination pair, including when an add command originally supplied multiple destinations.
+
+```ts
+await solr.schema({ "add-copy-field": { source: "title", dest: ["text", "catchall"], maxChars: 128 } });
+await solr.schema({ "delete-copy-field": { source: "title", dest: "text" } });
+await solr.schema({ "add-copy-field": { source: "title", dest: "search_text", maxChars: 128 } });
+```
 
 ```ts
 const added = await solr.schema({
