@@ -443,7 +443,7 @@
     {
       "id": "export.api",
       "area": "Export",
-      "clientMethod": "export / exportStream",
+      "clientMethod": "export",
       "httpMethod": "GET",
       "path": "/solr/{core-or-collection}/export",
       "methodImplemented": true,
