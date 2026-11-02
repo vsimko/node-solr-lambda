@@ -36,7 +36,6 @@ export interface SolrReplicationBackupParams extends SolrReplicationBaseParams {
   location?: string;
   repository?: string;
   numberToKeep?: number;
-  commitName?: string;
 }
 export interface SolrReplicationRestoreParams extends SolrReplicationBaseParams {
   name?: string;
@@ -227,16 +226,21 @@ export interface CollectionListBackupParams extends CollectionRequestBase {
   location?: string;
   repository?: string;
 }
-export interface CollectionDeleteBackupParams extends CollectionRequestBase {
+export interface CollectionDeleteBackupBaseParams extends CollectionRequestBase {
   name: string;
   location?: string;
   repository?: string;
-  backupId?: number;
-  maxNumBackupPoints?: number;
-  purgeUnused?: boolean;
 }
+export type CollectionDeleteBackupParams = CollectionDeleteBackupBaseParams & (
+  | { backupId: number; maxNumBackupPoints?: never; purgeUnused?: never }
+  | { backupId?: never; maxNumBackupPoints: number; purgeUnused?: never }
+  | { backupId?: never; maxNumBackupPoints?: never; purgeUnused: true }
+);
 export interface CollectionAsyncRequestStatusParams extends CollectionRequestBase { requestid: string }
-export interface CollectionAsyncRequestDeleteParams extends CollectionRequestBase { requestid: string }
+export type CollectionAsyncRequestDeleteParams = CollectionRequestBase & (
+  | { requestid: string; flush?: never }
+  | { requestid?: never; flush: true }
+);
 
 export interface SolrCollectionBackupMetadata {
   collection?: string;
