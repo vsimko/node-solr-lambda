@@ -472,13 +472,14 @@
         "9": "unverified",
         "10": "unverified"
       },
-      "documentation": "docs/architecture.md",
+      "documentation": "docs/configuration.md",
       "testFiles": [
         "test/client.test.ts",
         "test/config.test.ts",
-        "test/cancellation.test.ts"
+        "test/cancellation.test.ts",
+        "test/authentication.test.ts"
       ],
-      "notes": "Generic escape hatch. It does not imply typed support for every Solr endpoint."
+      "notes": "Generic escape hatch. It does not imply typed support for every Solr endpoint. Basic and Bearer Authorization header construction is unit-tested. The built-in transport does not log requests or add configured authorization values to error properties; custom Fetch logging and server-controlled response bodies still require caller-side redaction."
     },
     {
       "id": "transport.requestRaw",
@@ -495,14 +496,15 @@
         "9": "unverified",
         "10": "unverified"
       },
-      "documentation": "docs/raw-requests.md",
+      "documentation": "docs/configuration.md",
       "testFiles": [
         "test/errors.test.ts",
         "test/cancellation.test.ts",
         "test/client.test.ts",
-        "test/raw-request.test.ts"
+        "test/raw-request.test.ts",
+        "test/authentication.test.ts"
       ],
-      "notes": "Generic raw-response escape hatch using the shared Solr transport. Supports typed methods, query parameters, headers, request bodies, cancellation, timeouts, retry policy, configured validation, and standard Solr error classes. Relative paths and same-origin absolute URLs are supported; cross-origin absolute URLs, embedded credentials, and fragments are rejected before Fetch to prevent credential leakage. String bodies are passed through unchanged when callers supply an explicit Content-Type. Custom endpoint behavior is unverified on Solr 8/9/10 until endpoint-specific integration tests are added."
+      "notes": "Generic raw-response escape hatch using the shared Solr transport. Supports typed methods, query parameters, headers, request bodies, cancellation, timeouts, retry policy, configured validation, and standard Solr error classes. Relative paths and same-origin absolute URLs are supported; cross-origin absolute URLs, embedded credentials, and fragments are rejected before Fetch to prevent credential leakage. String bodies are passed through unchanged when callers supply an explicit Content-Type. Custom endpoint behavior is unverified on Solr 8/9/10 until endpoint-specific integration tests are added. Basic and Bearer Authorization header construction is unit-tested. The built-in transport does not log requests or add configured authorization values to error properties; custom Fetch logging and server-controlled response bodies still require caller-side redaction."
     },
     {
       "id": "update.commands",
