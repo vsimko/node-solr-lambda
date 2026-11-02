@@ -1,6 +1,7 @@
 import type { SolrTransport } from "../transport.js";
-import type { RequestControlOptions } from "../types.js";
+import type { RequestControlOptions, SolrSchemaCommand } from "../types.js";
 
-export function schema<T>(client: SolrTransport, path: string, command: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
+/** Execute a typed Schema API command. */
+export function schema<T>(client: SolrTransport, path: string, command: SolrSchemaCommand, requestOptions: RequestControlOptions = {}): Promise<T> {
   return client.request<T>(path, { ...requestOptions, method: "POST", body: command, operation: "schema" });
 }
