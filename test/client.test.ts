@@ -120,6 +120,12 @@ test("updateCommands rejects empty, unknown, and malformed commands", () => {
     () => client.updateCommands({ commit: { openSearcher: true }, optimize: { openSearcher: false } }),
     /must use the same openSearcher value/
   );
+  assert.throws(() => client.updateCommands({ commit: { maxSegments: 2 } } as never), /maxSegments is optimize-only/);
+  assert.throws(() => client.updateCommands({ optimize: { expungeDeletes: true } } as never), /expungeDeletes is commit-only/);
+  assert.throws(
+    () => client.updateCommands({ commit: { softCommit: true, expungeDeletes: true } } as never),
+    /expungeDeletes is not supported on a soft commit/
+  );
 });
 
 test("add and full-document update serialize overwrite, commitWithin, and SolrCloud route", async () => {
