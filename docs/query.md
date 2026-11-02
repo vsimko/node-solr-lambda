@@ -182,6 +182,37 @@ Result Grouping and Collapse/Expand are separate Solr features. They cannot be e
 
 See the official [Result Grouping guide](https://solr.apache.org/guide/solr/10_1/query-guide/result-grouping.html) and [Collapse and Expand guide](https://solr.apache.org/guide/solr/10_1/query-guide/collapse-and-expand-results.html) for version-specific limitations.
 
+## MoreLikeThis
+
+Use the typed `moreLikeThis` option to enable Solr's MoreLikeThis search component on the standard `/select` handler. It returns similar-document result lists keyed by the unique key of each document in the main query response.
+
+```ts
+const result = await solr.query<SolrQueryResponse<Product>>({
+  query: "category:books",
+  fields: ["id", "title_txt"],
+  moreLikeThis: {
+    fields: ["title_txt", "description_txt"],
+    count: 5,
+    minTermFrequency: 1,
+    minDocumentFrequency: 2,
+    maxQueryTerms: 20,
+    boost: true,
+    interestingTerms: "details"
+  }
+});
+
+const similarBooks = result.moreLikeThis?.[result.response?.docs?.[0]?.id ?? ""]?.docs;
+```
+
+- `fields` maps to `mlt.fl` and selects stored fields used for similarity; term vectors can improve performance. `queryFields` maps to `mlt.qf`, uses DisMax field/boost syntax, and must name fields also included in `fields`.
+- `count` maps to `mlt.count`. Term and document thresholds map to `mlt.mintf`, `mlt.mindf`, `mlt.maxdf`, and `mlt.maxdfpct`. Word-length, query-term, and parsed-token limits map to `mlt.minwl`, `mlt.maxwl`, `mlt.maxqt`, and `mlt.maxntp`.
+- `boost` maps to `mlt.boost`. `interestingTerms` accepts `none`, `list`, or `details`; the detailed terms mode is intended for diagnostics and may be expensive.
+- Supplying `moreLikeThis` enables the component by default. Set `enabled: false` to explicitly disable it.
+- This API covers the Search Component on `/select`. It does not configure the separate MoreLikeThis request handler (`/mlt`) or the MoreLikeThis query parser. The request handler must be configured in Solr before use.
+- The source document needs a stored unique key and usable stored text fields; stored term vectors are recommended for performance. Similarity behavior depends on field analysis and the configured schema.
+
+The Search Component and its parameters are documented in the [Solr 8.11 guide](https://solr.apache.org/guide/8_11/query-guide/morelikethis.html), [Solr 9.11 guide](https://solr.apache.org/guide/solr/9_11/query-guide/morelikethis.html), and [Solr 10.1 guide](https://solr.apache.org/guide/solr/10_1/query-guide/morelikethis.html). The integration suite exercises the component against the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images.
+
 ## Stats Component
 
 Use the typed `stats` property to request statistics for one or more fields. Each field can select individual statistics with local parameters, request percentiles or approximate cardinality, and attach a key/tag for integration with other components. `facets` breaks each field's statistics down by the requested facet fields.
