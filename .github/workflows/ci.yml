@@ -66,7 +66,7 @@ jobs:
         env:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CORE: integration
-          SOLR_BACKUP_LOCATION: file:///var/solr/backups
+          SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print Solr logs
         if: always()
         run: docker logs solr || true
@@ -150,7 +150,7 @@ jobs:
           SOLR_SECURITY: "true"
           SOLR_USERNAME: integration-admin
           SOLR_PASSWORD: integration-password
-          SOLR_BACKUP_LOCATION: file:///var/solr/backups
+          SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print secure Solr logs
         if: always()
         run: docker logs solr-secure || true
@@ -239,7 +239,7 @@ jobs:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CLOUD: "true"
           SOLR_MULTINODE: "true"
-          SOLR_BACKUP_LOCATION: file:///var/solr/backups
+          SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print SolrCloud logs
         if: always()
         run: |
