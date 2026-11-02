@@ -15,6 +15,10 @@ import type {
   SolrSchemaUniqueKeyResponse,
   SolrSchemaSimilarityResponse,
   SolrConfigCommand,
+  SolrConfigPropertyName,
+  SolrConfigReadResponse,
+  SolrConfigOverlayResponse,
+  SolrConfigCommandResponse,
   CoreAdminParams,
   CollectionAdminParams
 } from "../src/index.js";
@@ -122,7 +126,28 @@ const uniqueKey: Promise<SolrSchemaUniqueKeyResponse> = client.request<SolrSchem
 const similarity: Promise<SolrSchemaSimilarityResponse> = client.request<SolrSchemaSimilarityResponse>("/solr/catalog/schema/similarity");
 void [fullSchema, fields, dynamicFields, fieldTypes, copyFields, schemaName, schemaVersion, uniqueKey, similarity];
 
-const setProperty: SolrConfigCommand = { "set-property": { "query.timeout": 10_000 } };
+const setProperty: SolrConfigCommand = { "set-property": { "query.maxBooleanClauses": 10_000, "updateHandler.autoCommit.openSearcher": false, "query.filterCache.autowarmCount": "25%" } };
+const unsetProperty: SolrConfigCommand = { "unset-property": ["query.maxBooleanClauses", "updateHandler.autoCommit.maxTime"] };
+const setUserProperty: SolrConfigCommand = { "set-user-property": { "tenant.default": "public", "tenant.options": { enabled: true, aliases: ["books", "journals"] } } };
+const configRead: Promise<SolrConfigReadResponse> = client.request<SolrConfigReadResponse>("/solr/catalog/config");
+const overlayRead: Promise<SolrConfigOverlayResponse> = client.request<SolrConfigOverlayResponse>("/solr/catalog/config/overlay");
+const commandResult: Promise<SolrConfigCommandResponse> = client.config(setProperty);
+void [unsetProperty, setUserProperty, configRead, overlayRead, commandResult];
+void configRead.then(result => {
+  const maxDocs: number | undefined = result.config?.updateHandler?.autoCommit?.maxDocs;
+  const cacheSize: number | undefined = result.config?.query?.filterCache?.size;
+  const handlerClass: string | undefined = result.config?.requestHandler?.["/select"]?.class;
+  void [maxDocs, cacheSize, handlerClass];
+});
+const commonProperty: SolrConfigPropertyName = "query.maxBooleanClauses";
+void commonProperty;
+// @ts-expect-error Common property names are a documented allow-list; misspellings are rejected.
+const invalidConfigProperty: SolrConfigCommand = { "set-property": { "query.maxBooleanClause": 100 } };
+// @ts-expect-error Numeric Config API properties do not accept booleans.
+const invalidConfigValue: SolrConfigCommand = { "set-property": { "query.maxBooleanClauses": true } };
+// @ts-expect-error unset-property only accepts known common Config API property names.
+const invalidUnsetProperty: SolrConfigCommand = { "unset-property": "query.notARealSetting" };
+void [invalidConfigProperty, invalidConfigValue, invalidUnsetProperty];
 const addHandler: SolrConfigCommand = {
   "add-requesthandler": {
     name: "/select",
