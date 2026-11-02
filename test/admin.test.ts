@@ -141,3 +141,44 @@ test("Collections replica move and property actions are serialized", async () =>
   assert.equal(deleteProperty.searchParams.get("action"), "DELETEREPLICAPROP");
   assert.equal(deleteProperty.searchParams.get("replica"), "core_node2");
 });
+
+
+test("typed administrative list parameters and custom params are serialized", async () => {
+  const requested: string[] = [];
+  const client = createSolrClient({
+    fetch: async (input) => {
+      requested.push(String(input));
+      return new Response(JSON.stringify({ success: true }));
+    }
+  });
+
+  await client.collections("CREATE", {
+    name: "books",
+    shards: "shard1,shard2",
+    "router.name": "implicit",
+    "collection.configName": "_default",
+    rule: ["replica:<2", "freedisk:>10"]
+  });
+  await client.collections("CREATEALIAS", {
+    name: "books-current",
+    collections: ["books-v1", "books-v2"]
+  });
+  await client.coreAdmin("STATUS", {
+    core: "books",
+    customParams: { indexInfo: true, wt: "json" }
+  });
+
+  const create = new URL(requested[0]!);
+  assert.equal(create.searchParams.get("action"), "CREATE");
+  assert.equal(create.searchParams.get("router.name"), "implicit");
+  assert.equal(create.searchParams.get("collection.configName"), "_default");
+  assert.equal(create.searchParams.get("rule"), "replica:<2,freedisk:>10");
+
+  const alias = new URL(requested[1]!);
+  assert.equal(alias.searchParams.get("collections"), "books-v1,books-v2");
+
+  const status = new URL(requested[2]!);
+  assert.equal(status.searchParams.get("action"), "STATUS");
+  assert.equal(status.searchParams.get("indexInfo"), "true");
+  assert.equal(status.searchParams.get("wt"), "json");
+});
