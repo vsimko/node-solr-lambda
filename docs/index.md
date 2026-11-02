@@ -11,6 +11,7 @@
 - [Error handling](errors.md)
 - [Raw requests](raw-requests.md)
 - [API coverage](api-coverage.md)
+- [Solr endpoint inventory](endpoint-inventory.md)
 - [Client architecture](architecture.md)
 - [Solr server compatibility](compatibility.md)
 - [Development roadmap](roadmap.md)
