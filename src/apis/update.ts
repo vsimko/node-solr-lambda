@@ -121,8 +121,12 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
       if (!validDelete) throw new TypeError("JSON delete command must contain an ID, ID list, or query");
     } else if (!value || typeof value !== "object" || Array.isArray(value)) {
       throw new TypeError(`JSON ${name} command must be an object`);
+    } else if (name === "commit" && "maxSegments" in value) {
+      throw new TypeError("maxSegments is optimize-only; use optimize()");
     } else if (name === "commit" && (value as SolrCommitOptions).softCommit === true && (value as SolrCommitOptions).expungeDeletes === true) {
       throw new TypeError("expungeDeletes is not supported on a soft commit");
+    } else if (name === "optimize" && "expungeDeletes" in value) {
+      throw new TypeError("expungeDeletes is commit-only");
     } else if (name === "optimize" && (value as SolrOptimizeOptions).maxSegments !== undefined &&
       (!Number.isInteger((value as SolrOptimizeOptions).maxSegments) || (value as SolrOptimizeOptions).maxSegments! < 1)) {
       throw new RangeError("maxSegments must be a positive integer");
