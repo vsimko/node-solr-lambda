@@ -345,8 +345,7 @@ void solr.query<SolrQueryResponse<{ id: string; title_txt: string }>>({
     interestingTerms: "details"
   }
 }).then(result => {
-  const pairValue = result.moreLikeThis?.[1];
-  const similarDocs = typeof pairValue === "object" && pairValue !== null ? pairValue.docs : undefined;
+  const similarDocs = result.moreLikeThis?.["source-id"]?.docs;
   const similarId: string | undefined = similarDocs?.[0]?.id;
   void similarId;
 });
