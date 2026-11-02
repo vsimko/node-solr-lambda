@@ -514,3 +514,61 @@ test("stats local options reject invalid percentile and cardinality values", () 
     /cardinality accuracy must be between 0 and 1/
   );
 });
+
+
+test("query serializes typed MoreLikeThis component parameters", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({
+    query: "category:books",
+    moreLikeThis: {
+      fields: ["title_txt", "description_txt"],
+      count: 8,
+      minTermFrequency: 1,
+      minDocumentFrequency: 2,
+      maxDocumentFrequency: 500,
+      maxDocumentFrequencyPercent: 80,
+      minWordLength: 3,
+      maxWordLength: 30,
+      maxQueryTerms: 15,
+      maxParsedTokens: 4000,
+      boost: true,
+      queryFields: "title_txt^2 description_txt",
+      interestingTerms: "details"
+    }
+  });
+  assert.equal(requestedUrl?.searchParams.get("mlt"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("mlt.fl"), ["title_txt", "description_txt"]);
+  assert.equal(requestedUrl?.searchParams.get("mlt.count"), "8");
+  assert.equal(requestedUrl?.searchParams.get("mlt.mintf"), "1");
+  assert.equal(requestedUrl?.searchParams.get("mlt.mindf"), "2");
+  assert.equal(requestedUrl?.searchParams.get("mlt.maxdf"), "500");
+  assert.equal(requestedUrl?.searchParams.get("mlt.maxdfpct"), "80");
+  assert.equal(requestedUrl?.searchParams.get("mlt.minwl"), "3");
+  assert.equal(requestedUrl?.searchParams.get("mlt.maxwl"), "30");
+  assert.equal(requestedUrl?.searchParams.get("mlt.maxqt"), "15");
+  assert.equal(requestedUrl?.searchParams.get("mlt.maxntp"), "4000");
+  assert.equal(requestedUrl?.searchParams.get("mlt.boost"), "true");
+  assert.equal(requestedUrl?.searchParams.get("mlt.qf"), "title_txt^2 description_txt");
+  assert.equal(requestedUrl?.searchParams.get("mlt.interestingTerms"), "details");
+});
+
+test("query can explicitly disable MoreLikeThis", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({ query: "*:*", moreLikeThis: { enabled: false, fields: ["title_txt"] } });
+  assert.equal(requestedUrl?.searchParams.get("mlt"), "false");
+  assert.equal(requestedUrl?.searchParams.has("mlt.fl"), false);
+});
+
+test("MoreLikeThis rejects invalid numeric thresholds", () => {
+  const client = createClient(() => undefined);
+  assert.throws(
+    () => client.query({ query: "*:*", moreLikeThis: { maxDocumentFrequencyPercent: 101 } }),
+    /maxDocumentFrequencyPercent must be an integer between 0 and 100/
+  );
+  assert.throws(
+    () => client.query({ query: "*:*", moreLikeThis: { count: -1 } }),
+    /count must be a non-negative integer/
+  );
+});
