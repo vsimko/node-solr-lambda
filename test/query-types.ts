@@ -332,3 +332,25 @@ void solr.query({ stats: { fields: [{ field: "price_d", percentiles: ["90"] }] }
 void solr.query({ stats: { fields: [{ field: "price_d", cardinality: "high" }] } });
 // @ts-expect-error Stats field names are required for field-specific options.
 void solr.query({ stats: { fields: [{ min: true }] } });
+
+
+void solr.query<SolrQueryResponse<{ id: string; title_txt: string }>>({
+  query: "category:books",
+  moreLikeThis: {
+    fields: ["title_txt"],
+    count: 5,
+    minTermFrequency: 1,
+    minDocumentFrequency: 1,
+    maxQueryTerms: 20,
+    interestingTerms: "details"
+  }
+}).then(result => {
+  const similarDocs = result.moreLikeThis?.["source-id"]?.docs;
+  const similarId: string | undefined = similarDocs?.[0]?.id;
+  void similarId;
+});
+
+// @ts-expect-error MoreLikeThis interesting term mode is restricted.
+void solr.query({ moreLikeThis: { interestingTerms: "all" } });
+// @ts-expect-error MoreLikeThis counts are numeric.
+void solr.query({ moreLikeThis: { count: "five" } });
