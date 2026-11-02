@@ -24,6 +24,8 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | `SolrClient.ping()` | Check Solr health | [Administration](administration.md) |
 | `SolrClient.schema()` | Execute typed Schema API commands | [Schema API](schema.md) |
 | `SolrClient.config()` | Execute typed Config API commands | [Config API](config.md) |
+| `SolrClient.getConfig()` | Read the effective configuration | [Config API](config.md) |
+| `SolrClient.getConfigOverlay()` | Read the persisted Config API overlay | [Config API](config.md) |
 | `SolrClient.coreAdmin()` | Execute CoreAdmin actions | [Administration](administration.md) |
 | `SolrClient.collections()` | Execute Collections API actions | [Administration](administration.md) |
 | `SolrClient.replication()` | Execute ReplicationHandler commands | [Replication API](replication.md) |
