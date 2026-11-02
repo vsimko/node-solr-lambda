@@ -61,9 +61,7 @@ const fieldTypeDefinition: SolrSchemaFieldType = {
 };
 void client.schema({ "add-field-type": fieldTypeDefinition });
 // @ts-expect-error Analyzer tokenizers require a plugin class.
-const invalidFieldType: SolrSchemaCommand = {
-  "add-field-type": { name: "invalid_text", class: "solr.TextField", analyzer: { tokenizer: {} } }
-};
+const invalidFieldType: SolrSchemaCommand = { "add-field-type": { name: "invalid_text", class: "solr.TextField", analyzer: { tokenizer: {} } } };
 void invalidFieldType;
 
 const addDynamicField: SolrSchemaCommand = {
