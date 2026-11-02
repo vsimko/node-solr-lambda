@@ -55,6 +55,7 @@ function inspectSolrError(error: unknown): void {
     }
   }
 }
+void inspectSolrError;
 void client.add({ id: "single" });
 void client.add([{ id: "one" }, { id: "two" }]);
 // @ts-expect-error JSON add command requires a document object.
