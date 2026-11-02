@@ -30,7 +30,7 @@ test("ReplicationHandler commands use the configured core and JSON response form
   assert.equal(calls[1]!.url.searchParams.get("httpConnTimeout"), "5000");
   assert.equal(calls[1]!.url.searchParams.get("maxWriteMBPerSec"), "20");
   assert.equal(calls[2]!.url.searchParams.get("generation"), "42");
-  assert.equal(calls[2]!.url.searchParams.get("indexversion"), "42");
+  assert.equal(calls[2]!.url.searchParams.get("indexversion"), null);
   assert.equal(calls[2]!.url.searchParams.get("wt"), "json");
 });
 
