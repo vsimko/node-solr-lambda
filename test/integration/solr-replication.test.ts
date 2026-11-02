@@ -46,8 +46,7 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
 
   const file = await replicationClient.replicationFile({
     directoryType: "file",
-    filePath: firstFile.name,
-    generation
+    filePath: firstFile.name
   });
   assert.equal(file.status, 200);
   assert.ok(file.body);
