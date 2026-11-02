@@ -19,7 +19,7 @@ This inventory defines the boundary of the typed client API after review against
 | Metrics API `/solr/admin/metrics` | `metrics()` | Typed response models; JSON metrics on Solr 8/9 and Prometheus exposition text on Solr 10.1 are documented. |
 | Streaming Expressions `/stream` | `stream()` | Expression request support and JSON response parsing; tested against SolrCloud on all three pinned versions. |
 | Export handler `/export` | `export()` | Raw response streaming; docValues sort-field flow tested on all three pinned versions. |
-| ReplicationHandler V1 `/solr/{core}/replication` | `replication()`, `replicationFile()` | Typed non-backup command surface for indexversion, details, filelist, fetch/poll/enable/disable/abort operations, plus raw file-content streaming. indexversion/details/filelist/filecontent are integration-tested on all three pinned versions. An end-to-end leader/follower cycle is not yet certified. |
+| ReplicationHandler V1 `/solr/{core}/replication` | `replication()`, `replicationFile()` | Typed non-backup command surface for indexversion, details, filelist, fetch/poll/enable/disable/abort operations, plus raw file-content streaming. indexversion/details/filelist/filecontent and leader enablereplication/disablereplication are integration-tested on all three pinned versions. fetchindex/abortfetch/poll command serialization is unit-tested; an end-to-end leader/follower cycle is not yet certified. |
 | Generic/custom request handlers | `request()`, `requestRaw()` | Escape hatches for custom paths and parameters. These do not imply typed support or integration certification for arbitrary endpoints. |
 
 ## Explicitly deferred or excluded endpoint families
