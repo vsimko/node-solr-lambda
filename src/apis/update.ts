@@ -194,7 +194,7 @@ export function commit<T>(client: SolrTransport, path: string, options: SolrComm
     ...requestOptions,
     method: "POST",
     body: { commit: commitOptions },
-    query: openSearcher === undefined ? undefined : { openSearcher },
+    ...(openSearcher === undefined ? {} : { query: { openSearcher } }),
     operation: "commit"
   });
 }
@@ -205,7 +205,7 @@ export function softCommit<T>(client: SolrTransport, path: string, options: Solr
     ...requestOptions,
     method: "POST",
     body: { commit: { softCommit: true, waitSearcher: waitSearcher ?? true } },
-    query: openSearcher === undefined ? undefined : { openSearcher },
+    ...(openSearcher === undefined ? {} : { query: { openSearcher } }),
     operation: "softCommit"
   });
 }
@@ -220,7 +220,7 @@ export function optimize<T>(client: SolrTransport, path: string, options: SolrOp
     ...requestOptions,
     method: "POST",
     body: { optimize: optimizeOptions },
-    query: openSearcher === undefined ? undefined : { openSearcher },
+    ...(openSearcher === undefined ? {} : { query: { openSearcher } }),
     operation: "optimize"
   });
 }
