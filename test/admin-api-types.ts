@@ -102,3 +102,8 @@ const invalidAlias: CollectionAdminParams<"CREATEALIAS"> = { name: "catalog-curr
 // @ts-expect-error Invalid replica types are rejected.
 void client.collections("ADDREPLICA", { collection: "catalog", type: "replica" });
 void [invalidCollection, invalidAlias];
+
+// @ts-expect-error CREATE requires a parameter object with a core name.
+void client.coreAdmin("CREATE");
+// @ts-expect-error Collections CREATE requires a parameter object with a collection name.
+void client.collections("CREATE");
