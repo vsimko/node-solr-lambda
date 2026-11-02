@@ -4,6 +4,8 @@
 
 ### Added
 
+- Add typed Config API property paths, effective-config/overlay response models, unit success/failure tests, and Solr 8/9/10 cache-property integration coverage.
+
 - Add Update API unit coverage for JSON endpoint selection, typed success responses, and Solr HTTP failures, plus Solr 8/9/10 delete-by-query persisted-state integration coverage.
 
 - Add Solr 8/9/10 integration coverage for Schema API dynamic-field add/replace/delete and copy-field add/delete, including copy-rule replacement via delete+add.
@@ -19,6 +21,7 @@
 
 ### Documentation
 
+- Expand Config API documentation with common cache/query/update-handler property types, typed read responses, and V1/V2 compatibility boundaries.
 - Add a Solr 8.11.4/9.11.0/10.1.0 Schema API compatibility matrix with explicit V1/V2 scope and unverified similarity plugin behavior.
 - Add typed Schema API command responses and read-response models for schema metadata, fields, dynamic fields, field types, copy fields, uniqueKey, and similarity.
 - Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.
