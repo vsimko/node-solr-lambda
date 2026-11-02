@@ -305,10 +305,12 @@
       },
       "documentation": "docs/config.md",
       "testFiles": [
-        "test/modules.test.ts",
+        "test/config.test.ts",
+        "test/admin-api-types.ts",
+        "test/integration/solr-config.test.ts",
         "test/integration/solr-config-security.test.ts"
       ],
-      "notes": "Config API set-user-property plus GET /config/overlay userProps read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property (CI #166). Live Security API authentication and authorization checks pass in the dedicated security matrix (CI #162)."
+      "notes": "Config command success and HTTP failure are unit-tested; known property paths have typed value constraints and config()/GET /config/GET /config/overlay response models. Setting query.filterCache.size, reading it back from overlay, unsetting it, and restoring any previous override are integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Existing user-property and Security API integration coverage remains. Component/plugin-specific settings remain runtime-dependent; client implements V1 Config API routes, not Solr 10 V2 routes."
     },
     {
       "id": "admin.core",
