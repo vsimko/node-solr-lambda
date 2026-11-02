@@ -95,7 +95,7 @@ void client.optimize(1, controls);
 void client.rollback(controls);
 void client.ping(controls);
 void client.schema({ "add-field": { name: "title", type: "string" } }, controls);
-void client.config({ "set-property": { "query.timeout": 1000 } }, controls);
+void client.config({ "set-property": { "query.maxBooleanClauses": 1000 } }, controls);
 void client.coreAdmin("STATUS", {}, controls);
 void client.collections("LIST", {}, controls);
 void client.systemInfo(controls);
