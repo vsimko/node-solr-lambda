@@ -7,14 +7,13 @@ Solr exposes two distinct backup/restore surfaces. Use the core-level Replicatio
 Core backups use the ReplicationHandler at `/solr/{core}/replication`. With no `location`, Solr stores the snapshot under the core's data directory. A custom filesystem location must be permitted by the server's `SOLR_HOME`, `SOLR_DATA_HOME`, or `solr.xml` `allowPaths` configuration.
 
 ```ts
-// Create a named snapshot of the current committed index.
+// Create a timestamped snapshot of the current committed index.
 await client.replication("backup", {
-  numberToKeep: 5,
-  commitName: "before-import"
+  numberToKeep: 5
 });
 
-// Restore the named snapshot. Restore runs asynchronously.
-await client.replication("restore", { name: "nightly" });
+// Restore the latest timestamped snapshot. Restore runs asynchronously.
+await client.replication("restore");
 
 let state = "";
 while (state !== "success") {
