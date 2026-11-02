@@ -10,6 +10,8 @@ export type SolrReplicationCommand =
   | "indexversion"
   | "fetchindex"
   | "abortfetch"
+  | "snappull"
+  | "abort"
   | "enablepoll"
   | "disablepoll"
   | "details"
