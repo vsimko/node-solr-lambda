@@ -22,6 +22,12 @@ const atomicProduct: SolrAtomicUpdateDocument<AtomicProduct> = {
   tags: { "add-distinct": "new" }
 };
 void client.atomicUpdate<AtomicProduct>(atomicProduct);
+interface ProductWithSku extends AtomicProduct { sku: string; }
+const customKeyUpdate: SolrAtomicUpdateDocument<ProductWithSku, "sku"> = {
+  sku: "SKU-1",
+  title: { set: "Updated by custom key" }
+};
+void client.atomicUpdate<ProductWithSku, "sku">(customKeyUpdate);
 // @ts-expect-error Increment is valid only for numeric fields.
 void client.atomicUpdate<AtomicProduct>({ id: "p-1", title: { inc: 1 } });
 // @ts-expect-error add requires a multi-valued field in the document model.
