@@ -82,8 +82,8 @@ const createCollection: CollectionAdminParams<"CREATE"> = {
   name: "catalog",
   numShards: 2,
   replicationFactor: 2,
-  routerName: "compositeId",
-  configName: "_default",
+  "router.name": "compositeId",
+  "collection.configName": "_default",
   waitForFinalState: true
 };
 const createAlias: CollectionAdminParams<"CREATEALIAS"> = {
