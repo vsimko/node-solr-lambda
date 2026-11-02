@@ -31,40 +31,38 @@ integrationTest("Solr JSON update supports single documents, document arrays, an
   }
 });
 
-integrationTest("Solr atomic updates modify only the selected fields on the pinned server", async ({
+integrationTest("Solr commit options control searcher visibility and commit behavior", async ({
   client,
-  createId,
-  addDocuments,
-  commit
+  createId
 }) => {
-  interface AtomicDocument {
-    id: string;
-    name_s: string;
-    rank_i: number;
-    tags_ss: string[];
-  }
-  const id = createId("atomic");
-  await addDocuments([{ id, name_s: "before", rank_i: 5, tags_ss: ["existing"] }]);
-  await commit();
-
-  await client.atomicUpdate<AtomicDocument>({
-    id,
-    name_s: { set: "after" },
-    rank_i: { inc: 2 },
-    tags_ss: { "add-distinct": "new" }
+  const softId = createId("soft-commit");
+  await client.add({ id: softId, name_s: "soft" });
+  await client.softCommit();
+  const softResult = await client.query<{ response?: { numFound?: number } }>({
+    query: `id:${softId}`,
+    limit: 1
   });
-  await commit();
+  assert.equal(softResult.response?.numFound, 1);
 
-  const result = await client.query<{
-    response?: { numFound?: number; docs?: Array<{ id: string; name_s: string; rank_i: number; tags_ss: string[] }> };
-  }>({
-    query: `id:${id}`,
-    fields: ["id", "name_s", "rank_i", "tags_ss"],
-    limit: 10
+  const hardId = createId("hard-commit");
+  await client.add({ id: hardId, name_s: "hard" });
+  await client.commit({ openSearcher: false, expungeDeletes: true });
+  await client.commit();
+  const hardResult = await client.query<{ response?: { numFound?: number } }>({
+    query: `id:${hardId}`,
+    limit: 1
   });
+  assert.equal(hardResult.response?.numFound, 1);
 
-  assert.equal(result.response?.numFound, 1);
-  assert.deepEqual(result.response?.docs, [{ id, name_s: "after", rank_i: 7, tags_ss: ["existing", "new"] }]);
+  await client.delete(hardId);
+  await client.commit({ expungeDeletes: true });
+  const deletedResult = await client.query<{ response?: { numFound?: number } }>({
+    query: `id:${hardId}`,
+    limit: 1
+  });
+  assert.equal(deletedResult.response?.numFound, 0);
+
+  await client.optimize({ maxSegments: 1, waitSearcher: true });
 });
 
 integrationTest("Solr atomic updates modify only the selected fields on the pinned server", async ({
