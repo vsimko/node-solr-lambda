@@ -39,6 +39,7 @@ export interface SolrIntegrationFixture {
   commit(): Promise<void>;
   createCore(prefix?: string): Promise<string>;
   addSchemaField(name: string, type?: string, docValues?: boolean): Promise<SolrSchemaCommandResponse>;
+  deleteSchemaField(name: string): Promise<SolrSchemaCommandResponse>;
   setUserProperty(name: string, value: string | number | boolean): Promise<void>;
   securityData: SolrSecurityFixtureData;
 }
@@ -94,6 +95,11 @@ export function integrationTest(
       async addSchemaField(name, type = "string", docValues = false) {
         const response = await client.schema({ "add-field": { name, type, stored: true, indexed: true, docValues } });
         schemaFields.add(name);
+        return response;
+      },
+      async deleteSchemaField(name) {
+        const response = await client.schema({ "delete-field": { name } });
+        schemaFields.delete(name);
         return response;
       },
       async setUserProperty(name, value) {

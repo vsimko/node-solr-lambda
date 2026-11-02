@@ -2,7 +2,17 @@
 
 Use `schema()` with the exported `SolrSchemaCommand` discriminated union. The command name selects the payload shape, and the field/type/analyzer properties are discoverable in TypeScript. The method returns a typed `SolrSchemaCommandResponse` by default; supply a generic only when an application needs a narrower server-specific response.
 
-## Modify fields, dynamic fields, field types, and copy fields
+## Add, replace, and delete fields
+
+The three field operations are typed individually. `replace-field` requires the full replacement definition rather than a partial patch; `delete-field` requires the exact field name and fails if a copy-field rule still references it.
+
+```ts
+await solr.schema({ "add-field": { name: "sku", type: "string", stored: true, indexed: true } });
+await solr.schema({ "replace-field": { name: "sku", type: "text_general", stored: true, indexed: true } });
+await solr.schema({ "delete-field": { name: "sku" } });
+```
+
+## Modify dynamic fields, field types, and copy fields
 
 ```ts
 const added = await solr.schema({

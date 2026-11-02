@@ -62,6 +62,30 @@ test("Schema API returns the typed command envelope", async () => {
   assert.equal(result.responseHeader?.QTime, 3);
 });
 
+test("Schema field operations serialize add, replace, and delete commands", async () => {
+  const bodies: unknown[] = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 1 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  await client.schema({ "add-field": { name: "sku", type: "string", stored: true } });
+  await client.schema({ "replace-field": { name: "sku", type: "text_general", stored: true } });
+  await client.schema({ "delete-field": { name: "sku" } });
+
+  assert.deepEqual(bodies, [
+    { "add-field": { name: "sku", type: "string", stored: true } },
+    { "replace-field": { name: "sku", type: "text_general", stored: true } },
+    { "delete-field": { name: "sku" } }
+  ]);
+});
+
 test("Schema API preserves Solr HTTP failures", async () => {
   const client = createSolrClient({
     core: "catalog",

@@ -284,7 +284,7 @@
         "test/admin-api-types.ts",
         "test/integration/solr-schema.test.ts"
       ],
-      "notes": "The add-field mutation returns the typed SolrSchemaCommandResponse envelope with responseHeader.status/QTime, and the integration test asserts status 0 plus GET /schema/fields read-back on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Consumer type tests cover all command families and typed read response envelopes for full schema, fields, dynamic fields, field types, copy fields, schema name/version/uniqueKey/similarity. Other mutation families and plugin-specific analyzer settings remain runtime-unverified; analyzer and field-type plugin options preserve an extensibility index signature."
+      "notes": "Add-field, replace-field, and delete-field commands are unit-tested for exact request serialization and integration-tested with responseHeader.status plus schema read-back on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Consumer type tests cover valid field definitions and reject incomplete add/replace definitions or delete commands without a name. Typed read response envelopes cover full schema, fields, dynamic fields, field types, copy fields, schema name/version/uniqueKey/similarity. Other mutation families and plugin-specific analyzer settings remain runtime-unverified."
     },
     {
       "id": "config.api",
