@@ -109,11 +109,20 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
     } else if (name === "delete") {
       const validDelete = typeof value === "string" ||
         (Array.isArray(value) && value.every(id => typeof id === "string")) ||
-        (!!value && typeof value === "object" && !Array.isArray(value) &&
-          (("id" in value && typeof value.id === "string") !== ("query" in value && typeof value.query === "string")));
+        (!!value && typeof value === "object" && !Array.isArray(value) && (() => {
+          const command = value as Record<string, unknown>;
+          const hasId = typeof command.id === "string";
+          const hasQuery = typeof command.query === "string";
+          const allowedKeys = hasId ? ["id", "_version_"] : ["query"];
+          return hasId !== hasQuery &&
+            Object.keys(command).every(key => allowedKeys.includes(key)) &&
+            (command._version_ === undefined || (hasId && typeof command._version_ === "number"));
+        })());
       if (!validDelete) throw new TypeError("JSON delete command must contain an ID, ID list, or query");
     } else if (!value || typeof value !== "object" || Array.isArray(value)) {
       throw new TypeError(`JSON ${name} command must be an object`);
+    } else if (name === "rollback" && Object.keys(value).length > 0) {
+      throw new TypeError("JSON rollback command must be an empty object");
     }
   }
 }
