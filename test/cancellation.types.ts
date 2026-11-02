@@ -1,5 +1,5 @@
 import { createSolrClient } from "../src/index.js";
-import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrDeleteOptions, SolrOptimizeOptions, SolrUpdateOptions } from "../src/index.js";
+import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrDeleteOptions, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrUpdateOptions } from "../src/index.js";
 
 const controller = new AbortController();
 const controls: RequestControlOptions = { signal: controller.signal, timeoutMs: 5000 };
@@ -22,6 +22,20 @@ const atomicProduct: SolrAtomicUpdateDocument<AtomicProduct> = {
   tags: { "add-distinct": "new" }
 };
 void client.atomicUpdate<AtomicProduct>(atomicProduct);
+const jsonCommands: SolrJsonUpdateCommands = {
+  add: { doc: { id: "p-1" }, overwrite: false, commitWithin: 1000 },
+  delete: { query: "status:expired" },
+  commit: { waitSearcher: false }
+};
+void client.updateCommands(jsonCommands);
+void client.add({ id: "single" });
+void client.add([{ id: "one" }, { id: "two" }]);
+// @ts-expect-error JSON add command requires a document object.
+void client.updateCommands({ add: { doc: "not a document" } });
+// @ts-expect-error Unknown JSON update commands are rejected.
+void client.updateCommands({ replace: { id: "one" } });
+// @ts-expect-error Delete command must be an ID, ID list, or query.
+void client.updateCommands({ delete: { id: "one", query: "*:*" } });
 interface ProductWithSku extends AtomicProduct { sku: string; }
 const customKeyUpdate: SolrAtomicUpdateDocument<ProductWithSku, "sku"> = {
   sku: "SKU-1",
