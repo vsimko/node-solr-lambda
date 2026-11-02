@@ -105,8 +105,9 @@ export interface SolrReplicationRestoreStatus {
   exception?: string | Readonly<Record<string, unknown>>;
 }
 export interface SolrReplicationDetailsResponse extends SolrReplicationCommandResponse {
-  details?: Readonly<Record<string, unknown>>;
-  backup?: SolrReplicationBackupStatus;
+  details?: Readonly<Record<string, unknown>> & {
+    backup?: SolrReplicationBackupStatus;
+  };
 }
 export interface SolrReplicationRestoreStatusResponse extends SolrReplicationCommandResponse {
   restorestatus?: SolrReplicationRestoreStatus;
