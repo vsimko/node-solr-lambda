@@ -96,11 +96,15 @@ void client.config(addInitParams);
 const invalidSchema: SolrSchemaCommand = { "add-feld": { name: "sku", type: "string" } };
 // @ts-expect-error Field names and types are required for add-field.
 const invalidField: SolrSchemaCommand = { "add-field": { name: "sku" } };
+// @ts-expect-error replace-field also requires the complete field definition.
+const invalidReplaceField: SolrSchemaCommand = { "replace-field": { name: "sku", stored: false } };
+// @ts-expect-error delete-field requires a field name.
+const invalidDeleteField: SolrSchemaCommand = { "delete-field": {} };
 // @ts-expect-error Config plugin startup values are constrained.
 const invalidHandler: SolrConfigCommand = { "add-requesthandler": { name: "/select", class: "solr.SearchHandler", startup: "sometimes" } };
 // @ts-expect-error set-property values must be valid JSON-compatible configuration values.
 const invalidProperty: SolrConfigCommand = { "set-property": { "query.timeout": () => 5 } };
-void [invalidSchema, invalidField, invalidHandler, invalidProperty];
+void [invalidSchema, invalidField, invalidReplaceField, invalidDeleteField, invalidHandler, invalidProperty];
 
 const createCore: CoreAdminParams<"CREATE"> = {
   name: "catalog",
