@@ -1,8 +1,11 @@
 # node-solr-lambda
 
-A TypeScript client for the Apache Solr JSON API. The active development line uses the Node.js Fetch API and supports Node.js 20, 22, and 24.
+A TypeScript-first Apache Solr client for Node.js. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable TypeScript request models, and a shared transport for query, update, administration, and raw requests.
 
-The public API is designed to make Solr options discoverable through TypeScript IntelliSense. Typed parameters and nested option models are being expanded incrementally; until a Solr feature has a dedicated type, use the explicit custom-parameter escape hatch where available. See the [roadmap](docs/roadmap.md) and [autocomplete-first API issue](https://github.com/vsimko/node-solr-lambda/issues/121).
+- **Node.js:** 20, 22, and 24
+- **Solr:** 8.x, 9.x, and 10.x; compatibility is recorded per operation in the [compatibility matrix](docs/compatibility.md)
+- **Modules:** ESM and CommonJS
+- **Runtime dependencies:** none; [Zod](https://zod.dev/) is an optional peer dependency for runtime validation
 
 ## Install
 
@@ -10,7 +13,7 @@ The public API is designed to make Solr options discoverable through TypeScript 
 npm install node-solr-lambda
 ```
 
-Runtime validation is disabled by default. Zod is an optional peer dependency and is not needed for a normal installation. Install it only when your application uses Zod schemas:
+Runtime validation is disabled by default. Install Zod only if your application uses Zod schemas:
 
 ```sh
 npm install zod
@@ -36,59 +39,87 @@ const result = await solr.query<{ response: { numFound: number; docs: Book[] } }
   query: "category:fiction",
   fields: ["id", "title", "category"],
   sort: "title asc",
-  limit: 20,
-  offset: 0,
-  defType: "edismax",
-  "q.op": "AND",
-  wt: "json",
-  params: {
-    // Custom Solr parameters not yet represented by a dedicated option.
-    "facet.field": "category"
-  }
+  limit: 20
 });
 
 console.log(result.response.docs);
+
+await solr.add({ id: "book-1", title: "Solr in Action", category: "fiction" });
+await solr.commit({ waitSearcher: true });
 ```
 
-Common query properties are explicitly typed, including the parser, query operator, and response writer. Misspelled or unsupported top-level properties fail TypeScript checks. The `params` property is the escape hatch for additional Solr parameters that do not yet have a dedicated type.
+Create the target core or collection on the Solr server before using the client. Set exactly one of `core` or `collection` in the client configuration for core- or collection-scoped methods.
 
-Both ESM and CommonJS consumers are supported. The package provides conditional TypeScript declarations for each module system. See [getting started](docs/getting-started.md) for import examples.
-
-## TypeScript autocomplete
-
-The public API uses named request models and discriminated unions so supported Solr options are discoverable in editor completion. Query options, parser settings, facets, highlighting, grouping, cursor pagination, update commands, Schema, Config, Core Admin, and Collections actions are typed. Custom query parameters are provided through `params`; administrative actions expose an explicit `customParams` escape hatch where appropriate.
+## Client configuration
 
 ```ts
-await solr.query({
-  query: "title:solr",
-  defType: "edismax",
-  parserOptions: { type: "edismax", qf: "title^5 description", mm: "2<75%" },
-  facets: { fields: ["category"], limit: 10 }
-});
+import { createSolrClient } from "node-solr-lambda";
 
-await solr.collections("CREATE", {
-  name: "catalog",
-  numShards: 2,
-  replicationFactor: 2,
-  "router.name": "compositeId"
+const solr = createSolrClient({
+  baseUrl: "https://solr.example.com/solr",
+  collection: "catalog",
+  auth: {
+    type: "bearer",
+    token: process.env.SOLR_TOKEN!
+  },
+  timeoutMs: 15_000,
+  retry: {
+    maxAttempts: 3,
+    methods: ["GET"]
+  }
 });
 ```
+
+The transport supports Basic or Bearer authentication, custom headers and Fetch implementations, request defaults, optional retries, per-request timeouts, and `AbortSignal` cancellation. Use HTTPS when credentials or sensitive data cross a network. Do not put credentials in URLs or log authorization headers, tokens, or unredacted server error bodies.
+
+## API overview
+
+The public client exposes typed methods for the main Solr API families:
+
+- **Query:** `query()` and `queryJson()`, including typed parser options, filters, facets, highlighting, grouping, stats, cursor pagination, and response models.
+- **Documents:** `add()`, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
+- **Schema and Config:** `schema()` and `config()` with typed command models.
+- **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`.
+- **Replication and backups:** `replication()`, `replicationFile()`, and the SolrCloud backup/restore actions exposed through `collections()`.
+- **Streaming:** `stream()`, `export()`, and `exportStream()`.
+- **Advanced/custom endpoints:** `request()` and `requestRaw()` use the shared transport. Raw requests are an escape hatch, not a claim that every Solr handler has a dedicated type or has been integration-tested.
+
+Supported options are represented by named TypeScript interfaces and discriminated unions. Custom query parameters use `params`; administrative models provide `customParams` where appropriate. Prefer a typed method when one exists.
+
+## Errors and validation
+
+HTTP failures throw `SolrHttpError`; network failures, timeouts, caller cancellation, and validation failures use `SolrNetworkError`, `SolrTimeoutError`, `SolrAbortError`, and `SolrValidationError`. See [error handling](docs/errors.md).
+
+Runtime input/output validation is opt-in and uses an application-supplied schema interface. Zod is supported as an optional peer dependency; it is not imported by the default runtime path. See [runtime validation](docs/validation.md).
+
+## Solr compatibility
+
+The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pinned images Solr 8.11.4, 9.11.0, and 10.1.0. Evidence is operation-specific: a tested query or admin action does not certify every option or every handler on that Solr major. Unverified and excluded behavior is called out in the [compatibility matrix](docs/compatibility.md) and [endpoint inventory](docs/endpoint-inventory.md).
 
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [Configuration](docs/configuration.md)
 - [Query API](docs/query.md)
-- [Update API](docs/update.md)
+- [Update and document API](docs/update.md)
+- [Schema API](docs/schema.md)
+- [Config API](docs/config.md)
+- [Core Admin and Collections](docs/administration.md)
+- [Replication API](docs/replication.md)
+- [Backup and restore](docs/backup-restore.md)
+- [Streaming and Export](docs/export.md)
 - [Raw requests](docs/raw-requests.md)
-- [API coverage](docs/api-coverage.md)
-- [Client architecture](docs/architecture.md)
-- [Solr compatibility](docs/compatibility.md)
+- [Error handling](docs/errors.md)
 - [Runtime validation](docs/validation.md)
-- [Roadmap](docs/roadmap.md)
+- [API coverage](docs/api-coverage.md)
+- [Solr endpoint inventory](docs/endpoint-inventory.md)
+- [Solr compatibility](docs/compatibility.md)
+- [Migration from v3 to v4](docs/migration-v3-to-v4.md)
+- [Development roadmap](docs/roadmap.md)
 
 ## Development
 
-Use npm with Node.js 20, 22, and 24:
+Use npm and a supported Node.js version:
 
 ```sh
 npm ci
@@ -99,6 +130,4 @@ npm run build
 npm run release:check
 ```
 
-Work on a short-lived branch created from `master`. Every change must be linked to a GitHub issue, submitted as a pull request targeting `master`, and merged only after review and successful CI. There is one active development line; do not create a permanent version-specific branch.
-
-To publish a release, run `npm run release:publish` manually after review. CI and pull request merges do not publish the package.
+Create a short-lived branch from `master`, link changes to a GitHub issue, and open a pull request targeting `master`. CI validates Node.js 20, 22, and 24 and the configured Solr integration matrix. Pull-request merges do not publish the package; releases are published manually after review.
