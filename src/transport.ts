@@ -309,7 +309,7 @@ export class SolrTransport {
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : rawStringBody ? input : JSON.stringify(input), options.signal, this.requestTimeout(options)
+      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal, this.requestTimeout(options)
     );
     try {
       let body: string;
@@ -360,7 +360,7 @@ export class SolrTransport {
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal, this.requestTimeout(options)
+      url, method, headers, options.body === undefined ? undefined : rawStringBody ? input as string : JSON.stringify(input), options.signal, this.requestTimeout(options)
     );
     if (!response.ok) {
       try {
