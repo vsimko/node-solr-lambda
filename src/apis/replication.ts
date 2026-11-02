@@ -26,14 +26,12 @@ export function replication<A extends SolrReplicationCommand>(
   };
   if (command === "filelist") {
     const fileListParams = params as { generation?: number; indexversion?: number };
-    const generation = fileListParams.generation ?? fileListParams.indexversion;
-    if (generation !== undefined) {
-      if (!Number.isInteger(generation) || generation < 0) {
-        throw new RangeError("generation must be a non-negative integer");
-      }
-      query.generation = generation;
-      query.indexversion = generation;
+    const version = fileListParams.generation ?? fileListParams.indexversion;
+    if (version !== undefined && (!Number.isInteger(version) || version < 0)) {
+      throw new RangeError("generation/indexversion must be a non-negative integer");
     }
+    if (fileListParams.generation !== undefined) query.generation = fileListParams.generation;
+    else if (fileListParams.indexversion !== undefined) query.indexversion = fileListParams.indexversion;
   }
   return client.request<SolrReplicationResponse<A>>(path, {
     ...requestOptions,
