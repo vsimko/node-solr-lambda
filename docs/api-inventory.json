@@ -79,7 +79,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/config.test.ts",
@@ -103,7 +103,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update.test.ts",
@@ -126,7 +126,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/modules.test.ts",
         "test/integration/solr-smoke.test.ts",
@@ -150,7 +150,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-smoke.test.ts",
@@ -174,7 +174,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update-lifecycle.test.ts",
@@ -197,7 +197,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-optimize.test.ts",
@@ -220,7 +220,7 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-update-lifecycle.test.ts",
