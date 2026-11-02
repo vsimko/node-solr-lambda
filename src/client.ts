@@ -10,7 +10,7 @@ import { systemInfo as systemInfoApi } from "./apis/system.js";
 import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import type {
-  CollectionAdminAction, CollectionAdminParams, CommitOptions, CoreAdminAction, RequestControlOptions, SolrAdminParams,
+  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions
 } from "./types.js";
 
@@ -60,12 +60,20 @@ export class SolrClient extends SolrTransport {
     return updateApi.deleteDocuments<T>(this, this.endpoint("/update"), command, options);
   }
 
-  commit<T = unknown>(options: CommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  commit<T = unknown>(options: SolrCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.commit<T>(this, this.endpoint("/update"), options, requestOptions);
   }
 
-  softCommit<T = unknown>(requestOptions: RequestControlOptions = {}): Promise<T> {
-    return updateApi.softCommit<T>(this, this.endpoint("/update"), requestOptions);
+  softCommit<T = unknown>(requestOptions?: RequestControlOptions): Promise<T>;
+  softCommit<T = unknown>(options?: SolrSoftCommitOptions, requestOptions?: RequestControlOptions): Promise<T>;
+  softCommit<T = unknown>(
+    optionsOrRequestOptions: SolrSoftCommitOptions | RequestControlOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<T> {
+    const isSoftCommitOptions = "waitSearcher" in optionsOrRequestOptions || "openSearcher" in optionsOrRequestOptions;
+    const options = isSoftCommitOptions ? optionsOrRequestOptions as SolrSoftCommitOptions : {};
+    const controls = isSoftCommitOptions ? requestOptions : optionsOrRequestOptions as RequestControlOptions;
+    return updateApi.softCommit<T>(this, this.endpoint("/update"), options, controls);
   }
 
   optimize<T = unknown>(options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {

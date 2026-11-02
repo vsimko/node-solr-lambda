@@ -87,7 +87,7 @@
         "test/cancellation.types.ts",
         "test/integration/solr-update.test.ts"
       ],
-      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0."
+      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0. commitWithin is a scheduling hint whose hard/soft behavior is controlled by Solr's commitWithin configuration; the client does not force either commit type."
     },
     {
       "id": "update.update",
@@ -110,7 +110,7 @@
         "test/integration/solr-update.test.ts",
         "test/cancellation.types.ts"
       ],
-      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0."
+      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0. commitWithin is a scheduling hint whose hard/soft behavior is controlled by Solr's commitWithin configuration; the client does not force either commit type."
     },
     {
       "id": "update.delete",
@@ -159,7 +159,7 @@
         "test/integration/solr-update.test.ts",
         "test/cancellation.types.ts"
       ],
-      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Command-body serialization is covered by explicit unit tests."
+      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Command-body serialization is covered by explicit unit tests. SolrCommitOptions expose waitSearcher, softCommit, expungeDeletes (hard-commit only), and openSearcher (request parameter); integration tests cover openSearcher=false and expungeDeletes on Solr 8.11.4/9.11.0/10.1.0. Legacy CommitOptions.maxSegments is deprecated and rejected."
     },
     {
       "id": "update.softCommit",
@@ -183,7 +183,7 @@
         "test/cancellation.types.ts",
         "test/integration/solr-update.test.ts"
       ],
-      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests."
+      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests. SolrSoftCommitOptions expose waitSearcher/openSearcher; softCommit() now waits for searcher registration by default and is integration-tested for immediate visibility on all pinned versions."
     },
     {
       "id": "update.optimize",
@@ -207,7 +207,7 @@
         "test/cancellation.types.ts",
         "test/integration/solr-update.test.ts"
       ],
-      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions."
+      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions. SolrOptimizeOptions expose maxSegments, waitSearcher, and openSearcher; maxSegments is optimize-only and defaults to Solr's unlimited target. The integration test exercises maxSegments on all pinned versions. openSearcher is request-parameter serialized; its optimize-specific runtime effect remains unverified."
     },
     {
       "id": "update.rollback",
@@ -515,7 +515,7 @@
         "test/integration/solr-update.test.ts"
       ],
       "documentation": "docs/update.md",
-      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested.",
+      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested. openSearcher values in commit/optimize command objects are extracted to the request parameter; conflicting values are rejected.",
       "clientMethod": "updateCommands",
       "methodImplemented": true,
       "unitTests": "present",

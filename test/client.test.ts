@@ -92,13 +92,14 @@ test("updateCommands sends a typed command object to the JSON update path", asyn
   await client.updateCommands({
     add: { doc: { id: "one", title: "One" }, overwrite: false, commitWithin: 5000 },
     delete: { query: "status:expired" },
-    commit: { waitSearcher: false },
-    optimize: { waitSearcher: false },
+    commit: { waitSearcher: false, openSearcher: false },
+    optimize: { waitSearcher: false, openSearcher: false },
     rollback: {}
   }, { route: "tenant-a" });
 
   assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/update/json");
   assert.equal(new URL(requestedUrl).searchParams.get("_route_"), "tenant-a");
+  assert.equal(new URL(requestedUrl).searchParams.get("openSearcher"), "false");
   assert.deepEqual(body, {
     add: { doc: { id: "one", title: "One" }, overwrite: false, commitWithin: 5000 },
     delete: { query: "status:expired" },
@@ -115,6 +116,16 @@ test("updateCommands rejects empty, unknown, and malformed commands", () => {
   assert.throws(() => client.updateCommands({ add: { doc: [] } } as never), /requires a document object/);
   assert.throws(() => client.updateCommands({ delete: { id: "one", query: "*:*" } } as never), /must contain an ID, ID list, or query/);
   assert.throws(() => client.updateCommands({ add: { doc: { id: "one" }, commitWithin: -1 } }), /commitWithin must be a non-negative integer/);
+  assert.throws(
+    () => client.updateCommands({ commit: { openSearcher: true }, optimize: { openSearcher: false } }),
+    /must use the same openSearcher value/
+  );
+  assert.throws(() => client.updateCommands({ commit: { maxSegments: 2 } } as never), /maxSegments is optimize-only/);
+  assert.throws(() => client.updateCommands({ optimize: { expungeDeletes: true } } as never), /expungeDeletes is commit-only/);
+  assert.throws(
+    () => client.updateCommands({ commit: { softCommit: true, expungeDeletes: true } } as never),
+    /expungeDeletes is not supported on a soft commit/
+  );
 });
 
 test("add and full-document update serialize overwrite, commitWithin, and SolrCloud route", async () => {
@@ -225,31 +236,39 @@ test("atomicUpdate validates modifier shapes and values before sending a request
   );
 });
 
-test("commit, soft commit, optimize, and rollback serialize typed command bodies", async () => {
-  const bodies: unknown[] = [];
+test("commit, soft commit, optimize, and rollback serialize typed command bodies and searcher params", async () => {
+  const requests: Array<{ url: URL; body: unknown }> = [];
   const client = createSolrClient({
     core: "catalog",
-    fetch: async (_input, init) => {
-      bodies.push(JSON.parse(String(init?.body)));
+    fetch: async (input, init) => {
+      requests.push({ url: new URL(String(input)), body: JSON.parse(String(init?.body)) });
       return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
     }
   });
 
-  await client.commit({ waitSearcher: false, softCommit: false, expungeDeletes: true });
+  await client.commit({ waitSearcher: false, softCommit: false, expungeDeletes: true, openSearcher: false });
+  await client.commit();
   await client.softCommit();
-  await client.optimize({ maxSegments: 2, waitSearcher: false });
+  await client.softCommit({ waitSearcher: false, openSearcher: false });
+  await client.optimize({ maxSegments: 2, waitSearcher: false, openSearcher: false });
   await client.optimize(3);
   await client.optimize();
   await client.rollback();
 
-  assert.deepEqual(bodies, [
+  assert.deepEqual(requests.map(request => request.body), [
     { commit: { waitSearcher: false, softCommit: false, expungeDeletes: true } },
+    { commit: {} },
+    { commit: { softCommit: true, waitSearcher: true } },
     { commit: { softCommit: true, waitSearcher: false } },
     { optimize: { maxSegments: 2, waitSearcher: false } },
     { optimize: { maxSegments: 3 } },
     { optimize: {} },
     { rollback: {} }
   ]);
+  assert.equal(requests[0]!.url.searchParams.get("openSearcher"), "false");
+  assert.equal(requests[1]!.url.searchParams.has("openSearcher"), false);
+  assert.equal(requests[3]!.url.searchParams.get("openSearcher"), "false");
+  assert.equal(requests[4]!.url.searchParams.get("openSearcher"), "false");
 });
 
 test("update command options reject invalid values before sending a request", () => {
@@ -259,6 +278,8 @@ test("update command options reject invalid values before sending a request", ()
   assert.throws(() => client.add({ id: "one" }, { route: "  " }), /route must be a non-empty string/);
   assert.throws(() => client.delete("one", { route: "" }), /route must be a non-empty string/);
   assert.throws(() => client.optimize({ maxSegments: 0 }), /maxSegments must be a positive integer/);
+  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true } as never), /expungeDeletes is not supported on a soft commit/);
+  assert.throws(() => client.commit({ maxSegments: 1 } as never), /maxSegments is optimize-only/);
 });
 
 test("requestRaw sends raw string bodies unchanged with caller content type", async () => {
