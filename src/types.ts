@@ -4,6 +4,85 @@ export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAM
 export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
+export type SolrReplicationCommand =
+  | "enablereplication"
+  | "disablereplication"
+  | "indexversion"
+  | "fetchindex"
+  | "abortfetch"
+  | "snappull"
+  | "abort"
+  | "enablepoll"
+  | "disablepoll"
+  | "details"
+  | "filelist";
+
+export interface SolrReplicationBaseParams {
+  customParams?: Readonly<Record<string, string | number | boolean>>;
+}
+export interface SolrReplicationFetchIndexParams extends SolrReplicationBaseParams {
+  leaderUrl?: string;
+  compression?: "internal" | "external";
+  httpConnTimeout?: number;
+  httpReadTimeout?: number;
+  maxWriteMBPerSec?: number;
+}
+export type SolrReplicationFileListParams = SolrReplicationBaseParams & (
+  | { generation: number; indexversion?: never }
+  | { generation?: never; indexversion: number }
+);
+export type SolrReplicationParams<A extends SolrReplicationCommand> =
+  A extends "fetchindex" | "snappull" ? SolrReplicationFetchIndexParams :
+  A extends "filelist" ? SolrReplicationFileListParams :
+  SolrReplicationBaseParams;
+
+export interface SolrReplicationResponseHeader {
+  status: number;
+  QTime?: number;
+}
+export interface SolrReplicationCommandResponse {
+  responseHeader?: SolrReplicationResponseHeader;
+  status?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+export interface SolrReplicationIndexVersionResponse extends SolrReplicationCommandResponse {
+  indexversion: number | string;
+  generation?: number;
+}
+export interface SolrReplicationFileMetadata {
+  name?: string;
+  size?: number;
+  lastmodified?: number | string;
+  checksum?: string;
+  alias?: string;
+  [key: string]: unknown;
+}
+export interface SolrReplicationFileListResponse extends SolrReplicationCommandResponse {
+  filelist?: readonly SolrReplicationFileMetadata[];
+  confFiles?: readonly SolrReplicationFileMetadata[];
+}
+export interface SolrReplicationDetailsResponse extends SolrReplicationCommandResponse {
+  details?: Readonly<Record<string, unknown>>;
+}
+export type SolrReplicationResponse<A extends SolrReplicationCommand> =
+  A extends "indexversion" ? SolrReplicationIndexVersionResponse :
+  A extends "filelist" ? SolrReplicationFileListResponse :
+  A extends "details" ? SolrReplicationDetailsResponse :
+  SolrReplicationCommandResponse;
+
+export interface SolrReplicationFileContentParams extends SolrReplicationBaseParams {
+  directoryType: "file" | "cf" | "tlogFile";
+  filePath: string;
+  offset?: number;
+  length?: number;
+  compression?: boolean;
+  checksum?: boolean;
+  maxWriteMBPerSec?: number;
+  generation?: number;
+}
+
+
 /** Custom key/value parameters for administrative actions not yet modelled by this client. */
 export type SolrAdminCustomParams = SolrAdminParams;
 

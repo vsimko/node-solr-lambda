@@ -19,13 +19,14 @@ This inventory defines the boundary of the typed client API after review against
 | Metrics API `/solr/admin/metrics` | `metrics()` | Typed response models; JSON metrics on Solr 8/9 and Prometheus exposition text on Solr 10.1 are documented. |
 | Streaming Expressions `/stream` | `stream()` | Expression request support and JSON response parsing; tested against SolrCloud on all three pinned versions. |
 | Export handler `/export` | `export()` | Raw response streaming; docValues sort-field flow tested on all three pinned versions. |
+| ReplicationHandler V1 `/solr/{core}/replication` | `replication()`, `replicationFile()` | Typed non-backup command surface for indexversion, details, filelist, fetch/poll/enable/disable/abort operations (including Solr 8/9 snappull/abort aliases), plus raw file-content streaming. indexversion/details/filelist/filecontent and leader enablereplication/disablereplication are integration-tested on all three pinned versions. fetchindex/abortfetch/poll command serialization is unit-tested; an end-to-end leader/follower cycle is not yet certified. |
 | Generic/custom request handlers | `request()`, `requestRaw()` | Escape hatches for custom paths and parameters. These do not imply typed support or integration certification for arbitrary endpoints. |
 
 ## Explicitly deferred or excluded endpoint families
 
 | Endpoint / feature | Status | Reason / tracking |
 | --- | --- | --- |
-| ReplicationHandler V1 `/solr/{core}/replication` | Not implemented as a dedicated typed module | Covers user-managed index replication, polling, index version/file listing and file streaming, enable/disable, and asynchronous status. SolrCloud also uses this handler internally for peer-to-peer shard recovery. Deferred to [Issue #95](https://github.com/vsimko/node-solr-lambda/issues/95). |
+| ReplicationHandler backup/restore commands | Deferred to [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96) | Core-level backup, details/status, restore, restorestatus, and deletebackup are separate operations with asynchronous completion and repository/path configuration. |
 | Core backup/restore through ReplicationHandler | Not implemented as a dedicated typed module | Backup, details/status, restore, restorestatus, and deletebackup are asynchronous and depend on server-side backup repository/path configuration. Deferred to [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96). |
 | SolrCloud Collections backup/restore | Not implemented as typed Collections actions | `BACKUP`, `RESTORE`, `LISTBACKUP`, and `DELETEBACKUP` are absent from the current `CollectionAdminAction` union. Deferred to [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96). |
 | V2 API paths | No dedicated V2 wrappers | The typed client currently uses V1 paths for CoreAdmin, Collections, Schema, and Config. V2 paths and payloads differ and are not inferred from V1 types. Use the generic request escape hatch only when the caller owns the V2 contract. |

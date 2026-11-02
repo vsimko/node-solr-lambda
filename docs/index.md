@@ -8,6 +8,7 @@
 - [Schema API](schema.md)
 - [Config API](config.md)
 - [Administration](administration.md)
+- [Replication API](replication.md)
 - [Error handling](errors.md)
 - [Raw requests](raw-requests.md)
 - [API coverage](api-coverage.md)

@@ -12,6 +12,7 @@ import "./solr-optimize.test.js";
 import "./solr-cursor.test.js";
 import "./solr-schema.test.js";
 import "./solr-security.test.js";
+import "./solr-replication.test.js";
 import "./solr-smoke.test.js";
 import "./solr-streaming.test.js";
 import "./solr-system-metrics.test.js";
