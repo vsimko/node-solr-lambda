@@ -22,7 +22,9 @@ const system = await admin.systemInfo();
 const metrics = await admin.metrics({ group: "jvm" });
 ```
 
-Check the API coverage matrix for endpoint-specific models and version tests. The action parameter is typed. Some action parameters still use a general key-value map.
+Core Admin and Collections API actions now use action-specific exported parameter models. For example, `coreAdmin("CREATE", ...)` exposes core creation settings, while `collections("CREATE", ...)` exposes collection routing, shard, replica, and config-set options. Each action model has a `customParams` property for valid Solr parameters not yet represented by a named property; this escape hatch is explicit and does not weaken completion for the standard options. See the TypeScript consumer fixture in `test/admin-api-types.ts` for accepted and rejected examples.
+
+`CoreAdminParams<A>` and `CollectionAdminParams<A>` map each action literal to its corresponding parameter interface. Unsupported or version-specific server options should be supplied through `customParams` and checked against the documentation for the target Solr version.
 
 ## Replica lifecycle parameters
 
