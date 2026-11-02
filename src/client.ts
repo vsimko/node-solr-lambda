@@ -11,7 +11,7 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import * as replicationApi from "./apis/replication.js";
 import type {
-  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
+  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
   SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams
 } from "./types.js";
@@ -96,6 +96,16 @@ export class SolrClient extends SolrTransport {
 
   config<T = SolrConfigCommandResponse>(command: SolrConfigCommand, requestOptions: RequestControlOptions = {}): Promise<T> {
     return configApi<T>(this, this.endpoint("/config"), command, requestOptions);
+  }
+
+  /** Read the effective configuration (overlay merged with solrconfig.xml). */
+  getConfig<T = SolrConfigReadResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
+    return this.request<T>(this.endpoint("/config"), { ...requestOptions, method: "GET", operation: "config" });
+  }
+
+  /** Read only the persisted Config API overlay. */
+  getConfigOverlay<T = SolrConfigOverlayResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
+    return this.request<T>(this.endpoint("/config/overlay"), { ...requestOptions, method: "GET", operation: "config" });
   }
 
   coreAdmin<T = unknown>(action: "STATUS", params?: CoreAdminParams<"STATUS">, requestOptions?: RequestControlOptions): Promise<T>;
