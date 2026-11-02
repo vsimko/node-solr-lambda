@@ -90,7 +90,8 @@ test("ReplicationHandler file content uses a raw streamed response", async () =>
   assert.equal(url.searchParams.get("file"), "segments_1");
   assert.equal(url.searchParams.get("wt"), "filestream");
   assert.equal(url.searchParams.get("offset"), "10");
-  assert.equal(url.searchParams.get("length"), "3");
+  assert.equal(url.searchParams.get("len"), "3");
+  assert.equal(url.searchParams.get("length"), null);
   assert.equal(url.searchParams.get("generation"), "42");
   assert.equal(url.searchParams.get("checksum"), "true");
   assert.equal(accept, "*/*");
