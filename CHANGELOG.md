@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Documentation
+
+- Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.
+
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ### [3.0.5](https://github.com/vsimko/node-solr-lambda/compare/v3.0.4...v3.0.5) (2023-06-27)
