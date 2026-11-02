@@ -20,6 +20,7 @@ while (backupState !== "success") {
   if (backupState !== "success") await new Promise(resolve => setTimeout(resolve, 500));
 }
 
+// Solr 8 can expose the backup status at the response root; newer versions nest it under details.
 // On Solr 8/9 the backup entry may be absent until the operation finishes.
 // Solr 10.1 also reports "waiting for commit" and "running" progress states.
 // Restore the latest timestamped snapshot. Restore runs asynchronously.
