@@ -9,8 +9,8 @@ Core backups use the ReplicationHandler at `/solr/{core}/replication`. With no `
 ```ts
 // Create a named snapshot of the current committed index.
 await client.replication("backup", {
-  name: "nightly",
-  numberToKeep: 5
+  numberToKeep: 5,
+  commitName: "before-import"
 });
 
 // Restore the named snapshot. Restore runs asynchronously.
@@ -32,7 +32,8 @@ Important details:
 
 - Commit the documents first with `client.commit()`; the `backup` command creates a backup only when committed index data exists.
 - `name` is optional for backup/restore. When omitted, Solr generates a timestamp-based snapshot name and restore selects the latest timestamped snapshot.
-- `numberToKeep` is a per-request retention option. It cannot be used when the handler is configured with `maxNumberOfBackups`; the server-side setting takes precedence.
+- `numberToKeep` is a per-request retention option for timestamp-named backups. Solr ignores it when `name` is supplied, and rejects it when the handler is configured with `maxNumberOfBackups`; the server-side setting takes precedence.
+- `commitName` selects a named commit created with the CoreAdmin `CREATESNAPSHOT` action.
 - `repository` defaults to the local filesystem repository.
 - `restorestatus` returns `In Progress`, `success`, or `failed`; a failure includes an exception.
 - `backupAfter` and `maxNumberOfBackups` are ReplicationHandler server configuration, not client-side backup commands.
