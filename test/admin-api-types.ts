@@ -175,12 +175,12 @@ const effectiveConfig: Promise<SolrConfigReadResponse> = client.request<SolrConf
 const overlayConfig: Promise<SolrConfigOverlayResponse> = client.request<SolrConfigOverlayResponse>("/solr/catalog/config/overlay");
 void configCommandResponse;
 void effectiveConfig.then(result => {
-  const maxTime: number | undefined = result.config?.updateHandler?.autoCommit?.maxTime;
-  const cacheSize: number | undefined = result.config?.query?.filterCache?.size;
+  const maxTime: number | string | undefined = result.config?.updateHandler?.autoCommit?.maxTime;
+  const cacheSize: number | string | undefined = result.config?.query?.filterCache?.size;
   void [maxTime, cacheSize];
 });
 void overlayConfig.then(result => {
-  const overlayCacheSize: number | undefined = result.overlay?.props?.query?.filterCache?.size;
+  const overlayCacheSize: number | string | undefined = result.overlay?.props?.query?.filterCache?.size;
   const userProperty: SolrConfigValue | undefined = result.overlay?.userProps?.["tenant.name"];
   void [overlayCacheSize, userProperty];
 });
