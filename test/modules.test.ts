@@ -35,6 +35,46 @@ test("delete delegates a Solr delete command to the update module", async () => 
   assert.deepEqual(JSON.parse(body), { delete: { query: "status:expired" } });
 });
 
+test("Update API uses the documented JSON endpoints and typed success response", async () => {
+  const calls: Array<{ path: string; body: unknown }> = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      calls.push({ path: new URL(String(input)).pathname, body: JSON.parse(String(init?.body)) });
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 2 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  const single = await client.add({ id: "single", title_s: "single" });
+  await client.add([{ id: "array-one" }, { id: "array-two" }]);
+  await client.updateCommands({ add: { doc: { id: "command" }, overwrite: true } });
+
+  assert.equal(single.responseHeader?.status, 0);
+  assert.equal(single.responseHeader?.QTime, 2);
+  assert.deepEqual(calls, [
+    { path: "/solr/catalog/update/json/docs", body: { id: "single", title_s: "single" } },
+    { path: "/solr/catalog/update", body: [{ id: "array-one" }, { id: "array-two" }] },
+    { path: "/solr/catalog/update/json", body: { add: { doc: { id: "command" }, overwrite: true } } }
+  ]);
+});
+
+test("Update API preserves Solr HTTP errors for failed mutations", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({
+      error: { code: 400, msg: "Invalid update command" }
+    }), { status: 400, headers: { "content-type": "application/json" } })
+  });
+
+  await assert.rejects(
+    client.atomicUpdate({ id: "book-1", price: { inc: 1 } }),
+    error => error instanceof SolrHttpError && error.status === 400
+  );
+});
+
 test("Schema and Config modules use their own collection endpoints", async () => {
   const paths: string[] = [];
   const client = createSolrClient({
