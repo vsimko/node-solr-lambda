@@ -334,3 +334,50 @@ test("HTTP errors retain the Solr payload", async () => {
     return true;
   });
 });
+
+
+test("Config API reads effective config and persisted overlay through typed GET methods", async () => {
+  const requests: Array<{ url: URL; method: string | undefined }> = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requests.push({ url: new URL(String(input)), method: init?.method });
+      const payload = requests.length === 1
+        ? { config: { query: { filterCache: { size: 256 } } } }
+        : { overlay: { znodeVersion: 3, userProps: { tenant: "public" } } };
+      return new Response(JSON.stringify(payload));
+    }
+  });
+
+  const effective = await client.getConfig();
+  const overlay = await client.getConfigOverlay();
+
+  assert.equal(requests[0]!.url.pathname, "/solr/catalog/config");
+  assert.equal(requests[0]!.method, "GET");
+  assert.equal(requests[1]!.url.pathname, "/solr/catalog/config/overlay");
+  assert.equal(requests[1]!.method, "GET");
+  assert.equal((effective as { config: { query: { filterCache: { size: number } } } }).config.query.filterCache.size, 256);
+  assert.equal((overlay as { overlay: { userProps: { tenant: string } } }).overlay.userProps.tenant, "public");
+});
+
+test("Config API read methods preserve request controls and propagate HTTP errors", async () => {
+  let requestedUrl = "";
+  let requestedSignal: AbortSignal | undefined;
+  const controller = new AbortController();
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requestedUrl = String(input);
+      requestedSignal = init?.signal ?? undefined;
+      return new Response(JSON.stringify({ error: { msg: "config unavailable" } }), { status: 503 });
+    }
+  });
+
+  await assert.rejects(client.getConfigOverlay({ signal: controller.signal }), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.equal(error.message, "config unavailable");
+    return true;
+  });
+  assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/config/overlay");
+  assert.equal(requestedSignal, controller.signal);
+});
