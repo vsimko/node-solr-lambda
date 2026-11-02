@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createSolrClient } from "../src/index.js";
+import { createSolrClient, SolrHttpError } from "../src/index.js";
 
 test("core backup and restore commands use ReplicationHandler parameters", async () => {
   const urls: URL[] = [];
@@ -76,3 +76,18 @@ test("SolrCloud collection backup, restore, listing, and async status use typed 
   assert.equal(urls[5]!.searchParams.get("action"), "DELETESTATUS");
 });
 
+
+test("core backup commands preserve Solr failures", async () => {
+  const body = JSON.stringify({ error: { code: 500, msg: "backup repository unavailable" } });
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(body, { status: 500, statusText: "Server Error" })
+  });
+
+  await assert.rejects(client.replication("backup"), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.equal(error.status, 500);
+    assert.equal(error.message, "backup repository unavailable");
+    return true;
+  });
+});
