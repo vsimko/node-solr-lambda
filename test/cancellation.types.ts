@@ -1,5 +1,5 @@
 import { createSolrClient } from "../src/index.js";
-import type { RequestControlOptions, SolrDeleteOptions, SolrOptimizeOptions, SolrUpdateOptions } from "../src/index.js";
+import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrDeleteOptions, SolrOptimizeOptions, SolrUpdateOptions } from "../src/index.js";
 
 const controller = new AbortController();
 const controls: RequestControlOptions = { signal: controller.signal, timeoutMs: 5000 };
@@ -14,6 +14,22 @@ void client.add({ id: "one" }, updateOptions, controls);
 void client.update({ id: "two" }, { route: "tenant-b" }, controls);
 void client.delete("one", deleteOptions);
 void client.optimize(optimizeOptions, controls);
+interface AtomicProduct { id: string; title: string; price: number; tags: string[]; }
+const atomicProduct: SolrAtomicUpdateDocument<AtomicProduct> = {
+  id: "p-1",
+  title: { set: "Updated" },
+  price: { inc: 2 },
+  tags: { "add-distinct": "new" }
+};
+void client.atomicUpdate<AtomicProduct>(atomicProduct);
+// @ts-expect-error Increment is valid only for numeric fields.
+void client.atomicUpdate<AtomicProduct>({ id: "p-1", title: { inc: 1 } });
+// @ts-expect-error add requires a multi-valued field in the document model.
+void client.atomicUpdate<AtomicProduct>({ id: "p-1", price: { add: 2 } });
+// @ts-expect-error Unknown atomic modifiers are rejected.
+void client.atomicUpdate<AtomicProduct>({ id: "p-1", title: { replace: "new" } });
+// @ts-expect-error Field values must match the document's field type.
+void client.atomicUpdate<AtomicProduct>({ id: "p-1", title: { set: 42 } });
 // @ts-expect-error SolrCloud route values must be strings.
 void client.add({ id: "bad" }, { route: 42 });
 // @ts-expect-error maxSegments must be numeric.
