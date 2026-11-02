@@ -66,11 +66,11 @@ cloudIntegrationTest("SolrCloud collection backup, list, restore, and delete cyc
   assert.equal(restore.responseHeader?.status, 0);
   await waitForCollectionRequest(client, restoreRequest);
 
-  const restored = await targetClient.query({ params: { q: `id:${id}` }, rows: 1 }) as {
-    response?: { numFound?: number; docs?: readonly { title?: string }[] };
+  const restored = await targetClient.query({ query: `id:${id}`, limit: 1 }) as {
+    response?: { numFound?: number; docs?: readonly { title?: string | readonly string[] }[] };
   };
   assert.equal(restored.response?.numFound, 1);
-  assert.equal(restored.response?.docs?.[0]?.title, "solrcloud backup fixture");
+  assert.ok(restored.response?.docs?.[0]?.title?.includes("solrcloud backup fixture"));
 
   const deleted = await client.collections("DELETEBACKUP", {
     name: backupName,
