@@ -18,12 +18,17 @@ export function replication<A extends SolrReplicationCommand>(
   const { customParams, ...commandParams } = params as SolrReplicationParams<A> & {
     customParams?: Readonly<Record<string, string | number | boolean>>;
   };
-  const query = {
+  const query: Record<string, string | number | boolean> = {
     ...commandParams,
     ...customParams,
     command,
     wt: "json"
   };
+  if (command === "filelist") {
+    const generation = "generation" in params ? params.generation : params.indexversion;
+    query.generation = generation;
+    query.indexversion = generation;
+  }
   return client.request<SolrReplicationResponse<A>>(path, {
     ...requestOptions,
     query,
