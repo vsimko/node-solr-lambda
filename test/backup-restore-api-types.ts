@@ -13,6 +13,7 @@ void client.collections("LISTBACKUP", { name: "nightly" });
 void client.collections("DELETEBACKUP", { name: "nightly", backupId: 1 });
 void client.collections("REQUESTSTATUS", { requestid: "backup-1" });
 void client.collections("DELETESTATUS", { requestid: "backup-1" });
+void client.collections("DELETESTATUS", { flush: true });
 
 // @ts-expect-error backup requires a collection name
 void client.collections("BACKUP", { name: "nightly" });
@@ -22,5 +23,11 @@ void client.collections("REQUESTSTATUS", {});
 void client.replication("deletebackup");
 // @ts-expect-error core-level backup deletion requires a backup name
 void client.replication("deletebackup", { location: "/backups" });
+// @ts-expect-error DELETEBACKUP requires exactly one deletion strategy
+void client.collections("DELETEBACKUP", { name: "nightly" });
+// @ts-expect-error DELETEBACKUP cannot combine strategies
+void client.collections("DELETEBACKUP", { name: "nightly", backupId: 1, purgeUnused: true });
+// @ts-expect-error DELETESTATUS requires requestid or flush
+void client.collections("DELETESTATUS", {});
 // @ts-expect-error unsupported index backup mode is rejected
 void client.collections("BACKUP", { name: "nightly", collection: "catalog", indexBackup: "zip" });
