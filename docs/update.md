@@ -145,6 +145,9 @@ All Update Handler methods default to the exported `SolrUpdateResponse` type, wh
 Successful responses can be validated through `validation.outputs` using the public operation name:
 
 ```ts
+import { z } from "zod";
+import { createSolrClient } from "node-solr-lambda";
+
 const client = createSolrClient({
   core: "catalog",
   validation: {
