@@ -13,7 +13,7 @@ import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrSchemaCommand,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -111,6 +111,16 @@ export class SolrClient extends SolrTransport {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
 
+  replication(
+    command: "filelist",
+    params: SolrReplicationFileListParams,
+    requestOptions?: RequestControlOptions
+  ): Promise<SolrReplicationFileListResponse>;
+  replication<A extends Exclude<SolrReplicationCommand, "filelist">>(
+    command: A,
+    params?: SolrReplicationParams<A>,
+    requestOptions?: RequestControlOptions
+  ): Promise<SolrReplicationResponse<A>>;
   replication<A extends SolrReplicationCommand>(
     command: A,
     params: SolrReplicationParams<A> = {} as SolrReplicationParams<A>,
