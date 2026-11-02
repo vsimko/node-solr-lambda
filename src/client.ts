@@ -11,7 +11,7 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CommitOptions, CoreAdminAction, RequestControlOptions, SolrAdminParams,
-  SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions
+  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -36,6 +36,20 @@ export class SolrClient extends SolrTransport {
 
   update<T = unknown>(documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.update<T>(this, this.endpoint("/update"), documents, options, requestOptions);
+  }
+
+  atomicUpdate<TDocument extends object, TUniqueKey extends keyof TDocument = "id" extends keyof TDocument ? "id" : never>(
+    documents: SolrAtomicUpdateDocument<TDocument, TUniqueKey> | readonly SolrAtomicUpdateDocument<TDocument, TUniqueKey>[],
+    options: SolrUpdateOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<unknown> {
+    return updateApi.atomicUpdate<unknown>(
+      this,
+      this.endpoint("/update"),
+      documents as unknown as SolrDocument | readonly SolrDocument[],
+      options,
+      requestOptions
+    );
   }
 
   delete<T = unknown>(command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
