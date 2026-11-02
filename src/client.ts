@@ -96,11 +96,16 @@ export class SolrClient extends SolrTransport {
     return configApi<T>(this, this.endpoint("/config"), command, requestOptions);
   }
 
-  coreAdmin<T = unknown, A extends CoreAdminAction = CoreAdminAction>(action: A, params: CoreAdminParams<A> = {} as CoreAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
+  coreAdmin<T = unknown>(action: "STATUS", params?: CoreAdminParams<"STATUS">, requestOptions?: RequestControlOptions): Promise<T>;
+  coreAdmin<T = unknown, A extends Exclude<CoreAdminAction, "STATUS"> = Exclude<CoreAdminAction, "STATUS">>(action: A, params: CoreAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
+  coreAdmin<T = unknown, A extends CoreAdminAction>(action: A, params: CoreAdminParams<A> = {} as CoreAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return coreAdminApi<T, A>(this, action, params, requestOptions);
   }
 
-  collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
+  collections<T = unknown>(action: "LIST" | "LISTALIASES", params?: CollectionAdminParams<"LIST" | "LISTALIASES">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = unknown>(action: "CLUSTERSTATUS", params?: CollectionAdminParams<"CLUSTERSTATUS">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = unknown, A extends Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS"> = Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS">>(action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = unknown, A extends CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
 
