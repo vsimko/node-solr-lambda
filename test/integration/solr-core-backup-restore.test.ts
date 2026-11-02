@@ -24,9 +24,10 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   let backupState = "";
   for (let attempt = 0; attempt < 120; attempt++) {
     const details = await client.replication("details");
-    backupState = details.details?.backup?.status ?? "";
+    const backupDetails = details.details?.backup ?? details.backup;
+    backupState = backupDetails?.status ?? "";
     if (backupState === "success") break;
-    if (backupState === "failed") throw new Error(JSON.stringify(details));
+    if (backupState === "failed" || backupDetails?.snapShootException) throw new Error(JSON.stringify(details));
     await new Promise(resolve => setTimeout(resolve, 500));
   }
   assert.equal(backupState, "success", "core backup did not finish successfully");
