@@ -97,7 +97,7 @@ SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration npm run test:inte
 SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration SOLR_SECURITY=true SOLR_USERNAME=integration-admin SOLR_PASSWORD=integration-password npm run test:integration
 ```
 
-CI #145 passed standalone and SolrCloud integration jobs on all three pinned Solr images. Covered behavior includes CRUD, hard/soft commit, rollback, ping, schema field lifecycle, config user properties, CoreAdmin core lifecycle, JSON Request API, optimize, system info, metrics, export, Collections CREATE/LIST/DELETE, Streaming Expressions search, and basic query/cursorMark pagination. These results do not certify every endpoint, query option, update command, or action in the compatibility matrix.
+CI #145 passed standalone and SolrCloud integration jobs on all three pinned Solr images. Covered behavior includes CRUD, hard/soft commit, rollback, ping, schema field lifecycle, config user properties, CoreAdmin core lifecycle, JSON Request API, optimize, system info, metrics, export, Collections CREATE/LIST/DELETE, Streaming Expressions search, and basic query/cursorMark pagination. These results do not certify every endpoint, query option, update-command variant, or action in the compatibility matrix. The typed `updateCommands()` add-command plus commit flow is separately exercised with a persisted-document read-back on all three pinned images.
 
 ## Remaining integration evidence
 

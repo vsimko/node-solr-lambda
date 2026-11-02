@@ -35,7 +35,7 @@ The aim is not to recreate every historical Solr client abstraction. Keep the na
 | Establish the autocomplete-first TypeScript API contract and consumer acceptance tests | [Issue #121](https://github.com/vsimko/node-solr-lambda/issues/121) |
 | Maintain an explicit endpoint/feature inventory and definition of done | [Issue #39](https://github.com/vsimko/node-solr-lambda/issues/39) |
 | Build repeatable Solr Docker integration infrastructure and fixtures | [#41](https://github.com/vsimko/node-solr-lambda/issues/41), [#42](https://github.com/vsimko/node-solr-lambda/issues/42), [#43](https://github.com/vsimko/node-solr-lambda/issues/43) |
-| Run and record the Solr 8/9/10 compatibility audit | [Issue #42](https://github.com/vsimko/node-solr-lambda/issues/42), [#109](https://github.com/vsimko/node-solr-lambda/issues/109) |
+| Expand the Solr 8/9/10 integration matrix; JSON update commands now have explicit per-version read-back coverage | [Issue #42](https://github.com/vsimko/node-solr-lambda/issues/42), [#109](https://github.com/vsimko/node-solr-lambda/issues/109) |
 
 ### P1 — Query API and IDE experience
 
