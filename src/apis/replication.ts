@@ -27,8 +27,13 @@ export function replication<A extends SolrReplicationCommand>(
   if (command === "filelist") {
     const fileListParams = params as { generation?: number; indexversion?: number };
     const generation = fileListParams.generation ?? fileListParams.indexversion;
-    query.generation = generation;
-    query.indexversion = generation;
+    if (generation !== undefined) {
+      if (!Number.isInteger(generation) || generation < 0) {
+        throw new RangeError("generation must be a non-negative integer");
+      }
+      query.generation = generation;
+      query.indexversion = generation;
+    }
   }
   return client.request<SolrReplicationResponse<A>>(path, {
     ...requestOptions,
