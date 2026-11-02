@@ -1,4 +1,4 @@
-import type { SolrClient, SolrJsonQueryRequest, SolrJsonQueryResponse, SolrQueryResponse, SolrResponse } from "../src/index.js";
+import type { SolrClient, SolrJsonQueryRequest, SolrJsonQueryResponse, SolrQueryResponse, SolrResponse, SolrStructuredExplanation } from "../src/index.js";
 import { solrExcludeTags, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort } from "../src/index.js";
 
 declare const solr: SolrClient;
@@ -34,6 +34,15 @@ void solr.query({
 });
 
 void solr.query({ query: "name:alice", defType: "lucene", parserOptions: { type: "lucene", df: "name", sow: true } });
+void solr.query({
+  query: "title:solr",
+  debug: { components: ["query", "results"], explainStructured: true, explainOther: "id:other" }
+});
+void solr.query({ query: "*:*", debug: { components: "timing" } });
+// @ts-expect-error Debug sections are limited to Solr's supported values.
+void solr.query({ query: "*:*", debug: { components: "everything" } });
+// @ts-expect-error Structured explain is a boolean option.
+void solr.query({ query: "*:*", debug: { explainStructured: "yes" } });
 void solr.query({ query: "name:alice", defType: "dismax", parserOptions: { type: "dismax", qf: "name^2", mm: "2", tie: 0.2 } });
 void solr.query({ query: solrLocalParams({ type: "lucene", df: "title" }, "search terms"), fields: solrFields("id", solrFunction("sum", "price", 10)) });
 void solr.query({ filter: solrFilter("category:books", { tag: "category" }) });
@@ -92,7 +101,7 @@ void solr.query<SolrQueryResponse<ProductDocument, ProductFacets>>({ query: "*:*
   const jsonFacetCount: number | undefined = page.facets?.count;
   const groupedMatches: number | undefined = page.grouped?.category?.matches;
   const averagePrice: number | undefined = page.stats?.stats_fields?.price?.mean;
-  const explanation: string | undefined = page.debug?.explain?.["product-1"];
+  const explanation: string | SolrStructuredExplanation | undefined = page.debug?.explain?.["product-1"];
   const queryTime: number | undefined = page.responseHeader?.QTime;
   void [documents, total, offset, maxScore, titleSnippet, facetCount, jsonFacetCount, groupedMatches, averagePrice, explanation, queryTime];
   for (const document of documents) {
