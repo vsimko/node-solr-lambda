@@ -29,7 +29,7 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
 
   const version = await replicationClient.replication("indexversion");
   assert.equal(version.responseHeader?.status, 0);
-  const generation = Number(version.indexversion);
+  const generation = version.generation ?? Number(version.indexversion);
   assert.ok(Number.isFinite(generation) && generation > 0, JSON.stringify(version));
   assert.equal((await replicationClient.replication("enablereplication")).responseHeader?.status, 0);
   assert.equal((await replicationClient.replication("disablereplication")).responseHeader?.status, 0);
@@ -37,7 +37,7 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
   const details = await replicationClient.replication("details");
   assert.equal(details.responseHeader?.status, 0);
 
-  const fileList = await replicationClient.replication("filelist", { generation });
+  const fileList = await replicationClient.replication("filelist", version.generation !== undefined ? { generation } : { indexversion: generation });
   assert.equal(fileList.responseHeader?.status, 0);
   assert.ok(fileList.filelist, JSON.stringify({ version, details, fileList }));
 
