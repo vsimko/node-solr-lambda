@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { z } from "zod";
-import { createSolrClient, SolrValidationError } from "../src/index.js";
+import { createSolrClient, SolrHttpError, SolrValidationError } from "../src/index.js";
 
 test("input validation can transform query parameters", async () => {
   let requestedUrl = "";
@@ -92,6 +92,54 @@ test("onError ignore returns original data after a schema rejection", async () =
 
   await client.query({ query: "abc" });
   assert.equal(requestedQuery, "abc");
+});
+
+test("update output validation is wired to each public update operation", async () => {
+  const validated: string[] = [];
+  const operations = ["add", "update", "atomicUpdate", "delete", "commit", "softCommit", "optimize", "rollback", "updateCommands"];
+  const outputs = Object.fromEntries(operations.map(operation => [operation, {
+    safeParseAsync: async (value: unknown) => {
+      validated.push(operation);
+      return { success: true as const, data: value };
+    }
+  }]));
+  const client = createSolrClient({
+    core: "catalog",
+    validation: { outputs },
+    fetch: async () => new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 1 } }))
+  });
+
+  const response = await client.add({ id: "one" });
+  assert.equal(response.responseHeader?.status, 0);
+  await client.update({ id: "two" });
+  await client.atomicUpdate<{ id: string; count: number }>({ id: "three", count: { inc: 1 } });
+  await client.delete("one");
+  await client.commit();
+  await client.softCommit();
+  await client.optimize();
+  await client.rollback();
+  await client.updateCommands({ commit: {} });
+
+  assert.deepEqual(validated, operations);
+});
+
+test("HTTP update errors retain a typed error response and bypass success output validation", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    validation: { outputs: { add: z.object({ responseHeader: z.object({ status: z.literal(0) }) }) } },
+    fetch: async () => new Response(JSON.stringify({ error: { code: 400, msg: "invalid update document" } }), {
+      status: 400,
+      statusText: "Bad Request"
+    })
+  });
+
+  await assert.rejects(client.add({ id: "one" }), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.deepEqual(error.errorResponse, { error: { code: 400, msg: "invalid update document" } });
+    assert.equal(error.solrError?.code, 400);
+    assert.equal(error.solrError?.msg, "invalid update document");
+    return true;
+  });
 });
 
 test("output validation rejects an invalid response", async () => {
