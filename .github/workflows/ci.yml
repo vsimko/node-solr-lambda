@@ -166,12 +166,11 @@ jobs:
           docker network create solr-cloud-net
           docker run --detach \
             --name solr-cloud \
-            --volume "$RUNNER_TEMP/solr-backups:/var/solr/backup" \
+            --volume "$RUNNER_TEMP/solr-backups:/var/solr/data/backup" \
             --publish 8983:8983 \
             --network solr-cloud-net \
             --network-alias solr-cloud \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
-            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backup" \
             "solr:${{ matrix.solr-version }}" \
             solr-foreground -c
       - name: Wait for SolrCloud
@@ -205,11 +204,10 @@ jobs:
         run: |
           docker run --detach \
             --name solr-cloud-2 \
-            --volume "$RUNNER_TEMP/solr-backups:/var/solr/backup" \
+            --volume "$RUNNER_TEMP/solr-backups:/var/solr/data/backup" \
             --network solr-cloud-net \
             --publish 8984:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
-            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backup" \
             "solr:${{ matrix.solr-version }}" \
             solr-foreground -c -z solr-cloud:9983
           for attempt in {1..60}; do
@@ -229,7 +227,7 @@ jobs:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CLOUD: "true"
           SOLR_MULTINODE: "true"
-          SOLR_BACKUP_LOCATION: file:///var/solr/backup
+          SOLR_BACKUP_LOCATION: file:///var/solr/data/backup
       - name: Print SolrCloud logs
         if: always()
         run: |
