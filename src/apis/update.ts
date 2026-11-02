@@ -1,5 +1,5 @@
 import type { SolrTransport } from "../transport.js";
-import type { CommitOptions, RequestControlOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrOptimizeOptions, SolrUpdateOptions } from "../types.js";
+import type { CommitOptions, RequestControlOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrUpdateOptions } from "../types.js";
 
 function updateParams(options: SolrUpdateOptions): Record<string, string | number | boolean> {
   const { route, ...params } = options;
@@ -73,12 +73,53 @@ export function atomicUpdate<T>(client: SolrTransport, path: string, documents: 
 }
 
 export function add<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
-  return client.request<T>(path, {
+  const isBatch = Array.isArray(documents);
+  const requestPath = isBatch ? path : `${path.replace(/\\/$/, "")}/json/docs`;
+  return client.request<T>(requestPath, {
     ...requestOptions,
     method: "POST",
-    body: Array.isArray(documents) ? documents : [documents],
+    body: documents,
     query: updateParams(options),
     operation: "add"
+  });
+}
+
+function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
+  const entries = Object.entries(commands);
+  if (entries.length === 0) throw new TypeError("A JSON update command object must contain at least one command");
+  const supported = new Set(["add", "delete", "commit", "optimize", "rollback"]);
+  for (const [name, value] of entries) {
+    if (!supported.has(name)) throw new TypeError(`Unsupported JSON update command "${name}"`);
+    if (name === "add") {
+      if (!value || typeof value !== "object" || Array.isArray(value) ||
+        !("doc" in value) || !value.doc || typeof value.doc !== "object" || Array.isArray(value.doc)) {
+        throw new TypeError("JSON add command requires a document object");
+      }
+      const addCommand = value as { commitWithin?: unknown };
+      if (addCommand.commitWithin !== undefined &&
+        (typeof addCommand.commitWithin !== "number" || !Number.isInteger(addCommand.commitWithin) || addCommand.commitWithin < 0)) {
+        throw new RangeError("JSON add commitWithin must be a non-negative integer");
+      }
+    } else if (name === "delete") {
+      const validDelete = typeof value === "string" ||
+        (Array.isArray(value) && value.every(id => typeof id === "string")) ||
+        (!!value && typeof value === "object" && !Array.isArray(value) &&
+          (("id" in value && typeof value.id === "string") || ("query" in value && typeof value.query === "string")));
+      if (!validDelete) throw new TypeError("JSON delete command must contain an ID, ID list, or query");
+    } else if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new TypeError(`JSON ${name} command must be an object`);
+    }
+  }
+}
+
+export function updateCommands<T>(client: SolrTransport, path: string, commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  validateJsonUpdateCommands(commands);
+  return client.request<T>(`${path.replace(/\\/$/, "")}/json`, {
+    ...requestOptions,
+    method: "POST",
+    body: commands,
+    query: updateParams(options),
+    operation: "updateCommands"
   });
 }
 
