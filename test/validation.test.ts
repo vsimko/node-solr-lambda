@@ -123,6 +123,20 @@ test("update output validation is wired to each public update operation", async 
   assert.deepEqual(validated, operations);
 });
 
+test("update output validation rejects an invalid successful response", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    validation: { outputs: { add: z.object({ responseHeader: z.object({ status: z.literal(0) }) }) } },
+    fetch: async () => new Response(JSON.stringify({ responseHeader: { status: 1 } }))
+  });
+
+  await assert.rejects(client.add({ id: "one" }), (error: unknown) => {
+    assert.ok(error instanceof SolrValidationError);
+    assert.equal(error.operation, "add");
+    return true;
+  });
+});
+
 test("HTTP update errors retain a typed error response and bypass success output validation", async () => {
   const client = createSolrClient({
     core: "catalog",
