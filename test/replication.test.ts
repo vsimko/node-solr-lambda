@@ -99,16 +99,16 @@ test("ReplicationHandler file content validates local file parameters", async ()
     core: "catalog",
     fetch: async () => new Response("ok")
   });
-  await assert.rejects(
-    client.replicationFile({ directoryType: "file", filePath: " ", offset: 0 }),
+  assert.throws(
+    () => client.replicationFile({ directoryType: "file", filePath: " ", offset: 0 }),
     /filePath must be a non-empty string/
   );
-  await assert.rejects(
-    client.replicationFile({ directoryType: "cf", filePath: "schema.xml", offset: -1 }),
+  assert.throws(
+    () => client.replicationFile({ directoryType: "cf", filePath: "schema.xml", offset: -1 }),
     /offset must be a non-negative integer/
   );
-  await assert.rejects(
-    client.replicationFile({ directoryType: "file", filePath: "segments_1", length: 0 }),
+  assert.throws(
+    () => client.replicationFile({ directoryType: "file", filePath: "segments_1", length: 0 }),
     /length must be a positive integer/
   );
 });
