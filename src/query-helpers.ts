@@ -113,7 +113,7 @@ function spatialFilter(parser: "geofilt" | "bbox", options: SolrSpatialFilterOpt
   if (options.cache !== undefined) params.cache = options.cache;
   if (options.cost !== undefined) params.cost = options.cost;
   const serialized = Object.entries(params).map(([key, value]) => `${key}=${formatLocalParamValue(value)}`).join(" ");
-  return `{!${parser} ${serialized}}pt=${options.point} d=${options.distance}`;
+  return `{!${parser} ${serialized} pt=${formatLocalParamValue(options.point)} d=${options.distance}}`;
 }
 
 /** Build Solr's circular geofilt filter expression. */

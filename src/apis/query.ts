@@ -292,9 +292,9 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
     params.d = distance;
   }
   if (query.collapse !== undefined) {
-    const filters = query.filter === undefined
-      ? (Array.isArray(params.fq) ? params.fq.filter((value): value is string => typeof value === "string") : typeof params.fq === "string" ? [params.fq] : [])
-      : Array.isArray(query.filter) ? query.filter.map(filter => serializeFilter(filter)) : [serializeFilter(query.filter as SolrFilter)];
+    const filters = Array.isArray(params.fq)
+      ? params.fq.filter((value): value is string => typeof value === "string")
+      : typeof params.fq === "string" ? [params.fq] : [];
     filters.push(serializeCollapse(query.collapse));
     params.fq = filters.length === 1 ? filters[0] : filters;
   }

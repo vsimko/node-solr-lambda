@@ -105,6 +105,25 @@ test("query serializes a single structured filter and preserves local parameter 
 });
 
 
+test("query serializes spatial filters with existing filters and spatial parameters", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({
+    query: "*:*",
+    filter: ["category:shop"],
+    spatial: { parser: "geofilt", field: "store_location", point: "45.15,-93.85", distance: 5 }
+  });
+  assert.deepEqual(requestedUrl?.searchParams.getAll("fq"), ["category:shop", "{!geofilt sfield=store_location}"]);
+  assert.equal(requestedUrl?.searchParams.get("pt"), "45.15,-93.85");
+  assert.equal(requestedUrl?.searchParams.get("d"), "5");
+});
+
+test("query rejects invalid spatial parameters before making a request", () => {
+  const client = createClient(() => { throw new Error("fetch must not run"); });
+  assert.throws(() => client.query({ spatial: { parser: "geofilt", field: "", point: "0,0", distance: 5 } }), /spatial field/);
+  assert.throws(() => client.query({ spatial: { parser: "bbox", field: "location", point: "0,0", distance: -1 } }), /spatial distance/);
+});
+
 test("cursor pagination serializes cursorMark and returns the next mark across pages", async () => {
   const requestedUrls: URL[] = [];
   const pages = [

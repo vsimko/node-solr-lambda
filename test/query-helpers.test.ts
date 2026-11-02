@@ -20,9 +20,9 @@ test("solrExcludeTags joins tags for parser or request parameters", () => {
 
 test("spatial helpers build Solr geofilt, bbox and geodist syntax", () => {
   assert.equal(solrGeofilt({ field: "store", point: "45.15,-93.85", distance: 5 }),
-    "{!geofilt sfield=store}pt=45.15,-93.85 d=5");
+    "{!geofilt sfield=store pt=45.15,-93.85 d=5}");
   assert.equal(solrBbox({ field: "store", point: "45.15,-93.85", distance: 5, cache: false }),
-    "{!bbox sfield=store cache=false}pt=45.15,-93.85 d=5");
+    "{!bbox sfield=store cache=false pt=45.15,-93.85 d=5}");
   assert.equal(solrGeoDistance(), "geodist()");
   assert.equal(solrGeoDistance("store"), "geodist(store)");
   assert.equal(solrGeoDistance("store", 45.15, -93.85), "geodist(store,45.15,-93.85)");
