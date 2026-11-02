@@ -128,6 +128,7 @@ test("commit, soft commit, optimize, and rollback serialize typed command bodies
 test("update command options reject invalid values before sending a request", () => {
   const client = createSolrClient({ core: "catalog", fetch: async () => { throw new Error("fetch must not run"); } });
   assert.throws(() => client.add({ id: "one" }, { commitWithin: -1 }), /commitWithin must be a finite non-negative number/);
+  assert.throws(() => client.add({ id: "one" }, { commitWithin: 1.5 }), /commitWithin must be a finite non-negative number/);
   assert.throws(() => client.add({ id: "one" }, { route: "  " }), /route must be a non-empty string/);
   assert.throws(() => client.delete("one", { route: "" }), /route must be a non-empty string/);
   assert.throws(() => client.optimize({ maxSegments: 0 }), /maxSegments must be a positive integer/);
