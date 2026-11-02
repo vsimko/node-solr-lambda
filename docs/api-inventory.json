@@ -308,7 +308,7 @@
         "test/modules.test.ts",
         "test/integration/solr-config-security.test.ts"
       ],
-      "notes": "Config API set-user-property plus GET /config/overlay userProps read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property (CI #166). Live Security API authentication and authorization checks pass in the dedicated security matrix (CI #162)."
+      "notes": "Config API set-user-property plus GET /config/overlay userProps read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property (CI #166). Live Security API authentication and authorization checks pass in the dedicated security matrix (CI #162). Common set-property/unset-property names and property-specific values are exported for the shared Solr 8.11/9.11/10.1 baseline; typed command, effective-config, and config-overlay response models are exported. Version-specific common properties remain outside the cross-version property union."
     },
     {
       "id": "admin.core",
