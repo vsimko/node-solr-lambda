@@ -29,6 +29,37 @@ await solr.update(
 
 `update()` is an alias for full-document replacement through the same add command. Atomic/partial document updates use a different command shape and are tracked separately in [Issue #61](https://github.com/vsimko/node-solr-lambda/issues/61).
 
+## JSON update request forms
+
+`add()` and `update()` accept either one document or an array:
+
+- A single document is sent as a top-level JSON object to `/update/json/docs`, which selects Solr's JSON-document mode.
+- An array is sent as a top-level JSON array to `/update`.
+- `updateCommands()` sends a typed command object to `/update/json`.
+
+```ts
+await solr.add({ id: "book-1", title: "Single document" });
+
+await solr.add([
+  { id: "book-2", title: "First in a batch" },
+  { id: "book-3", title: "Second in a batch" }
+]);
+
+await solr.updateCommands({
+  add: {
+    doc: { id: "book-4", title: "Command document" },
+    overwrite: true,
+    commitWithin: 5_000
+  },
+  delete: { query: "status:expired" },
+  commit: { waitSearcher: true }
+});
+```
+
+`SolrJsonUpdateCommands` supports `add`, `delete`, `commit`, `optimize`, and `rollback`. Delete accepts a single ID, an ID array, `{ id, _version_? }`, or `{ query }`. The command object permits one `add` command because JavaScript objects cannot preserve duplicate JSON keys; use `add()` with an array for multiple documents. Request-level `overwrite`, `commitWithin`, and SolrCloud `route` options remain available through the existing `SolrUpdateOptions`.
+
+Solr documents these three JSON forms (single object, document array, and command map) and the `/update/json/docs` and `/update/json` convenience paths in the [Solr 10.1 Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html) and [Solr 9.4 Update Handlers guide](https://solr.apache.org/guide/solr/9_4/indexing-guide/indexing-with-update-handlers.html). The public methods are integration-tested against Solr 8.11.4, 9.11.0, and 10.1.0.
+
 ## Atomic and partial document updates
 
 Use `atomicUpdate<TDocument>()` when changing only selected fields. The unique-key field (by default `id`) remains a plain value; every changed field must use exactly one Solr modifier.
