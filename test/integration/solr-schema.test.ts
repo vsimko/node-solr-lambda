@@ -78,6 +78,8 @@ integrationTest("Schema API adds, replaces, and deletes a field type with analyz
       name?: string;
       class?: string;
       analyzer?: { tokenizer?: { class?: string }; filters?: Array<{ class?: string }> };
+      indexAnalyzer?: { tokenizer?: { class?: string } };
+      queryAnalyzer?: { tokenizer?: { class?: string } };
       similarity?: { class?: string };
     }>;
   }>(`/${process.env.SOLR_CORE}/schema/fieldtypes`, { method: "GET" });
