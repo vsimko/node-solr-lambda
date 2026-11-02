@@ -102,4 +102,4 @@ void client.systemInfo(controls);
 void client.metrics({}, controls);
 void client.security("authentication", undefined, controls);
 void client.stream("search(catalog, q=*:*)", controls);
-void client.export({ fl: "id" }, controls);
+void client.export({ fl: "id", sort: "id asc" }, controls);
