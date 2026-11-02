@@ -97,7 +97,7 @@ export class SolrClient extends SolrTransport {
   }
 
   coreAdmin<T = unknown, A extends CoreAdminAction = CoreAdminAction>(action: A, params: CoreAdminParams<A> = {} as CoreAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
-    return coreAdminApi<T>(this, action, params, requestOptions);
+    return coreAdminApi<T, A>(this, action, params, requestOptions);
   }
 
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
