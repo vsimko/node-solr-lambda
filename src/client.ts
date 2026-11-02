@@ -13,7 +13,7 @@ import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrSchemaCommand, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -160,7 +160,14 @@ export class SolrClient extends SolrTransport {
     return advancedApi.stream<T>(this, this.endpoint("/stream"), expression, requestOptions);
   }
 
-  export(params: SolrAdminParams, requestOptions: RequestControlOptions = {}): Promise<Response> {
+  export(params: SolrExportParams, requestOptions: RequestControlOptions = {}): Promise<Response> {
     return advancedApi.exportResults(this, this.endpoint("/export"), params, requestOptions);
+  }
+
+  /** Return the raw Export response body as a backpressure-aware byte stream. */
+  async exportStream(params: SolrExportParams, requestOptions: RequestControlOptions = {}): Promise<ReadableStream<Uint8Array>> {
+    const response = await this.export(params, requestOptions);
+    if (!response.body) throw new Error("Solr Export response did not contain a body stream");
+    return response.body;
   }
 }

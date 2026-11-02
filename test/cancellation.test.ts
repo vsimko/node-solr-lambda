@@ -106,7 +106,7 @@ test("raw export keeps cancellation active while its body is consumed", async ()
     }))
   });
 
-  const response = await client.export({ fl: "id" }, { signal: controller.signal });
+  const response = await client.export({ fl: "id", sort: "id asc" }, { signal: controller.signal });
   const reader = response.body!.getReader();
   const pendingRead = reader.read();
   controller.abort(reason);
@@ -124,7 +124,7 @@ test("raw export clears timeout when the response body is consumed", async () =>
     }
   });
 
-  const response = await client.export({ fl: "id" });
+  const response = await client.export({ fl: "id", sort: "id asc" });
   assert.equal(await response.text(), "id\n1\n");
   await new Promise(resolve => setTimeout(resolve, 25));
   assert.equal(signal?.aborted, false);

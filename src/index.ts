@@ -3,6 +3,7 @@ export { SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, Solr
 export type { SolrErrorMetadata } from "./errors.js";
 export { solrExcludeTags, solrFieldAlias, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort, solrGeofilt, solrBbox, solrGeoDistance } from "./query-helpers.js";
 export type { SolrFieldListEntry, SolrFunctionArgument, SolrLocalParamValue, SolrSortClause, SolrSortDirection, SolrSortInput, SolrSpatialFilterOptions } from "./query-helpers.js";
+export type { SolrExportFieldType, SolrExportSortClause, SolrExportSort, SolrExportParams } from "./types.js";
 export type { SolrStatsFieldOptions, SolrStatsOptions } from "./types.js";
 export type { SolrReplicationCommand, SolrReplicationBaseParams, SolrReplicationFetchIndexParams, SolrReplicationBackupParams, SolrReplicationRestoreParams, SolrReplicationDeleteBackupParams, SolrReplicationFileListParams, SolrReplicationParams, SolrReplicationResponseHeader, SolrReplicationCommandResponse, SolrReplicationIndexVersionResponse, SolrReplicationFileMetadata, SolrReplicationFileListResponse, SolrReplicationBackupStatus, SolrReplicationRestoreStatus, SolrReplicationDetailsResponse, SolrReplicationRestoreStatusResponse, SolrReplicationResponse, SolrReplicationFileContentParams } from "./types.js";
 export type { SolrMoreLikeThisOptions, SolrMoreLikeThisResponse } from "./types.js";

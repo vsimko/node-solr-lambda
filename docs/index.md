@@ -4,6 +4,7 @@
 - [Configuration](configuration.md)
 - [Validation](validation.md)
 - [Query API](query.md)
+- [Export API](export.md)
 - [Document API](documents.md)
 - [Schema API](schema.md)
 - [Config API](config.md)

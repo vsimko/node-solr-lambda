@@ -88,7 +88,7 @@ test("raw export errors use the same HTTP error class", async () => {
     core: "catalog",
     fetch: async () => new Response("forbidden", { status: 403, statusText: "Forbidden" })
   });
-  await assert.rejects(client.export({ fl: "id" }), (error: unknown) => {
+  await assert.rejects(client.export({ fl: "id", sort: "id asc" }), (error: unknown) => {
     assert.ok(error instanceof SolrHttpError);
     assert.equal(error.endpoint, "http://localhost:8983/solr/catalog/export");
     assert.equal(error.body, "forbidden");
