@@ -621,8 +621,8 @@ export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   expanded?: SolrExpandedResult<TDocument>;
   /** Stats Component response. */
   stats?: SolrStats;
-  /** Similar-document result lists keyed by source document unique key. */
-  moreLikeThis?: Readonly<Record<string, SolrQueryResult<TDocument>>>;
+  /** Alternating source document IDs and similar-document result objects. */
+  moreLikeThis?: SolrMoreLikeThisResponse<TDocument>;
   /** Query parser and execution diagnostics, when debug is enabled. */
   debug?: SolrDebugInfo;
   /** Opaque cursor to pass as cursorMark on the next page. */
@@ -643,6 +643,9 @@ export interface SolrQueryResult<TDocument = unknown> {
   /** Documents in this page. */
   docs?: TDocument[];
 }
+
+/** MoreLikeThis Search Component response: alternating source IDs and result objects. */
+export type SolrMoreLikeThisResponse<TDocument = unknown> = readonly (string | SolrQueryResult<TDocument>)[];
 
 /** Standard response header shared by Solr JSON responses. */
 export interface SolrResponseHeader {
