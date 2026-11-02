@@ -24,10 +24,10 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Man
 
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
 | --- | --- | --- | --- | --- |
-| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query, cursorMark pagination, classic field/query/numeric-range/date-range facets, configured highlighting snippets, field grouping, collapse selection, expanded group documents, numeric Stats Component aggregates/facet breakdowns, and MoreLikeThis Search Component similar-document responses on pinned 8.11.4 / 9.11.0 / 10.1.0 images; new geofilt/bbox/geodist helpers are implemented but remain Unverified pending runtime integration tests; group.func and distributed collapse behavior remain limited by Solr semantics |
+| `query()` — `GET /solr/{core}/select` | Documented | Documented | Documented | Tested: basic query, cursorMark pagination, classic field/query/numeric-range/date-range facets, configured highlighting snippets, field grouping, collapse selection, expanded group documents, numeric Stats Component aggregates/facet breakdowns, and MoreLikeThis Search Component similar-document responses on pinned 8.11.4 / 9.11.0 / 10.1.0 images. Unverified: geofilt/bbox filter and geodist helper runtime behavior. group.func and distributed collapse behavior remain subject to Solr semantics |
 | `queryJson()` — `POST /solr/{collection}/query` | Documented JSON Request API | Documented JSON Request API | Documented JSON Request API | Tested: JSON query round-trip plus nested terms/query/range JSON facets, metrics, and excludeTags domain changes on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `add()`, `update()`, `delete()` — `POST /update` | Documented | Documented | Documented | Tested: add, full-document update, and delete by ID on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, and rollback on pinned 8.11.4 / 9.11.0 / 10.1.0 images; Tested: optimize preserves committed documents on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
+| `add()`, `update()`, `atomicUpdate()`, `delete()`, `updateCommands()` — update handlers | Documented | Documented | Documented | Tested: add, full-document update, delete by ID, atomic update, single/array JSON documents, and JSON updateCommands add + commit + persisted-document read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images. Unverified: runtime effects of `_route_` and `commitWithin` options; command variants other than the explicitly tested add + commit flow |
+| `commit()`, `softCommit()`, `optimize()`, `rollback()` — update commands | Documented | Documented | Documented | Tested: hard commit, soft commit, rollback, and optimize preserving committed documents on pinned 8.11.4 / 9.11.0 / 10.1.0 images. `expungeDeletes` and `openSearcher=false` commit behavior are tested; optimize-specific `openSearcher` runtime effect remains unverified |
 | `ping()` — `/admin/ping` | Documented | Documented | Documented | Tested: ping returns OK on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `schema()` — `/schema` | Documented | Documented | Documented | Tested: add-field and GET /{core}/schema/fields read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
 | `config()` — `/config` | Documented | Documented | Documented | Tested: set-user-property and GET /config/overlay userProps read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #166) |
@@ -38,9 +38,9 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Man
 | `security()` — authentication and authorization handlers | Documented | Documented | Documented | Tested: authenticated BasicAuth/RuleBasedAuthorization, anonymous rejection, authentication/authorization GET, and authentication `set-property` read-back on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #162) |
 | `stream()` — `/stream` | Documented | Documented | Documented | Tested: Streaming Expressions search against a disposable SolrCloud collection on pinned 8.11.4 / 9.11.0 / 10.1.0 images (CI #145) |
 | `export()` — `/export` | Documented | Documented | Documented | Tested: raw response with docValues sort field on pinned 8.11.4 / 9.11.0 / 10.1.0 images |
-| `requestRaw()` — caller-defined path | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Unverified |
+| `request()` / `requestRaw()` — generic caller-defined transport | Depends on the selected endpoint | Depends on the selected endpoint | Depends on the selected endpoint | Generic transport behavior has unit tests only; no endpoint-independent live Solr integration claim is made. Each custom endpoint remains unverified until tested individually |
 
-The matrix records that the official guides describe these endpoint families. It does not certify the current request parameters, response models, or all action variants. Integration evidence is still required. The classic Facet Component coverage is limited to the field, query, and numeric/date range combinations exercised by the integration suite; legacy `facet.date` is not supported because it was removed in Solr 6.
+The matrix records documentation and narrowly scoped runtime evidence separately. It does not certify every request parameter, response model, or action variant. The classic Facet Component coverage is limited to the field, query, and numeric/date range combinations exercised by the integration suite; legacy `facet.date` is not supported because it was removed in Solr 6.
 
 ## Version-specific notes
 
@@ -99,22 +99,19 @@ SOLR_BASE_URL=http://localhost:8983/solr SOLR_CORE=integration SOLR_SECURITY=tru
 
 CI #145 passed standalone and SolrCloud integration jobs on all three pinned Solr images. Covered behavior includes CRUD, hard/soft commit, rollback, ping, schema field lifecycle, config user properties, CoreAdmin core lifecycle, JSON Request API, optimize, system info, metrics, export, Collections CREATE/LIST/DELETE, Streaming Expressions search, and basic query/cursorMark pagination. These results do not certify every endpoint, query option, update-command variant, or action in the compatibility matrix. The typed `updateCommands()` add-command plus commit flow is separately exercised with a persisted-document read-back on all three pinned images.
 
-## Remaining integration evidence
+## Remaining gaps and explicit non-certification
 
-For each target Solr line, expand the integration suite across the endpoint families below and record the exact image tag and test result.
+The endpoint families listed in the matrix have representative integration evidence on the three pinned images. The following narrower behaviors remain explicitly unverified and must not be described as generally Solr-8/9/10-compatible until focused tests exist:
 
-The suite must cover:
+- Geospatial `geofilt`/`bbox` filter behavior and `geodist()` helper behavior; current evidence is unit/consumer type coverage only.
+- Runtime effects of update `_route_` and `commitWithin` request options; serialization is covered, but server-side routing and commit scheduling behavior are not.
+- The optimize-specific runtime effect of `openSearcher`; the option is serialized but has no isolated server-side assertion.
+- Generic `request()` and `requestRaw()` against arbitrary endpoint families. These are transport escape hatches, not blanket compatibility certification; each custom endpoint requires its own test.
+- JSON update command variants beyond the tested `add` + `commit` + persisted-document read-back flow. Other command shapes have type/serialization coverage but are not all independently exercised against live Solr.
+- Collections snapshot/backup operations and response models, plus cluster-state response models.
+- Function grouping and distributed collapse behavior beyond the documented Solr semantics and the specific standalone cases tested.
 
-1. Query and JSON Request API.
-2. Add, update, delete, commit, soft commit, optimize, and rollback.
-3. Ping and error response parsing.
-4. Schema and Config API mutations and read-back where supported by the public client method.
-5. CoreAdmin and Collections actions.
-6. System information and Metrics API.
-7. Authentication and authorization requests with a test security configuration (CI #162 passed on all three pinned Solr versions).
-8. Streaming Expressions and export response handling.
-
-Do not mark a row as supported until the relevant integration test passes. Record unsupported or unavailable operations as such, with the exact server version and reason.
+The machine-readable inventory is authoritative for operation-level status. Keep `integrationTests: not-run` / `versions: unverified` for generic transport methods, and record these narrower gaps in the operation notes rather than promoting the whole API family to tested.
 
 ## Reference notes
 
