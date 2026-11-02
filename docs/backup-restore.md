@@ -23,8 +23,6 @@ while (state !== "success") {
   if (state !== "success") await new Promise(resolve => setTimeout(resolve, 500));
 }
 
-// Remove a core-level snapshot when it is no longer needed.
-await client.replication("deletebackup", { name: "nightly" });
 ```
 
 Important details:
