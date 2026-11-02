@@ -85,3 +85,59 @@ export function solrFilter(query: string, options: Omit<SolrFilterQuery, "query"
   if (options.cost !== undefined) localParams.cost = options.cost;
   return Object.keys(localParams).length === 0 ? query : solrLocalParams(localParams, query);
 }
+
+
+function assertNonEmpty(name: string, value: string): void {
+  if (value.trim() === "") throw new TypeError(`${name} must be a non-empty string`);
+}
+
+/** Common options for Solr's geofilt and bbox query parsers. */
+export interface SolrSpatialFilterOptions {
+  field: string;
+  /** Center point; use latitude,longitude for geodetic fields. */
+  point: string;
+  /** Radius in the field's configured distance units. */
+  distance: number;
+  cache?: boolean;
+  cost?: number;
+  localParams?: Readonly<Record<string, SolrLocalParamValue>>;
+}
+
+function spatialFilter(parser: "geofilt" | "bbox", options: SolrSpatialFilterOptions): string {
+  assertNonEmpty("spatial field", options.field);
+  assertNonEmpty("spatial point", options.point);
+  if (!Number.isFinite(options.distance) || options.distance < 0) {
+    throw new TypeError("spatial distance must be a non-negative finite number");
+  }
+  const params: Record<string, SolrLocalParamValue> = { ...(options.localParams ?? {}), sfield: options.field };
+  if (options.cache !== undefined) params.cache = options.cache;
+  if (options.cost !== undefined) params.cost = options.cost;
+  const serialized = Object.entries(params).map(([key, value]) => `${key}=${formatLocalParamValue(value)}`).join(" ");
+  return `{!${parser} ${serialized} pt=${formatLocalParamValue(options.point)} d=${options.distance}}`;
+}
+
+/** Build Solr's circular geofilt filter expression. */
+export function solrGeofilt(options: SolrSpatialFilterOptions): string {
+  return spatialFilter("geofilt", options);
+}
+
+/** Build Solr's bbox rectangular-approximation filter expression. */
+export function solrBbox(options: SolrSpatialFilterOptions): string {
+  return spatialFilter("bbox", options);
+}
+
+/** Build Solr's geodist function expression for sorting or scoring. */
+export function solrGeoDistance(field?: string, latitude?: number, longitude?: number): string {
+  if (field !== undefined) assertNonEmpty("spatial field", field);
+  if ((latitude === undefined) !== (longitude === undefined)) {
+    throw new TypeError("latitude and longitude must be supplied together");
+  }
+  if (latitude !== undefined && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) {
+    throw new TypeError("latitude must be between -90 and 90");
+  }
+  if (longitude !== undefined && (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)) {
+    throw new TypeError("longitude must be between -180 and 180");
+  }
+  const args = [field, latitude, longitude].filter(value => value !== undefined);
+  return `geodist(${args.join(",")})`;
+}

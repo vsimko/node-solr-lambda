@@ -93,6 +93,32 @@ const priceRangeCounts = result.facet_counts?.facet_ranges?.price_d?.counts;
 - `facet_counts.facet_fields` uses Solr's alternating term/count array representation. Query counts are in `facet_queries`; numeric and date range counts are in `facet_ranges`.
 - The `params` escape hatch remains available for facet parameters not represented by these models. Runtime behavior is covered by the pinned Solr integration matrix; verify any server-specific or uncommon facet option against the version you deploy.
 
+## Spatial filters and distance sorting
+
+Use the typed `spatial` property for a circular `geofilt` filter or its bounding-box approximation `bbox`. The client emits the parser filter and associated `pt` and `d` request parameters. The point string is passed through unchanged; for geodetic fields Solr expects `latitude,longitude` order.
+
+```ts
+const nearby = await solr.query({
+  query: "*:*",
+  spatial: { parser: "geofilt", field: "store_location", point: "45.15,-93.85", distance: 5 },
+  sort: "geodist() asc"
+});
+
+await solr.query({
+  query: "*:*",
+  spatial: { parser: "bbox", field: "store_location", point: "45.15,-93.85", distance: 5, cache: false }
+});
+```
+
+The standalone `solrGeofilt()` and `solrBbox()` helpers build raw filter expressions; `solrGeoDistance()` builds the `geodist()` expression for `sort` or scoring.
+
+- `geofilt` applies a circular great-circle distance filter.
+- `bbox` uses the bounding rectangle of the same radius and may include points outside the circle.
+- `geodist()` computes distance for sorting/scoring. Field-type support and units depend on the Solr schema.
+- The client does not convert units. Common lat/lon fields use kilometers by default; RPT and BBoxField may configure `distanceUnits`.
+
+See the [Solr 8.11](https://solr.apache.org/guide/8_11/query-guide/spatial-search.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/query-guide/spatial-search.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/query-guide/spatial-search.html) Spatial Search references. Runtime compatibility remains unverified until tests run against all pinned images.
+
 ## Highlighting
 
 Use the typed `highlighting` property to configure the Solr Highlighting component. The response snippets are returned separately from `response.docs`, keyed first by document unique key and then by field name.
