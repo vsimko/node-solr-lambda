@@ -70,7 +70,6 @@ integrationTest("Schema API adds, replaces, and deletes a field type with analyz
       tokenizer: { class: "solr.KeywordTokenizerFactory" },
       filters: [{ class: "solr.LowerCaseFilterFactory" }]
     },
-    similarity: { class: "solr.SchemaSimilarityFactory" }
   });
   assert.equal(added.responseHeader?.status, 0);
 
