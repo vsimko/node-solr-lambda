@@ -128,7 +128,7 @@ const uniqueKey: Promise<SolrSchemaUniqueKeyResponse> = client.request<SolrSchem
 const similarity: Promise<SolrSchemaSimilarityResponse> = client.request<SolrSchemaSimilarityResponse>("/solr/catalog/schema/similarity");
 void [fullSchema, fields, dynamicFields, fieldTypes, copyFields, schemaName, schemaVersion, uniqueKey, similarity];
 
-const setProperty: SolrConfigCommand = { "set-property": { "query.timeout": 10_000 } };
+const setProperty: SolrConfigCommand = { "set-property": { "query.maxBooleanClauses": 10_000 } };
 const addHandler: SolrConfigCommand = {
   "add-requesthandler": {
     name: "/select",
@@ -164,6 +164,13 @@ const knownProperties: SolrConfigPropertyMap = {
   "updateHandler.autoSoftCommit.maxTime": 1_000
 };
 const configCommandResponse: Promise<SolrConfigCommandResponse> = client.config({ "set-property": knownProperties });
+const validUnsetProperty: SolrConfigCommand = { "unset-property": "query.filterCache.size" };
+// @ts-expect-error Unknown common property paths are rejected instead of silently bypassing typo detection.
+const invalidPropertyPath: SolrConfigPropertyMap = { "query.filterCache.szie": 512 };
+// @ts-expect-error unset-property accepts only known common or version-specific paths.
+const invalidUnsetProperty: SolrConfigCommand = { "unset-property": "query.filterCache.szie" };
+const knownPropertyName: SolrConfigPropertyName = "query.filterCache.size";
+void [validUnsetProperty, invalidPropertyPath, invalidUnsetProperty, knownPropertyName];
 const effectiveConfig: Promise<SolrConfigReadResponse> = client.request<SolrConfigReadResponse>("/solr/catalog/config");
 const overlayConfig: Promise<SolrConfigOverlayResponse> = client.request<SolrConfigOverlayResponse>("/solr/catalog/config/overlay");
 void configCommandResponse;
