@@ -1,5 +1,7 @@
 # Solr API coverage
 
+See the [public API reference](api-reference.md) for the package-root client methods and exported API groups. The documentation consistency check verifies the reference against the source declarations and package entry points.
+
 See the [Solr endpoint inventory](endpoint-inventory.md) for the explicit typed-client boundary, deferred endpoint families, and official Solr reference sources.
 
 See [Client architecture](architecture.md) for module boundaries, type-model guidelines, and shared request conventions. The [roadmap](roadmap.md) tracks priorities and links to implementation issues.

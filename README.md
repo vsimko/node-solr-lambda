@@ -111,6 +111,7 @@ The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pi
 - [Raw requests](docs/raw-requests.md)
 - [Error handling](docs/errors.md)
 - [Runtime validation](docs/validation.md)
+- [Public API reference](docs/api-reference.md)
 - [API coverage](docs/api-coverage.md)
 - [Solr endpoint inventory](docs/endpoint-inventory.md)
 - [Solr compatibility](docs/compatibility.md)
