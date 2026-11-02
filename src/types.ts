@@ -2,6 +2,26 @@ export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
 export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
+/** Field types supported by the Solr Export Handler field list. */
+export type SolrExportFieldType = "int" | "long" | "float" | "double" | "string" | "date" | "boolean";
+/** One field-based Export sort criterion. Sort fields must be single-valued and have docValues. */
+export interface SolrExportSortClause { field: string; direction: "asc" | "desc"; }
+/** Raw Solr sort syntax or one or more structured field sort clauses. */
+export type SolrExportSort = string | SolrExportSortClause | readonly (string | SolrExportSortClause)[];
+/** Typed request parameters for the streaming /export handler. */
+export interface SolrExportParams {
+  q?: string;
+  fq?: string | readonly string[];
+  fl: string | readonly string[];
+  sort: SolrExportSort;
+  batchSize?: number;
+  /** Solr 10.1 option for including stored-only fields in fl. */
+  includeStoredFields?: boolean;
+  expr?: string;
+  wt?: "json" | "javabin" | "xsort";
+  customParams?: Readonly<Record<string, string | number | boolean>>;
+}
+
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
 export type SolrReplicationCommand =
