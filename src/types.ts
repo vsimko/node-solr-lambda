@@ -644,8 +644,8 @@ export interface SolrQueryResult<TDocument = unknown> {
   docs?: TDocument[];
 }
 
-/** MoreLikeThis Search Component response: alternating source IDs and result objects. */
-export type SolrMoreLikeThisResponse<TDocument = unknown> = readonly (string | SolrQueryResult<TDocument>)[];
+/** MoreLikeThis Search Component response keyed by source document unique key. */
+export type SolrMoreLikeThisResponse<TDocument = unknown> = Readonly<Record<string, SolrQueryResult<TDocument>>>;
 
 /** Standard response header shared by Solr JSON responses. */
 export interface SolrResponseHeader {
