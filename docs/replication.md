@@ -43,7 +43,8 @@ The `indexversion` response includes the current `generation` on newer Solr vers
 ## Control a follower
 
 ```ts
-// Trigger a one-time fetch. leaderUrl may be omitted when configured on the follower.
+// Solr 10 uses fetchindex/abortfetch. Solr 8 and 9 use the legacy snappull/abort names.
+// leaderUrl may be omitted when configured on the follower.
 await client.replication("fetchindex", {
   leaderUrl: "http://leader:8983/solr/catalog/replication",
   compression: "internal",
@@ -51,6 +52,7 @@ await client.replication("fetchindex", {
   httpReadTimeout: 10_000
 });
 
+// On Solr 8/9, use "snappull" to trigger a fetch and "abort" to stop it.
 // Pause/resume automatic polling or abort an in-progress fetch.
 await client.replication("disablepoll");
 await client.replication("enablepoll");
@@ -95,7 +97,7 @@ Supported directory types are `file` (Lucene index files), `cf` (configuration f
 
 ## Scope and compatibility
 
-- Typed commands: `enablereplication`, `disablereplication`, `indexversion`, `fetchindex`, `abortfetch`, `enablepoll`, `disablepoll`, `details`, and `filelist`.
+- Typed commands: `enablereplication`, `disablereplication`, `indexversion`, `fetchindex`/`abortfetch` (Solr 10), `snappull`/`abort` (Solr 8/9), `enablepoll`, `disablepoll`, `details`, and `filelist`.
 - `filecontent` is exposed separately through `replicationFile()` because it returns a raw stream.
 - Core-level `backup`, `restore`, `restorestatus`, and `deletebackup` are not exposed here; see Issue #96.
 - The client currently exposes the V1 handler path. Solr 10.1 also documents V2 equivalents for selected file and index-version operations; no dedicated V2 wrapper is provided.
