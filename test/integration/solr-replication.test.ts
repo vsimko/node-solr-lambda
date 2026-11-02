@@ -39,7 +39,7 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
 
   const fileList = await replicationClient.replication("filelist", { generation });
   assert.equal(fileList.responseHeader?.status, 0);
-  assert.ok(fileList.filelist, JSON.stringify(fileList));
+  assert.ok(fileList.filelist, JSON.stringify({ version, details, fileList }));
 
   const files = fileList.filelist?.file;
   const firstFile = Array.isArray(files) ? files[0] : files;
