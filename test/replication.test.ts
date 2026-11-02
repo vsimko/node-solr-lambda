@@ -54,6 +54,8 @@ test("ReplicationHandler supports read, poll, and replication lifecycle commands
   await client.replication("enablepoll");
   await client.replication("disablepoll");
   await client.replication("abortfetch");
+  await client.replication("snappull", { leaderUrl: "http://leader:8983/solr/catalog/replication" });
+  await client.replication("abort");
 
   assert.deepEqual(commands, [
     "details",
@@ -61,7 +63,9 @@ test("ReplicationHandler supports read, poll, and replication lifecycle commands
     "disablereplication",
     "enablepoll",
     "disablepoll",
-    "abortfetch"
+    "abortfetch",
+    "snappull",
+    "abort"
   ]);
 });
 
