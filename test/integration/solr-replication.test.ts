@@ -43,7 +43,7 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
 
   const files = fileList.filelist?.file;
   const firstFile = Array.isArray(files) ? files[0] : files;
-  assert.ok(firstFile?.name, "filelist should include at least one Lucene index file");
+  assert.ok(firstFile?.name, JSON.stringify(fileList));
 
   const file = await replicationClient.replicationFile({
     directoryType: "file",
