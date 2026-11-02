@@ -48,7 +48,7 @@ const addListener: SolrConfigCommand = {
   }
 };
 const addInitParams: SolrConfigCommand = {
-  "add-initparams": { name: "shared-search-params", params: { rows: 20, wt: "json" } }
+  "add-initparams": { name: "shared-search-params", path: ["/select", "/query"], defaults: { rows: 20, wt: "json" } }
 };
 void client.config(setProperty);
 void client.config(addHandler);
