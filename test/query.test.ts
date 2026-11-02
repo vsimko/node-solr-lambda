@@ -12,6 +12,44 @@ const createClient = (capture: (url: URL) => void) => new SolrClient({
   }
 });
 
+test("query serializes debug components, structured explanations, and explainOther", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "title:solr",
+    debug: {
+      components: ["query", "results"],
+      explainStructured: true,
+      explainOther: "id:other"
+    }
+  });
+
+  assert.deepEqual(requestedUrl?.searchParams.getAll("debug"), ["query", "results"]);
+  assert.equal(requestedUrl?.searchParams.get("debug.explain.structured"), "true");
+  assert.equal(requestedUrl?.searchParams.get("explainOther"), "id:other");
+  assert.equal(requestedUrl?.searchParams.has("components"), false);
+  assert.equal(requestedUrl?.searchParams.has("explainStructured"), false);
+});
+
+test("query defaults debug options to all sections and can disable debug", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({ query: "*:*", debug: {} });
+  assert.equal(requestedUrl?.searchParams.get("debug"), "true");
+
+  await client.query({ query: "*:*", debug: { enabled: false, explainStructured: true, explainOther: "id:other" } });
+  assert.equal(requestedUrl?.searchParams.get("debug"), "false");
+  assert.equal(requestedUrl?.searchParams.has("debug.explain.structured"), false);
+  assert.equal(requestedUrl?.searchParams.has("explainOther"), false);
+});
+
+test("debug explainOther rejects blank queries", () => {
+  const client = createClient(() => { throw new Error("fetch must not run"); });
+  assert.throws(() => client.query({ debug: { explainOther: "  " } }), /explainOther must be a non-empty query/);
+});
+
 test("query serializes Lucene parser options", async () => {
   let requestedUrl: URL | undefined;
   const client = createClient(url => { requestedUrl = url; });
