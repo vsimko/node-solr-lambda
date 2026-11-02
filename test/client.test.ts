@@ -100,6 +100,63 @@ test("delete supports ID and query commands with route and commitWithin options"
   assert.equal(requests[1]!.url.searchParams.get("_route_"), "tenant-b");
 });
 
+test("atomicUpdate serializes field modifiers without changing the document envelope", async () => {
+  interface ProductDocument {
+    id: string;
+    title: string;
+    price: number;
+    tags: string[];
+    categories: string[];
+    labels: string[];
+  }
+  let body: unknown;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.atomicUpdate<ProductDocument>({
+    id: "one",
+    title: { set: "Updated" },
+    price: { inc: 2 },
+    tags: { add: ["new", "sale"] },
+    categories: { "add-distinct": "books" },
+    labels: { remove: "legacy" }
+  });
+  assert.deepEqual(body, [{
+    id: "one",
+    title: { set: "Updated" },
+    price: { inc: 2 },
+    tags: { add: ["new", "sale"] },
+    categories: { "add-distinct": "books" },
+    labels: { remove: "legacy" }
+  }]);
+});
+
+test("atomicUpdate validates modifier shapes and values before sending a request", () => {
+  interface ProductDocument { id: string; title: string; price: number; tags: string[]; }
+  const client = createSolrClient({ core: "catalog", fetch: async () => { throw new Error("fetch must not run"); } });
+  assert.throws(
+    () => client.atomicUpdate<ProductDocument>({ id: "one", title: { set: "new", inc: 1 } } as never),
+    /must contain exactly one supported modifier/
+  );
+  assert.throws(
+    () => client.atomicUpdate<ProductDocument>({ id: "one", price: { inc: Number.NaN } } as never),
+    /must be a finite number/
+  );
+  assert.throws(
+    () => client.atomicUpdate<ProductDocument>({ id: "one", title: { removeregex: 42 } } as never),
+    /must be a string or string array/
+  );
+  assert.throws(
+    () => client.atomicUpdate<ProductDocument>({ id: "one" } as never),
+    /must contain at least one field modifier/
+  );
+});
+
 test("commit, soft commit, optimize, and rollback serialize typed command bodies", async () => {
   const bodies: unknown[] = [];
   const client = createSolrClient({
