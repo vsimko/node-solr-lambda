@@ -9,9 +9,11 @@ import { security as securityApi } from "./apis/security.js";
 import { systemInfo as systemInfoApi } from "./apis/system.js";
 import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
+import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrSchemaCommand,
-  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse
+  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -107,6 +109,18 @@ export class SolrClient extends SolrTransport {
   collections<T = unknown, A extends Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS"> = Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS">>(action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
+  }
+
+  replication<A extends SolrReplicationCommand>(
+    command: A,
+    params: SolrReplicationParams<A> = {} as SolrReplicationParams<A>,
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrReplicationResponse<A>> {
+    return replicationApi.replication(this, this.endpoint("/replication"), command, params, requestOptions);
+  }
+
+  replicationFile(params: SolrReplicationFileContentParams, requestOptions: RequestControlOptions = {}): Promise<Response> {
+    return replicationApi.replicationFile(this, this.endpoint("/replication"), params, requestOptions);
   }
 
   systemInfo<T = unknown>(requestOptions: RequestControlOptions = {}): Promise<T> {
