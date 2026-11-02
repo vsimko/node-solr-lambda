@@ -4,7 +4,7 @@ Solr exposes two distinct backup/restore surfaces. Use the core-level Replicatio
 
 ## Core-level backup and restore
 
-Core backups use the ReplicationHandler at `/solr/{core}/replication`. With no `location`, Solr stores the snapshot under the core's data directory. A custom filesystem location must be permitted by the server's `SOLR_HOME`, `SOLR_DATA_HOME`, or `solr.xml` `allowPaths` configuration.
+Core backups use the ReplicationHandler at `/solr/{core}/replication`. With no `location`, Solr stores the snapshot under the core's data directory. A custom filesystem location must be permitted by the server's `SOLR_HOME`, `SOLR_DATA_HOME`, or `solr.xml` `allowPaths` configuration. For the core-level ReplicationHandler, pass a filesystem path such as `/var/solr/backups` (not a `file://` URI); the SolrCloud Collections API uses a repository URI such as `file:///var/solr/backups`.
 
 ```ts
 // Create a timestamped snapshot of the current committed index.
