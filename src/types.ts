@@ -32,7 +32,7 @@ export type SolrReplicationFileListParams = SolrReplicationBaseParams & (
   | { generation?: never; indexversion: number }
 );
 export type SolrReplicationParams<A extends SolrReplicationCommand> =
-  A extends "fetchindex" ? SolrReplicationFetchIndexParams :
+  A extends "fetchindex" | "snappull" ? SolrReplicationFetchIndexParams :
   A extends "filelist" ? SolrReplicationFileListParams :
   SolrReplicationBaseParams;
 
