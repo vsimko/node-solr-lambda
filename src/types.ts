@@ -649,6 +649,27 @@ export type SolrQuery = SolrStandardQueryOptions | SolrCursorQuery;
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
 
+/** Successful response returned by Solr Update Handler commands. */
+export interface SolrUpdateResponse {
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
+
+/** Structured error detail returned in Solr's HTTP error payload. */
+export interface SolrErrorDetail {
+  code?: number;
+  msg?: string;
+  metadata?: unknown;
+  [key: string]: unknown;
+}
+
+/** Solr HTTP error payload; the client exposes this on SolrHttpError.errorResponse. */
+export interface SolrErrorResponse {
+  error: string | SolrErrorDetail;
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
+
 /** One add command in a Solr-style JSON update command object. */
 export interface SolrJsonAddCommand {
   doc: SolrDocument;
