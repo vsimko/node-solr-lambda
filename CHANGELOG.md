@@ -11,6 +11,7 @@
 
 ### Documentation
 
+- Add typed Schema API command responses and read-response models for schema metadata, fields, dynamic fields, field types, copy fields, uniqueKey, and similarity.
 - Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.
 - Expand the v3-to-v4 migration guide with a complete v4 CRUD example and link its compile-time and Solr integration checks.
 - Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.
