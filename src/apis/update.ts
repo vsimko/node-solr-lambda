@@ -140,12 +140,14 @@ export function updateCommands<T>(client: SolrTransport, path: string, commands:
     throw new TypeError("commit and optimize commands must use the same openSearcher value in one request");
   }
   const openSearcher = commitOpenSearcher ?? optimizeOpenSearcher;
-  const { openSearcher: _commitOpenSearcher, ...commitOptions } = commands.commit ?? {};
-  const { openSearcher: _optimizeOpenSearcher, ...optimizeOptions } = commands.optimize ?? {};
+  const commitOptions = commands.commit === undefined ? undefined : { ...commands.commit };
+  const optimizeOptions = commands.optimize === undefined ? undefined : { ...commands.optimize };
+  if (commitOptions) delete commitOptions.openSearcher;
+  if (optimizeOptions) delete optimizeOptions.openSearcher;
   const body: SolrJsonUpdateCommands = {
     ...commands,
-    ...(commands.commit === undefined ? {} : { commit: commitOptions }),
-    ...(commands.optimize === undefined ? {} : { optimize: optimizeOptions })
+    ...(commitOptions === undefined ? {} : { commit: commitOptions }),
+    ...(optimizeOptions === undefined ? {} : { optimize: optimizeOptions })
   };
   return client.request<T>(`${path}/json`, {
     ...requestOptions,
