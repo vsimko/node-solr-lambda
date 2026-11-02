@@ -158,6 +158,10 @@ test("atomicUpdate validates modifier shapes and values before sending a request
     () => client.atomicUpdate<ProductDocument>({ id: "one" } as never),
     /must contain at least one field modifier/
   );
+  assert.throws(
+    () => client.atomicUpdate<ProductDocument>({ title: { set: "new" } } as never),
+    /must contain exactly one plain unique-key field/
+  );
 });
 
 test("commit, soft commit, optimize, and rollback serialize typed command bodies", async () => {
