@@ -17,7 +17,7 @@ integrationTest("Config API sets and unsets a typed cache property with overlay 
     assert.equal(set.responseHeader?.status, 0);
 
     const afterSet = await readOverlay();
-    assert.equal(afterSet.overlay?.props?.query?.filterCache?.size, 333);
+    assert.equal(String(afterSet.overlay?.props?.query?.filterCache?.size), "333");
 
     const unset = await client.config({ "unset-property": property });
     changed = false;
