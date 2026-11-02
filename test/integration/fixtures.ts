@@ -157,13 +157,6 @@ export function integrationTest(
     try {
       await run(fixture);
     } finally {
-      for (const name of schemaFields) {
-        try {
-          await client.schema({ "delete-field": { name } });
-        } catch (error) {
-          cleanupErrors.push(error);
-        }
-      }
       for (const [source, destinations] of schemaCopyFields) {
         for (const dest of destinations) {
           try {
@@ -171,6 +164,13 @@ export function integrationTest(
           } catch (error) {
             cleanupErrors.push(error);
           }
+        }
+      }
+      for (const name of schemaFields) {
+        try {
+          await client.schema({ "delete-field": { name } });
+        } catch (error) {
+          cleanupErrors.push(error);
         }
       }
       for (const name of schemaDynamicFields) {
