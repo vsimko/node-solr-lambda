@@ -305,6 +305,7 @@ export interface SolrConfigReadPlugin {
   startup?: "lazy" | "eager";
   [key: string]: unknown;
 }
+export type SolrConfigReadPluginCollection = Readonly<Record<string, SolrConfigReadPlugin>> | readonly SolrConfigReadPlugin[];
 export interface SolrConfigSettings {
   query?: SolrConfigQuerySettings;
   updateHandler?: SolrConfigUpdateHandlerSettings;
@@ -312,8 +313,8 @@ export interface SolrConfigSettings {
   requestHandler?: Readonly<Record<string, SolrConfigReadPlugin>>;
   searchComponent?: Readonly<Record<string, SolrConfigReadPlugin>>;
   queryResponseWriter?: Readonly<Record<string, SolrConfigReadPlugin>>;
-  initParams?: Readonly<Record<string, SolrConfigReadPlugin>>;
-  listener?: readonly SolrConfigReadPlugin[];
+  initParams?: SolrConfigReadPluginCollection;
+  listener?: SolrConfigReadPluginCollection;
   directoryFactory?: SolrConfigReadPlugin;
   indexConfig?: Readonly<Record<string, unknown>>;
   codecFactory?: SolrConfigReadPlugin;
