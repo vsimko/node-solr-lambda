@@ -660,8 +660,8 @@ export interface SolrJsonAddCommand {
 export type SolrJsonDeleteCommand =
   | string
   | readonly string[]
-  | { id: string; _version_?: number }
-  | { query: string };
+  | { id: string; _version_?: number; query?: never }
+  | { query: string; id?: never; _version_?: never };
 
 /**
  * JSON update command object. Use add() for a list of documents; one add
