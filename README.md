@@ -70,7 +70,7 @@ await solr.collections("CREATE", {
   name: "catalog",
   numShards: 2,
   replicationFactor: 2,
-  routerName: "compositeId"
+  "router.name": "compositeId"
 });
 ```
 
