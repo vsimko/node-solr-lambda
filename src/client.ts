@@ -39,7 +39,7 @@ export class SolrClient extends SolrTransport {
   }
 
   delete<T = unknown>(command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
-    return updateApi.deleteDocuments<T>(this, this.endpoint("/update"), command, requestOptions);
+    return updateApi.deleteDocuments<T>(this, this.endpoint("/update"), command, options);
   }
 
   commit<T = unknown>(options: CommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
