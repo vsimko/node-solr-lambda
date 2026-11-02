@@ -156,6 +156,23 @@ test("HTTP update errors retain a typed error response and bypass success output
   });
 });
 
+test("string-form Solr errors are preserved in the typed error response", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({ error: "unsupported update command" }), {
+      status: 400,
+      statusText: "Bad Request"
+    })
+  });
+
+  await assert.rejects(client.add({ id: "one" }), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.equal(error.errorResponse?.error, "unsupported update command");
+    assert.equal(error.solrError?.msg, "unsupported update command");
+    return true;
+  });
+});
+
 test("output validation rejects an invalid response", async () => {
   const client = createSolrClient({
     core: "catalog",
