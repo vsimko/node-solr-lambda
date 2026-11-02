@@ -1,5 +1,6 @@
 import { createSolrClient } from "../src/index.js";
-import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrCommitOptions, SolrDeleteOptions, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions } from "../src/index.js";
+import { SolrHttpError } from "../src/index.js";
+import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrCommitOptions, SolrDeleteOptions, SolrErrorResponse, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions, SolrUpdateResponse } from "../src/index.js";
 
 const controller = new AbortController();
 const controls: RequestControlOptions = { signal: controller.signal, timeoutMs: 5000 };
@@ -37,6 +38,29 @@ const jsonCommands: SolrJsonUpdateCommands = {
   commit: { waitSearcher: false }
 };
 void client.updateCommands(jsonCommands);
+const addResponse: Promise<SolrUpdateResponse> = client.add({ id: "response-1" });
+const updateResponse: Promise<SolrUpdateResponse> = client.update({ id: "response-2" });
+const atomicResponse: Promise<SolrUpdateResponse> = client.atomicUpdate<AtomicProduct>(atomicProduct);
+const deleteResponse: Promise<SolrUpdateResponse> = client.delete("response-1");
+const commitResponse: Promise<SolrUpdateResponse> = client.commit();
+const softCommitResponse: Promise<SolrUpdateResponse> = client.softCommit();
+const optimizeResponse: Promise<SolrUpdateResponse> = client.optimize();
+const rollbackResponse: Promise<SolrUpdateResponse> = client.rollback();
+const commandsResponse: Promise<SolrUpdateResponse> = client.updateCommands({ commit: {} });
+void addResponse; void updateResponse; void atomicResponse; void deleteResponse; void commitResponse;
+void softCommitResponse; void optimizeResponse; void rollbackResponse; void commandsResponse;
+const solrError: SolrErrorResponse = { error: { code: 400, msg: "bad request" } };
+void solrError;
+function inspectSolrError(error: unknown): void {
+  if (error instanceof SolrHttpError) {
+    const detail = error.errorResponse?.error;
+    if (detail && typeof detail !== "string") {
+      const code: number | undefined = detail.code;
+      void code;
+    }
+  }
+}
+void inspectSolrError;
 void client.add({ id: "single" });
 void client.add([{ id: "one" }, { id: "two" }]);
 // @ts-expect-error JSON add command requires a document object.

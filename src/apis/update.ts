@@ -1,5 +1,5 @@
 import type { SolrTransport } from "../transport.js";
-import type { RequestControlOptions, SolrCommitOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions } from "../types.js";
+import type { RequestControlOptions, SolrCommitOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions, SolrUpdateResponse } from "../types.js";
 
 function updateParams(options: SolrUpdateOptions): Record<string, string | number | boolean> {
   const { route, ...params } = options;
@@ -66,13 +66,20 @@ function validateAtomicUpdateDocument(document: SolrDocument): void {
   if (modifierCount === 0) throw new TypeError("An atomic update document must contain at least one field modifier");
 }
 
-export function atomicUpdate<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function atomicUpdate<T = SolrUpdateResponse>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   const batch = Array.isArray(documents) ? documents : [documents];
   for (const document of batch) validateAtomicUpdateDocument(document as SolrDocument);
-  return add<T>(client, path, batch, options, requestOptions);
+  return sendDocuments<T>(client, path, batch, options, requestOptions, "atomicUpdate");
 }
 
-export function add<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+function sendDocuments<T = SolrUpdateResponse>(
+  client: SolrTransport,
+  path: string,
+  documents: SolrDocument | readonly SolrDocument[],
+  options: SolrUpdateOptions,
+  requestOptions: RequestControlOptions,
+  operation: "add" | "update" | "atomicUpdate"
+): Promise<T> {
   const isBatch = Array.isArray(documents);
   const requestPath = isBatch ? path : `${path}/json/docs`;
   return client.request<T>(requestPath, {
@@ -80,8 +87,12 @@ export function add<T>(client: SolrTransport, path: string, documents: SolrDocum
     method: "POST",
     body: documents,
     query: updateParams(options),
-    operation: "add"
+    operation
   });
+}
+
+export function add<T = SolrUpdateResponse>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  return sendDocuments<T>(client, path, documents, options, requestOptions, "add");
 }
 
 function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
@@ -136,7 +147,7 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
   }
 }
 
-export function updateCommands<T>(client: SolrTransport, path: string, commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function updateCommands<T = SolrUpdateResponse>(client: SolrTransport, path: string, commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   validateJsonUpdateCommands(commands);
   const commitOpenSearcher = commands.commit?.openSearcher;
   const optimizeOpenSearcher = commands.optimize?.openSearcher;
@@ -162,11 +173,11 @@ export function updateCommands<T>(client: SolrTransport, path: string, commands:
   });
 }
 
-export function update<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
-  return add<T>(client, path, documents, options, requestOptions);
+export function update<T = SolrUpdateResponse>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  return sendDocuments<T>(client, path, documents, options, requestOptions, "update");
 }
 
-export function deleteDocuments<T>(client: SolrTransport, path: string, command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
+export function deleteDocuments<T = SolrUpdateResponse>(client: SolrTransport, path: string, command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
   const requestOptions: RequestControlOptions = {
     ...(options.signal === undefined ? {} : { signal: options.signal }),
     ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
@@ -181,7 +192,7 @@ export function deleteDocuments<T>(client: SolrTransport, path: string, command:
   });
 }
 
-export function commit<T>(client: SolrTransport, path: string, options: SolrCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function commit<T = SolrUpdateResponse>(client: SolrTransport, path: string, options: SolrCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   if (options.softCommit === true && options.expungeDeletes === true) {
     throw new TypeError("expungeDeletes is not supported on a soft commit");
   }
@@ -199,7 +210,7 @@ export function commit<T>(client: SolrTransport, path: string, options: SolrComm
   });
 }
 
-export function softCommit<T>(client: SolrTransport, path: string, options: SolrSoftCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function softCommit<T = SolrUpdateResponse>(client: SolrTransport, path: string, options: SolrSoftCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   const { openSearcher, waitSearcher } = options;
   return client.request<T>(path, {
     ...requestOptions,
@@ -210,7 +221,7 @@ export function softCommit<T>(client: SolrTransport, path: string, options: Solr
   });
 }
 
-export function optimize<T>(client: SolrTransport, path: string, options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function optimize<T = SolrUpdateResponse>(client: SolrTransport, path: string, options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   const normalized = typeof options === "number" ? { maxSegments: options } : options;
   if (normalized.maxSegments !== undefined && (!Number.isInteger(normalized.maxSegments) || normalized.maxSegments < 1)) {
     throw new RangeError("maxSegments must be a positive integer");
@@ -225,6 +236,6 @@ export function optimize<T>(client: SolrTransport, path: string, options: SolrOp
   });
 }
 
-export function rollback<T>(client: SolrTransport, path: string, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function rollback<T = SolrUpdateResponse>(client: SolrTransport, path: string, requestOptions: RequestControlOptions = {}): Promise<T> {
   return client.request<T>(path, { ...requestOptions, method: "POST", body: { rollback: {} }, operation: "rollback" });
 }
