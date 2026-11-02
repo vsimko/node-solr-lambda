@@ -1,7 +1,7 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
-export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
+export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
 export type SolrReplicationCommand =
@@ -15,7 +15,11 @@ export type SolrReplicationCommand =
   | "enablepoll"
   | "disablepoll"
   | "details"
-  | "filelist";
+  | "filelist"
+  | "backup"
+  | "restore"
+  | "restorestatus"
+  | "deletebackup";
 
 export interface SolrReplicationBaseParams {
   customParams?: Readonly<Record<string, string | number | boolean>>;
@@ -27,6 +31,23 @@ export interface SolrReplicationFetchIndexParams extends SolrReplicationBasePara
   httpReadTimeout?: number;
   maxWriteMBPerSec?: number;
 }
+export interface SolrReplicationBackupParams extends SolrReplicationBaseParams {
+  name?: string;
+  location?: string;
+  repository?: string;
+  numberToKeep?: number;
+  commitName?: string;
+}
+export interface SolrReplicationRestoreParams extends SolrReplicationBaseParams {
+  name?: string;
+  location?: string;
+  repository?: string;
+}
+export interface SolrReplicationDeleteBackupParams extends SolrReplicationBaseParams {
+  name: string;
+  location?: string;
+  repository?: string;
+}
 export type SolrReplicationFileListParams = SolrReplicationBaseParams & (
   | { generation: number; indexversion?: never }
   | { generation?: never; indexversion: number }
@@ -34,6 +55,9 @@ export type SolrReplicationFileListParams = SolrReplicationBaseParams & (
 export type SolrReplicationParams<A extends SolrReplicationCommand> =
   A extends "fetchindex" | "snappull" ? SolrReplicationFetchIndexParams :
   A extends "filelist" ? SolrReplicationFileListParams :
+  A extends "backup" ? SolrReplicationBackupParams :
+  A extends "restore" ? SolrReplicationRestoreParams :
+  A extends "deletebackup" ? SolrReplicationDeleteBackupParams :
   SolrReplicationBaseParams;
 
 export interface SolrReplicationResponseHeader {
@@ -62,13 +86,35 @@ export interface SolrReplicationFileListResponse extends SolrReplicationCommandR
   filelist?: readonly SolrReplicationFileMetadata[];
   confFiles?: readonly SolrReplicationFileMetadata[];
 }
+export interface SolrReplicationBackupStatus {
+  status?: "waiting for commit" | "running" | "success" | "failed" | (string & {});
+  startTime?: string;
+  endTime?: string;
+  snapshotCompletedAt?: string;
+  snapshotName?: string;
+  directoryName?: string;
+  fileCount?: number;
+  finishedFileCount?: number;
+  indexFileCount?: number;
+  exception?: string | Readonly<Record<string, unknown>>;
+}
+export interface SolrReplicationRestoreStatus {
+  status?: "In Progress" | "success" | "failed" | (string & {});
+  snapshotName?: string;
+  exception?: string | Readonly<Record<string, unknown>>;
+}
 export interface SolrReplicationDetailsResponse extends SolrReplicationCommandResponse {
   details?: Readonly<Record<string, unknown>>;
+  backup?: SolrReplicationBackupStatus;
+}
+export interface SolrReplicationRestoreStatusResponse extends SolrReplicationCommandResponse {
+  restorestatus?: SolrReplicationRestoreStatus;
 }
 export type SolrReplicationResponse<A extends SolrReplicationCommand> =
   A extends "indexversion" ? SolrReplicationIndexVersionResponse :
   A extends "filelist" ? SolrReplicationFileListResponse :
   A extends "details" ? SolrReplicationDetailsResponse :
+  A extends "restorestatus" ? SolrReplicationRestoreStatusResponse :
   SolrReplicationCommandResponse;
 
 export interface SolrReplicationFileContentParams extends SolrReplicationBaseParams {
@@ -150,6 +196,97 @@ export type CoreAdminParams<A extends CoreAdminAction> =
 /** Replica types accepted by the SolrCloud Collections API. */
 export type CollectionReplicaType = "nrt" | "tlog" | "pull";
 export interface CollectionRequestBase { async?: string; customParams?: SolrAdminCustomParams }
+
+export interface CollectionBackupParams extends CollectionRequestBase {
+  name: string;
+  collection: string;
+  location?: string;
+  repository?: string;
+  maxNumBackupPoints?: number;
+  backupConfigset?: boolean;
+  incremental?: boolean;
+  indexBackup?: "copy-files" | "none";
+  commitName?: string;
+}
+export interface CollectionRestoreParams extends CollectionRequestBase {
+  name: string;
+  collection: string;
+  location?: string;
+  repository?: string;
+  backupId?: number;
+  createNodeSet?: string;
+  "createNodeSet.shuffle"?: boolean;
+  nrtReplicas?: number;
+  tlogReplicas?: number;
+  pullReplicas?: number;
+  replicationFactor?: number;
+  "collection.configName"?: string;
+}
+export interface CollectionListBackupParams extends CollectionRequestBase {
+  name: string;
+  location?: string;
+  repository?: string;
+}
+export interface CollectionDeleteBackupParams extends CollectionRequestBase {
+  name: string;
+  location?: string;
+  repository?: string;
+  backupId?: number;
+  maxNumBackupPoints?: number;
+  purgeUnused?: boolean;
+}
+export interface CollectionAsyncRequestStatusParams extends CollectionRequestBase { requestid: string }
+export interface CollectionAsyncRequestDeleteParams extends CollectionRequestBase { requestid: string }
+
+export interface SolrCollectionBackupMetadata {
+  collection?: string;
+  numShards?: number;
+  backupId?: number;
+  indexVersion?: string;
+  startTime?: string;
+  endTime?: string;
+  indexFileCount?: number;
+  uploadedIndexFileCount?: number;
+  indexSizeMB?: number;
+  uploadedIndexFileMB?: number;
+  shardBackupIds?: readonly string[] | Readonly<Record<string, string>>;
+  [key: string]: unknown;
+}
+export interface SolrCollectionBackupResponse {
+  responseHeader?: SolrReplicationResponseHeader;
+  response?: SolrCollectionBackupMetadata;
+  requestid?: string;
+  [key: string]: unknown;
+}
+export interface SolrCollectionBackupListResponse {
+  responseHeader?: SolrReplicationResponseHeader;
+  collection?: string;
+  backups?: readonly SolrCollectionBackupMetadata[];
+  [key: string]: unknown;
+}
+export interface SolrCollectionBackupDeleteResponse {
+  responseHeader?: SolrReplicationResponseHeader;
+  collection?: string;
+  deleted?: readonly unknown[];
+  [key: string]: unknown;
+}
+export interface SolrCollectionAsyncRequestStatusResponse {
+  responseHeader?: SolrReplicationResponseHeader;
+  status?: {
+    state?: "running" | "completed" | "failed" | "notfound" | (string & {});
+    msg?: string;
+    response?: unknown;
+    [key: string]: unknown;
+  };
+  requestid?: string;
+  [key: string]: unknown;
+}
+export interface SolrCollectionAsyncRequestDeleteResponse {
+  responseHeader?: SolrReplicationResponseHeader;
+  status?: string;
+  requestid?: string;
+  [key: string]: unknown;
+}
 export interface ListCollectionsParams extends CollectionRequestBase {}
 export interface CreateCollectionParams extends CollectionRequestBase {
   name: string;
@@ -256,6 +393,12 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "CREATESHARD" ? CreateShardParams :
   A extends "DELETESHARD" ? DeleteShardParams :
   A extends "SPLITSHARD" ? SplitShardParams :
+  A extends "BACKUP" ? CollectionBackupParams :
+  A extends "RESTORE" ? CollectionRestoreParams :
+  A extends "LISTBACKUP" ? CollectionListBackupParams :
+  A extends "DELETEBACKUP" ? CollectionDeleteBackupParams :
+  A extends "REQUESTSTATUS" ? CollectionAsyncRequestStatusParams :
+  A extends "DELETESTATUS" ? CollectionAsyncRequestDeleteParams :
   CollectionRoleParams;
 
 /** One field definition in the Schema API. */
