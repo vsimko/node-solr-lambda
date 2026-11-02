@@ -649,6 +649,31 @@ export type SolrQuery = SolrStandardQueryOptions | SolrCursorQuery;
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
 
+/** Atomic-update modifiers supported by Solr's JSON update syntax. */
+export type SolrAtomicUpdateOperation<TValue> =
+  | { set: TValue | null }
+  | (TValue extends readonly (infer TItem)[]
+      ? { add: TItem | readonly TItem[] }
+        | { "add-distinct": TItem | readonly TItem[] }
+        | { remove: TItem | readonly TItem[] }
+        | (TItem extends string ? { removeregex: string | readonly string[] } : never)
+      : never)
+  | (TValue extends number ? { inc: number } : never);
+
+/**
+ * Field-specific atomic update document. The unique-key field is preserved as
+ * a plain value; all other document fields use modifiers. The unique key
+ * defaults to "id" when present in TDocument.
+ */
+export type SolrAtomicUpdateDocument<
+  TDocument extends object,
+  TUniqueKey extends keyof TDocument = "id" extends keyof TDocument ? "id" : never
+> = Pick<TDocument, TUniqueKey>
+  & {
+    [K in Exclude<keyof TDocument, TUniqueKey | "_root_" | "_version_">]?: SolrAtomicUpdateOperation<TDocument[K]>
+  }
+  & { _root_?: string; _version_?: number };
+
 /** Request-level options shared by document add and full-document replacement. */
 export interface SolrUpdateOptions {
   /** Replace an existing document with the same unique key (default: true). */
