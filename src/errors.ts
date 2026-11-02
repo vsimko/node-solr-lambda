@@ -1,10 +1,12 @@
-import type { SolrResponse } from "./types.js";
+import type { SolrErrorDetail, SolrErrorResponse, SolrResponse } from "./types.js";
 
-export interface SolrErrorDetail {
-  code?: number;
-  msg?: string;
-  metadata?: unknown;
-  [key: string]: unknown;
+function readSolrErrorResponse(payload: unknown): SolrErrorResponse | undefined {
+  if (!payload || typeof payload !== "object" || !("error" in payload)) return undefined;
+  const error = (payload as { error?: unknown }).error;
+  if (typeof error === "string" || (error && typeof error === "object")) {
+    return payload as SolrErrorResponse;
+  }
+  return undefined;
 }
 
 function readSolrError(payload: unknown): SolrErrorDetail | undefined {
@@ -17,6 +19,7 @@ function readSolrError(payload: unknown): SolrErrorDetail | undefined {
 
 export class SolrHttpError extends Error {
   readonly solrError: SolrErrorDetail | undefined;
+  readonly errorResponse: SolrErrorResponse | undefined;
 
   constructor(
     readonly status: number,
@@ -30,6 +33,7 @@ export class SolrHttpError extends Error {
     super(solrError?.msg ?? `Solr request failed: ${status} ${statusText}`, options);
     this.name = "SolrHttpError";
     this.solrError = solrError;
+    this.errorResponse = readSolrErrorResponse(payload);
   }
 }
 
