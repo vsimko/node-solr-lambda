@@ -43,7 +43,12 @@ const updateResponse: Promise<SolrUpdateResponse> = client.update({ id: "respons
 const atomicResponse: Promise<SolrUpdateResponse> = client.atomicUpdate<AtomicProduct>(atomicProduct);
 const deleteResponse: Promise<SolrUpdateResponse> = client.delete("response-1");
 const commitResponse: Promise<SolrUpdateResponse> = client.commit();
+const softCommitResponse: Promise<SolrUpdateResponse> = client.softCommit();
+const optimizeResponse: Promise<SolrUpdateResponse> = client.optimize();
+const rollbackResponse: Promise<SolrUpdateResponse> = client.rollback();
+const commandsResponse: Promise<SolrUpdateResponse> = client.updateCommands({ commit: {} });
 void addResponse; void updateResponse; void atomicResponse; void deleteResponse; void commitResponse;
+void softCommitResponse; void optimizeResponse; void rollbackResponse; void commandsResponse;
 const solrError: SolrErrorResponse = { error: { code: 400, msg: "bad request" } };
 void solrError;
 function inspectSolrError(error: unknown): void {
