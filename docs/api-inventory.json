@@ -498,9 +498,10 @@
       "documentation": "docs/architecture.md",
       "testFiles": [
         "test/errors.test.ts",
-        "test/cancellation.test.ts"
+        "test/cancellation.test.ts",
+        "test/client.test.ts"
       ],
-      "notes": "Generic raw-response escape hatch. It does not imply typed support for every Solr endpoint."
+      "notes": "Generic raw-response escape hatch. String bodies are passed through unchanged when callers supply an explicit Content-Type; XML has no dedicated typed update API and remains runtime-unverified across Solr 8/9/10."
     },
     {
       "id": "update.commands",
