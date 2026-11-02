@@ -13,14 +13,14 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
   const version = await client.replication("indexversion");
   assert.equal(version.responseHeader?.status, 0);
   const generation = Number(version.indexversion);
-  assert.ok(Number.isFinite(generation) && generation >= 0);
+  assert.ok(Number.isFinite(generation) && generation > 0, JSON.stringify(version));
 
   const details = await client.replication("details");
   assert.equal(details.responseHeader?.status, 0);
 
   const fileList = await client.replication("filelist", { generation });
   assert.equal(fileList.responseHeader?.status, 0);
-  assert.ok(fileList.filelist);
+  assert.ok(fileList.filelist, JSON.stringify(fileList));
 
   const files = fileList.filelist?.file;
   const firstFile = Array.isArray(files) ? files[0] : files;
