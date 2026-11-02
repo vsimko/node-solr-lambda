@@ -25,7 +25,8 @@ export function replication<A extends SolrReplicationCommand>(
     wt: "json"
   };
   if (command === "filelist") {
-    const generation = "generation" in params ? params.generation : params.indexversion;
+    const fileListParams = params as { generation?: number; indexversion?: number };
+    const generation = fileListParams.generation ?? fileListParams.indexversion;
     query.generation = generation;
     query.indexversion = generation;
   }
@@ -62,11 +63,11 @@ export function replicationFile(
   return client.requestRaw(path, {
     ...requestOptions,
     query: {
+      ...customParams,
       command: "filecontent",
       [directoryType]: filePath,
       wt: "filestream",
-      ...fileOptions,
-      ...customParams
+      ...fileOptions
     },
     operation: "replicationFile"
   });
