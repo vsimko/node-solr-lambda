@@ -1,6 +1,6 @@
 # Query API
 
-Use `query()` to send a standard Solr query request. Common options are typed directly on the query object; parser-specific options are grouped under `parserOptions` and flattened into Solr request parameters.
+Use `query()` to send a standard Solr query request. Common options are typed directly on the query object; parser-specific options are grouped under `parserOptions` and flattened into Solr request parameters. The documented query patterns are also represented by a compile-only consumer fixture in `test/query-doc-examples.ts`; `npm run test:types` compiles it on every Node.js CI job, including negative checks for misspelled options.
 
 ## Standard query
 
