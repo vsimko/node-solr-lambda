@@ -384,7 +384,7 @@ test("Config API read methods preserve abort controls", async () => {
   assert.equal(requestedSignal.aborted, false);
   controller.abort();
   assert.equal(requestedSignal.aborted, true);
-  await assert.rejects(request, { name: "AbortError" });
+  await assert.rejects(request, { name: "SolrAbortError" });
 });
 
 test("Config API read methods propagate HTTP errors", async () => {
