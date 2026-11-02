@@ -50,7 +50,7 @@ export class SolrClient extends SolrTransport {
     return updateApi.softCommit<T>(this, this.endpoint("/update"), requestOptions);
   }
 
-  optimize<T = unknown>(options: SolrOptimizeOptions | number = 1, requestOptions: RequestControlOptions = {}): Promise<T> {
+  optimize<T = unknown>(options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.optimize<T>(this, this.endpoint("/update"), options, requestOptions);
   }
 
