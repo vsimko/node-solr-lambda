@@ -42,7 +42,10 @@ for (const method of publicMethods) {
   assert.ok(documentedMethods.has(method), `API reference is missing SolrClient.${method}()`);
 }
 for (const entry of inventory.entries) {
-  assert.ok(publicMethods.has(entry.clientMethod), `API inventory method is not public: ${entry.clientMethod}`);
+  const methods = entry.clientMethod.split(/\\s*\\/\\s*/);
+  for (const method of methods) {
+    assert.ok(publicMethods.has(method), `API inventory method is not public: ${method} (entry ${entry.id})`);
+  }
   assert.equal(entry.methodImplemented, true, `API inventory marks ${entry.id} as unimplemented`);
 }
 
