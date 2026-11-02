@@ -15,7 +15,7 @@ await client.replication("backup", {
 let backupState = "";
 while (backupState !== "success") {
   const details = await client.replication("details");
-  backupState = details.backup?.status ?? "";
+  backupState = details.details?.backup?.status ?? "";
   if (backupState === "failed") throw new Error(JSON.stringify(details));
   if (backupState !== "success") await new Promise(resolve => setTimeout(resolve, 500));
 }
