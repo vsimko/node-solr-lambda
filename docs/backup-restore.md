@@ -20,6 +20,8 @@ while (backupState !== "success") {
   if (backupState !== "success") await new Promise(resolve => setTimeout(resolve, 500));
 }
 
+// On Solr 8/9 the backup entry may be absent until the operation finishes.
+// Solr 10.1 also reports "waiting for commit" and "running" progress states.
 // Restore the latest timestamped snapshot. Restore runs asynchronously.
 await client.replication("restore");
 
