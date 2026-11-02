@@ -66,7 +66,7 @@ cloudIntegrationTest("SolrCloud collection backup, list, restore, and delete cyc
   assert.equal(restore.responseHeader?.status, 0);
   await waitForCollectionRequest(client, restoreRequest);
 
-  const restored = await targetClient.query({ q: `id:${id}`, rows: 1 }) as {
+  const restored = await targetClient.query({ params: { q: `id:${id}` }, rows: 1 }) as {
     response?: { numFound?: number; docs?: readonly { title?: string }[] };
   };
   assert.equal(restored.response?.numFound, 1);
