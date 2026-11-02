@@ -1,6 +1,6 @@
 # Update API
 
-The client exposes typed wrappers for Solr's Update Request Handler. Add and full-document replacement accept one document or a list of documents; delete accepts either a unique-key ID or a query.
+The client exposes typed wrappers for Solr's Update Request Handler. Add and full-document replacement accept one document or a list of documents; delete accepts either a unique-key ID or a query. The examples in this guide are mirrored by the compile-only consumer fixture `test/update-doc-examples.ts`; `npm run test:types` checks the valid request shapes and representative invalid options in every Node.js CI job.
 
 ## Add and replace documents
 
