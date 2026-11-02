@@ -4,7 +4,7 @@ import type { CommitOptions, RequestControlOptions, SolrDelete, SolrDeleteOption
 function updateParams(options: SolrUpdateOptions): Record<string, string | number | boolean> {
   const { route, ...params } = options;
   if (options.commitWithin !== undefined && (!Number.isInteger(options.commitWithin) || options.commitWithin < 0)) {
-    throw new RangeError("commitWithin must be a finite non-negative number");
+    throw new RangeError("commitWithin must be a non-negative integer");
   }
   if (route !== undefined && route.trim() === "") throw new TypeError("route must be a non-empty string");
   return { ...params, ...(route === undefined ? {} : { _route_: route }) };
@@ -13,7 +13,7 @@ function updateParams(options: SolrUpdateOptions): Record<string, string | numbe
 function deleteParams(options: SolrDeleteOptions): Record<string, string | number | boolean> {
   const { route, commitWithin } = options;
   if (commitWithin !== undefined && (!Number.isInteger(commitWithin) || commitWithin < 0)) {
-    throw new RangeError("commitWithin must be a finite non-negative number");
+    throw new RangeError("commitWithin must be a non-negative integer");
   }
   if (route !== undefined && route.trim() === "") throw new TypeError("route must be a non-empty string");
   return {
