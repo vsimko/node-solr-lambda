@@ -140,7 +140,7 @@ await solr.rollback();
 
 ## Compatibility
 
-The base add, full-document update, delete-by-ID, hard/soft commit, optimize, and rollback operations have integration coverage on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Unit and consumer type tests cover the new request-option serialization and validation. The `_route_` and `commitWithin` options introduced in this typed interface remain runtime-unverified on those three versions; do not infer runtime support from their TypeScript types alone.
+The base add, full-document update, delete-by-ID, hard/soft commit, expungeDeletes, openSearcher=false on commit, optimize with maxSegments, and rollback operations have integration coverage on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. The openSearcher=false option on optimize is unit-serialization-tested but not independently runtime-verified. Unit and consumer type tests cover the new request-option serialization and validation. The `_route_` and `commitWithin` options introduced in this typed interface remain runtime-unverified on those three versions; do not infer runtime support from their TypeScript types alone.
 
 The request shapes follow the official [Solr 10.1 Indexing with Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html). The guide documents JSON add/delete commands, `overwrite`, `commitWithin`, and commit/optimize behavior. SolrCloud routing uses the documented `_route_` request parameter.
 
