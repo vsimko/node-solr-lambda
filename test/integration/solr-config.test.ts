@@ -25,6 +25,10 @@ integrationTest("Config API sets and unsets a typed cache property with overlay 
 
     const afterUnset = await readOverlay();
     assert.equal(afterUnset.overlay?.props?.query?.filterCache?.size, undefined);
+
+    if (previousSize !== undefined) {
+      await client.config({ "set-property": { [property]: previousSize } });
+    }
   } finally {
     if (changed) {
       if (previousSize === undefined) {
