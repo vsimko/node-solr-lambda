@@ -71,13 +71,13 @@ test("add and full-document update serialize overwrite, commitWithin, and SolrCl
   await client.add({ id: "one" }, { overwrite: false, commitWithin: 5000, route: "tenant-a" });
   await client.update({ id: "two" }, { overwrite: true, route: "tenant-b" });
 
-  assert.deepEqual(requests[0].body, [{ id: "one" }]);
-  assert.equal(requests[0].url.searchParams.get("overwrite"), "false");
-  assert.equal(requests[0].url.searchParams.get("commitWithin"), "5000");
-  assert.equal(requests[0].url.searchParams.get("_route_"), "tenant-a");
-  assert.deepEqual(requests[1].body, [{ id: "two" }]);
-  assert.equal(requests[1].url.searchParams.get("overwrite"), "true");
-  assert.equal(requests[1].url.searchParams.get("_route_"), "tenant-b");
+  assert.deepEqual(requests[0]!.body, [{ id: "one" }]);
+  assert.equal(requests[0]!.url.searchParams.get("overwrite"), "false");
+  assert.equal(requests[0]!.url.searchParams.get("commitWithin"), "5000");
+  assert.equal(requests[0]!.url.searchParams.get("_route_"), "tenant-a");
+  assert.deepEqual(requests[1]!.body, [{ id: "two" }]);
+  assert.equal(requests[1]!.url.searchParams.get("overwrite"), "true");
+  assert.equal(requests[1]!.url.searchParams.get("_route_"), "tenant-b");
 });
 
 test("delete supports ID and query commands with route and commitWithin options", async () => {
@@ -93,11 +93,11 @@ test("delete supports ID and query commands with route and commitWithin options"
   await client.delete("one", { route: "tenant-a", commitWithin: 1000 });
   await client.delete({ query: "status:expired" }, { route: "tenant-b" });
 
-  assert.deepEqual(requests[0].body, { delete: { id: "one" } });
-  assert.equal(requests[0].url.searchParams.get("_route_"), "tenant-a");
-  assert.equal(requests[0].url.searchParams.get("commitWithin"), "1000");
-  assert.deepEqual(requests[1].body, { delete: { query: "status:expired" } });
-  assert.equal(requests[1].url.searchParams.get("_route_"), "tenant-b");
+  assert.deepEqual(requests[0]!.body, { delete: { id: "one" } });
+  assert.equal(requests[0]!.url.searchParams.get("_route_"), "tenant-a");
+  assert.equal(requests[0]!.url.searchParams.get("commitWithin"), "1000");
+  assert.deepEqual(requests[1]!.body, { delete: { query: "status:expired" } });
+  assert.equal(requests[1]!.url.searchParams.get("_route_"), "tenant-b");
 });
 
 test("commit, soft commit, optimize, and rollback serialize typed command bodies", async () => {
