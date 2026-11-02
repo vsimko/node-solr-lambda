@@ -128,3 +128,40 @@ integrationTest("Solr update replaces an existing document on the pinned server"
   assert.equal(result.response?.numFound, 1);
   assert.deepEqual(result.response?.docs, [{ id, name_s: "after" }]);
 });
+
+integrationTest("Solr delete-by-query removes all matching documents and preserves other groups", async ({
+  client,
+  createId,
+  addDocuments,
+  commit
+}) => {
+  const group = createId("delete_query");
+  const otherGroup = createId("keep_query");
+  const deletedIds = [createId("delete_doc"), createId("delete_doc")];
+  const keptId = createId("keep_doc");
+
+  await addDocuments([
+    { id: deletedIds[0], group_s: group, label_s: "remove-one" },
+    { id: deletedIds[1], group_s: group, label_s: "remove-two" },
+    { id: keptId, group_s: otherGroup, label_s: "keep" }
+  ]);
+  await commit();
+
+  const deleted = await client.delete({ query: `group_s:"${group}"` });
+  assert.equal(deleted.responseHeader?.status, 0);
+  await commit();
+
+  const removedResult = await client.query<{ response?: { numFound?: number } }>({
+    query: `group_s:"${group}"`,
+    fields: ["id"],
+    limit: 10
+  });
+  assert.equal(removedResult.response?.numFound, 0);
+
+  const keptResult = await client.query<{ response?: { docs?: Array<{ id: string }> } }>({
+    query: `id:${keptId}`,
+    fields: ["id"],
+    limit: 1
+  });
+  assert.deepEqual(keptResult.response?.docs, [{ id: keptId }]);
+});
