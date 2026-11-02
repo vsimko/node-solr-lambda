@@ -126,7 +126,7 @@ await solr.rollback();
 ```
 
 - `SolrCommitOptions` models hard commit (`softCommit: false` or omitted), `waitSearcher`, `expungeDeletes`, and `openSearcher`. `expungeDeletes` is valid only for hard commits.
-- `SolrSoftCommitOptions` exposes `waitSearcher` and `openSearcher`; `softCommit()` sets `softCommit: true` and defaults `waitSearcher` to `true`, so it waits until the new searcher is registered.
+- `SolrSoftCommitOptions` exposes `waitSearcher` and `openSearcher`; `softCommit()` sets `softCommit: true` and defaults `waitSearcher` to `true`, so it waits until the new searcher is registered. A soft commit is optimized for near-real-time visibility, not hard-commit durability.
 - `openSearcher` is sent as a request parameter, not inside the JSON commit/optimize command. It defaults to `true`. Set it to `false` when the commit should not open a searcher; changes will not become searchable until a later searcher is opened.
 - `waitSearcher` defaults to `true`. It waits for registration of a searcher when one is opened; it does not itself cause a searcher to open.
 - `expungeDeletes` removes deleted documents during a hard commit and defaults to `false`. It is rejected for soft commits.
