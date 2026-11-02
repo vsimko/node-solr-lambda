@@ -207,7 +207,7 @@
         "test/cancellation.types.ts",
         "test/integration/solr-update.test.ts"
       ],
-      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions. SolrOptimizeOptions expose maxSegments, waitSearcher, and openSearcher; maxSegments is optimize-only and defaults to Solr's unlimited target. The integration test exercises maxSegments on all pinned versions."
+      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions. SolrOptimizeOptions expose maxSegments, waitSearcher, and openSearcher; maxSegments is optimize-only and defaults to Solr's unlimited target. The integration test exercises maxSegments on all pinned versions. openSearcher is request-parameter serialized; its optimize-specific runtime effect remains unverified."
     },
     {
       "id": "update.rollback",
@@ -515,7 +515,7 @@
         "test/integration/solr-update.test.ts"
       ],
       "documentation": "docs/update.md",
-      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested.",
+      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested. openSearcher values in commit/optimize command objects are extracted to the request parameter; conflicting values are rejected.",
       "clientMethod": "updateCommands",
       "methodImplemented": true,
       "unitTests": "present",
