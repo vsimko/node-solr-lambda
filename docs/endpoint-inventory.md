@@ -12,7 +12,7 @@ This inventory defines the boundary of the typed client API after review against
 | Schema API `/schema` | `schema()` | Typed schema command models; integration coverage is limited to the add-field and read-back flow. |
 | Config API `/config` | `config()` | Typed component/configuration command models; integration coverage includes user-property set/read-back. |
 | CoreAdmin V1 `/solr/admin/cores` | `coreAdmin()` | Action-specific parameter models; integration coverage includes CREATE, STATUS, RELOAD, and cleanup UNLOAD. `REQUESTSTATUS` for asynchronous CoreAdmin jobs and `REQUESTRECOVERY` are not in the current action union. |
-| Collections V1 `/solr/admin/collections` | `collections()` | Action-specific parameter models for the actions listed in `CollectionAdminAction`; representative standalone/SolrCloud lifecycle and replica tests are recorded in the compatibility matrix. `REQUESTSTATUS`/`DELETESTATUS`, `MIGRATE`, `FORCELEADER`, cluster/node management actions, and snapshot/backup actions are not in the current action union; selected response models are also not included. |
+| Collections V1 `/solr/admin/collections` | `collections()` | Action-specific parameter models include BACKUP, RESTORE, LISTBACKUP, DELETEBACKUP, REQUESTSTATUS, and DELETESTATUS. The backup/restore cycle is integration-tested on all three pinned SolrCloud versions. Other unmodelled actions include MIGRATE, FORCELEADER, and selected cluster/node management commands; selected response models remain partial. |
 | Security API `/solr/admin/authentication`, `/solr/admin/authorization` | `security()` | Authentication and authorization requests; dedicated security-enabled integration coverage is available on all three pinned versions. |
 | Ping `/admin/ping` | `ping()` | Typed client method; response status tested on all three pinned versions. |
 | System information `/solr/admin/info/system` | `systemInfo()` | Typed client method; representative response integration-tested on all three pinned versions. |
@@ -26,7 +26,7 @@ This inventory defines the boundary of the typed client API after review against
 
 | Endpoint / feature | Status | Reason / tracking |
 | --- | --- | --- |
-| ReplicationHandler backup/restore commands | Deferred to [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96) | Core-level backup, details/status, restore, restorestatus, and deletebackup are separate operations with asynchronous completion and repository/path configuration. |
+| V2 backup endpoints | No dedicated V2 wrappers | The client exposes V1 ReplicationHandler and Collections API backup actions; Solr V2 backup routes and JSON payloads remain outside the typed client surface. |
 | Core backup/restore through ReplicationHandler | Not implemented as a dedicated typed module | Backup, details/status, restore, restorestatus, and deletebackup are asynchronous and depend on server-side backup repository/path configuration. Deferred to [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96). |
 | SolrCloud Collections backup/restore | Not implemented as typed Collections actions | `BACKUP`, `RESTORE`, `LISTBACKUP`, and `DELETEBACKUP` are absent from the current `CollectionAdminAction` union. Deferred to [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96). |
 | V2 API paths | No dedicated V2 wrappers | The typed client currently uses V1 paths for CoreAdmin, Collections, Schema, and Config. V2 paths and payloads differ and are not inferred from V1 types. Use the generic request escape hatch only when the caller owns the V2 contract. |
