@@ -12,6 +12,8 @@ void client.replication("disablereplication");
 void client.replication("enablepoll");
 void client.replication("disablepoll");
 void client.replication("abortfetch");
+void client.replication("snappull", { leaderUrl: "http://leader:8983/solr/catalog/replication" });
+void client.replication("abort");
 void client.replicationFile({ directoryType: "cf", filePath: "managed-schema", checksum: true });
 
 // @ts-expect-error filelist requires a generation or indexversion
