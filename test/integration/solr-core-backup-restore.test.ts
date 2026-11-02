@@ -24,7 +24,7 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   let backupState = "";
   for (let attempt = 0; attempt < 120; attempt++) {
     const details = await client.replication("details");
-    backupState = details.backup?.status ?? "";
+    backupState = details.details?.backup?.status ?? "";
     if (backupState === "success") break;
     if (backupState === "failed") throw new Error(JSON.stringify(details));
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -47,11 +47,11 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   }
   assert.equal(restoreState, "success", "core restore did not finish successfully");
 
-  const result = await client.query({ params: { q: `id:${id}` }, rows: 1 }) as {
-    response?: { numFound?: number; docs?: readonly { title?: string }[] };
+  const result = await client.query({ query: `id:${id}`, limit: 1 }) as {
+    response?: { numFound?: number; docs?: readonly { title?: string | readonly string[] }[] };
   };
   assert.equal(result.response?.numFound, 1);
-  assert.equal(result.response?.docs?.[0]?.title, "before backup");
+  assert.ok(result.response?.docs?.[0]?.title?.includes("before backup"));
 
   const deleted = await client.replication("deletebackup", { name: backupName });
   assert.equal(deleted.responseHeader?.status, 0);
