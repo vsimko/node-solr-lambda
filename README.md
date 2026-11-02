@@ -54,6 +54,26 @@ Common query properties are explicitly typed, including the parser, query operat
 
 Both ESM and CommonJS consumers are supported. The package provides conditional TypeScript declarations for each module system. See [getting started](docs/getting-started.md) for import examples.
 
+## TypeScript autocomplete
+
+The public API uses named request models and discriminated unions so supported Solr options are discoverable in editor completion. Query options, parser settings, facets, highlighting, grouping, cursor pagination, update commands, Schema, Config, Core Admin, and Collections actions are typed. Custom query parameters are provided through `params`; administrative actions expose an explicit `customParams` escape hatch where appropriate.
+
+```ts
+await solr.query({
+  query: "title:solr",
+  defType: "edismax",
+  parserOptions: { type: "edismax", qf: "title^5 description", mm: "2<75%" },
+  facets: { fields: ["category"], limit: 10 }
+});
+
+await solr.collections("CREATE", {
+  name: "catalog",
+  numShards: 2,
+  replicationFactor: 2,
+  "router.name": "compositeId"
+});
+```
+
 ## Documentation
 
 - [Getting started](docs/getting-started.md)

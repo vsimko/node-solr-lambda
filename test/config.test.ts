@@ -148,3 +148,32 @@ test("invalid transport configuration fails at construction", () => {
   assert.throws(() => createSolrClient({ baseUrl: "https://user:pass@solr.example" }), /embedded credentials/);
   assert.throws(() => createSolrClient({ retry: { maxAttempts: 0 } }), /positive integer/);
 });
+
+
+test("Config API customOptions are flattened into the native plugin definition", async () => {
+  let body: unknown;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.config({
+    "add-requesthandler": {
+      name: "/custom",
+      class: "example.CustomHandler",
+      customOptions: { cacheEnabled: true, maxItems: 25 }
+    }
+  });
+
+  assert.deepEqual(body, {
+    "add-requesthandler": {
+      name: "/custom",
+      class: "example.CustomHandler",
+      cacheEnabled: true,
+      maxItems: 25
+    }
+  });
+});

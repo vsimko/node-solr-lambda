@@ -4,84 +4,149 @@ export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAM
 export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE";
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
+/** Custom key/value parameters for administrative actions not yet modelled by this client. */
+export type SolrAdminCustomParams = SolrAdminParams;
+
+/** Values accepted by Config API properties and plugin configuration. */
+export type SolrConfigValue = string | number | boolean | null | readonly SolrConfigValue[] | { readonly [key: string]: SolrConfigValue };
+
+/** A typed Core Admin STATUS request. */
+export interface CoreStatusParams {
+  core?: string;
+  indexInfo?: boolean;
+  customParams?: SolrAdminCustomParams;
+}
+export interface CoreCreateParams {
+  name: string;
+  instanceDir?: string;
+  dataDir?: string;
+  config?: string;
+  schema?: string;
+  configSet?: string;
+  collection?: string;
+  shard?: string;
+  numShards?: number;
+  replicaType?: CollectionReplicaType;
+  async?: string;
+  customParams?: SolrAdminCustomParams;
+}
+export interface CoreReloadParams { core: string; async?: string; customParams?: SolrAdminCustomParams }
+export interface CoreUnloadParams {
+  core: string;
+  deleteIndex?: boolean;
+  deleteDataDir?: boolean;
+  deleteInstanceDir?: boolean;
+  async?: string;
+  customParams?: SolrAdminCustomParams;
+}
+export interface CoreRenameParams { core: string; other: string; async?: string; customParams?: SolrAdminCustomParams }
+export interface CoreSwapParams { core: string; other: string; async?: string; customParams?: SolrAdminCustomParams }
+export interface CoreMergeIndexesParams {
+  core: string;
+  indexDir?: string | readonly string[];
+  srcCore?: string | readonly string[];
+  async?: string;
+  customParams?: SolrAdminCustomParams;
+}
+export interface CoreSplitParams {
+  core: string;
+  path?: string | readonly string[];
+  targetCore?: string | readonly string[];
+  ranges?: string;
+  splitKey?: string;
+  async?: string;
+  customParams?: SolrAdminCustomParams;
+}
+/** Action-specific Core Admin parameters; customParams is the explicit escape hatch. */
+export type CoreAdminParams<A extends CoreAdminAction> =
+  A extends "STATUS" ? CoreStatusParams :
+  A extends "CREATE" ? CoreCreateParams :
+  A extends "RELOAD" ? CoreReloadParams :
+  A extends "UNLOAD" ? CoreUnloadParams :
+  A extends "RENAME" ? CoreRenameParams :
+  A extends "SWAP" ? CoreSwapParams :
+  A extends "MERGEINDEXES" ? CoreMergeIndexesParams :
+  CoreSplitParams;
+
 /** Replica types accepted by the SolrCloud Collections API. */
 export type CollectionReplicaType = "nrt" | "tlog" | "pull";
+export interface CollectionRequestBase { async?: string; customParams?: SolrAdminCustomParams }
+export interface ListCollectionsParams extends CollectionRequestBase {}
+export interface CreateCollectionParams extends CollectionRequestBase {
+  name: string;
+  numShards?: number;
+  replicationFactor?: number;
+  nrtReplicas?: number;
+  tlogReplicas?: number;
+  pullReplicas?: number;
+  maxShardsPerNode?: number;
+  createNodeSet?: string;
+  "router.name"?: "compositeId" | "implicit" | (string & {});
+  "router.field"?: string;
+  shards?: string;
+  "collection.configName"?: string;
+  autoAddReplicas?: boolean;
+  waitForFinalState?: boolean;
+  rule?: string | readonly string[];
+  snitch?: string | readonly string[];
+}
+export interface DeleteCollectionParams extends CollectionRequestBase { name: string }
+export interface ReloadCollectionParams extends CollectionRequestBase { name: string }
+export interface ModifyCollectionParams extends CollectionRequestBase {
+  collection: string;
+  replicationFactor?: number;
+  readOnly?: boolean;
+  autoAddReplicas?: boolean;
+  maxShardsPerNode?: number;
+  rule?: string | readonly string[];
+  snitch?: string | readonly string[];
+}
+export interface CreateAliasParams extends CollectionRequestBase { name: string; collections: string | readonly string[] }
+export interface DeleteAliasParams extends CollectionRequestBase { name: string }
+export interface ListAliasesParams extends CollectionRequestBase {}
+export interface ClusterStatusParams extends CollectionRequestBase { collection?: string; shard?: string; route?: string; coreInfo?: boolean }
+export interface CreateShardParams extends CollectionRequestBase { collection: string; shard: string; createNodeSet?: string; nrtReplicas?: number; tlogReplicas?: number; pullReplicas?: number; waitForFinalState?: boolean }
+export interface DeleteShardParams extends CollectionRequestBase { collection: string; shard: string; deleteInstanceDir?: boolean; deleteDataDir?: boolean; deleteIndex?: boolean }
+export interface SplitShardParams extends CollectionRequestBase { collection: string; shard?: string; splitKey?: string; ranges?: string; numSubShards?: number; splitMethod?: "rewrite" | "link" | "router"; waitForFinalState?: boolean }
+export interface CollectionRoleParams extends CollectionRequestBase { node: string; role: string }
 
 /** Parameters for Collections API ADDREPLICA. */
-export interface AddReplicaParams {
-  /** Additional Collections API parameters not modelled here. */
-  customParams?: SolrAdminParams;
-  /** Target collection. */
+export interface AddReplicaParams extends CollectionRequestBase {
   collection: string;
-  /** Target shard; omit when the collection has a single shard. */
   shard?: string;
-  /** Optional explicit replica name. */
   name?: string;
-  /** Replica type; defaults to the collection's configured replica type. */
   type?: CollectionReplicaType;
-  /** Node name on which to place the replica. */
   node?: string;
-  /** Comma-separated candidate node names for placement. */
   createNodeSet?: string;
-  /** Wait until the replica reaches an active state before returning. */
   waitForFinalState?: boolean;
-  /** Async request identifier. */
-  async?: string;
 }
-
 /** Parameters for Collections API DELETEREPLICA. */
-export interface DeleteReplicaParams {
-  /** Additional Collections API parameters not modelled here. */
-  customParams?: SolrAdminParams;
-  /** Target collection. */
+export interface DeleteReplicaParams extends CollectionRequestBase {
   collection: string;
-  /** Target shard. */
   shard: string;
-  /** Replica name to remove. */
   replica: string;
-  /** Delete the replica's instance directory from its node. */
   deleteInstanceDir?: boolean;
-  /** Delete the replica's data directory from its node. */
   deleteDataDir?: boolean;
-  /** Delete the replica's index directory from its node. */
   deleteIndex?: boolean;
-  /** Async request identifier. */
-  async?: string;
 }
-
-/** Parameters for Collections API MOVEREPLICA. */
-export interface MoveReplicaBaseParams {
+export interface MoveReplicaBaseParams extends CollectionRequestBase {
   collection: string;
   targetNode: string;
   timeout?: number;
   inPlaceMove?: boolean;
-  async?: string;
 }
-
-/** A move identifies either one replica or a source node and shard. */
 export type MoveReplicaParams = MoveReplicaBaseParams & (
   | { replica: string; sourceNode?: never; shard?: never }
   | { replica?: never; sourceNode: string; shard: string }
 );
-
-/** Parameters for Collections API BALANCESHARDUNIQUE. */
-export interface BalanceShardUniqueParams {
+export interface BalanceShardUniqueParams extends CollectionRequestBase {
   collection: string;
   property: string;
   onlyactivenodes?: boolean;
   shardUnique?: boolean;
 }
-
-/** Parameters for Collections API REBALANCELEADERS. */
-export interface RebalanceLeadersParams {
-  collection: string;
-  maxAtOnce?: number;
-  maxWaitSeconds?: number;
-  async?: string;
-}
-
-/** Parameters for Collections API ADDREPLICAPROP. */
-export interface AddReplicaPropertyParams {
+export interface RebalanceLeadersParams extends CollectionRequestBase { collection: string; maxAtOnce?: number; maxWaitSeconds?: number }
+export interface AddReplicaPropertyParams extends CollectionRequestBase {
   collection: string;
   shard: string;
   replica: string;
@@ -89,17 +154,19 @@ export interface AddReplicaPropertyParams {
   "property.value": string;
   shardUnique?: boolean;
 }
+export interface DeleteReplicaPropertyParams extends CollectionRequestBase { collection: string; shard: string; replica: string; property: string }
 
-/** Parameters for Collections API DELETEREPLICAPROP. */
-export interface DeleteReplicaPropertyParams {
-  collection: string;
-  shard: string;
-  replica: string;
-  property: string;
-}
-
-/** Action-specific parameter models for replica lifecycle and property operations. */
+/** Action-specific Collections API parameters. Unsupported actions still have a named customParams escape hatch. */
 export type CollectionAdminParams<A extends CollectionAdminAction> =
+  A extends "LIST" ? ListCollectionsParams :
+  A extends "CREATE" ? CreateCollectionParams :
+  A extends "DELETE" ? DeleteCollectionParams :
+  A extends "RELOAD" ? ReloadCollectionParams :
+  A extends "MODIFYCOLLECTION" ? ModifyCollectionParams :
+  A extends "CREATEALIAS" ? CreateAliasParams :
+  A extends "DELETEALIAS" ? DeleteAliasParams :
+  A extends "LISTALIASES" ? ListAliasesParams :
+  A extends "CLUSTERSTATUS" ? ClusterStatusParams :
   A extends "ADDREPLICA" ? AddReplicaParams :
   A extends "DELETEREPLICA" ? DeleteReplicaParams :
   A extends "MOVEREPLICA" ? MoveReplicaParams :
@@ -107,7 +174,147 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "REBALANCELEADERS" ? RebalanceLeadersParams :
   A extends "ADDREPLICAPROP" ? AddReplicaPropertyParams :
   A extends "DELETEREPLICAPROP" ? DeleteReplicaPropertyParams :
-  SolrAdminParams;
+  A extends "CREATESHARD" ? CreateShardParams :
+  A extends "DELETESHARD" ? DeleteShardParams :
+  A extends "SPLITSHARD" ? SplitShardParams :
+  CollectionRoleParams;
+
+/** One field definition in the Schema API. */
+export interface SolrSchemaField {
+  name: string;
+  type: string;
+  default?: SolrConfigValue;
+  docValues?: boolean;
+  indexed?: boolean;
+  multiValued?: boolean;
+  required?: boolean;
+  stored?: boolean;
+  uninvertible?: boolean;
+  useDocValuesAsStored?: boolean;
+  large?: boolean;
+  omitNorms?: boolean;
+  omitTermFreqAndPositions?: boolean;
+  omitPositions?: boolean;
+  termVectors?: boolean;
+  termPositions?: boolean;
+  termOffsets?: boolean;
+  termPayloads?: boolean;
+  sortMissingFirst?: boolean;
+  sortMissingLast?: boolean;
+}
+export interface SolrSchemaDynamicField extends SolrSchemaField {}
+export interface SolrSchemaFieldType {
+  name: string;
+  class: string;
+  positionIncrementGap?: number;
+  multiValued?: boolean;
+  docValuesFormat?: string;
+  postingsFormat?: string;
+  analyzer?: SolrSchemaAnalyzer;
+  indexAnalyzer?: SolrSchemaAnalyzer;
+  queryAnalyzer?: SolrSchemaAnalyzer;
+  similarity?: Readonly<Record<string, SolrConfigValue>>;
+  [key: string]: unknown;
+}
+export interface SolrSchemaAnalyzer {
+  tokenizer?: SolrSchemaAnalyzerComponent;
+  filters?: readonly SolrSchemaAnalyzerComponent[];
+  charFilters?: readonly SolrSchemaAnalyzerComponent[];
+}
+export interface SolrSchemaAnalyzerComponent {
+  class: string;
+  [key: string]: unknown;
+}
+export interface SolrSchemaCopyField { source: string; dest: string; maxChars?: number }
+export type SolrSchemaCommand =
+  | { "add-field": SolrSchemaField }
+  | { "replace-field": SolrSchemaField }
+  | { "delete-field": { name: string } }
+  | { "add-dynamic-field": SolrSchemaDynamicField }
+  | { "replace-dynamic-field": SolrSchemaDynamicField }
+  | { "delete-dynamic-field": { name: string } }
+  | { "add-field-type": SolrSchemaFieldType }
+  | { "replace-field-type": SolrSchemaFieldType }
+  | { "delete-field-type": { name: string } }
+  | { "add-copy-field": SolrSchemaCopyField }
+  | { "delete-copy-field": { source: string; dest: string } };
+
+/** Shared settings for named Config API plugins. */
+export interface SolrConfigPlugin {
+  name: string;
+  class: string;
+  startup?: "lazy" | "eager";
+  initParams?: Readonly<Record<string, SolrConfigValue>>;
+  /** Explicit escape hatch for plugin-specific settings; flattened into the component definition. */
+  customOptions?: Readonly<Record<string, SolrConfigValue>>;
+}
+export interface SolrRequestHandlerConfig extends SolrConfigPlugin {
+  defaults?: Readonly<Record<string, SolrConfigValue>>;
+  appends?: Readonly<Record<string, SolrConfigValue>>;
+  invariants?: Readonly<Record<string, SolrConfigValue>>;
+  useParams?: string | readonly string[];
+  components?: string | readonly string[];
+}
+export interface SolrSearchComponentConfig extends SolrConfigPlugin {
+  query?: Readonly<Record<string, SolrConfigValue>>;
+  highlighting?: Readonly<Record<string, SolrConfigValue>>;
+  spellcheck?: Readonly<Record<string, SolrConfigValue>>;
+  terms?: Readonly<Record<string, SolrConfigValue>>;
+}
+export interface SolrQueryResponseWriterConfig extends SolrConfigPlugin {
+  contentType?: string;
+  charset?: string;
+}
+export interface SolrInitParamsConfig {
+  name: string;
+  path?: string | readonly string[];
+  defaults?: Readonly<Record<string, SolrConfigValue>>;
+  appends?: Readonly<Record<string, SolrConfigValue>>;
+  invariants?: Readonly<Record<string, SolrConfigValue>>;
+  customOptions?: Readonly<Record<string, SolrConfigValue>>;
+}
+export interface SolrListenerConfig extends SolrConfigPlugin {
+  event: string;
+}
+export interface SolrOtherComponentConfig extends SolrConfigPlugin {}
+export type SolrConfigCommand =
+  | { "set-property": Readonly<Record<string, SolrConfigValue>> }
+  | { "unset-property": string | readonly string[] }
+  | { "set-user-property": Readonly<Record<string, SolrConfigValue>> }
+  | { "unset-user-property": string | readonly string[] }
+  | { "add-requesthandler": SolrRequestHandlerConfig }
+  | { "update-requesthandler": SolrRequestHandlerConfig }
+  | { "delete-requesthandler": string }
+  | { "add-searchcomponent": SolrSearchComponentConfig }
+  | { "update-searchcomponent": SolrSearchComponentConfig }
+  | { "delete-searchcomponent": string }
+  | { "add-queryresponsewriter": SolrQueryResponseWriterConfig }
+  | { "update-queryresponsewriter": SolrQueryResponseWriterConfig }
+  | { "delete-queryresponsewriter": string }
+  | { "add-initparams": SolrInitParamsConfig }
+  | { "update-initparams": SolrInitParamsConfig }
+  | { "delete-initparams": string }
+  | { "add-queryparser": SolrOtherComponentConfig }
+  | { "update-queryparser": SolrOtherComponentConfig }
+  | { "delete-queryparser": string }
+  | { "add-valuesourceparser": SolrOtherComponentConfig }
+  | { "update-valuesourceparser": SolrOtherComponentConfig }
+  | { "delete-valuesourceparser": string }
+  | { "add-transformer": SolrOtherComponentConfig }
+  | { "update-transformer": SolrOtherComponentConfig }
+  | { "delete-transformer": string }
+  | { "add-updateprocessor": SolrOtherComponentConfig }
+  | { "update-updateprocessor": SolrOtherComponentConfig }
+  | { "delete-updateprocessor": string }
+  | { "add-queryconverter": SolrOtherComponentConfig }
+  | { "update-queryconverter": SolrOtherComponentConfig }
+  | { "delete-queryconverter": string }
+  | { "add-listener": SolrListenerConfig }
+  | { "update-listener": SolrListenerConfig }
+  | { "delete-listener": string }
+  | { "add-expressible": SolrOtherComponentConfig }
+  | { "update-expressible": SolrOtherComponentConfig }
+  | { "delete-expressible": string };
 
 export type SolrAuth =
   | { type: "basic"; username: string; password?: string }
