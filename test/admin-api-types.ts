@@ -39,12 +39,21 @@ const addHandler: SolrConfigCommand = {
     useParams: ["public-search"]
   }
 };
-const addCache: SolrConfigCommand = {
-  "add-cache": { name: "filterCache", class: "solr.CaffeineCache", size: 512, autowarmCount: "10%" }
+const addListener: SolrConfigCommand = {
+  "add-listener": {
+    name: "reload-listener",
+    event: "newSearcher",
+    class: "example.ReloadListener",
+    customOptions: { enabled: true, priority: 10 }
+  }
+};
+const addInitParams: SolrConfigCommand = {
+  "add-initparams": { name: "shared-search-params", params: { rows: 20, wt: "json" } }
 };
 void client.config(setProperty);
 void client.config(addHandler);
-void client.config(addCache);
+void client.config(addListener);
+void client.config(addInitParams);
 
 // @ts-expect-error Unknown Schema API command names are rejected.
 const invalidSchema: SolrSchemaCommand = { "add-feld": { name: "sku", type: "string" } };
