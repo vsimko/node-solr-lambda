@@ -706,6 +706,11 @@ export interface SolrConfigSnapshot {
   searchComponent?: Readonly<Record<string, SolrSearchComponentConfig>>;
   queryResponseWriter?: Readonly<Record<string, SolrQueryResponseWriterConfig>>;
   initParams?: Readonly<Record<string, SolrInitParamsConfig>>;
+  znodeVersion?: number;
+  listener?: readonly SolrListenerConfig[] | Readonly<Record<string, SolrListenerConfig>>;
+  directoryFactory?: SolrConfigPlugin;
+  indexConfig?: Readonly<Record<string, SolrConfigValue>>;
+  codecFactory?: SolrConfigPlugin;
   [key: string]: unknown;
 }
 
