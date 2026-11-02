@@ -36,6 +36,7 @@ export interface SolrReplicationBackupParams extends SolrReplicationBaseParams {
   location?: string;
   repository?: string;
   numberToKeep?: number;
+  commitName?: string;
 }
 export interface SolrReplicationRestoreParams extends SolrReplicationBaseParams {
   name?: string;
