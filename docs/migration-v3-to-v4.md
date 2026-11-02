@@ -61,6 +61,7 @@ The v3 client returned a functional object with convenience methods such as `add
 | `solr.deleteField(name)` | `solr.schema({ "delete-field": { name } })` |
 | `solr.deleteFieldType(name)` | `solr.schema({ "delete-field-type": { name } })` |
 | `solr.config(data)` | `solr.config(command)`; use the typed Config API command union |
+| `defaultConfig` / `mergeConfig` exports | No package-level equivalents; define and compose application configuration explicitly (for example, with object spread) |
 | `solr.configAutoEnableFields(enable)` | `solr.config({ "set-user-property": { "update.autoCreateFields": String(enable) } })` |
 | `prepareCoreAdmin(config).ping(core)` | Configure `core` and call `solr.ping()` |
 | `prepareCoreAdmin(config).solrDeleteCore(core)` | `solr.coreAdmin("UNLOAD", { core, deleteIndex: true, deleteDataDir: true, deleteInstanceDir: true })` |
@@ -105,7 +106,7 @@ TypeScript consumers should use Node-compatible module resolution (for example, 
 
 ## 5. Replace Axios-specific assumptions and error handling
 
-v4 uses the Fetch API internally. Typed methods return parsed Solr response payloads rather than Axios response objects. Raw methods (`requestRaw()`, `export()`, and `replicationFile()`) return a Fetch `Response` when streaming or non-JSON content is required.
+v4 uses the Fetch API internally. Like the v3 helpers, typed methods return the Solr response payload rather than an Axios response wrapper. The transport and error contracts are different, however: raw methods (`requestRaw()`, `export()`, and `replicationFile()`) return a Fetch `Response` when streaming or non-JSON content is required.
 
 HTTP errors throw `SolrHttpError`; network errors, timeouts, caller cancellation, and validation failures use the corresponding exported `SolrNetworkError`, `SolrTimeoutError`, `SolrAbortError`, and `SolrValidationError` classes. Replace Axios-specific checks such as `error.response.status` with these v4 error classes and their documented properties. See [error handling](errors.md).
 
