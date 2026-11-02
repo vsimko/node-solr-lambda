@@ -20,6 +20,7 @@ test("ReplicationHandler commands use the configured core and JSON response form
     customParams: { maxWriteMBPerSec: 20 }
   });
   await client.replication("filelist", { generation: 42 });
+  await client.replication("filelist", { indexversion: 42 });
 
   assert.equal(calls[0]!.url.pathname, "/solr/catalog/replication");
   assert.equal(calls[0]!.url.searchParams.get("command"), "indexversion");
@@ -32,6 +33,8 @@ test("ReplicationHandler commands use the configured core and JSON response form
   assert.equal(calls[2]!.url.searchParams.get("generation"), "42");
   assert.equal(calls[2]!.url.searchParams.get("indexversion"), null);
   assert.equal(calls[2]!.url.searchParams.get("wt"), "json");
+  assert.equal(calls[3]!.url.searchParams.get("indexversion"), "42");
+  assert.equal(calls[3]!.url.searchParams.get("generation"), null);
 });
 
 test("ReplicationHandler supports read, poll, and replication lifecycle commands", async () => {
