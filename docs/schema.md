@@ -135,6 +135,26 @@ void [schemaName, schemaVersion, keyField, firstField, firstFieldType];
 
 Additional response models cover dynamic fields, copy fields, schema name, schema version, and global similarity. These read types reflect the JSON response envelopes; they do not imply that this client provides dedicated convenience methods for each read path. Use the documented `/schema` read paths with `request<T>()`.
 
+## Solr 8/9/10 compatibility matrix
+
+The following matrix records the exact pinned versions exercised by CI. “Tested” means the operation changes or reads the live schema and asserts the response; compile-time coverage alone is not treated as runtime evidence.
+
+| Schema capability | Solr 8.11.4 | Solr 9.11.0 | Solr 10.1.0 | Evidence |
+| --- | --- | --- | --- | --- |
+| Field add / replace / delete | Tested | Tested | Tested | Mutation response headers and field read-back |
+| Field type add / replace / delete | Tested | Tested | Tested | TextField analyzer, tokenizer, filter and separate index/query analyzer read-back |
+| Dynamic field add / replace / delete | Tested | Tested | Tested | Dynamic-field rule read-back after each mutation |
+| Copy-field add / delete | Tested | Tested | Tested | Multiple destinations and rule read-back |
+| Copy-field replacement | Tested | Tested | Tested | Delete old source/destination pair, then add replacement; Solr has no native replace command |
+| Schema read metadata | Tested | Tested | Tested | Full schema, name, version, uniqueKey, and similarity response envelopes |
+| Similarity plugin mutation | Not verified | Not verified | Not verified | Type and serialization coverage only; plugin implementations vary |
+
+The supported client surface is the V1 `POST /solr/{core-or-collection}/schema` command API plus typed `request<T>()` access to V1 read endpoints. Solr 10.1 also documents V2 schema endpoints, but this client does not claim to implement those routes.
+
+The on-disk managed-schema filename changed across major versions: Solr 8 documentation refers to `managed-schema`, while Solr 9 and later use `managed-schema.xml`. This is a server-side file naming detail; applications should use the Schema API rather than editing the managed schema file directly.
+
+Schema mutations reload the core for subsequent indexing, but they do not rewrite previously indexed documents. Reindex after changes that alter the interpretation of existing fields. In SolrCloud, changes propagate to replicas; without an explicit replica update timeout, other replicas may apply the schema change asynchronously.
+
 ## Compatibility and operational behavior
 
 The v1 Schema API command names and JSON response envelope are documented across the Solr 8.11, 9.x, and 10.1 guides. Add/replace/delete field and field-type mutations, including analyzer/tokenizer/filter configuration and response headers, are integration-tested against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Dynamic-field and copy-field mutation families, similarity plugin settings, and other plugin-specific analyzer options currently have type/serialization coverage only; do not infer server compatibility from compilation alone.
