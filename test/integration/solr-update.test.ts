@@ -137,7 +137,7 @@ integrationTest("Solr delete-by-query removes all matching documents and preserv
 }) => {
   const group = createId("delete_query");
   const otherGroup = createId("keep_query");
-  const deletedIds = [createId("delete_doc"), createId("delete_doc")];
+  const deletedIds = [createId("delete_doc"), createId("delete_doc")] as const;
   const keptId = createId("keep_doc");
 
   await addDocuments([
