@@ -9,6 +9,7 @@
 - [Config API](config.md)
 - [Administration](administration.md)
 - [Replication API](replication.md)
+- [Backup and restore APIs](backup-restore.md)
 - [Error handling](errors.md)
 - [Raw requests](raw-requests.md)
 - [API coverage](api-coverage.md)
