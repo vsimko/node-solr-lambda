@@ -4,6 +4,24 @@ The ReplicationHandler is a per-core V1 request handler at `/solr/{core}/replica
 
 The typed client exposes the documented non-backup commands. Backup and restore operations are tracked separately in [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96).
 
+## Configure a leader
+
+The server must expose the ReplicationHandler with a leader configuration before it can produce a replicable file generation. For example, the Config API can add the handler to a core:
+
+```ts
+await client.config({
+  "add-requesthandler": {
+    name: "/replication",
+    class: "solr.ReplicationHandler",
+    customOptions: {
+      leader: { replicateAfter: "commit" }
+    }
+  }
+});
+```
+
+This configures the server; the client does not enable or disable handler configuration automatically. The `replicateAfter` setting determines when the handler publishes a new replicable generation.
+
 ## Read replication state
 
 ```ts
