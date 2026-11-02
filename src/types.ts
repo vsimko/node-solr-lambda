@@ -245,12 +245,15 @@ export interface SolrConfigPlugin {
   class: string;
   startup?: "lazy" | "eager";
   initParams?: Readonly<Record<string, SolrConfigValue>>;
+  /** Explicit escape hatch for plugin-specific settings; flattened into the component definition. */
+  customOptions?: Readonly<Record<string, SolrConfigValue>>;
 }
 export interface SolrRequestHandlerConfig extends SolrConfigPlugin {
   defaults?: Readonly<Record<string, SolrConfigValue>>;
   appends?: Readonly<Record<string, SolrConfigValue>>;
   invariants?: Readonly<Record<string, SolrConfigValue>>;
   useParams?: string | readonly string[];
+  components?: string | readonly string[];
 }
 export interface SolrSearchComponentConfig extends SolrConfigPlugin {
   query?: Readonly<Record<string, SolrConfigValue>>;
@@ -262,17 +265,15 @@ export interface SolrQueryResponseWriterConfig extends SolrConfigPlugin {
   contentType?: string;
   charset?: string;
 }
-export interface SolrCacheConfig extends SolrConfigPlugin {
-  size?: number;
-  initialSize?: number;
-  autowarmCount?: number | string;
-  maxRamMB?: number;
-  cleanupThread?: boolean;
+export interface SolrInitParamsConfig {
+  name: string;
+  params: Readonly<Record<string, SolrConfigValue>>;
+  customOptions?: Readonly<Record<string, SolrConfigValue>>;
 }
 export interface SolrListenerConfig extends SolrConfigPlugin {
   event: string;
-  enabled?: boolean;
 }
+export interface SolrOtherComponentConfig extends SolrConfigPlugin {}
 export type SolrConfigCommand =
   | { "set-property": Readonly<Record<string, SolrConfigValue>> }
   | { "unset-property": string | readonly string[] }
@@ -287,11 +288,30 @@ export type SolrConfigCommand =
   | { "add-queryresponsewriter": SolrQueryResponseWriterConfig }
   | { "update-queryresponsewriter": SolrQueryResponseWriterConfig }
   | { "delete-queryresponsewriter": string }
-  | { "add-cache": SolrCacheConfig }
-  | { "update-cache": SolrCacheConfig }
-  | { "delete-cache": string }
+  | { "add-initparams": SolrInitParamsConfig }
+  | { "update-initparams": SolrInitParamsConfig }
+  | { "delete-initparams": string }
+  | { "add-queryparser": SolrOtherComponentConfig }
+  | { "update-queryparser": SolrOtherComponentConfig }
+  | { "delete-queryparser": string }
+  | { "add-valuesourceparser": SolrOtherComponentConfig }
+  | { "update-valuesourceparser": SolrOtherComponentConfig }
+  | { "delete-valuesourceparser": string }
+  | { "add-transformer": SolrOtherComponentConfig }
+  | { "update-transformer": SolrOtherComponentConfig }
+  | { "delete-transformer": string }
+  | { "add-updateprocessor": SolrOtherComponentConfig }
+  | { "update-updateprocessor": SolrOtherComponentConfig }
+  | { "delete-updateprocessor": string }
+  | { "add-queryconverter": SolrOtherComponentConfig }
+  | { "update-queryconverter": SolrOtherComponentConfig }
+  | { "delete-queryconverter": string }
   | { "add-listener": SolrListenerConfig }
-  | { "delete-listener": string };
+  | { "update-listener": SolrListenerConfig }
+  | { "delete-listener": string }
+  | { "add-expressible": SolrOtherComponentConfig }
+  | { "update-expressible": SolrOtherComponentConfig }
+  | { "delete-expressible": string };
 
 export type SolrAuth =
   | { type: "basic"; username: string; password?: string }
