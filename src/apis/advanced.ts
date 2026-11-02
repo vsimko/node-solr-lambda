@@ -7,6 +7,11 @@ export function stream<T>(client: SolrTransport, path: string, expression: strin
 
 function serializeExportSort(sort: SolrExportParams["sort"]): string {
   const clauses = Array.isArray(sort) ? sort : [sort];
+  if (clauses.length === 0 || clauses.some(clause =>
+    typeof clause === "string" ? !clause.trim() : !clause.field.trim()
+  )) {
+    throw new TypeError("Export sort must contain non-empty criteria");
+  }
   return clauses.map(clause => typeof clause === "string"
     ? clause
     : `${clause.field} ${clause.direction}`).join(", ");
