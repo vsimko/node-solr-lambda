@@ -556,7 +556,7 @@
         "test/replication-api-types.ts",
         "test/integration/solr-replication.test.ts"
       ],
-      "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, enablepoll, disablepoll, details, and filelist; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, and filecontent. Leader/follower control command serialization has unit tests, but a multi-core leader/follower replication cycle is not yet certified. Core backup/restore commands (backup, restore, restorestatus, deletebackup) remain deferred to Issue #96. Filelist sends both generation and legacy indexversion aliases."
+      "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, enablepoll, disablepoll, details, and filelist; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, and filecontent. Leader/follower control command serialization has unit tests, but a multi-core leader/follower replication cycle is not yet certified. Core backup/restore commands (backup, restore, restorestatus, deletebackup) remain deferred to Issue #96. Filelist uses the generation returned by newer Solr indexversion responses and falls back to the legacy indexversion parameter when that field is absent."
     }
   ]
 }
