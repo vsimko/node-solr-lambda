@@ -2,7 +2,7 @@
 
 The ReplicationHandler is a per-core V1 request handler at `/solr/{core}/replication`. It supports user-managed leader/follower index replication and is also used internally by SolrCloud for peer-to-peer shard recovery. Do not configure the user-managed leader/follower settings on a SolrCloud core.
 
-The typed client exposes the documented non-backup commands. Backup and restore operations are tracked separately in [Issue #96](https://github.com/vsimko/node-solr-lambda/issues/96).
+The typed client exposes the documented replication commands and core-level backup/restore controls. See the [backup and restore guide](backup-restore.md) for snapshot lifecycle and SolrCloud collection backups.
 
 ## Configure a leader
 
@@ -97,9 +97,9 @@ Supported directory types are `file` (Lucene index files), `cf` (configuration f
 
 ## Scope and compatibility
 
-- Typed commands: `enablereplication`, `disablereplication`, `indexversion`, `fetchindex`/`abortfetch` (Solr 10), `snappull`/`abort` (Solr 8/9), `enablepoll`, `disablepoll`, `details`, and `filelist`.
+- Typed commands: `enablereplication`, `disablereplication`, `indexversion`, `fetchindex`/`abortfetch` (Solr 10), `snappull`/`abort` (Solr 8/9), `enablepoll`, `disablepoll`, `details`, `filelist`, `backup`, `restore`, `restorestatus`, and `deletebackup`.
 - `filecontent` is exposed separately through `replicationFile()` because it returns a raw stream.
-- Core-level `backup`, `restore`, `restorestatus`, and `deletebackup` are not exposed here; see Issue #96.
+- Core-level `backup`, `restore`, `restorestatus`, and `deletebackup` are exposed through `replication()`; see [backup and restore docs](backup-restore.md).
 - The client currently exposes the V1 handler path. Solr 10.1 also documents V2 equivalents for selected file and index-version operations; no dedicated V2 wrapper is provided.
 - The handler may not be configured for user-managed leader/follower replication on every core. The server must have the appropriate ReplicationHandler configuration before control commands can be used.
 
