@@ -83,12 +83,12 @@ The query API is the most visible area where autocomplete quality directly affec
 
 ## Historical branch audit
 
-The historical branch audit requested by [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122) was completed on 2026-11-02. Only two of the nine refs listed in the earlier audit remain on GitHub:
+The historical branch audit requested by [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122) was completed on 2026-11-02. A fresh comparison against `master` on 2026-11-02 confirms that only two of the nine refs listed in the earlier audit remain on GitHub; the ahead/behind counts below are the current comparison:
 
 | Remaining historical branch | Ahead of master | Behind master | Related work accounted for |
 | --- | ---: | ---: | --- |
-| `v4.0` | 64 | 44 | Foundation and documentation in PRs #113/#114; compatibility matrix in #117; domain modules and endpoint work in #118; transport configuration/retry policy in #119. The later update/commit, atomic-update, raw-request, and response work is represented by the focused mainline PRs #152, #153, #156, #159, and #160. |
-| `v4-npm-issue-112` | 6 | 42 | Temporary lockfile bootstrap in PR #115 and the final npm/release workflow in PR #116. |
+| `v4.0` | 64 | 47 | Foundation and documentation in PRs #113/#114; compatibility matrix in #117; domain modules and endpoint work in #118; transport configuration/retry policy in #119. The later update/commit, atomic-update, raw-request, and response work is represented by the focused mainline PRs #152, #153, #156, #159, and #160. |
+| `v4-npm-issue-112` | 6 | 45 | Temporary lockfile bootstrap in PR #115 and the final npm/release workflow in PR #116. |
 
 The other seven refs from the previous inventory no longer exist: `v4-client-modules-issue-32`, `v4-config-transport-issue-33`, `v4-npm-issue-112-final`, `v4-solr-compat-issue-31`, `v4-docs-issue-114`, `v4-foundation-issue-113`, and `npm-lock-bootstrap-issue-112`.
 
