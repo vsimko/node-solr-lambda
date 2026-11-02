@@ -33,11 +33,7 @@ integrationTest("Solr MoreLikeThis component returns similar documents for each 
   });
 
   assert.ok(result.response?.docs?.some(document => document.id === ids[0]));
-  const entries = result.moreLikeThis ?? [];
-  const sourceIndex = entries.indexOf(ids[0]!);
-  assert.ok(sourceIndex >= 0);
-  const similarResult = entries[sourceIndex + 1];
-  assert.ok(similarResult && typeof similarResult === "object");
-  const similar = similarResult.docs ?? [];
+  const similar = result.moreLikeThis?.[ids[0]!]?.docs;
+  assert.ok(similar);
   assert.ok(similar.some(document => document.id === ids[1] || document.id === ids[2]));
 });
