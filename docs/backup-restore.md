@@ -12,6 +12,9 @@ await client.replication("backup", {
   numberToKeep: 5
 });
 
+// Backup runs asynchronously; inspect details until backup.status is "success".
+// Treat "failed" (or snapShootException) as an error.
+
 // Restore the latest timestamped snapshot. Restore runs asynchronously.
 await client.replication("restore");
 
