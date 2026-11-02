@@ -704,7 +704,7 @@ export type SolrAtomicUpdateDocument<
 export interface SolrUpdateOptions {
   /** Replace an existing document with the same unique key (default: true). */
   overwrite?: boolean;
-  /** Commit this document within the specified number of milliseconds. */
+  /** Request a commit within this many whole milliseconds; hard/soft behavior follows Solr commitWithin configuration. */
   commitWithin?: number;
   /** Route the update to a SolrCloud shard using the _route_ request parameter. */
   route?: string;
@@ -716,7 +716,7 @@ export interface SolrUpdateOptions {
 export interface SolrDeleteOptions extends RequestControlOptions {
   /** Route the delete to a SolrCloud shard using the _route_ request parameter. */
   route?: string;
-  /** Commit a delete-by-ID within the specified number of milliseconds. Solr ignores this for delete-by-query. */
+  /** Request a commit within this many whole milliseconds; hard/soft behavior follows Solr configuration. Solr ignores this for delete-by-query. */
   commitWithin?: number;
 }
 
