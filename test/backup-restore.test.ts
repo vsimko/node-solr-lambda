@@ -12,15 +12,16 @@ test("core backup and restore commands use ReplicationHandler parameters", async
     }
   });
 
-  await client.replication("backup", { name: "nightly", numberToKeep: 3, location: "/var/solr/backups" });
+  await client.replication("backup", { numberToKeep: 3, location: "/var/solr/backups", commitName: "before-import" });
   await client.replication("restore", { name: "nightly", location: "/var/solr/backups" });
   await client.replication("restorestatus");
   await client.replication("deletebackup", { name: "nightly", location: "/var/solr/backups" });
 
   assert.equal(urls[0]!.pathname, "/solr/catalog/replication");
   assert.equal(urls[0]!.searchParams.get("command"), "backup");
-  assert.equal(urls[0]!.searchParams.get("name"), "nightly");
+  assert.equal(urls[0]!.searchParams.get("name"), null);
   assert.equal(urls[0]!.searchParams.get("numberToKeep"), "3");
+  assert.equal(urls[0]!.searchParams.get("commitName"), "before-import");
   assert.equal(urls[1]!.searchParams.get("command"), "restore");
   assert.equal(urls[2]!.searchParams.get("command"), "restorestatus");
   assert.equal(urls[3]!.searchParams.get("command"), "deletebackup");
