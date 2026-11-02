@@ -53,12 +53,14 @@ cloudIntegrationTest("SolrCloud collection backup, list, restore, and delete cyc
   const listed = await client.collections("LISTBACKUP", { name: backupName, location });
   const backupPoint = listed.backups?.[0];
   assert.ok(backupPoint, JSON.stringify(listed));
+  assert.ok(typeof backupPoint.backupId === "number", JSON.stringify(backupPoint));
+  const backupId = backupPoint.backupId;
 
   const restore = await client.collections("RESTORE", {
     name: backupName,
     collection: target,
     location,
-    backupId: backupPoint.backupId,
+    backupId,
     async: restoreRequest
   });
   assert.equal(restore.responseHeader?.status, 0);
@@ -73,7 +75,7 @@ cloudIntegrationTest("SolrCloud collection backup, list, restore, and delete cyc
   const deleted = await client.collections("DELETEBACKUP", {
     name: backupName,
     location,
-    backupId: backupPoint.backupId!
+    backupId
   });
   assert.equal(deleted.responseHeader?.status, 0);
   await client.collections("DELETESTATUS", { requestid: backupRequest });
