@@ -1,6 +1,36 @@
 import assert from "node:assert/strict";
 import { integrationTest } from "./fixtures.js";
 
+integrationTest("Solr JSON update supports single documents, document arrays, and command objects", async ({
+  client,
+  createId
+}) => {
+  const singleId = createId("json-single");
+  const arrayId1 = createId("json-array");
+  const arrayId2 = createId("json-array");
+  const commandId = createId("json-command");
+
+  await client.add({ id: singleId, name_s: "single" });
+  await client.add([
+    { id: arrayId1, name_s: "array-one" },
+    { id: arrayId2, name_s: "array-two" }
+  ]);
+  await client.updateCommands({
+    add: { doc: { id: commandId, name_s: "command" }, overwrite: true },
+    commit: {}
+  });
+
+  for (const [id, name] of [[singleId, "single"], [arrayId1, "array-one"], [arrayId2, "array-two"], [commandId, "command"]] as const) {
+    const result = await client.query<{ response?: { numFound?: number; docs?: Array<{ id: string; name_s: string }> } }>({
+      query: `id:${id}`,
+      fields: ["id", "name_s"],
+      limit: 1
+    });
+    assert.equal(result.response?.numFound, 1);
+    assert.deepEqual(result.response?.docs, [{ id, name_s: name }]);
+  }
+});
+
 integrationTest("Solr atomic updates modify only the selected fields on the pinned server", async ({
   client,
   createId,

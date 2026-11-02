@@ -45,17 +45,76 @@ test("query serializes typed parser, operator, writer, and custom parameters", a
   assert.equal(params.get("facet.field"), "category");
 });
 
-test("add sends a document array", async () => {
-  let body = "";
+test("add sends a single document to the JSON docs convenience path", async () => {
+  let requestedUrl = "";
+  let body: unknown;
   const client = createSolrClient({
     core: "catalog",
-    fetch: async (_input, init) => {
-      body = String(init?.body);
+    fetch: async (input, init) => {
+      requestedUrl = String(input);
+      body = JSON.parse(String(init?.body));
       return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
     }
   });
   await client.add({ id: "one" });
-  assert.deepEqual(JSON.parse(body), [{ id: "one" }]);
+  assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/update/json/docs");
+  assert.deepEqual(body, { id: "one" });
+});
+
+test("add sends a document array to the standard update path", async () => {
+  let requestedUrl = "";
+  let body: unknown;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requestedUrl = String(input);
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+  await client.add([{ id: "one" }, { id: "two" }]);
+  assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/update");
+  assert.deepEqual(body, [{ id: "one" }, { id: "two" }]);
+});
+
+test("updateCommands sends a typed command object to the JSON update path", async () => {
+  let requestedUrl = "";
+  let body: unknown;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requestedUrl = String(input);
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.updateCommands({
+    add: { doc: { id: "one", title: "One" }, overwrite: false, commitWithin: 5000 },
+    delete: { query: "status:expired" },
+    commit: { waitSearcher: false },
+    optimize: { waitSearcher: false },
+    rollback: {}
+  }, { route: "tenant-a" });
+
+  assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/update/json");
+  assert.equal(new URL(requestedUrl).searchParams.get("_route_"), "tenant-a");
+  assert.deepEqual(body, {
+    add: { doc: { id: "one", title: "One" }, overwrite: false, commitWithin: 5000 },
+    delete: { query: "status:expired" },
+    commit: { waitSearcher: false },
+    optimize: { waitSearcher: false },
+    rollback: {}
+  });
+});
+
+test("updateCommands rejects empty, unknown, and malformed commands", () => {
+  const client = createSolrClient({ core: "catalog", fetch: async () => { throw new Error("fetch must not run"); } });
+  assert.throws(() => client.updateCommands({} as never), /must contain at least one command/);
+  assert.throws(() => client.updateCommands({ unknown: {} } as never), /Unsupported JSON update command/);
+  assert.throws(() => client.updateCommands({ add: { doc: [] } } as never), /requires a document object/);
+  assert.throws(() => client.updateCommands({ delete: { id: "one", query: "*:*" } } as never), /must contain an ID, ID list, or query/);
+  assert.throws(() => client.updateCommands({ add: { doc: { id: "one" }, commitWithin: -1 } }), /commitWithin must be a non-negative integer/);
 });
 
 test("add and full-document update serialize overwrite, commitWithin, and SolrCloud route", async () => {
@@ -71,11 +130,13 @@ test("add and full-document update serialize overwrite, commitWithin, and SolrCl
   await client.add({ id: "one" }, { overwrite: false, commitWithin: 5000, route: "tenant-a" });
   await client.update({ id: "two" }, { overwrite: true, route: "tenant-b" });
 
-  assert.deepEqual(requests[0]!.body, [{ id: "one" }]);
+  assert.deepEqual(requests[0]!.body, { id: "one" });
+  assert.equal(requests[0]!.url.pathname, "/solr/catalog/update/json/docs");
   assert.equal(requests[0]!.url.searchParams.get("overwrite"), "false");
   assert.equal(requests[0]!.url.searchParams.get("commitWithin"), "5000");
   assert.equal(requests[0]!.url.searchParams.get("_route_"), "tenant-a");
-  assert.deepEqual(requests[1]!.body, [{ id: "two" }]);
+  assert.deepEqual(requests[1]!.body, { id: "two" });
+  assert.equal(requests[1]!.url.pathname, "/solr/catalog/update/json/docs");
   assert.equal(requests[1]!.url.searchParams.get("overwrite"), "true");
   assert.equal(requests[1]!.url.searchParams.get("_route_"), "tenant-b");
 });
