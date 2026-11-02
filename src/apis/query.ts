@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -118,6 +118,44 @@ function applyStats(params: Record<string, unknown>, stats: SolrStatsOptions): v
   }
   if (stats.facets !== undefined) params["stats.facet"] = stats.facets;
   if (stats.calcDistinct !== undefined) params["stats.calcdistinct"] = stats.calcDistinct;
+}
+
+function applyMoreLikeThis(params: Record<string, unknown>, options: SolrMoreLikeThisOptions): void {
+  params.mlt = options.enabled ?? true;
+  if (options.enabled === false) return;
+  if (options.fields !== undefined) params["mlt.fl"] = options.fields;
+  const integerOptions = [
+    ["count", options.count],
+    ["minTermFrequency", options.minTermFrequency],
+    ["minDocumentFrequency", options.minDocumentFrequency],
+    ["maxDocumentFrequency", options.maxDocumentFrequency],
+    ["minWordLength", options.minWordLength],
+    ["maxWordLength", options.maxWordLength],
+    ["maxQueryTerms", options.maxQueryTerms],
+    ["maxParsedTokens", options.maxParsedTokens]
+  ] as const;
+  for (const [name, value] of integerOptions) {
+    if (value !== undefined && (!Number.isInteger(value) || value < 0)) {
+      throw new TypeError(`MoreLikeThis ${name} must be a non-negative integer`);
+    }
+  }
+  if (options.count !== undefined) params["mlt.count"] = options.count;
+  if (options.minTermFrequency !== undefined) params["mlt.mintf"] = options.minTermFrequency;
+  if (options.minDocumentFrequency !== undefined) params["mlt.mindf"] = options.minDocumentFrequency;
+  if (options.maxDocumentFrequency !== undefined) params["mlt.maxdf"] = options.maxDocumentFrequency;
+  if (options.maxDocumentFrequencyPercent !== undefined) {
+    if (!Number.isInteger(options.maxDocumentFrequencyPercent) || options.maxDocumentFrequencyPercent < 0 || options.maxDocumentFrequencyPercent > 100) {
+      throw new TypeError("MoreLikeThis maxDocumentFrequencyPercent must be an integer between 0 and 100");
+    }
+    params["mlt.maxdfpct"] = options.maxDocumentFrequencyPercent;
+  }
+  if (options.minWordLength !== undefined) params["mlt.minwl"] = options.minWordLength;
+  if (options.maxWordLength !== undefined) params["mlt.maxwl"] = options.maxWordLength;
+  if (options.maxQueryTerms !== undefined) params["mlt.maxqt"] = options.maxQueryTerms;
+  if (options.maxParsedTokens !== undefined) params["mlt.maxntp"] = options.maxParsedTokens;
+  if (options.boost !== undefined) params["mlt.boost"] = options.boost;
+  if (options.queryFields !== undefined) params["mlt.qf"] = options.queryFields;
+  if (options.interestingTerms !== undefined) params["mlt.interestingTerms"] = options.interestingTerms;
 }
 
 function applyGrouping(params: Record<string, unknown>, grouping: SolrGroupingOptions): void {
@@ -239,6 +277,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.highlighting !== undefined) applyHighlighting(params, query.highlighting);
   if (query.grouping !== undefined) applyGrouping(params, query.grouping);
   if (query.stats !== undefined) applyStats(params, query.stats);
+  if (query.moreLikeThis !== undefined) applyMoreLikeThis(params, query.moreLikeThis);
   if (query.expand !== undefined) applyExpand(params, query.expand);
   if (query.collapse !== undefined) {
     const filters = query.filter === undefined
@@ -261,6 +300,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.facets;
   delete params.highlighting;
   delete params.grouping;
+  delete params.moreLikeThis;
   delete params.collapse;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
