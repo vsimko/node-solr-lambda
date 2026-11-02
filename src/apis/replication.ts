@@ -70,7 +70,8 @@ export function replicationFile(
       command: "filecontent",
       [directoryType]: filePath,
       wt: "filestream",
-      ...fileOptions
+      ...Object.fromEntries(Object.entries(fileOptions).filter(([key]) => key !== "length")),
+      ...(fileOptions.length === undefined ? {} : { len: fileOptions.length })
     },
     operation: "replicationFile"
   });
