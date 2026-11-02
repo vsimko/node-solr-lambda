@@ -46,6 +46,7 @@ export interface SolrReplicationCommandResponse {
 }
 export interface SolrReplicationIndexVersionResponse extends SolrReplicationCommandResponse {
   indexversion: number | string;
+  generation?: number;
 }
 export interface SolrReplicationFileMetadata {
   name?: string;
