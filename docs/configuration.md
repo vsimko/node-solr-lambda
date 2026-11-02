@@ -38,7 +38,11 @@ const solr = createSolrClient({
 
 The legacy `username` and `password` options remain supported. Do not combine them with `auth`.
 
-Use HTTPS when you send credentials over a network. Do not store passwords or tokens in source files.
+Use HTTPS when you send credentials over a network. Do not store passwords or tokens in source files. Read them from environment variables or your deployment platform's secret manager, and rotate them according to your organization's policy.
+
+The client sends Basic/Bearer credentials in the `Authorization` request header; it does not put configured credentials in the request URL. The built-in transport does not log requests and does not copy authorization header values into its error properties. If you provide a custom `fetch` implementation or request logger, redact at least `Authorization`, `Cookie`, and any application-specific secret headers before recording request options.
+
+HTTP error bodies and parsed payloads come from the Solr server and may contain arbitrary server or application data. They do not include request headers by default, but a server or proxy could echo submitted values. Sanitize response bodies, validation details, and underlying causes before logging them in production.
 
 Header precedence, from lowest to highest:
 

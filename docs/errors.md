@@ -19,6 +19,8 @@ The client throws `SolrHttpError` when Solr returns a non-success HTTP status.
 
 The `solrError` object preserves Solr fields such as `code`, `msg`, and `metadata`. The `errorResponse` property preserves the typed response envelope, including string-form errors. The error message uses `solrError.msg` when it is available. Otherwise, it uses the HTTP status and status text.
 
+The client does not add request headers or configured Basic/Bearer credentials to error properties. The `endpoint` omits query parameters. However, `body` and `payload` are server-controlled response data and may contain echoed input; sanitize them before logging. Network error `cause` values may also originate from a custom Fetch implementation, so apply the same care when logging causes.
+
 ## `SolrNetworkError`
 
 The client throws `SolrNetworkError` when Fetch fails before a response is received, or when reading a non-streaming response body fails.
