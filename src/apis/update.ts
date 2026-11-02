@@ -74,7 +74,7 @@ export function atomicUpdate<T>(client: SolrTransport, path: string, documents: 
 
 export function add<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   const isBatch = Array.isArray(documents);
-  const requestPath = isBatch ? path : `${path.replace(/\\/$/, "")}/json/docs`;
+  const requestPath = isBatch ? path : `${path}/json/docs`;
   return client.request<T>(requestPath, {
     ...requestOptions,
     method: "POST",
@@ -85,6 +85,9 @@ export function add<T>(client: SolrTransport, path: string, documents: SolrDocum
 }
 
 function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
+  if (!commands || typeof commands !== "object" || Array.isArray(commands)) {
+    throw new TypeError("JSON update commands must be an object");
+  }
   const entries = Object.entries(commands);
   if (entries.length === 0) throw new TypeError("A JSON update command object must contain at least one command");
   const supported = new Set(["add", "delete", "commit", "optimize", "rollback"]);
@@ -95,16 +98,19 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
         !("doc" in value) || !value.doc || typeof value.doc !== "object" || Array.isArray(value.doc)) {
         throw new TypeError("JSON add command requires a document object");
       }
-      const addCommand = value as { commitWithin?: unknown };
+      const addCommand = value as { commitWithin?: unknown; overwrite?: unknown };
       if (addCommand.commitWithin !== undefined &&
         (typeof addCommand.commitWithin !== "number" || !Number.isInteger(addCommand.commitWithin) || addCommand.commitWithin < 0)) {
         throw new RangeError("JSON add commitWithin must be a non-negative integer");
+      }
+      if (addCommand.overwrite !== undefined && typeof addCommand.overwrite !== "boolean") {
+        throw new TypeError("JSON add overwrite must be a boolean");
       }
     } else if (name === "delete") {
       const validDelete = typeof value === "string" ||
         (Array.isArray(value) && value.every(id => typeof id === "string")) ||
         (!!value && typeof value === "object" && !Array.isArray(value) &&
-          (("id" in value && typeof value.id === "string") || ("query" in value && typeof value.query === "string")));
+          (("id" in value && typeof value.id === "string") !== ("query" in value && typeof value.query === "string")));
       if (!validDelete) throw new TypeError("JSON delete command must contain an ID, ID list, or query");
     } else if (!value || typeof value !== "object" || Array.isArray(value)) {
       throw new TypeError(`JSON ${name} command must be an object`);
@@ -114,7 +120,7 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
 
 export function updateCommands<T>(client: SolrTransport, path: string, commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   validateJsonUpdateCommands(commands);
-  return client.request<T>(`${path.replace(/\\/$/, "")}/json`, {
+  return client.request<T>(`${path}/json`, {
     ...requestOptions,
     method: "POST",
     body: commands,
