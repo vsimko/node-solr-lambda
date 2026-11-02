@@ -2,7 +2,8 @@ import { createSolrClient } from "../src/index.js";
 
 const client = createSolrClient({ core: "catalog" });
 
-void client.replication("backup", { name: "nightly", numberToKeep: 3 });
+void client.replication("backup", { name: "nightly" });
+void client.replication("backup", { numberToKeep: 3, commitName: "before-import" });
 void client.replication("restore", { name: "nightly" });
 void client.replication("restorestatus");
 void client.replication("deletebackup", { name: "nightly" });
@@ -11,6 +12,8 @@ void client.collections("BACKUP", { name: "nightly", collection: "catalog", incr
 void client.collections("RESTORE", { name: "nightly", collection: "catalog-restored", backupId: 1 });
 void client.collections("LISTBACKUP", { name: "nightly" });
 void client.collections("DELETEBACKUP", { name: "nightly", backupId: 1 });
+void client.collections("DELETEBACKUP", { name: "nightly", maxNumBackupPoints: 2 });
+void client.collections("DELETEBACKUP", { name: "nightly", purgeUnused: true });
 void client.collections("REQUESTSTATUS", { requestid: "backup-1" });
 void client.collections("DELETESTATUS", { requestid: "backup-1" });
 void client.collections("DELETESTATUS", { flush: true });
