@@ -34,7 +34,7 @@ integrationTest("Config API sets and unsets a typed cache property with overlay 
       if (previousSize === undefined) {
         await client.config({ "unset-property": property });
       } else {
-        await client.config({ "set-property": { [property]: previousSize } });
+        await client.config({ "set-property": { [property]: Number(previousSize) } });
       }
     }
   }
