@@ -261,6 +261,47 @@ test("update command options reject invalid values before sending a request", ()
   assert.throws(() => client.optimize({ maxSegments: 0 }), /maxSegments must be a positive integer/);
 });
 
+test("requestRaw sends raw string bodies unchanged with caller content type", async () => {
+  let requestBody: BodyInit | null | undefined;
+  let contentType: string | null = null;
+  const client = createSolrClient({
+    baseUrl: "http://localhost:8983",
+    fetch: async (_input, init) => {
+      requestBody = init?.body;
+      contentType = new Headers(init?.headers).get("content-type");
+      return new Response("accepted");
+    }
+  });
+  const xml = "<add><doc><field name=\"id\">one</field></doc></add>";
+
+  const response = await client.requestRaw("/solr/catalog/update", {
+    method: "POST",
+    body: xml,
+    headers: { "content-type": "text/xml" }
+  });
+
+  assert.equal(requestBody, xml);
+  assert.equal(contentType, "text/xml");
+  assert.equal(await response.text(), "accepted");
+});
+
+test("requestRaw continues to JSON serialize object bodies", async () => {
+  let requestBody: BodyInit | null | undefined;
+  let contentType: string | null = null;
+  const client = createSolrClient({
+    baseUrl: "http://localhost:8983",
+    fetch: async (_input, init) => {
+      requestBody = init?.body;
+      contentType = new Headers(init?.headers).get("content-type");
+      return new Response("accepted");
+    }
+  });
+
+  await client.requestRaw("/solr/catalog/update", { method: "POST", body: { add: { doc: { id: "one" } } } });
+  assert.equal(requestBody, JSON.stringify({ add: { doc: { id: "one" } } }));
+  assert.equal(contentType, "application/json");
+});
+
 test("HTTP errors retain the Solr payload", async () => {
   const client = createSolrClient({
     core: "catalog",
