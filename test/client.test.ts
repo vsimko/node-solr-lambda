@@ -379,5 +379,8 @@ test("Config API read methods preserve request controls and propagate HTTP error
     return true;
   });
   assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/config/overlay");
-  assert.equal(requestedSignal, controller.signal);
+  assert.ok(requestedSignal instanceof AbortSignal);
+  assert.equal(requestedSignal.aborted, false);
+  controller.abort();
+  assert.equal(requestedSignal.aborted, true);
 });
