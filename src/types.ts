@@ -267,7 +267,10 @@ export interface SolrQueryResponseWriterConfig extends SolrConfigPlugin {
 }
 export interface SolrInitParamsConfig {
   name: string;
-  params: Readonly<Record<string, SolrConfigValue>>;
+  path?: string | readonly string[];
+  defaults?: Readonly<Record<string, SolrConfigValue>>;
+  appends?: Readonly<Record<string, SolrConfigValue>>;
+  invariants?: Readonly<Record<string, SolrConfigValue>>;
   customOptions?: Readonly<Record<string, SolrConfigValue>>;
 }
 export interface SolrListenerConfig extends SolrConfigPlugin {
