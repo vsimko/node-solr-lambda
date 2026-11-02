@@ -278,7 +278,7 @@ test("update command options reject invalid values before sending a request", ()
   assert.throws(() => client.add({ id: "one" }, { route: "  " }), /route must be a non-empty string/);
   assert.throws(() => client.delete("one", { route: "" }), /route must be a non-empty string/);
   assert.throws(() => client.optimize({ maxSegments: 0 }), /maxSegments must be a positive integer/);
-  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true }), /expungeDeletes is not supported on a soft commit/);
+  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true } as never), /expungeDeletes is not supported on a soft commit/);
   assert.throws(() => client.commit({ maxSegments: 1 } as never), /maxSegments is optimize-only/);
 });
 
