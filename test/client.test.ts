@@ -92,13 +92,14 @@ test("updateCommands sends a typed command object to the JSON update path", asyn
   await client.updateCommands({
     add: { doc: { id: "one", title: "One" }, overwrite: false, commitWithin: 5000 },
     delete: { query: "status:expired" },
-    commit: { waitSearcher: false },
-    optimize: { waitSearcher: false },
+    commit: { waitSearcher: false, openSearcher: false },
+    optimize: { waitSearcher: false, openSearcher: false },
     rollback: {}
   }, { route: "tenant-a" });
 
   assert.equal(new URL(requestedUrl).pathname, "/solr/catalog/update/json");
   assert.equal(new URL(requestedUrl).searchParams.get("_route_"), "tenant-a");
+  assert.equal(new URL(requestedUrl).searchParams.get("openSearcher"), "false");
   assert.deepEqual(body, {
     add: { doc: { id: "one", title: "One" }, overwrite: false, commitWithin: 5000 },
     delete: { query: "status:expired" },
@@ -115,6 +116,10 @@ test("updateCommands rejects empty, unknown, and malformed commands", () => {
   assert.throws(() => client.updateCommands({ add: { doc: [] } } as never), /requires a document object/);
   assert.throws(() => client.updateCommands({ delete: { id: "one", query: "*:*" } } as never), /must contain an ID, ID list, or query/);
   assert.throws(() => client.updateCommands({ add: { doc: { id: "one" }, commitWithin: -1 } }), /commitWithin must be a non-negative integer/);
+  assert.throws(
+    () => client.updateCommands({ commit: { openSearcher: true }, optimize: { openSearcher: false } }),
+    /must use the same openSearcher value/
+  );
 });
 
 test("add and full-document update serialize overwrite, commitWithin, and SolrCloud route", async () => {
