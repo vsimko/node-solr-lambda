@@ -431,7 +431,6 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "DELETESTATUS" ? CollectionAsyncRequestDeleteParams :
   CollectionRoleParams;
 
-/** One field definition in the Schema API. */
 /** Standard response header returned by the Solr Schema API. */
 export interface SolrSchemaResponseHeader {
   status: number;
@@ -489,6 +488,7 @@ export interface SolrSchemaSimilarityResponse extends SolrSchemaCommandResponse 
   similarity?: Readonly<Record<string, unknown>>;
 }
 
+/** One field definition in the Schema API. */
 export interface SolrSchemaField {
   name: string;
   type: string;
