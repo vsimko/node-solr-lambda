@@ -15,12 +15,12 @@ const client = createSolrClient({
 const version = await client.replication("indexversion");
 const details = await client.replication("details");
 
-const files = await client.replication("filelist", {
-  generation: Number(version.indexversion)
-});
+const files = await client.replication("filelist", version.generation !== undefined
+  ? { generation: version.generation }
+  : { indexversion: Number(version.indexversion) });
 ```
 
-The `filelist` command accepts `generation` (the current documented parameter) and the legacy `indexversion` alias used by older Solr versions. The client sends both names with the same value to retain compatibility across Solr 8, 9, and 10.
+The `indexversion` response includes the current `generation` on newer Solr versions. Pass that generation to `filelist`; older Solr versions expose only `indexversion`, which is accepted as the legacy parameter. The client sends exactly the parameter name supplied so it does not confuse an index version timestamp with a generation number.
 
 ## Control a follower
 
