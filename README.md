@@ -59,6 +59,7 @@ Both ESM and CommonJS consumers are supported. The package provides conditional 
 - [Getting started](docs/getting-started.md)
 - [Query API](docs/query.md)
 - [Update API](docs/update.md)
+- [Raw requests](docs/raw-requests.md)
 - [API coverage](docs/api-coverage.md)
 - [Client architecture](docs/architecture.md)
 - [Solr compatibility](docs/compatibility.md)
