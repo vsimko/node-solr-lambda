@@ -4,11 +4,14 @@
 
 ### Added
 
+- Add end-to-end v3-to-v4 migration coverage for health checks, document add/replace/delete, and typed query read-back on Solr 8/9/10.
+
 - Add typed core-level and SolrCloud collection backup/restore APIs with asynchronous status handling.
 - Add typed V1 ReplicationHandler commands and raw file-content streaming through `replication()` and `replicationFile()`.
 
 ### Documentation
 
+- Expand the v3-to-v4 migration guide with a complete v4 CRUD example and link its compile-time and Solr integration checks.
 - Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
