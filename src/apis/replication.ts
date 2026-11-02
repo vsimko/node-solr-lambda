@@ -47,12 +47,12 @@ export function replicationFile(
   params: SolrReplicationFileContentParams,
   requestOptions: RequestControlOptions = {}
 ): Promise<Response> {
-  const { directoryType, filePath, customParams, ...fileOptions } = params;
+  const { directoryType, filePath, customParams, length, ...fileOptions } = params;
   if (!filePath.trim()) throw new TypeError("filePath must be a non-empty string");
   if (fileOptions.offset !== undefined && (!Number.isInteger(fileOptions.offset) || fileOptions.offset < 0)) {
     throw new RangeError("offset must be a non-negative integer");
   }
-  if (fileOptions.length !== undefined && (!Number.isInteger(fileOptions.length) || fileOptions.length <= 0)) {
+  if (length !== undefined && (!Number.isInteger(length) || length <= 0)) {
     throw new RangeError("length must be a positive integer");
   }
   if (fileOptions.generation !== undefined && (!Number.isInteger(fileOptions.generation) || fileOptions.generation < 0)) {
@@ -70,8 +70,8 @@ export function replicationFile(
       command: "filecontent",
       [directoryType]: filePath,
       wt: "filestream",
-      ...Object.fromEntries(Object.entries(fileOptions).filter(([key]) => key !== "length")),
-      ...(fileOptions.length === undefined ? {} : { len: fileOptions.length })
+      ...fileOptions,
+      ...(length === undefined ? {} : { len: length })
     },
     operation: "replicationFile"
   });
