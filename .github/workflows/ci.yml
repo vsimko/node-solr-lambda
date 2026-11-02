@@ -209,6 +209,7 @@ jobs:
             --network solr-cloud-net \
             --publish 8984:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
             "solr:${{ matrix.solr-version }}" \
             solr-foreground -c -z solr-cloud:9983
           for attempt in {1..60}; do
