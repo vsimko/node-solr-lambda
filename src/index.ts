@@ -1,6 +1,6 @@
 export { SolrClient } from "./client.js";
 export { SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "./errors.js";
-export type { SolrErrorDetail, SolrErrorMetadata } from "./errors.js";
+export type { SolrErrorMetadata } from "./errors.js";
 export { solrExcludeTags, solrFieldAlias, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort, solrGeofilt, solrBbox, solrGeoDistance } from "./query-helpers.js";
 export type { SolrFieldListEntry, SolrFunctionArgument, SolrLocalParamValue, SolrSortClause, SolrSortDirection, SolrSortInput, SolrSpatialFilterOptions } from "./query-helpers.js";
 export type { SolrStatsFieldOptions, SolrStatsOptions } from "./types.js";
