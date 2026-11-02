@@ -1,5 +1,7 @@
 # Solr API coverage
 
+See the [Solr endpoint inventory](endpoint-inventory.md) for the explicit typed-client boundary, deferred endpoint families, and official Solr reference sources.
+
 See [Client architecture](architecture.md) for module boundaries, type-model guidelines, and shared request conventions. The [roadmap](roadmap.md) tracks priorities and links to implementation issues.
 
 See the [machine-readable API inventory](api-inventory.json) for each operation, request path, type coverage, unit-test status, and per-version integration status.
