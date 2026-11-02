@@ -1,6 +1,6 @@
 # Config API
 
-Use `config()` with the exported `SolrConfigCommand` discriminated union. Command names select their payload models. Common property paths have dedicated value types and editor completion through `SolrConfigPropertyMap`; plugin-specific or newer properties remain available through its JSON-compatible extension index.
+Use `config()` with the exported `SolrConfigCommand` discriminated union. Command names select their payload models. Known common and version-specific property paths have dedicated value types and editor completion through `SolrConfigPropertyMap`. Unknown property names are rejected rather than silently disabling typo detection; use `requestRaw()` for Config API properties that are not modelled yet.
 
 ## Common properties: caches, query settings, and update handlers
 
@@ -25,7 +25,7 @@ await solr.config({
 });
 ```
 
-The property map includes common update-handler commit settings, filter/query-result/document/field-value cache settings, query sizing and circuit-breaker settings, and request-parser controls. Solr still validates property names and values at runtime; TypeScript types do not guarantee that a particular setting exists in every Solr version or configset.
+The property map includes common update-handler commit settings, filter/query-result/document/field-value cache settings, query sizing and circuit-breaker settings, and request-parser controls. Some entries are version-specific: circuit-breaker names differ between Solr 9 and 10, and request-dispatcher options vary by release. Solr still validates property names and values at runtime; select properties documented for the server version you operate.
 
 ## Components and plugin configuration
 
@@ -50,7 +50,7 @@ await solr.config({
 await solr.config({ "delete-requesthandler": "/select" });
 ```
 
-Typed command families include set/unset properties, request handlers, search components, query response writers, init params, query parsers, value-source parsers, transformers, update processors, query converters, listeners, and expressible components. Cache settings are configured through `set-property`, not through a separate cache command. Plugin-specific properties can be supplied through the explicit `customOptions` escape hatch, which is flattened into the native component definition.
+Typed command families include set/unset properties, request handlers, search components, query response writers, init params, query parsers, value-source parsers, transformers, update processors, query converters, listeners, and expressible components. Cache settings are configured through `set-property`, not through a separate cache command. Plugin-specific component properties can be supplied through the explicit `customOptions` escape hatch, which is flattened into the native component definition.
 
 ## Read effective config and overlay responses
 
@@ -78,6 +78,6 @@ Config API writes update `configoverlay.json`; they do not edit `solrconfig.xml`
 The V1 Config API is used by `config()` at `/solr/{core-or-collection}/config`. Solr 10.1 also documents V2 routes, but this client does not claim support for those V2 routes. The common cache property `query.filterCache.size` is integration-tested with set, overlay read-back, and unset on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Other component-specific settings and plugin values are type/serialization-covered but require target-version integration tests before claiming runtime compatibility.
 
 Official references:
-- [Solr 8.11 Config API (draft reference guide)](https://nightlies.apache.org/solr/draft-guides/solr-reference-guide-8.x/config-api.html)
-- [Solr 9.5 Config API](https://solr.apache.org/guide/solr/9_5/configuration-guide/config-api.html)
+- [Solr 8.11 Config API (draft reference guide)](https://solr.apache.org/guide/8_11/config-api.html)
+- [Solr 9.5 Config API](https://solr.apache.org/guide/solr/9_11/configuration-guide/config-api.html)
 - [Solr 10.1 Config API](https://solr.apache.org/guide/solr/10_1/configuration-guide/config-api.html)
