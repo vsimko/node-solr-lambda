@@ -1,6 +1,6 @@
 # Getting started
 
-Use Node.js 20, 22, or 24. The target Solr server lines are 8.x, 9.x, and 10.x. Real-server compatibility is not yet verified. Check the [API coverage matrix](api-coverage.md) and [compatibility policy](compatibility.md) before you depend on an endpoint.
+Use Node.js 20, 22, or 24. The client targets Solr 8.x, 9.x, and 10.x. Integration evidence is operation-specific and is recorded in the [API coverage matrix](api-coverage.md) and [compatibility policy](compatibility.md); do not infer support for every Solr endpoint from the target version range.
 
 Install the package:
 
@@ -8,7 +8,7 @@ Install the package:
 npm install node-solr-lambda
 ```
 
-Create a client. Set the Solr base URL and the core or collection name.
+Create a client. Set the Solr base URL and exactly one core or collection name.
 
 ```ts
 import { createSolrClient } from "node-solr-lambda";
@@ -22,9 +22,7 @@ const result = await solr.query({ query: "*:*", limit: 10 });
 console.log(result);
 ```
 
-Common query properties are typed. The type model is being expanded so that supported Solr parameters and nested options are discoverable through IDE autocomplete. Use the explicit `params` property for additional parameters that do not yet have a dedicated public type. See the [development roadmap](roadmap.md).
-
-The client does not create a core or collection. Create it before you send a request.
+The client does not create a core or collection. Create it on the Solr server before sending requests.
 
 ## ESM, CommonJS, and TypeScript
 
@@ -46,14 +44,22 @@ const solr = createSolrClient({ collection: "catalog" });
 
 TypeScript consumers use conditional declarations for the selected module system. The package also keeps a top-level `types` entry for TypeScript tooling that does not use NodeNext package conditions.
 
-## Local development
+## Runtime validation
 
-Install the exact dependency tree from the lockfile and run the checks:
+Validation is disabled by default. Zod is an optional peer dependency; install it only when using application-defined input/output schemas:
 
 ```sh
-npm ci
-npm run typecheck
-npm run test:types
-npm test
-npm run build
+npm install zod
 ```
+
+See [runtime validation](validation.md) for configuration and examples.
+
+## Next steps
+
+- [Client configuration](configuration.md)
+- [Query API](query.md)
+- [Update API](update.md)
+- [API coverage](api-coverage.md)
+- [Solr compatibility](compatibility.md)
+- [Migration from v3 to v4](migration-v3-to-v4.md)
+
