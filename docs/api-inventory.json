@@ -87,7 +87,7 @@
         "test/cancellation.types.ts",
         "test/integration/solr-update.test.ts"
       ],
-      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates."
+      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0."
     },
     {
       "id": "update.update",
@@ -110,7 +110,7 @@
         "test/integration/solr-update.test.ts",
         "test/cancellation.types.ts"
       ],
-      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates."
+      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0."
     },
     {
       "id": "update.delete",
@@ -501,6 +501,20 @@
         "test/cancellation.test.ts"
       ],
       "notes": "Generic raw-response escape hatch. It does not imply typed support for every Solr endpoint."
+    },
+    {
+      "id": "update.commands",
+      "area": "Update",
+      "method": "SolrClient.updateCommands",
+      "path": "/update/json",
+      "typeCoverage": "complete",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts"
+      ],
+      "documentation": "docs/update.md",
+      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested."
     }
   ]
 }
