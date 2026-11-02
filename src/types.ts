@@ -130,7 +130,7 @@ export interface SolrRetryPolicy {
 
 export interface SolrRequestDefaults {
   /** Query parameters added only when the request does not set the same key. */
-  params?: Readonly<Record<string, string | number | boolean | readonly (string | number)[]>>;
+  params?: Readonly<Record<string, SolrQueryParamValue>>;
   /** Headers applied before client-level and per-request headers. */
   headers?: Readonly<Record<string, string>>;
 }
@@ -173,7 +173,8 @@ export type SolrQueryOperator = "AND" | "OR";
 /** Common Solr response writers. Custom writer names remain accepted. */
 export type SolrResponseWriter = "json" | "xml" | "csv" | "javabin" | (string & {});
 
-export type SolrQueryParamValue = string | number | boolean | readonly (string | number)[];
+export type SolrQueryParamScalar = string | number | boolean | Date | null;
+export type SolrQueryParamValue = SolrQueryParamScalar | readonly SolrQueryParamScalar[];
 
 /** One structured filter query. Raw filter strings remain supported alongside this model. */
 export interface SolrFilterQuery {
@@ -903,7 +904,7 @@ export interface RequestControlOptions {
 
 export interface RequestOptions extends RequestControlOptions {
   method?: SolrHttpMethod;
-  query?: URLSearchParams | Record<string, string | number | boolean | readonly (string | number)[]>;
+  query?: URLSearchParams | Record<string, SolrQueryParamValue>;
   body?: unknown;
   operation?: string;
 }
