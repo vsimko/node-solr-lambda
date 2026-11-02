@@ -113,3 +113,83 @@ integrationTest("Schema API adds, replaces, and deletes a field type with analyz
   const afterDelete = await readFieldTypes();
   assert.equal(afterDelete.fieldTypes?.some(candidate => candidate.name === name), false);
 });
+
+integrationTest("Schema API adds, replaces, and deletes a dynamic field rule", async ({
+  client,
+  createId,
+  addSchemaDynamicField,
+  deleteSchemaDynamicField
+}) => {
+  const name = `*_${createId("dynamic_field")}`;
+  const added = await addSchemaDynamicField({ name, type: "string", stored: true, indexed: true });
+  assert.equal(added.responseHeader?.status, 0);
+
+  const readDynamicFields = () => client.request<{
+    dynamicFields?: Array<{ name?: string; type?: string; stored?: boolean; indexed?: boolean }>;
+  }>(`/${process.env.SOLR_CORE}/schema/dynamicfields`, { method: "GET" });
+
+  const initial = await readDynamicFields();
+  const initialField = initial.dynamicFields?.find(field => field.name === name);
+  assert.ok(initialField, `schema should contain dynamic field ${name}`);
+  assert.equal(initialField.type, "string");
+
+  const replaced = await client.schema({
+    "replace-dynamic-field": { name, type: "text_general", stored: true, indexed: true }
+  });
+  assert.equal(replaced.responseHeader?.status, 0);
+
+  const afterReplace = await readDynamicFields();
+  const replacedField = afterReplace.dynamicFields?.find(field => field.name === name);
+  assert.ok(replacedField, `schema should contain replaced dynamic field ${name}`);
+  assert.equal(replacedField.type, "text_general");
+
+  const deleted = await deleteSchemaDynamicField(name);
+  assert.equal(deleted.responseHeader?.status, 0);
+  const afterDelete = await readDynamicFields();
+  assert.equal(afterDelete.dynamicFields?.some(field => field.name === name), false);
+});
+
+integrationTest("Schema API adds, replaces, and deletes copy-field rules", async ({
+  client,
+  createId,
+  addSchemaField,
+  addSchemaCopyField,
+  deleteSchemaCopyField
+}) => {
+  const source = createId("copy_source");
+  const firstDestination = createId("copy_first");
+  const oldDestination = createId("copy_old");
+  const newDestination = createId("copy_new");
+  await addSchemaField(source);
+  await addSchemaField(firstDestination);
+  await addSchemaField(oldDestination);
+  await addSchemaField(newDestination);
+
+  const added = await addSchemaCopyField({ source, dest: [firstDestination, oldDestination], maxChars: 128 });
+  assert.equal(added.responseHeader?.status, 0);
+
+  const readCopyFields = () => client.request<{
+    copyFields?: Array<{ source?: string; dest?: string; maxChars?: number }>;
+  }>(`/${process.env.SOLR_CORE}/schema/copyfields`, { method: "GET" });
+
+  const initial = await readCopyFields();
+  assert.ok(initial.copyFields?.some(rule => rule.source === source && rule.dest === firstDestination));
+  assert.ok(initial.copyFields?.some(rule => rule.source === source && rule.dest === oldDestination));
+
+  // Solr has no replace-copy-field command: replacement is delete + add.
+  const removed = await deleteSchemaCopyField(source, oldDestination);
+  assert.equal(removed.responseHeader?.status, 0);
+  const replaced = await addSchemaCopyField({ source, dest: newDestination, maxChars: 64 });
+  assert.equal(replaced.responseHeader?.status, 0);
+
+  const afterReplace = await readCopyFields();
+  assert.ok(afterReplace.copyFields?.some(rule => rule.source === source && rule.dest === firstDestination));
+  assert.equal(afterReplace.copyFields?.some(rule => rule.source === source && rule.dest === oldDestination), false);
+  assert.ok(afterReplace.copyFields?.some(rule => rule.source === source && rule.dest === newDestination));
+
+  const deleted = await deleteSchemaCopyField(source, firstDestination);
+  assert.equal(deleted.responseHeader?.status, 0);
+  await deleteSchemaCopyField(source, newDestination);
+  const afterDelete = await readCopyFields();
+  assert.equal(afterDelete.copyFields?.some(rule => rule.source === source), false);
+});
