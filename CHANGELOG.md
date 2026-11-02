@@ -4,6 +4,7 @@
 
 ### Added
 
+- Add typed core-level and SolrCloud collection backup/restore APIs with asynchronous status handling.
 - Add typed V1 ReplicationHandler commands and raw file-content streaming through `replication()` and `replicationFile()`.
 
 ### Documentation

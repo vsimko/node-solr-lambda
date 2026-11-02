@@ -37,10 +37,14 @@ jobs:
       - run: npm ci
       - name: Start standalone Solr with pre-created integration core
         run: |
+          mkdir -p "$RUNNER_TEMP/solr-backups"
+          chmod 777 "$RUNNER_TEMP/solr-backups"
           docker run --detach \
             --name solr \
+            --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
             "solr:${{ matrix.solr-version }}" \
             solr-precreate integration
       - name: Wait for Solr and integration core
@@ -62,6 +66,7 @@ jobs:
         env:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CORE: integration
+          SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print Solr logs
         if: always()
         run: docker logs solr || true
@@ -110,10 +115,14 @@ jobs:
           chmod 666 security.json
       - name: Start Solr with security enabled
         run: |
+          mkdir -p "$RUNNER_TEMP/solr-backups"
+          chmod 777 "$RUNNER_TEMP/solr-backups"
           docker create \
             --name solr-secure \
+            --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
             --entrypoint /bin/bash \
             "solr:${{ matrix.solr-version }}" \
             -lc 'mkdir -p /var/solr/data && cp /tmp/security.json /var/solr/data/security.json && chmod 666 /var/solr/data/security.json && exec docker-entrypoint.sh solr-precreate integration'
@@ -141,6 +150,7 @@ jobs:
           SOLR_SECURITY: "true"
           SOLR_USERNAME: integration-admin
           SOLR_PASSWORD: integration-password
+          SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print secure Solr logs
         if: always()
         run: docker logs solr-secure || true
@@ -157,15 +167,21 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
+      - name: Prepare shared backup storage
+        run: |
+          mkdir -p "$RUNNER_TEMP/solr-backups"
+          chmod 777 "$RUNNER_TEMP/solr-backups"
       - name: Start SolrCloud
         run: |
           docker network create solr-cloud-net
           docker run --detach \
             --name solr-cloud \
+            --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --network solr-cloud-net \
             --network-alias solr-cloud \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
             "solr:${{ matrix.solr-version }}" \
             solr-foreground -c
       - name: Wait for SolrCloud
@@ -199,9 +215,11 @@ jobs:
         run: |
           docker run --detach \
             --name solr-cloud-2 \
+            --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --network solr-cloud-net \
             --publish 8984:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
             "solr:${{ matrix.solr-version }}" \
             solr-foreground -c -z solr-cloud:9983
           for attempt in {1..60}; do
@@ -221,6 +239,7 @@ jobs:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CLOUD: "true"
           SOLR_MULTINODE: "true"
+          SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print SolrCloud logs
         if: always()
         run: |

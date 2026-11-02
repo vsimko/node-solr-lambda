@@ -13,6 +13,8 @@ import "./solr-cursor.test.js";
 import "./solr-schema.test.js";
 import "./solr-security.test.js";
 import "./solr-replication.test.js";
+import "./solr-core-backup-restore.test.js";
+import "./solrcloud-backup-restore.test.js";
 import "./solr-smoke.test.js";
 import "./solr-streaming.test.js";
 import "./solr-system-metrics.test.js";

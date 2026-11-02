@@ -11,9 +11,9 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import * as replicationApi from "./apis/replication.js";
 import type {
-  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrSchemaCommand,
+  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrSchemaCommand, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -106,7 +106,13 @@ export class SolrClient extends SolrTransport {
 
   collections<T = unknown>(action: "LIST" | "LISTALIASES", params?: CollectionAdminParams<"LIST" | "LISTALIASES">, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = unknown>(action: "CLUSTERSTATUS", params?: CollectionAdminParams<"CLUSTERSTATUS">, requestOptions?: RequestControlOptions): Promise<T>;
-  collections<T = unknown, A extends Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS"> = Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS">>(action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionBackupResponse>(action: "BACKUP", params: CollectionBackupParams, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionBackupResponse>(action: "RESTORE", params: CollectionRestoreParams, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionBackupListResponse>(action: "LISTBACKUP", params: CollectionListBackupParams, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionBackupDeleteResponse>(action: "DELETEBACKUP", params: CollectionDeleteBackupParams, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionAsyncRequestStatusResponse>(action: "REQUESTSTATUS", params: CollectionAsyncRequestStatusParams, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionAsyncRequestDeleteResponse>(action: "DELETESTATUS", params: CollectionAsyncRequestDeleteParams, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = unknown, A extends Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS"> = Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS">>(action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
@@ -116,7 +122,12 @@ export class SolrClient extends SolrTransport {
     params: SolrReplicationFileListParams,
     requestOptions?: RequestControlOptions
   ): Promise<SolrReplicationFileListResponse>;
-  replication<A extends Exclude<SolrReplicationCommand, "filelist">>(
+  replication(
+    command: "deletebackup",
+    params: SolrReplicationDeleteBackupParams,
+    requestOptions?: RequestControlOptions
+  ): Promise<SolrReplicationResponse<"deletebackup">>;
+  replication<A extends Exclude<SolrReplicationCommand, "filelist" | "deletebackup">>(
     command: A,
     params?: SolrReplicationParams<A>,
     requestOptions?: RequestControlOptions
