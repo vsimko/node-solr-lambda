@@ -107,37 +107,6 @@ A custom unique-key field can be supplied as the second generic parameter when t
 
 Atomic updates require Solr schema fields to be stored or docValues-backed (subject to Solr's documented copyField/derived-field exceptions). The client validates that each update has one unique-key value and at least one valid modifier, and rejects malformed modifier objects before sending the request.
 
-## Atomic and partial document updates
-
-Use `atomicUpdate<TDocument>()` when changing selected fields without replacing the full document. The unique-key field (by default `id`) remains a plain value; every changed field must use exactly one Solr modifier.
-
-```ts
-interface Product {
-  id: string;
-  title: string;
-  price: number;
-  tags: string[];
-}
-
-await solr.atomicUpdate<Product>({
-  id: "book-1",
-  title: { set: "Revised title" },
-  price: { inc: 2.5 },
-  tags: { "add-distinct": "featured" }
-});
-```
-
-The field-specific `SolrAtomicUpdateOperation<TValue>` model supports:
-
-- `set`: replace a field value (or clear it with `null`).
-- `add`, `add-distinct`, and `remove`: operate on fields modelled as arrays.
-- `removeregex`: remove matching values from a string-array field (this is Solr's exact wire spelling).
-- `inc`: increment or decrement a numeric field.
-
-A custom unique-key field can be supplied as the second generic parameter, for example `SolrAtomicUpdateDocument<Product, "sku">`. For nested documents, include `_root_` and, where needed, pass the root ID using the existing `route` option.
-
-Atomic updates require schema fields to be stored or docValues-backed, subject to Solr's documented copyField and derived-field exceptions. The client validates that each update contains one unique-key value and at least one valid modifier, and rejects malformed modifier objects before sending the request.
-
 ## Delete by ID or query
 
 ```ts
@@ -147,21 +116,27 @@ await solr.delete({ query: "status:expired" }, { route: "tenant-b" });
 
 `SolrDeleteOptions` accepts `route` and `commitWithin`, plus the usual request controls (`signal`, `timeoutMs`, and `headers`). Solr ignores `commitWithin` for delete-by-query, so use it only with delete-by-ID.
 
-## Commit, optimize, and rollback
+## Commit, soft commit, and optimize semantics
 
 ```ts
-await solr.commit({ waitSearcher: true });
-await solr.softCommit();
-await solr.optimize({ maxSegments: 2, waitSearcher: false });
-// Or preserve the numeric shorthand:
-await solr.optimize(2);
+await solr.commit({ waitSearcher: true, openSearcher: true });
+await solr.softCommit(); // waits for the new searcher by default
+await solr.optimize({ maxSegments: 2, waitSearcher: true });
 await solr.rollback();
 ```
 
-- `commit()` sends a commit command with the supplied `CommitOptions`.
-- `softCommit()` sends `softCommit: true` and `waitSearcher: false`.
-- `optimize()` accepts either a `SolrOptimizeOptions` object or the legacy numeric `maxSegments` shorthand. Omit `maxSegments` to leave the merge target to Solr.
+- `SolrCommitOptions` models hard commit (`softCommit: false` or omitted), `waitSearcher`, `expungeDeletes`, and `openSearcher`. `expungeDeletes` is valid only for hard commits.
+- `SolrSoftCommitOptions` exposes `waitSearcher` and `openSearcher`; `softCommit()` sets `softCommit: true` and defaults `waitSearcher` to `true`, so it waits until the new searcher is registered.
+- `openSearcher` is sent as a request parameter, not inside the JSON commit/optimize command. It defaults to `true`. Set it to `false` when the commit should not open a searcher; changes will not become searchable until a later searcher is opened.
+- `waitSearcher` defaults to `true`. It waits for registration of a searcher when one is opened; it does not itself cause a searcher to open.
+- `expungeDeletes` removes deleted documents during a hard commit and defaults to `false`. It is rejected for soft commits.
+- `optimize()` accepts `SolrOptimizeOptions` or the numeric `maxSegments` shorthand. `maxSegments` is optimize-only and defaults to Solr's unlimited merge target. Optimize can be expensive and is generally appropriate for static or low-update indexes, not as a routine substitute for commits.
+- The legacy `CommitOptions` type remains deprecated for source compatibility; `maxSegments` on `commit()` is rejected. Use `SolrCommitOptions` and `SolrOptimizeOptions`.
 - `rollback()` discards uncommitted updates since the last commit.
+
+### commitWithin behavior
+
+`commitWithin` schedules a commit within the requested number of milliseconds. Solr's configured `commitWithin` policy determines whether that scheduled commit is soft or hard; the client does not force a commit type. The default Solr policy is a soft commit, but `solrconfig.xml` can change it. This is configuration-dependent and is not asserted as a hard/soft guarantee by the client.
 
 ## Compatibility
 
