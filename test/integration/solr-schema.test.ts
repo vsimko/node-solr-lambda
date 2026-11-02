@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { integrationTest } from "./fixtures.js";
+import type { SolrSchemaReadResponse, SolrSchemaNameResponse, SolrSchemaVersionResponse, SolrSchemaUniqueKeyResponse, SolrSchemaSimilarityResponse } from "../../src/index.js";
 
 integrationTest("Schema API adds and reads an isolated field definition", async ({
   client,
@@ -192,4 +193,29 @@ integrationTest("Schema API adds, replaces, and deletes copy-field rules", async
   await deleteSchemaCopyField(source, newDestination);
   const afterDelete = await readCopyFields();
   assert.equal(afterDelete.copyFields?.some(rule => rule.source === source), false);
+});
+
+integrationTest("Schema API read endpoints expose consistent metadata response envelopes", async ({ client }) => {
+  const basePath = `/${process.env.SOLR_CORE}/schema`;
+  const [full, name, version, uniqueKey, similarity] = await Promise.all([
+    client.request<SolrSchemaReadResponse>(basePath, { method: "GET" }),
+    client.request<SolrSchemaNameResponse>(`${basePath}/name`, { method: "GET" }),
+    client.request<SolrSchemaVersionResponse>(`${basePath}/version`, { method: "GET" }),
+    client.request<SolrSchemaUniqueKeyResponse>(`${basePath}/uniquekey`, { method: "GET" }),
+    client.request<SolrSchemaSimilarityResponse>(`${basePath}/similarity`, { method: "GET" })
+  ]);
+
+  assert.equal(full.responseHeader?.status, 0);
+  assert.equal(name.responseHeader?.status, 0);
+  assert.equal(version.responseHeader?.status, 0);
+  assert.equal(uniqueKey.responseHeader?.status, 0);
+  assert.equal(similarity.responseHeader?.status, 0);
+
+  assert.ok(full.schema?.name);
+  assert.equal(name.name, full.schema?.name);
+  assert.ok(typeof full.schema?.version === "number");
+  assert.equal(version.version, full.schema?.version);
+  assert.ok(full.schema?.uniqueKey);
+  assert.equal(uniqueKey.uniqueKey, full.schema?.uniqueKey);
+  assert.ok(similarity.similarity);
 });
