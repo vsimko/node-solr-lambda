@@ -160,6 +160,180 @@ export type SolrAdminCustomParams = SolrAdminParams;
 /** Values accepted by Config API properties and plugin configuration. */
 export type SolrConfigValue = string | number | boolean | null | readonly SolrConfigValue[] | { readonly [key: string]: SolrConfigValue };
 
+/** Common Config API property names documented across the pinned Solr 8.11, 9.11, and 10.1 baselines. */
+export type SolrConfigPropertyName =
+  | "updateHandler.autoCommit.maxDocs"
+  | "updateHandler.autoCommit.maxTime"
+  | "updateHandler.autoCommit.openSearcher"
+  | "updateHandler.autoSoftCommit.maxDocs"
+  | "updateHandler.autoSoftCommit.maxTime"
+  | "updateHandler.commitWithin.softCommit"
+  | "query.filterCache.class"
+  | "query.filterCache.size"
+  | "query.filterCache.initialSize"
+  | "query.filterCache.autowarmCount"
+  | "query.filterCache.maxRamMB"
+  | "query.filterCache.regenerator"
+  | "query.queryResultCache.class"
+  | "query.queryResultCache.size"
+  | "query.queryResultCache.initialSize"
+  | "query.queryResultCache.autowarmCount"
+  | "query.queryResultCache.maxRamMB"
+  | "query.queryResultCache.regenerator"
+  | "query.documentCache.class"
+  | "query.documentCache.size"
+  | "query.documentCache.initialSize"
+  | "query.documentCache.autowarmCount"
+  | "query.documentCache.regenerator"
+  | "query.fieldValueCache.class"
+  | "query.fieldValueCache.size"
+  | "query.fieldValueCache.initialSize"
+  | "query.fieldValueCache.autowarmCount"
+  | "query.fieldValueCache.regenerator"
+  | "query.maxBooleanClauses"
+  | "query.enableLazyFieldLoading"
+  | "query.useFilterForSortedQuery"
+  | "query.queryResultWindowSize"
+  | "query.queryResultMaxDocCached"
+  | "requestDispatcher.requestParsers.multipartUploadLimitInKB"
+  | "requestDispatcher.requestParsers.formdataUploadLimitInKB";
+
+/** Values are constrained by the corresponding common Config API property. */
+export interface SolrConfigPropertyValueMap {
+  "updateHandler.autoCommit.maxDocs"?: number;
+  "updateHandler.autoCommit.maxTime"?: number;
+  "updateHandler.autoCommit.openSearcher"?: boolean;
+  "updateHandler.autoSoftCommit.maxDocs"?: number;
+  "updateHandler.autoSoftCommit.maxTime"?: number;
+  "updateHandler.commitWithin.softCommit"?: boolean;
+  "query.filterCache.class"?: string;
+  "query.filterCache.size"?: number;
+  "query.filterCache.initialSize"?: number;
+  "query.filterCache.autowarmCount"?: number | string;
+  "query.filterCache.maxRamMB"?: number;
+  "query.filterCache.regenerator"?: string;
+  "query.queryResultCache.class"?: string;
+  "query.queryResultCache.size"?: number;
+  "query.queryResultCache.initialSize"?: number;
+  "query.queryResultCache.autowarmCount"?: number | string;
+  "query.queryResultCache.maxRamMB"?: number;
+  "query.queryResultCache.regenerator"?: string;
+  "query.documentCache.class"?: string;
+  "query.documentCache.size"?: number;
+  "query.documentCache.initialSize"?: number;
+  "query.documentCache.autowarmCount"?: number | string;
+  "query.documentCache.regenerator"?: string;
+  "query.fieldValueCache.class"?: string;
+  "query.fieldValueCache.size"?: number;
+  "query.fieldValueCache.initialSize"?: number;
+  "query.fieldValueCache.autowarmCount"?: number | string;
+  "query.fieldValueCache.regenerator"?: string;
+  "query.maxBooleanClauses"?: number;
+  "query.enableLazyFieldLoading"?: boolean;
+  "query.useFilterForSortedQuery"?: boolean;
+  "query.queryResultWindowSize"?: number;
+  "query.queryResultMaxDocCached"?: number;
+  "requestDispatcher.requestParsers.multipartUploadLimitInKB"?: number;
+  "requestDispatcher.requestParsers.formdataUploadLimitInKB"?: number;
+}
+export type SolrConfigPropertyValues = Partial<SolrConfigPropertyValueMap>;
+
+/** Response header returned by Config API mutation commands. */
+export interface SolrConfigResponseHeader {
+  status: number;
+  QTime?: number;
+  [key: string]: unknown;
+}
+export interface SolrConfigCommandResponse {
+  responseHeader?: SolrConfigResponseHeader;
+  [key: string]: unknown;
+}
+/** Cache settings exposed in the effective Solr config response. */
+export interface SolrConfigCacheSettings {
+  class?: string;
+  size?: number;
+  initialSize?: number;
+  autowarmCount?: number | string;
+  maxRamMB?: number;
+  regenerator?: string;
+  [key: string]: unknown;
+}
+export interface SolrConfigQuerySettings {
+  filterCache?: SolrConfigCacheSettings;
+  queryResultCache?: SolrConfigCacheSettings;
+  documentCache?: SolrConfigCacheSettings;
+  fieldValueCache?: SolrConfigCacheSettings;
+  maxBooleanClauses?: number;
+  enableLazyFieldLoading?: boolean;
+  useFilterForSortedQuery?: boolean;
+  queryResultWindowSize?: number;
+  queryResultMaxDocCached?: number;
+  /** Solr-version-specific circuit breaker settings. */
+  memEnabled?: boolean;
+  memThreshold?: number;
+  useCircuitBreakers?: boolean;
+  memoryCircuitBreakerThresholdPct?: number;
+  [key: string]: unknown;
+}
+export interface SolrConfigCommitSettings {
+  maxDocs?: number;
+  maxTime?: number;
+  openSearcher?: boolean;
+}
+export interface SolrConfigUpdateHandlerSettings {
+  autoCommit?: SolrConfigCommitSettings;
+  autoSoftCommit?: Pick<SolrConfigCommitSettings, "maxDocs" | "maxTime">;
+  commitWithin?: { softCommit?: boolean };
+  indexWriter?: { closeWaitsForMerges?: boolean };
+  [key: string]: unknown;
+}
+export interface SolrConfigRequestParserSettings {
+  enableRemoteStreaming?: boolean;
+  enableStreamBody?: boolean;
+  multipartUploadLimitInKB?: number;
+  formdataUploadLimitInKB?: number;
+  addHttpRequestToContext?: boolean;
+}
+export interface SolrConfigRequestDispatcherSettings {
+  handleSelect?: boolean;
+  requestParsers?: SolrConfigRequestParserSettings;
+}
+/** Plugin configuration as returned by GET /config (not the customOptions write helper). */
+export interface SolrConfigReadPlugin {
+  name?: string;
+  class?: string;
+  startup?: "lazy" | "eager";
+  [key: string]: unknown;
+}
+export interface SolrConfigSettings {
+  query?: SolrConfigQuerySettings;
+  updateHandler?: SolrConfigUpdateHandlerSettings;
+  requestDispatcher?: SolrConfigRequestDispatcherSettings;
+  requestHandler?: Readonly<Record<string, SolrConfigReadPlugin>>;
+  searchComponent?: Readonly<Record<string, SolrConfigReadPlugin>>;
+  queryResponseWriter?: Readonly<Record<string, SolrConfigReadPlugin>>;
+  initParams?: Readonly<Record<string, SolrConfigReadPlugin>>;
+  listener?: readonly SolrConfigReadPlugin[];
+  directoryFactory?: SolrConfigReadPlugin;
+  indexConfig?: Readonly<Record<string, unknown>>;
+  codecFactory?: SolrConfigReadPlugin;
+  [key: string]: unknown;
+}
+/** Effective configuration: merged configoverlay.json plus solrconfig.xml defaults and settings. */
+export interface SolrConfigReadResponse {
+  config?: SolrConfigSettings;
+  responseHeader?: SolrConfigResponseHeader;
+}
+/** Config overlay response contains only values persisted through Config API commands. */
+export interface SolrConfigOverlayResponse {
+  overlay?: {
+    znodeVersion?: number;
+    props?: Readonly<Record<string, unknown>>;
+    userProps?: Readonly<Record<string, SolrConfigValue>>;
+  };
+  responseHeader?: SolrConfigResponseHeader;
+}
+
 /** A typed Core Admin STATUS request. */
 export interface CoreStatusParams {
   core?: string;
@@ -587,8 +761,8 @@ export interface SolrListenerConfig extends SolrConfigPlugin {
 }
 export interface SolrOtherComponentConfig extends SolrConfigPlugin {}
 export type SolrConfigCommand =
-  | { "set-property": Readonly<Record<string, SolrConfigValue>> }
-  | { "unset-property": string | readonly string[] }
+  | { "set-property": SolrConfigPropertyValues }
+  | { "unset-property": SolrConfigPropertyName | readonly SolrConfigPropertyName[] }
   | { "set-user-property": Readonly<Record<string, SolrConfigValue>> }
   | { "unset-user-property": string | readonly string[] }
   | { "add-requesthandler": SolrRequestHandlerConfig }
