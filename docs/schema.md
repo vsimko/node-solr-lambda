@@ -119,7 +119,7 @@ Additional response models cover dynamic fields, copy fields, schema name, schem
 
 ## Compatibility and operational behavior
 
-The v1 Schema API command names and JSON response envelope are documented across the Solr 8.11, 9.x, and 10.1 guides. The add-field mutation and response header are integration-tested against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Other mutation families and plugin-specific analyzer settings currently have type/serialization coverage only; do not infer server compatibility from compilation alone.
+The v1 Schema API command names and JSON response envelope are documented across the Solr 8.11, 9.x, and 10.1 guides. Add/replace/delete field and field-type mutations, including analyzer/tokenizer/filter configuration and response headers, are integration-tested against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Dynamic-field and copy-field mutation families, similarity plugin settings, and other plugin-specific analyzer options currently have type/serialization coverage only; do not infer server compatibility from compilation alone.
 
 Schema changes trigger a core reload so the new definitions apply to subsequent indexing. Existing indexed documents are not rewritten: reindex when a schema change alters how existing data is interpreted. In SolrCloud, schema changes propagate to replicas; without a replica update timeout, other replicas may apply the change asynchronously.
 
