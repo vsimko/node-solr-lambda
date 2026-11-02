@@ -9,6 +9,7 @@ test("Basic authentication sends an Authorization header without exposing creden
   let sentAuthorization: string | null = null;
   const client = createSolrClient({
     baseUrl: "https://solr.example.test",
+    core: "catalog",
     auth: { type: "basic", username, password },
     fetch: async (_input, init) => {
       sentAuthorization = new Headers(init?.headers).get("authorization");
@@ -40,6 +41,7 @@ test("Bearer authentication sends a token header without exposing the token in e
   let sentAuthorization: string | null = null;
   const client = createSolrClient({
     baseUrl: "https://solr.example.test",
+    core: "catalog",
     auth: { type: "bearer", token },
     fetch: async (_input, init) => {
       sentAuthorization = new Headers(init?.headers).get("authorization");
@@ -61,6 +63,7 @@ test("legacy Basic authentication remains supported", async () => {
   let sentAuthorization: string | null = null;
   const client = createSolrClient({
     baseUrl: "https://solr.example.test",
+    core: "catalog",
     username: "legacy-user",
     password: "legacy-password",
     fetch: async (_input, init) => {
