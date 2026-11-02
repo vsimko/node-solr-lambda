@@ -651,14 +651,14 @@ export type SolrDelete = string | { id: string } | { query: string };
 
 /** Atomic-update modifiers supported by Solr's JSON update syntax. */
 export type SolrAtomicUpdateOperation<TValue> =
-  | { set: TValue | null }
-  | (TValue extends readonly (infer TItem)[]
+  | { set: NonNullable<TValue> | null }
+  | (NonNullable<TValue> extends readonly (infer TItem)[]
       ? { add: TItem | readonly TItem[] }
         | { "add-distinct": TItem | readonly TItem[] }
         | { remove: TItem | readonly TItem[] }
-        | (TItem extends string ? { removeregex: string | readonly string[] } : never)
+        | (NonNullable<TItem> extends string ? { removeregex: string | readonly string[] } : never)
       : never)
-  | (TValue extends number ? { inc: number } : never);
+  | (NonNullable<TValue> extends number ? { inc: number } : never);
 
 /**
  * Field-specific atomic update document. The unique-key field is preserved as
