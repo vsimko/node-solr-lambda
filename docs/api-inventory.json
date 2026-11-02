@@ -443,11 +443,11 @@
     {
       "id": "export.api",
       "area": "Export",
-      "clientMethod": "export",
+      "clientMethod": "export / exportStream",
       "httpMethod": "GET",
       "path": "/solr/{core-or-collection}/export",
       "methodImplemented": true,
-      "typeCoverage": "partial",
+      "typeCoverage": "complete",
       "unitTests": "present",
       "integrationTests": "tested",
       "versions": {
@@ -455,14 +455,16 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/administration.md",
+      "documentation": "docs/export.md",
       "testFiles": [
         "test/client.test.ts",
         "test/errors.test.ts",
         "test/cancellation.test.ts",
-        "test/integration/solr-export.test.ts"
+        "test/integration/solr-export.test.ts",
+        "test/export.test.ts",
+        "test/export-api-types.ts"
       ],
-      "notes": "Raw Export response with a docValues sort field passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
+      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response; exportStream() exposes the byte body. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. includeStoredFields is documented for Solr 10.1 but remains version-specific. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; new unit tests cover typed serialization and streamed chunk consumption."
     },
     {
       "id": "transport.request",
