@@ -15,6 +15,11 @@ import type {
   SolrSchemaUniqueKeyResponse,
   SolrSchemaSimilarityResponse,
   SolrConfigCommand,
+  SolrConfigPropertyMap,
+  SolrConfigCommandResponse,
+  SolrConfigReadResponse,
+  SolrConfigOverlayResponse,
+  SolrConfigValue,
   CoreAdminParams,
   CollectionAdminParams
 } from "../src/index.js";
@@ -148,6 +153,32 @@ void client.config(setProperty);
 void client.config(addHandler);
 void client.config(addListener);
 void client.config(addInitParams);
+
+const knownProperties: SolrConfigPropertyMap = {
+  "query.filterCache.size": 512,
+  "query.filterCache.autowarmCount": "128",
+  "query.maxBooleanClauses": 2_048,
+  "updateHandler.autoCommit.maxTime": 15_000,
+  "updateHandler.autoCommit.openSearcher": false,
+  "updateHandler.autoSoftCommit.maxTime": 1_000
+};
+const configCommandResponse: Promise<SolrConfigCommandResponse> = client.config({ "set-property": knownProperties });
+const effectiveConfig: Promise<SolrConfigReadResponse> = client.request<SolrConfigReadResponse>("/solr/catalog/config");
+const overlayConfig: Promise<SolrConfigOverlayResponse> = client.request<SolrConfigOverlayResponse>("/solr/catalog/config/overlay");
+void configCommandResponse;
+void effectiveConfig.then(result => {
+  const maxTime: number | undefined = result.config?.updateHandler?.autoCommit?.maxTime;
+  const cacheSize: number | undefined = result.config?.query?.filterCache?.size;
+  void [maxTime, cacheSize];
+});
+void overlayConfig.then(result => {
+  const overlayCacheSize: number | undefined = result.overlay?.props?.query?.filterCache?.size;
+  const userProperty: SolrConfigValue | undefined = result.overlay?.userProps?.["tenant.name"];
+  void [overlayCacheSize, userProperty];
+});
+// @ts-expect-error Cache sizes are numeric configuration values.
+const invalidCacheSize: SolrConfigPropertyMap = { "query.filterCache.size": "large" };
+void invalidCacheSize;
 
 // @ts-expect-error Unknown Schema API command names are rejected.
 const invalidSchema: SolrSchemaCommand = { "add-feld": { name: "sku", type: "string" } };
