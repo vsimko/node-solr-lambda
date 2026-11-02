@@ -648,7 +648,38 @@ export type SolrQuery = SolrStandardQueryOptions | SolrCursorQuery;
 
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
-export interface UpdateOptions { overwrite?: boolean; commitWithin?: number; boost?: number; }
+
+/** Request-level options shared by document add and full-document replacement. */
+export interface SolrUpdateOptions {
+  /** Replace an existing document with the same unique key (default: true). */
+  overwrite?: boolean;
+  /** Commit this document within the specified number of milliseconds. */
+  commitWithin?: number;
+  /** Route the update to a SolrCloud shard using the _route_ request parameter. */
+  route?: string;
+  /** Legacy document boost option retained for source compatibility. */
+  boost?: number;
+}
+
+/** Delete request options; request controls can be supplied in the same object. */
+export interface SolrDeleteOptions extends RequestControlOptions {
+  /** Route the delete to a SolrCloud shard using the _route_ request parameter. */
+  route?: string;
+  /** Commit a delete-by-ID within the specified number of milliseconds. Solr ignores this for delete-by-query. */
+  commitWithin?: number;
+}
+
+/** Options for the Update Handler optimize command. */
+export interface SolrOptimizeOptions {
+  /** Best-effort maximum number of index segments; omit to use Solr's default. */
+  maxSegments?: number;
+  /** Wait until the new searcher is registered (default: true). */
+  waitSearcher?: boolean;
+}
+
+/** @deprecated Use SolrUpdateOptions. */
+export type UpdateOptions = SolrUpdateOptions;
+
 export interface CommitOptions { waitSearcher?: boolean; softCommit?: boolean; expungeDeletes?: boolean; maxSegments?: number; }
 export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   responseHeader?: SolrResponseHeader;
