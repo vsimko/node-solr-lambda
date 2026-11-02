@@ -12,8 +12,13 @@ await client.replication("backup", {
   numberToKeep: 5
 });
 
-// Backup runs asynchronously; inspect details until backup.status is "success".
-// Treat "failed" (or snapShootException) as an error.
+let backupState = "";
+while (backupState !== "success") {
+  const details = await client.replication("details");
+  backupState = details.backup?.status ?? "";
+  if (backupState === "failed") throw new Error(JSON.stringify(details));
+  if (backupState !== "success") await new Promise(resolve => setTimeout(resolve, 500));
+}
 
 // Restore the latest timestamped snapshot. Restore runs asynchronously.
 await client.replication("restore");
@@ -58,11 +63,17 @@ await client.collections("BACKUP", {
   indexBackup: "copy-files"
 });
 
-// Poll asynchronous completion.
-const status = await client.collections("REQUESTSTATUS", {
-  requestid: backupRequestId
-});
-if (status.status?.state === "failed") throw new Error(JSON.stringify(status));
+// Poll asynchronous completion before listing the backup.
+async function waitForCollectionRequest(requestid: string): Promise<void> {
+  while (true) {
+    const status = await client.collections("REQUESTSTATUS", { requestid });
+    const state = status.status?.state;
+    if (state === "completed") return;
+    if (state === "failed" || state === "notfound") throw new Error(JSON.stringify(status));
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+}
+await waitForCollectionRequest(backupRequestId);
 
 // Inspect available backup points and select one to restore.
 const backups = await client.collections("LISTBACKUP", {
@@ -80,8 +91,8 @@ await client.collections("RESTORE", {
   async: restoreRequestId
 });
 
-// Poll REQUESTSTATUS with restoreRequestId until completed or failed.
-// Remove the stored async status records after handling them.
+// Wait for restore completion and remove the stored async status records.
+await waitForCollectionRequest(restoreRequestId);
 await client.collections("DELETESTATUS", { requestid: backupRequestId });
 await client.collections("DELETESTATUS", { requestid: restoreRequestId });
 
