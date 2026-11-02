@@ -4,6 +4,7 @@ export type { SolrErrorMetadata } from "./errors.js";
 export { solrExcludeTags, solrFieldAlias, solrFields, solrFilter, solrFunction, solrLocalParams, solrSort, solrGeofilt, solrBbox, solrGeoDistance } from "./query-helpers.js";
 export type { SolrFieldListEntry, SolrFunctionArgument, SolrLocalParamValue, SolrSortClause, SolrSortDirection, SolrSortInput, SolrSpatialFilterOptions } from "./query-helpers.js";
 export type { SolrStatsFieldOptions, SolrStatsOptions } from "./types.js";
+export type { SolrReplicationCommand, SolrReplicationBaseParams, SolrReplicationFetchIndexParams, SolrReplicationFileListParams, SolrReplicationParams, SolrReplicationResponseHeader, SolrReplicationCommandResponse, SolrReplicationIndexVersionResponse, SolrReplicationFileMetadata, SolrReplicationFileListResponse, SolrReplicationDetailsResponse, SolrReplicationResponse, SolrReplicationFileContentParams } from "./types.js";
 export type { SolrMoreLikeThisOptions, SolrMoreLikeThisResponse } from "./types.js";
 export type { SolrCollapseHint, SolrCollapseNullPolicy, SolrCollapseOptions, SolrExpandOptions, SolrExpandedResult, SolrGroupFormat, SolrGroupingOptions } from "./types.js";
 export type { SolrFieldHighlightOptions, SolrHighlightEncoder, SolrHighlighterMethod, SolrHighlightingOptions } from "./types.js";
