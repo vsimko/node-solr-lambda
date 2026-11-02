@@ -56,7 +56,7 @@ The field-specific `SolrAtomicUpdateOperation<TValue>` model supports:
 - `removeregex`: remove values matching a regular expression from a string-array field (this is Solr's exact wire spelling).
 - `inc`: increment or decrement a numeric field.
 
-A custom unique-key field can be supplied as the second generic parameter, for example `SolrAtomicUpdateDocument<Product, "sku">`. For nested documents, include `_root_` and, where needed, pass the root ID using the existing `route` option.
+A custom unique-key field can be supplied as the second generic parameter when that key exists on the document type, for example `interface ProductWithSku extends Product { sku: string; }` followed by `SolrAtomicUpdateDocument<ProductWithSku, "sku">`. For nested documents, include `_root_` and, where needed, pass the root ID using the existing `route` option.
 
 Atomic updates require Solr schema fields to be stored or docValues-backed (subject to Solr's documented copyField/derived-field exceptions). The client validates that each update has one unique-key value and at least one valid modifier, and rejects malformed modifier objects before sending the request.
 
