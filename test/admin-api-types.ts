@@ -54,15 +54,15 @@ void commandResponse.then(result => {
   void [status, qTime];
 });
 
-const fullSchema: Promise<SolrSchemaReadResponse> = client.request("/solr/catalog/schema");
-const fields: Promise<SolrSchemaFieldsResponse> = client.request("/solr/catalog/schema/fields");
-const dynamicFields: Promise<SolrSchemaDynamicFieldsResponse> = client.request("/solr/catalog/schema/dynamicfields");
-const fieldTypes: Promise<SolrSchemaFieldTypesResponse> = client.request("/solr/catalog/schema/fieldtypes");
-const copyFields: Promise<SolrSchemaCopyFieldsResponse> = client.request("/solr/catalog/schema/copyfields");
-const schemaName: Promise<SolrSchemaNameResponse> = client.request("/solr/catalog/schema/name");
-const schemaVersion: Promise<SolrSchemaVersionResponse> = client.request("/solr/catalog/schema/version");
-const uniqueKey: Promise<SolrSchemaUniqueKeyResponse> = client.request("/solr/catalog/schema/uniquekey");
-const similarity: Promise<SolrSchemaSimilarityResponse> = client.request("/solr/catalog/schema/similarity");
+const fullSchema: Promise<SolrSchemaReadResponse> = client.request<SolrSchemaReadResponse>("/solr/catalog/schema");
+const fields: Promise<SolrSchemaFieldsResponse> = client.request<SolrSchemaFieldsResponse>("/solr/catalog/schema/fields");
+const dynamicFields: Promise<SolrSchemaDynamicFieldsResponse> = client.request<SolrSchemaDynamicFieldsResponse>("/solr/catalog/schema/dynamicfields");
+const fieldTypes: Promise<SolrSchemaFieldTypesResponse> = client.request<SolrSchemaFieldTypesResponse>("/solr/catalog/schema/fieldtypes");
+const copyFields: Promise<SolrSchemaCopyFieldsResponse> = client.request<SolrSchemaCopyFieldsResponse>("/solr/catalog/schema/copyfields");
+const schemaName: Promise<SolrSchemaNameResponse> = client.request<SolrSchemaNameResponse>("/solr/catalog/schema/name");
+const schemaVersion: Promise<SolrSchemaVersionResponse> = client.request<SolrSchemaVersionResponse>("/solr/catalog/schema/version");
+const uniqueKey: Promise<SolrSchemaUniqueKeyResponse> = client.request<SolrSchemaUniqueKeyResponse>("/solr/catalog/schema/uniquekey");
+const similarity: Promise<SolrSchemaSimilarityResponse> = client.request<SolrSchemaSimilarityResponse>("/solr/catalog/schema/similarity");
 void [fullSchema, fields, dynamicFields, fieldTypes, copyFields, schemaName, schemaVersion, uniqueKey, similarity];
 
 const setProperty: SolrConfigCommand = { "set-property": { "query.timeout": 10_000 } };
