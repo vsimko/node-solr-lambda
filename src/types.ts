@@ -660,7 +660,7 @@ export interface SolrConfigUpdateHandlerSettings {
   autoSoftCommit?: SolrConfigAutoSoftCommitSettings;
   commitWithin?: { softCommit?: boolean; [key: string]: SolrConfigValue | undefined };
   indexWriter?: Readonly<Record<string, SolrConfigValue>>;
-  [key: string]: SolrConfigValue | undefined;
+  [key: string]: unknown;
 }
 
 export interface SolrConfigQuerySettings {
@@ -675,7 +675,7 @@ export interface SolrConfigQuerySettings {
   queryResultMaxDocCached?: number;
   useCircuitBreakers?: boolean;
   memoryCircuitBreakerThresholdPct?: number;
-  [key: string]: SolrConfigValue | SolrConfigCacheSettings | undefined;
+  [key: string]: unknown;
 }
 
 export interface SolrConfigRequestDispatcherSettings {
