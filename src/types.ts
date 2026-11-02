@@ -81,11 +81,10 @@ export interface CreateCollectionParams extends CollectionRequestBase {
   pullReplicas?: number;
   maxShardsPerNode?: number;
   createNodeSet?: string;
-  routerName?: "compositeId" | "implicit" | (string & {});
-  routerField?: string;
+  "router.name"?: "compositeId" | "implicit" | (string & {});
+  "router.field"?: string;
   shards?: string;
-  configName?: string;
-  collectionConfigName?: string;
+  "collection.configName"?: string;
   autoAddReplicas?: boolean;
   waitForFinalState?: boolean;
   rule?: string | readonly string[];
