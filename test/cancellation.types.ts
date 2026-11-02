@@ -1,5 +1,5 @@
 import { createSolrClient } from "../src/index.js";
-import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrDeleteOptions, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrUpdateOptions } from "../src/index.js";
+import type { RequestControlOptions, SolrAtomicUpdateDocument, SolrCommitOptions, SolrDeleteOptions, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions } from "../src/index.js";
 
 const controller = new AbortController();
 const controls: RequestControlOptions = { signal: controller.signal, timeoutMs: 5000 };
@@ -13,7 +13,16 @@ const optimizeOptions: SolrOptimizeOptions = { maxSegments: 2, waitSearcher: fal
 void client.add({ id: "one" }, updateOptions, controls);
 void client.update({ id: "two" }, { route: "tenant-b" }, controls);
 void client.delete("one", deleteOptions);
-void client.optimize(optimizeOptions, controls);
+void client.optimize({ ...optimizeOptions, openSearcher: false }, controls);
+const commitOptions: SolrCommitOptions = { waitSearcher: false, openSearcher: true, expungeDeletes: true };
+const softCommitOptions: SolrSoftCommitOptions = { waitSearcher: true, openSearcher: false };
+void client.commit(commitOptions, controls);
+void client.softCommit(softCommitOptions, controls);
+void client.softCommit(controls);
+// @ts-expect-error expungeDeletes is not supported on soft commits.
+void client.commit({ softCommit: true, expungeDeletes: true });
+// @ts-expect-error maxSegments is an optimize-only option.
+void client.commit({ maxSegments: 2 });
 interface AtomicProduct { id: string; title: string; price: number; tags: string[]; }
 const atomicProduct: SolrAtomicUpdateDocument<AtomicProduct> = {
   id: "p-1",
