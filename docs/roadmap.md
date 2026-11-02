@@ -81,23 +81,20 @@ The query API is the most visible area where autocomplete quality directly affec
 | URL serialization, retry behavior, and auth guidance | [Issues #99–#101](https://github.com/vsimko/node-solr-lambda/issues/99) |
 | README, API reference, migration, public API, compatibility, and release checklist | [Issues #102–#104](https://github.com/vsimko/node-solr-lambda/issues/102), [#107–#110](https://github.com/vsimko/node-solr-lambda/issues/107) |
 
-## Historical branch note
+## Historical branch audit
 
-The old `v4.0` and `v4-*` refs are historical working branches, not active development targets. They have diverged from current `master` and contain unique commits. At the time of this audit, the comparisons show:
+The historical branch audit requested by [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122) was completed on 2026-11-02. Only two of the nine refs listed in the earlier audit remain on GitHub:
 
-| Historical branch | Ahead of master | Behind master |
-| --- | ---: | ---: |
-| `v4.0` | 64 | 11 |
-| `v4-client-modules-issue-32` | 17 | 6 |
-| `v4-config-transport-issue-33` | 19 | 5 |
-| `v4-npm-issue-112-final` | 7 | 8 |
-| `v4-npm-issue-112` | 6 | 9 |
-| `v4-solr-compat-issue-31` | 4 | 7 |
-| `v4-docs-issue-114` | 2 | 10 |
-| `v4-foundation-issue-113` | 1 | 11 |
-| `npm-lock-bootstrap-issue-112` | 1 | 9 |
+| Remaining historical branch | Ahead of master | Behind master | Related work accounted for |
+| --- | ---: | ---: | --- |
+| `v4.0` | 64 | 44 | Foundation and documentation in PRs #113/#114; compatibility matrix in #117; domain modules and endpoint work in #118; transport configuration/retry policy in #119. The later update/commit, atomic-update, raw-request, and response work is represented by the focused mainline PRs #152, #153, #156, #159, and #160. |
+| `v4-npm-issue-112` | 6 | 42 | Temporary lockfile bootstrap in PR #115 and the final npm/release workflow in PR #116. |
 
-Do not base new work on these refs. Do not merge or delete them blindly. Review their unique commits and related PRs, then account for any required changes before archiving or deleting them. The audit is tracked by [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122).
+The other seven refs from the previous inventory no longer exist: `v4-client-modules-issue-32`, `v4-config-transport-issue-33`, `v4-npm-issue-112-final`, `v4-solr-compat-issue-31`, `v4-docs-issue-114`, `v4-foundation-issue-113`, and `npm-lock-bootstrap-issue-112`.
+
+The original broad PR #111 is closed and explicitly superseded. Its scoped work was delivered through the merged PRs listed above. The temporary npm bootstrap PR #115 and final npm migration PR #116 are both merged. The unique changes represented by the two remaining branches have therefore been accounted for by merged historical PRs or superseding mainline implementation; no change should be merged from either branch into current `master`.
+
+Both remaining refs are retained as historical evidence for now. They are not valid bases for new work, and no force-merge or branch deletion is required to complete the audit. If they are later deleted, that should be a separate housekeeping action after confirming that no external consumer relies on the refs.
 
 ## Workflow
 
