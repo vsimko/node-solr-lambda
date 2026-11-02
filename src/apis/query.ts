@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrDebugOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -118,6 +118,17 @@ function applyStats(params: Record<string, unknown>, stats: SolrStatsOptions): v
   }
   if (stats.facets !== undefined) params["stats.facet"] = stats.facets;
   if (stats.calcDistinct !== undefined) params["stats.calcdistinct"] = stats.calcDistinct;
+}
+
+function applyDebug(params: Record<string, unknown>, options: SolrDebugOptions): void {
+  params.debug = options.enabled ?? true;
+  if (options.enabled === false) return;
+  if (options.components !== undefined) params.debug = options.components;
+  if (options.explainStructured !== undefined) params["debug.explain.structured"] = options.explainStructured;
+  if (options.explainOther !== undefined) {
+    if (options.explainOther.trim() === "") throw new TypeError("debug explainOther must be a non-empty query");
+    params.explainOther = options.explainOther;
+  }
 }
 
 function applyMoreLikeThis(params: Record<string, unknown>, options: SolrMoreLikeThisOptions): void {
@@ -279,6 +290,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.stats !== undefined) applyStats(params, query.stats);
   if (query.moreLikeThis !== undefined) applyMoreLikeThis(params, query.moreLikeThis);
   if (query.expand !== undefined) applyExpand(params, query.expand);
+  if (query.debug !== undefined) applyDebug(params, query.debug);
   if (query.spatial !== undefined) {
     const { parser, field, point, distance, cache, cost } = query.spatial;
     if (field.trim() === "") throw new TypeError("spatial field must be a non-empty string");
@@ -315,6 +327,9 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.moreLikeThis;
   delete params.collapse;
   delete params.spatial;
+  delete params.debug;
+  delete params.explainStructured;
+  delete params.explainOther;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" ||
