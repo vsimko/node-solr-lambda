@@ -721,17 +721,18 @@ export interface SolrDeleteOptions extends RequestControlOptions {
 }
 
 /** Options for the Update Handler optimize command. */
-/** Options for a hard commit or an explicit soft commit command. */
-export interface SolrCommitOptions {
+/** Shared searcher controls for hard and soft commit commands. */
+interface SolrCommitSearcherOptions {
   /** Wait for the newly opened searcher to be registered; Solr defaults to true. */
   waitSearcher?: boolean;
-  /** Perform a near-real-time soft commit instead of a hard commit. Defaults to false. */
-  softCommit?: boolean;
-  /** Expunge deleted documents during a hard commit. Commit-only; defaults to false. */
-  expungeDeletes?: boolean;
   /** Open a new searcher. Defaults to true; sent as the openSearcher request parameter. */
   openSearcher?: boolean;
 }
+
+/** Commit options; expungeDeletes is only valid for hard commits. */
+export type SolrCommitOptions =
+  | (SolrCommitSearcherOptions & { softCommit?: false; expungeDeletes?: boolean })
+  | (SolrCommitSearcherOptions & { softCommit: true; expungeDeletes?: never });
 
 /** Options for a soft commit. Expunge and segment-merge options do not apply. */
 export interface SolrSoftCommitOptions {
@@ -758,10 +759,10 @@ export type UpdateOptions = SolrUpdateOptions;
  * @deprecated Use SolrCommitOptions. maxSegments is optimize-only and is
  * rejected by commit(); use SolrOptimizeOptions for segment merging.
  */
-export interface CommitOptions extends SolrCommitOptions {
+export type CommitOptions = SolrCommitOptions & {
   /** @deprecated maxSegments is valid only for optimize(). */
   maxSegments?: number;
-}
+};
 export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   responseHeader?: SolrResponseHeader;
   response?: SolrQueryResult<TDocument>;
