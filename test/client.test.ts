@@ -369,7 +369,11 @@ test("Config API read methods preserve abort controls", async () => {
     fetch: (input, init) => {
       requestedUrl = String(input);
       requestedSignal = init?.signal ?? undefined;
-      return new Promise<Response>(() => {});
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(new DOMException("The operation was aborted", "AbortError"));
+        }, { once: true });
+      });
     }
   });
 
