@@ -557,6 +557,52 @@
         "test/integration/solr-replication.test.ts"
       ],
       "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, enablepoll, disablepoll, details, and filelist; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, and filecontent. enablereplication/disablereplication are integration-tested on a configured leader; fetchindex/abortfetch (Solr 10), snappull/abort (Solr 8/9), enablepoll, and disablepoll have unit serialization coverage, but a multi-core leader/follower fetch cycle is not yet certified. Core backup/restore commands (backup, restore, restorestatus, deletebackup) remain deferred to Issue #96. Filelist uses the generation returned by newer Solr indexversion responses and falls back to the legacy indexversion parameter when that field is absent."
+    },
+    {
+      "id": "replication.backup",
+      "area": "Backup and restore",
+      "clientMethod": "replication",
+      "httpMethod": "GET",
+      "path": "/solr/{core}/replication?command=backup|restore|restorestatus|deletebackup",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "documentation": "docs/backup-restore.md",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "testFiles": [
+        "test/backup-restore.test.ts",
+        "test/backup-restore-api-types.ts",
+        "test/integration/solr-core-backup-restore.test.ts"
+      ],
+      "notes": "Core-level ReplicationHandler backup, restore, restorestatus, and deletebackup are typed. Backup defaults to the core dataDir; restore status is polled with restorestatus. Full backup/restore/read-back/delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0. Custom filesystem locations must be permitted by server allowPaths."
+    },
+    {
+      "id": "collections.backup",
+      "area": "Backup and restore",
+      "clientMethod": "collections",
+      "httpMethod": "GET",
+      "path": "/solr/admin/collections?action=BACKUP|RESTORE|LISTBACKUP|DELETEBACKUP|REQUESTSTATUS|DELETESTATUS",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "documentation": "docs/backup-restore.md",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "testFiles": [
+        "test/backup-restore.test.ts",
+        "test/backup-restore-api-types.ts",
+        "test/integration/solrcloud-backup-restore.test.ts"
+      ],
+      "notes": "Typed SolrCloud collection backup/restore actions and asynchronous REQUESTSTATUS/DELETESTATUS tracking. Full backup, list, restore, query read-back, and delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0 with a shared local filesystem volume mounted on both SolrCloud nodes. S3 and other external repositories are not certified."
     }
   ]
 }
