@@ -10,7 +10,7 @@ import { systemInfo as systemInfoApi } from "./apis/system.js";
 import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import type {
-  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions,
+  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrSchemaCommand,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions
 } from "./types.js";
 
@@ -88,15 +88,15 @@ export class SolrClient extends SolrTransport {
     return this.request<T>(this.endpoint("/admin/ping"), { ...requestOptions, operation: "ping" });
   }
 
-  schema<T = unknown>(command: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
+  schema<T = unknown>(command: SolrSchemaCommand, requestOptions: RequestControlOptions = {}): Promise<T> {
     return schemaApi<T>(this, this.endpoint("/schema"), command, requestOptions);
   }
 
-  config<T = unknown>(command: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
+  config<T = unknown>(command: SolrConfigCommand, requestOptions: RequestControlOptions = {}): Promise<T> {
     return configApi<T>(this, this.endpoint("/config"), command, requestOptions);
   }
 
-  coreAdmin<T = unknown>(action: CoreAdminAction, params: SolrAdminParams = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  coreAdmin<T = unknown, A extends CoreAdminAction = CoreAdminAction>(action: A, params: CoreAdminParams<A> = {} as CoreAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return coreAdminApi<T>(this, action, params, requestOptions);
   }
 
