@@ -14,12 +14,16 @@ interface RequestSignalContext {
   classify(cause?: unknown): SolrAbortError | SolrTimeoutError | undefined;
 }
 
+function serializeQueryParam(value: string | number | boolean | Date | null): string {
+  return value instanceof Date ? value.toISOString() : String(value);
+}
+
 function appendSearchParams(target: URLSearchParams, query: RequestOptions["query"]): void {
   if (!query) return;
   const entries = query instanceof URLSearchParams
     ? query.entries()
     : Object.entries(query).flatMap(([key, value]) =>
-        (Array.isArray(value) ? value : [value]).map(item => [key, String(item)] as [string, string])
+        (Array.isArray(value) ? value : [value]).map(item => [key, serializeQueryParam(item)] as [string, string])
       );
   for (const [key, value] of entries) target.append(key, value);
 }
@@ -34,7 +38,7 @@ function withDefaultParams(
     for (const [key, value] of Object.entries(defaults)) {
       if (!query.has(key)) {
         const values = Array.isArray(value) ? value : [value];
-        for (const item of values) merged.append(key, String(item));
+        for (const item of values) merged.append(key, serializeQueryParam(item));
       }
     }
     appendSearchParams(merged, query);

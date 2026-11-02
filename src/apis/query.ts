@@ -261,6 +261,15 @@ function applyClassicFacets(params: Record<string, unknown>, facets: SolrClassic
   }
 }
 
+function isQueryParamValue(value: unknown): value is SolrQueryParamValue {
+  return value === null || typeof value === "string" || typeof value === "number" ||
+    typeof value === "boolean" || value instanceof Date ||
+    (Array.isArray(value) && value.every(item =>
+      item === null || typeof item === "string" || typeof item === "number" ||
+      typeof item === "boolean" || item instanceof Date
+    ));
+}
+
 export function query<T>(client: SolrTransport, path: string, query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {
   if (query.cursorMark !== undefined) {
     if (typeof query.sort !== "string" || query.sort.trim() === "") {
@@ -329,10 +338,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.spatial;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" ||
-      (Array.isArray(value) && value.every(item => typeof item === "string" || typeof item === "number"))) {
-      flat[key] = value as SolrQueryParamValue;
-    }
+    if (isQueryParamValue(value)) flat[key] = value;
   }
   return client.request<T>(path, { ...requestOptions, method: "GET", query: flat, operation: "query" });
 }
