@@ -54,3 +54,62 @@ integrationTest("Schema API adds, replaces, and deletes an isolated field", asyn
   }>(`/${process.env.SOLR_CORE}/schema/fields`, { method: "GET" });
   assert.equal(afterDelete.fields?.some(candidate => candidate.name === name), false);
 });
+
+integrationTest("Schema API adds, replaces, and deletes a field type with analyzer components", async ({
+  client,
+  createId,
+  addSchemaFieldType,
+  deleteSchemaFieldType
+}) => {
+  const name = createId("schema_field_type");
+  const added = await addSchemaFieldType({
+    name,
+    class: "solr.TextField",
+    positionIncrementGap: 100,
+    analyzer: {
+      tokenizer: { class: "solr.KeywordTokenizerFactory" },
+      filters: [{ class: "solr.LowerCaseFilterFactory" }]
+    },
+  });
+  assert.equal(added.responseHeader?.status, 0);
+
+  const readFieldTypes = () => client.request<{
+    fieldTypes?: Array<{
+      name?: string;
+      class?: string;
+      analyzer?: { tokenizer?: { class?: string }; filters?: Array<{ class?: string }> };
+      indexAnalyzer?: { tokenizer?: { class?: string } };
+      queryAnalyzer?: { tokenizer?: { class?: string } };
+      similarity?: { class?: string };
+    }>;
+  }>(`/${process.env.SOLR_CORE}/schema/fieldtypes`, { method: "GET" });
+
+  const initial = await readFieldTypes();
+  const initialType = initial.fieldTypes?.find(candidate => candidate.name === name);
+  assert.ok(initialType, `schema should contain field type ${name}`);
+  assert.equal(initialType.class, "solr.TextField");
+  assert.equal(initialType.analyzer?.tokenizer?.class, "solr.KeywordTokenizerFactory");
+  assert.equal(initialType.analyzer?.filters?.[0]?.class, "solr.LowerCaseFilterFactory");
+
+  const replaced = await client.schema({
+    "replace-field-type": {
+      name,
+      class: "solr.TextField",
+      positionIncrementGap: 200,
+      indexAnalyzer: { tokenizer: { class: "solr.StandardTokenizerFactory" } },
+      queryAnalyzer: { tokenizer: { class: "solr.KeywordTokenizerFactory" } }
+    }
+  });
+  assert.equal(replaced.responseHeader?.status, 0);
+
+  const afterReplace = await readFieldTypes();
+  const replacedType = afterReplace.fieldTypes?.find(candidate => candidate.name === name);
+  assert.ok(replacedType, `schema should contain replaced field type ${name}`);
+  assert.equal(replacedType.indexAnalyzer?.tokenizer?.class, "solr.StandardTokenizerFactory");
+  assert.equal(replacedType.queryAnalyzer?.tokenizer?.class, "solr.KeywordTokenizerFactory");
+
+  const deleted = await deleteSchemaFieldType(name);
+  assert.equal(deleted.responseHeader?.status, 0);
+  const afterDelete = await readFieldTypes();
+  assert.equal(afterDelete.fieldTypes?.some(candidate => candidate.name === name), false);
+});

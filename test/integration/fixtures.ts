@@ -1,7 +1,7 @@
 import test from "node:test";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { SolrClient } from "../../src/index.js";
-import type { SolrDocument, SolrSchemaCommandResponse } from "../../src/index.js";
+import type { SolrDocument, SolrSchemaCommandResponse, SolrSchemaFieldType } from "../../src/index.js";
 
 const baseUrl = process.env.SOLR_BASE_URL;
 const core = process.env.SOLR_CORE;
@@ -40,6 +40,8 @@ export interface SolrIntegrationFixture {
   createCore(prefix?: string): Promise<string>;
   addSchemaField(name: string, type?: string, docValues?: boolean): Promise<SolrSchemaCommandResponse>;
   deleteSchemaField(name: string): Promise<SolrSchemaCommandResponse>;
+  addSchemaFieldType(fieldType: SolrSchemaFieldType): Promise<SolrSchemaCommandResponse>;
+  deleteSchemaFieldType(name: string): Promise<SolrSchemaCommandResponse>;
   setUserProperty(name: string, value: string | number | boolean): Promise<void>;
   securityData: SolrSecurityFixtureData;
 }
@@ -72,6 +74,7 @@ export function integrationTest(
     const documentIds = new Set<string>();
     const createdCores = new Set<string>();
     const schemaFields = new Set<string>();
+    const schemaFieldTypes = new Set<string>();
     const userProperties = new Set<string>();
 
     const fixture: SolrIntegrationFixture = {
@@ -102,6 +105,16 @@ export function integrationTest(
         schemaFields.delete(name);
         return response;
       },
+      async addSchemaFieldType(fieldType) {
+        const response = await client.schema({ "add-field-type": fieldType });
+        schemaFieldTypes.add(fieldType.name);
+        return response;
+      },
+      async deleteSchemaFieldType(name) {
+        const response = await client.schema({ "delete-field-type": { name } });
+        schemaFieldTypes.delete(name);
+        return response;
+      },
       async setUserProperty(name, value) {
         await client.config({ "set-user-property": { [name]: value } });
         userProperties.add(name);
@@ -116,6 +129,13 @@ export function integrationTest(
       for (const name of schemaFields) {
         try {
           await client.schema({ "delete-field": { name } });
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
+      for (const name of schemaFieldTypes) {
+        try {
+          await client.schema({ "delete-field-type": { name } });
         } catch (error) {
           cleanupErrors.push(error);
         }

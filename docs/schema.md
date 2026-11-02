@@ -12,7 +12,38 @@ await solr.schema({ "replace-field": { name: "sku", type: "text_general", stored
 await solr.schema({ "delete-field": { name: "sku" } });
 ```
 
-## Modify dynamic fields, field types, and copy fields
+## Add, replace, and delete field types
+
+Field types support a shared analyzer or separate index/query analyzers. Tokenizers, filters, char filters, and similarity configuration are represented explicitly where common, with an extension index for plugin-specific options.
+
+```ts
+await solr.schema({
+  "add-field-type": {
+    name: "text_en",
+    class: "solr.TextField",
+    analyzer: {
+      tokenizer: { class: "solr.StandardTokenizerFactory" },
+      filters: [{ class: "solr.LowerCaseFilterFactory" }]
+    },
+    similarity: { class: "solr.SchemaSimilarityFactory" }
+  }
+});
+
+await solr.schema({
+  "replace-field-type": {
+    name: "text_en",
+    class: "solr.TextField",
+    indexAnalyzer: { tokenizer: { class: "solr.StandardTokenizerFactory" } },
+    queryAnalyzer: { tokenizer: { class: "solr.KeywordTokenizerFactory" } }
+  }
+});
+
+await solr.schema({ "delete-field-type": { name: "text_en" } });
+```
+
+The replace operation requires a complete field type definition. Analyzer plugin class names and parameters must exist on the target Solr distribution; TypeScript cannot validate server-side plugin availability.
+
+## Modify dynamic fields and copy fields
 
 ```ts
 const added = await solr.schema({
@@ -88,7 +119,7 @@ Additional response models cover dynamic fields, copy fields, schema name, schem
 
 ## Compatibility and operational behavior
 
-The v1 Schema API command names and JSON response envelope are documented across the Solr 8.11, 9.x, and 10.1 guides. The add-field mutation and response header are integration-tested against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Other mutation families and plugin-specific analyzer settings currently have type/serialization coverage only; do not infer server compatibility from compilation alone.
+The v1 Schema API command names and JSON response envelope are documented across the Solr 8.11, 9.x, and 10.1 guides. Add/replace/delete field and field-type mutations, including analyzer/tokenizer/filter configuration and response headers, are integration-tested against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Dynamic-field and copy-field mutation families, similarity plugin settings, and other plugin-specific analyzer options currently have type/serialization coverage only; do not infer server compatibility from compilation alone.
 
 Schema changes trigger a core reload so the new definitions apply to subsequent indexing. Existing indexed documents are not rewritten: reindex when a schema change alters how existing data is interpreted. In SolrCloud, schema changes propagate to replicas; without a replica update timeout, other replicas may apply the change asynchronously.
 

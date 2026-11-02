@@ -1,6 +1,7 @@
 import type {
   SolrClient,
   SolrSchemaCommand,
+  SolrSchemaFieldType,
   SolrSchemaCommandResponse,
   SolrSchemaReadResponse,
   SolrSchemaFieldsResponse,
@@ -37,6 +38,31 @@ const addFieldType: SolrSchemaCommand = {
 void client.schema(addField);
 void client.schema(replaceField);
 void client.schema(addFieldType);
+
+const replaceFieldType: SolrSchemaCommand = {
+  "replace-field-type": {
+    name: "text_en",
+    class: "solr.TextField",
+    indexAnalyzer: { tokenizer: { class: "solr.StandardTokenizerFactory" } },
+    queryAnalyzer: { tokenizer: { class: "solr.KeywordTokenizerFactory" } },
+    similarity: { class: "solr.SchemaSimilarityFactory" }
+  }
+};
+const deleteFieldType: SolrSchemaCommand = { "delete-field-type": { name: "text_en" } };
+void client.schema(replaceFieldType);
+void client.schema(deleteFieldType);
+const fieldTypeDefinition: SolrSchemaFieldType = {
+  name: "text_de",
+  class: "solr.TextField",
+  analyzer: {
+    tokenizer: { class: "solr.StandardTokenizerFactory" },
+    filters: [{ class: "solr.LowerCaseFilterFactory" }]
+  }
+};
+void client.schema({ "add-field-type": fieldTypeDefinition });
+// @ts-expect-error Analyzer tokenizers require a plugin class.
+const invalidFieldType: SolrSchemaCommand = { "add-field-type": { name: "invalid_text", class: "solr.TextField", analyzer: { tokenizer: {} } } };
+void invalidFieldType;
 
 const addDynamicField: SolrSchemaCommand = {
   "add-dynamic-field": { name: "*_sku", type: "string", stored: true, indexed: true }

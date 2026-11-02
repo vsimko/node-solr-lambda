@@ -86,6 +86,60 @@ test("Schema field operations serialize add, replace, and delete commands", asyn
   ]);
 });
 
+test("Schema field type operations serialize analyzer, tokenizer, filter, and similarity definitions", async () => {
+  const bodies: unknown[] = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 1 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  await client.schema({
+    "add-field-type": {
+      name: "text_en",
+      class: "solr.TextField",
+      analyzer: {
+        tokenizer: { class: "solr.StandardTokenizerFactory" },
+        filters: [{ class: "solr.LowerCaseFilterFactory" }]
+      },
+      similarity: { class: "solr.SchemaSimilarityFactory" }
+    }
+  });
+  await client.schema({
+    "replace-field-type": {
+      name: "text_en",
+      class: "solr.TextField",
+      indexAnalyzer: { tokenizer: { class: "solr.KeywordTokenizerFactory" } },
+      queryAnalyzer: { tokenizer: { class: "solr.StandardTokenizerFactory" } }
+    }
+  });
+  await client.schema({ "delete-field-type": { name: "text_en" } });
+
+  assert.deepEqual(bodies, [
+    { "add-field-type": {
+      name: "text_en",
+      class: "solr.TextField",
+      analyzer: {
+        tokenizer: { class: "solr.StandardTokenizerFactory" },
+        filters: [{ class: "solr.LowerCaseFilterFactory" }]
+      },
+      similarity: { class: "solr.SchemaSimilarityFactory" }
+    } },
+    { "replace-field-type": {
+      name: "text_en",
+      class: "solr.TextField",
+      indexAnalyzer: { tokenizer: { class: "solr.KeywordTokenizerFactory" } },
+      queryAnalyzer: { tokenizer: { class: "solr.StandardTokenizerFactory" } }
+    } },
+    { "delete-field-type": { name: "text_en" } }
+  ]);
+});
+
 test("Schema API preserves Solr HTTP failures", async () => {
   const client = createSolrClient({
     core: "catalog",
