@@ -11,6 +11,7 @@ import "./solr-json-facets.test.js";
 import "./solr-optimize.test.js";
 import "./solr-cursor.test.js";
 import "./solr-schema.test.js";
+import "./solr-config.test.js";
 import "./solr-security.test.js";
 import "./solr-replication.test.js";
 import "./solr-core-backup-restore.test.js";
