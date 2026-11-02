@@ -461,6 +461,33 @@ export interface SolrMoreLikeThisOptions {
   interestingTerms?: "none" | "list" | "details";
 }
 
+/** Debug response sections supported by Solr's standard query handler. */
+export type SolrDebugComponent = "query" | "timing" | "results" | "track" | "all";
+
+/** Typed options for query parsing, timing, and score explanation diagnostics. */
+export interface SolrDebugOptions {
+  /** Enable debug output; defaults to true when this object is supplied. */
+  enabled?: boolean;
+  /** One or more debug sections. Omit to request all available sections. */
+  components?: SolrDebugComponent | readonly SolrDebugComponent[];
+  /** Return score explanations as structured JSON instead of plain strings. */
+  explainStructured?: boolean;
+  /** Additional Lucene query whose matching documents should be explained. */
+  explainOther?: string;
+}
+
+/** One structured score explanation returned when debug.explain.structured=true. */
+export interface SolrStructuredExplanation {
+  match?: boolean;
+  value?: number;
+  description?: string;
+  details?: readonly SolrStructuredExplanation[];
+  [key: string]: unknown;
+}
+
+/** A score explanation can be plain text or a structured explanation tree. */
+export type SolrExplanation = string | SolrStructuredExplanation;
+
 /** Typed spatial filter options for the geofilt and bbox query parsers. */
 export interface SolrSpatialQueryOptions {
   parser: "geofilt" | "bbox";
@@ -515,6 +542,8 @@ export interface SolrStandardQueryOptions {
   expand?: SolrExpandOptions;
   /** Typed geofilt/bbox spatial filter. */
   spatial?: SolrSpatialQueryOptions;
+  /** Query parser, timing, and explain diagnostics. */
+  debug?: SolrDebugOptions;
   /** Boolean query operator, serialized as q.op. */
   "q.op"?: SolrQueryOperator;
   /** Response writer, serialized as wt. */
@@ -739,7 +768,8 @@ export interface SolrDebugInfo {
   querystring?: string;
   parsedquery?: string;
   parsedquery_toString?: string;
-  explain?: Readonly<Record<string, string>>;
+  explain?: Readonly<Record<string, SolrExplanation>>;
+  explainOther?: Readonly<Record<string, SolrExplanation>>;
   timing?: Readonly<Record<string, unknown>>;
   [key: string]: unknown;
 }
