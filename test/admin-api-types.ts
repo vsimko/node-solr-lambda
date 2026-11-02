@@ -16,6 +16,7 @@ import type {
   SolrSchemaSimilarityResponse,
   SolrConfigCommand,
   SolrConfigPropertyMap,
+  SolrConfigPropertyName,
   SolrConfigCommandResponse,
   SolrConfigReadResponse,
   SolrConfigOverlayResponse,
@@ -178,7 +179,10 @@ void overlayConfig.then(result => {
 });
 // @ts-expect-error Cache sizes are numeric configuration values.
 const invalidCacheSize: SolrConfigPropertyMap = { "query.filterCache.size": "large" };
-void invalidCacheSize;
+// @ts-expect-error Unknown common property paths are rejected instead of silently bypassing typo detection.
+const invalidPropertyPath: SolrConfigPropertyMap = { "query.filterCache.szie": 512 };
+const knownPropertyPath: SolrConfigPropertyName = "query.filterCache.size";
+void [invalidCacheSize, invalidPropertyPath, knownPropertyPath];
 
 // @ts-expect-error Unknown Schema API command names are rejected.
 const invalidSchema: SolrSchemaCommand = { "add-feld": { name: "sku", type: "string" } };
