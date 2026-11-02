@@ -150,6 +150,57 @@ test("invalid transport configuration fails at construction", () => {
 });
 
 
+test("Config API returns a typed response for common property settings", async () => {
+  let body: unknown;
+  let requestedPath = "";
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requestedPath = new URL(String(input)).pathname;
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 2 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  const result = await client.config({
+    "set-property": {
+      "query.filterCache.size": 512,
+      "query.maxBooleanClauses": 2_048,
+      "updateHandler.autoCommit.maxTime": 15_000,
+      "updateHandler.autoCommit.openSearcher": false
+    }
+  });
+
+  assert.equal(requestedPath, "/solr/catalog/config");
+  assert.deepEqual(body, {
+    "set-property": {
+      "query.filterCache.size": 512,
+      "query.maxBooleanClauses": 2_048,
+      "updateHandler.autoCommit.maxTime": 15_000,
+      "updateHandler.autoCommit.openSearcher": false
+    }
+  });
+  assert.equal(result.responseHeader?.status, 0);
+  assert.equal(result.responseHeader?.QTime, 2);
+});
+
+test("Config API preserves Solr HTTP failures", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({
+      error: { code: 400, msg: "Unknown Config API property" }
+    }), { status: 400, headers: { "content-type": "application/json" } })
+  });
+
+  await assert.rejects(
+    client.config({ "set-property": { "query.filterCache.size": 512 } }),
+    error => error instanceof SolrHttpError && error.status === 400
+  );
+});
+
 test("Config API customOptions are flattened into the native plugin definition", async () => {
   let body: unknown;
   const client = createSolrClient({
