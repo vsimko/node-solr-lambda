@@ -456,3 +456,61 @@ test("collapse rejects conflicting selectors and invalid numeric options", async
     /size must be a non-negative integer/
   );
 });
+
+test("query serializes typed Stats Component fields, facets, and local options", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    stats: {
+      fields: [
+        "price_d",
+        {
+          field: "price_d",
+          key: "price_stats",
+          tag: ["pivot", "sales"],
+          excludeTags: "stock",
+          min: true,
+          max: true,
+          mean: true,
+          distinctValues: false,
+          countDistinct: false,
+          percentiles: [50, 90],
+          cardinality: 0.5,
+          tdigestCompression: 150
+        }
+      ],
+      facets: ["category_s", "brand_s"],
+      calcDistinct: true
+    }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("stats"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("stats.field"), [
+    "price_d",
+    "{!key='price_stats' tag='pivot,sales' ex='stock' min=true max=true mean=true distinctValues=false countDistinct=false percentiles='50,90' cardinality=0.5 tdigestCompression=150}price_d"
+  ]);
+  assert.deepEqual(requestedUrl?.searchParams.getAll("stats.facet"), ["category_s", "brand_s"]);
+  assert.equal(requestedUrl?.searchParams.get("stats.calcdistinct"), "true");
+});
+
+test("query can explicitly disable the Stats Component", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+  await client.query({ query: "*:*", stats: { enabled: false, fields: ["price_d"] } });
+  assert.equal(requestedUrl?.searchParams.get("stats"), "false");
+  assert.equal(requestedUrl?.searchParams.has("stats.field"), false);
+});
+
+test("stats local options reject invalid percentile and cardinality values", () => {
+  const client = createClient(() => undefined);
+  assert.throws(
+    () => client.query({ query: "*:*", stats: { fields: [{ field: "price_d", percentiles: [101] }] } }),
+    /percentiles must be between 0 and 100/
+  );
+  assert.throws(
+    () => client.query({ query: "*:*", stats: { fields: [{ field: "price_d", cardinality: 1.5 }] } }),
+    /cardinality accuracy must be between 0 and 1/
+  );
+});

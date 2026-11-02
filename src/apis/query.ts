@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -73,6 +73,52 @@ function applyHighlighting(params: Record<string, unknown>, highlighting: SolrHi
   }
 }
 
+
+
+function quoteStatsLocalParam(value: string): string {
+  return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+}
+
+function serializeStatsField(options: SolrStatsFieldOptions): string {
+  if (options.field.trim() === "") throw new TypeError("stats field must be a non-empty string");
+  if (options.percentiles?.some(value => !Number.isFinite(value) || value < 0 || value > 100)) {
+    throw new TypeError("stats percentiles must be between 0 and 100");
+  }
+  if (typeof options.cardinality === "number" && (!Number.isFinite(options.cardinality) || options.cardinality < 0 || options.cardinality > 1)) {
+    throw new TypeError("stats cardinality accuracy must be between 0 and 1");
+  }
+  if (options.tdigestCompression !== undefined && (!Number.isFinite(options.tdigestCompression) || options.tdigestCompression <= 0)) {
+    throw new TypeError("stats tdigest compression must be a positive number");
+  }
+
+  const localParams: string[] = [];
+  if (options.key !== undefined) localParams.push(`key=${quoteStatsLocalParam(options.key)}`);
+  if (options.tag !== undefined) localParams.push(`tag=${quoteStatsLocalParam(typeof options.tag === "string" ? options.tag : options.tag.join(","))}`);
+  if (options.excludeTags !== undefined) localParams.push(`ex=${quoteStatsLocalParam(typeof options.excludeTags === "string" ? options.excludeTags : options.excludeTags.join(","))}`);
+
+  const flags = ["min", "max", "sum", "count", "missing", "sumOfSquares", "mean", "stddev", "distinctValues", "countDistinct"] as const;
+  for (const flag of flags) {
+    if (options[flag] !== undefined) localParams.push(`${flag}=${options[flag]}`);
+  }
+  if (options.percentiles !== undefined) localParams.push(`percentiles=${quoteStatsLocalParam(options.percentiles.join(","))}`);
+  if (options.cardinality !== undefined) localParams.push(`cardinality=${options.cardinality}`);
+  if (options.tdigestCompression !== undefined) localParams.push(`tdigestCompression=${options.tdigestCompression}`);
+
+  return localParams.length === 0
+    ? options.field
+    : `{!${localParams.join(" ")}}${options.field}`;
+}
+
+function applyStats(params: Record<string, unknown>, stats: SolrStatsOptions): void {
+  params.stats = stats.enabled ?? true;
+  if (stats.enabled === false) return;
+  if (stats.fields !== undefined) {
+    const fields = typeof stats.fields === "string" ? [stats.fields] : stats.fields;
+    params["stats.field"] = fields.map(field => typeof field === "string" ? field : serializeStatsField(field));
+  }
+  if (stats.facets !== undefined) params["stats.facet"] = stats.facets;
+  if (stats.calcDistinct !== undefined) params["stats.calcdistinct"] = stats.calcDistinct;
+}
 
 function applyGrouping(params: Record<string, unknown>, grouping: SolrGroupingOptions): void {
   params.group = grouping.enabled ?? true;
@@ -192,6 +238,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.facets !== undefined) applyClassicFacets(params, query.facets);
   if (query.highlighting !== undefined) applyHighlighting(params, query.highlighting);
   if (query.grouping !== undefined) applyGrouping(params, query.grouping);
+  if (query.stats !== undefined) applyStats(params, query.stats);
   if (query.expand !== undefined) applyExpand(params, query.expand);
   if (query.collapse !== undefined) {
     const filters = query.filter === undefined

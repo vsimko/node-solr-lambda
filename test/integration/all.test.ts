@@ -6,6 +6,7 @@ import "./solr-facets.test.js";
 import "./solr-json-query.test.js";
 import "./solr-highlighting.test.js";
 import "./solr-grouping.test.js";
+import "./solr-stats.test.js";
 import "./solr-json-facets.test.js";
 import "./solr-optimize.test.js";
 import "./solr-cursor.test.js";

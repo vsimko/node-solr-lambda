@@ -295,3 +295,40 @@ void solr.query({ collapse: { field: "product_id_s", nullPolicy: "merge" } });
 void solr.query({ collapse: { field: "product_id_s", hint: "cache" } });
 // @ts-expect-error Expand rows must be numeric.
 void solr.query({ expand: { rows: "five" } });
+
+void solr.query<SolrQueryResponse<{ id: string }>>({
+  query: "*:*",
+  stats: {
+    fields: [
+      "price_d",
+      {
+        field: "price_d",
+        key: "price_stats",
+        tag: ["pivot", "sales"],
+        excludeTags: "stock",
+        min: true,
+        max: true,
+        mean: true,
+        percentiles: [50, 90],
+        cardinality: 0.5,
+        tdigestCompression: 150
+      }
+    ],
+    facets: ["category_s", "brand_s"],
+    calcDistinct: true
+  }
+}).then(result => {
+  const minimum: number | string | null | undefined = result.stats?.stats_fields?.price_d?.min;
+  const mean: number | undefined = result.stats?.stats_fields?.price_d?.mean;
+  const distinctCount: number | undefined = result.stats?.stats_fields?.price_d?.countDistinct;
+  const p90: number | undefined = result.stats?.stats_fields?.price_d?.percentiles?.["90.0"];
+  const categoryMean: number | undefined = result.stats?.stats_fields?.price_d?.facets?.category_s?.books?.mean;
+  void [minimum, mean, distinctCount, p90, categoryMean];
+});
+
+// @ts-expect-error Stats percentiles are numeric.
+void solr.query({ stats: { fields: [{ field: "price_d", percentiles: ["90"] }] } });
+// @ts-expect-error Cardinality accuracy is boolean or a number.
+void solr.query({ stats: { fields: [{ field: "price_d", cardinality: "high" }] } });
+// @ts-expect-error Stats field names are required for field-specific options.
+void solr.query({ stats: { fields: [{ min: true }] } });
