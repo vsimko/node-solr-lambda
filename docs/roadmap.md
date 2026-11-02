@@ -77,7 +77,7 @@ The query API is the most visible area where autocomplete quality directly affec
 | --- | --- |
 | Streaming Expressions, stream parsing, and export | [Issues #92–#94](https://github.com/vsimko/node-solr-lambda/issues/92) |
 | Replication and backup/restore | [Issues #95–#96](https://github.com/vsimko/node-solr-lambda/issues/95) |
-| Remaining endpoints and safe raw request API | [Issues #97–#98](https://github.com/vsimko/node-solr-lambda/issues/97) |
+| Remaining endpoints and safe raw request API; explicit typed-client boundary in [endpoint inventory](endpoint-inventory.md) | [Issues #97–#98](https://github.com/vsimko/node-solr-lambda/issues/97) |
 | URL serialization, retry behavior, and auth guidance | [Issues #99–#101](https://github.com/vsimko/node-solr-lambda/issues/99) |
 | README, API reference, migration, public API, compatibility, and release checklist | [Issues #102–#104](https://github.com/vsimko/node-solr-lambda/issues/102), [#107–#110](https://github.com/vsimko/node-solr-lambda/issues/107) |
 
