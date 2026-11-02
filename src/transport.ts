@@ -48,8 +48,18 @@ function withDefaultParams(
 }
 
 function resolveUrl(path: string, baseUrl: string): URL {
-  if (/^https?:\/\//i.test(path)) return new URL(path);
-  const url = new URL(baseUrl);
+  const base = new URL(baseUrl);
+  if (/^https?:\/\//i.test(path)) {
+    const target = new URL(path);
+    if (target.origin !== base.origin) {
+      throw new TypeError("Solr request URL must use the configured Solr origin");
+    }
+    if (target.username || target.password || target.hash) {
+      throw new TypeError("Solr request URL must not include credentials or a fragment");
+    }
+    return target;
+  }
+  const url = base;
   const baseSegments = url.pathname.split("/").filter(Boolean);
   const pathSegments = path.split("/").filter(Boolean);
   if (baseSegments[baseSegments.length - 1] === "solr" && pathSegments[0] === "solr") {
