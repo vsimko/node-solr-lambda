@@ -239,3 +239,8 @@ void [invalidCollection, invalidAlias];
 void client.coreAdmin("CREATE");
 // @ts-expect-error Collections CREATE requires a parameter object with a collection name.
 void client.collections("CREATE");
+
+
+const typedConfigRead: Promise<SolrConfigReadResponse> = client.getConfig();
+const typedConfigOverlay: Promise<SolrConfigOverlayResponse> = client.getConfigOverlay();
+void [typedConfigRead, typedConfigOverlay];
