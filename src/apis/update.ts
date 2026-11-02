@@ -1,5 +1,5 @@
 import type { SolrTransport } from "../transport.js";
-import type { CommitOptions, RequestControlOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrUpdateOptions } from "../types.js";
+import type { RequestControlOptions, SolrCommitOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions } from "../types.js";
 
 function updateParams(options: SolrUpdateOptions): Record<string, string | number | boolean> {
   const { route, ...params } = options;
@@ -121,6 +121,11 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
       if (!validDelete) throw new TypeError("JSON delete command must contain an ID, ID list, or query");
     } else if (!value || typeof value !== "object" || Array.isArray(value)) {
       throw new TypeError(`JSON ${name} command must be an object`);
+    } else if (name === "commit" && (value as SolrCommitOptions).softCommit === true && (value as SolrCommitOptions).expungeDeletes === true) {
+      throw new TypeError("expungeDeletes is not supported on a soft commit");
+    } else if (name === "optimize" && (value as SolrOptimizeOptions).maxSegments !== undefined &&
+      (!Number.isInteger((value as SolrOptimizeOptions).maxSegments) || (value as SolrOptimizeOptions).maxSegments! < 1)) {
+      throw new RangeError("maxSegments must be a positive integer");
     } else if (name === "rollback" && Object.keys(value).length > 0) {
       throw new TypeError("JSON rollback command must be an empty object");
     }
@@ -129,11 +134,24 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
 
 export function updateCommands<T>(client: SolrTransport, path: string, commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   validateJsonUpdateCommands(commands);
+  const commitOpenSearcher = commands.commit?.openSearcher;
+  const optimizeOpenSearcher = commands.optimize?.openSearcher;
+  if (commitOpenSearcher !== undefined && optimizeOpenSearcher !== undefined && commitOpenSearcher !== optimizeOpenSearcher) {
+    throw new TypeError("commit and optimize commands must use the same openSearcher value in one request");
+  }
+  const openSearcher = commitOpenSearcher ?? optimizeOpenSearcher;
+  const { openSearcher: _commitOpenSearcher, ...commitOptions } = commands.commit ?? {};
+  const { openSearcher: _optimizeOpenSearcher, ...optimizeOptions } = commands.optimize ?? {};
+  const body: SolrJsonUpdateCommands = {
+    ...commands,
+    ...(commands.commit === undefined ? {} : { commit: commitOptions }),
+    ...(commands.optimize === undefined ? {} : { optimize: optimizeOptions })
+  };
   return client.request<T>(`${path}/json`, {
     ...requestOptions,
     method: "POST",
-    body: commands,
-    query: updateParams(options),
+    body,
+    query: { ...updateParams(options), ...(openSearcher === undefined ? {} : { openSearcher }) },
     operation: "updateCommands"
   });
 }
@@ -157,12 +175,33 @@ export function deleteDocuments<T>(client: SolrTransport, path: string, command:
   });
 }
 
-export function commit<T>(client: SolrTransport, path: string, options: CommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
-  return client.request<T>(path, { ...requestOptions, method: "POST", body: { commit: options }, operation: "commit" });
+export function commit<T>(client: SolrTransport, path: string, options: SolrCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  if (options.softCommit === true && options.expungeDeletes === true) {
+    throw new TypeError("expungeDeletes is not supported on a soft commit");
+  }
+  const legacyOptions = options as SolrCommitOptions & { maxSegments?: number };
+  if (legacyOptions.maxSegments !== undefined) {
+    throw new TypeError("maxSegments is optimize-only; use optimize()");
+  }
+  const { openSearcher, ...commitOptions } = options;
+  return client.request<T>(path, {
+    ...requestOptions,
+    method: "POST",
+    body: { commit: commitOptions },
+    query: openSearcher === undefined ? undefined : { openSearcher },
+    operation: "commit"
+  });
 }
 
-export function softCommit<T>(client: SolrTransport, path: string, requestOptions: RequestControlOptions = {}): Promise<T> {
-  return commit<T>(client, path, { softCommit: true, waitSearcher: false }, requestOptions);
+export function softCommit<T>(client: SolrTransport, path: string, options: SolrSoftCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  const { openSearcher, waitSearcher } = options;
+  return client.request<T>(path, {
+    ...requestOptions,
+    method: "POST",
+    body: { commit: { softCommit: true, waitSearcher: waitSearcher ?? true } },
+    query: openSearcher === undefined ? undefined : { openSearcher },
+    operation: "softCommit"
+  });
 }
 
 export function optimize<T>(client: SolrTransport, path: string, options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
@@ -170,7 +209,14 @@ export function optimize<T>(client: SolrTransport, path: string, options: SolrOp
   if (normalized.maxSegments !== undefined && (!Number.isInteger(normalized.maxSegments) || normalized.maxSegments < 1)) {
     throw new RangeError("maxSegments must be a positive integer");
   }
-  return client.request<T>(path, { ...requestOptions, method: "POST", body: { optimize: normalized }, operation: "optimize" });
+  const { openSearcher, ...optimizeOptions } = normalized;
+  return client.request<T>(path, {
+    ...requestOptions,
+    method: "POST",
+    body: { optimize: optimizeOptions },
+    query: openSearcher === undefined ? undefined : { openSearcher },
+    operation: "optimize"
+  });
 }
 
 export function rollback<T>(client: SolrTransport, path: string, requestOptions: RequestControlOptions = {}): Promise<T> {
