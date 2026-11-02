@@ -496,7 +496,7 @@
         "9": "unverified",
         "10": "unverified"
       },
-      "documentation": "docs/configuration.md",
+      "documentation": "docs/raw-requests.md",
       "testFiles": [
         "test/errors.test.ts",
         "test/cancellation.test.ts",
