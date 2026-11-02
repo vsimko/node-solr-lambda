@@ -22,6 +22,56 @@ function deleteParams(options: SolrDeleteOptions): Record<string, string | numbe
   };
 }
 
+const atomicModifiers = new Set(["set", "add", "add-distinct", "remove", "removeregex", "inc"]);
+
+function validateAtomicUpdateDocument(document: SolrDocument): void {
+  let uniqueKeyCount = 0;
+  let modifierCount = 0;
+
+  for (const [field, value] of Object.entries(document)) {
+    if (field === "_root_") {
+      if (typeof value !== "string" || value.length === 0) throw new TypeError("_root_ must be a non-empty string");
+      continue;
+    }
+    if (field === "_version_") {
+      if (typeof value !== "number" || !Number.isFinite(value)) throw new TypeError("_version_ must be a finite number");
+      continue;
+    }
+
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      uniqueKeyCount += 1;
+      if (typeof value !== "string" && typeof value !== "number") {
+        throw new TypeError("The atomic update unique-key value must be a string or number");
+      }
+      continue;
+    }
+
+    const modifiers = Object.keys(value);
+    if (modifiers.length !== 1 || !atomicModifiers.has(modifiers[0]!)) {
+      throw new TypeError(`Atomic update field "${field}" must contain exactly one supported modifier`);
+    }
+    const modifier = modifiers[0]!;
+    const modifierValue = (value as Record<string, unknown>)[modifier];
+    if (modifier === "inc" && (typeof modifierValue !== "number" || !Number.isFinite(modifierValue))) {
+      throw new TypeError(`Atomic update modifier "inc" for "${field}" must be a finite number`);
+    }
+    if (modifier === "removeregex" &&
+      !(typeof modifierValue === "string" || (Array.isArray(modifierValue) && modifierValue.every(item => typeof item === "string")))) {
+      throw new TypeError(`Atomic update modifier "removeregex" for "${field}" must be a string or string array`);
+    }
+    modifierCount += 1;
+  }
+
+  if (uniqueKeyCount !== 1) throw new TypeError("An atomic update document must contain exactly one plain unique-key field");
+  if (modifierCount === 0) throw new TypeError("An atomic update document must contain at least one field modifier");
+}
+
+export function atomicUpdate<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  const batch = Array.isArray(documents) ? documents : [documents];
+  for (const document of batch) validateAtomicUpdateDocument(document as SolrDocument);
+  return add<T>(client, path, batch, options, requestOptions);
+}
+
 export function add<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   return client.request<T>(path, {
     ...requestOptions,
