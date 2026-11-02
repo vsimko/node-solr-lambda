@@ -24,6 +24,33 @@ const result = await solr.query({
 });
 ```
 
+## Debugging and explain output
+
+Use the typed `debug` option to request query parsing, timing, score explanations, or distributed tracking diagnostics. If `components` is omitted, Solr returns all available debug sections. Structured explanations are available with `explainStructured`; `explainOther` requests explanations for documents matching a second Lucene query.
+
+```ts
+const diagnostic = await solr.query<SolrQueryResponse<Product>>({
+  query: "title:distributed",
+  debug: {
+    components: ["query", "results", "timing"],
+    explainStructured: true,
+    explainOther: "id:product-42"
+  }
+});
+
+const parsedQuery = diagnostic.debug?.parsedquery;
+const explanation = diagnostic.debug?.explain?.["product-1"];
+const explanationDetails = typeof explanation === "string" ? undefined : explanation?.details;
+```
+
+- `components` accepts `query`, `timing`, `results`, `track`, or `all`; an array sends repeated `debug` parameters.
+- Supplying `debug: {}` enables all debug sections. Set `enabled: false` to explicitly disable them.
+- `explainStructured: true` maps to `debug.explain.structured=true`. Response explanations are typed as either plain strings or recursive structured explanation trees.
+- `explainOther` must be a non-empty Lucene query and maps to Solr's `explainOther` parameter.
+- Debug output can be verbose and may expose query details; enable it selectively. Runtime response behavior for this new typed interface remains unverified on the pinned Solr 8/9/10 matrix.
+
+See the official [Solr 10.1 common query parameters reference](https://solr.apache.org/guide/solr/10_1/query-guide/common-query-parameters.html) for supported debug sections, structured explain output, and `explainOther`. The documented parameter forms are also present in the Solr 8.11 and 9.11 guides.
+
 ## Filter queries, tags, and local parameters
 
 The `filter` property accepts one filter or an array. Arrays are sent as repeated `fq` parameters; raw strings remain unchanged. Structured filters support tags and Solr filter-cache hints:
