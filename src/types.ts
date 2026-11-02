@@ -105,9 +105,12 @@ export interface SolrReplicationRestoreStatus {
   exception?: string | Readonly<Record<string, unknown>>;
 }
 export interface SolrReplicationDetailsResponse extends SolrReplicationCommandResponse {
+  /** Nested details shape returned by current ReplicationHandler implementations. */
   details?: Readonly<Record<string, unknown>> & {
     backup?: SolrReplicationBackupStatus;
   };
+  /** Legacy Solr 8 response shape. */
+  backup?: SolrReplicationBackupStatus;
 }
 export interface SolrReplicationRestoreStatusResponse extends SolrReplicationCommandResponse {
   restorestatus?: SolrReplicationRestoreStatus;
