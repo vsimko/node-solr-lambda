@@ -279,6 +279,18 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.stats !== undefined) applyStats(params, query.stats);
   if (query.moreLikeThis !== undefined) applyMoreLikeThis(params, query.moreLikeThis);
   if (query.expand !== undefined) applyExpand(params, query.expand);
+  if (query.spatial !== undefined) {
+    const { parser, field, point, distance, cache, cost } = query.spatial;
+    if (field.trim() === "") throw new TypeError("spatial field must be a non-empty string");
+    if (point.trim() === "") throw new TypeError("spatial point must be a non-empty string");
+    if (!Number.isFinite(distance) || distance < 0) throw new TypeError("spatial distance must be a non-negative finite number");
+    const localParams = `{!${parser} sfield=${field}${cache === undefined ? "" : ` cache=${cache}`}${cost === undefined ? "" : ` cost=${cost}`}}`;
+    const filters = params.fq === undefined ? [] : Array.isArray(params.fq) ? [...params.fq] : [params.fq];
+    filters.push(localParams);
+    params.fq = filters;
+    params.pt = point;
+    params.d = distance;
+  }
   if (query.collapse !== undefined) {
     const filters = query.filter === undefined
       ? (Array.isArray(params.fq) ? params.fq.filter((value): value is string => typeof value === "string") : typeof params.fq === "string" ? [params.fq] : [])
@@ -302,6 +314,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   delete params.grouping;
   delete params.moreLikeThis;
   delete params.collapse;
+  delete params.spatial;
   const flat: Record<string, SolrQueryParamValue> = {};
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" ||

@@ -461,6 +461,19 @@ export interface SolrMoreLikeThisOptions {
   interestingTerms?: "none" | "list" | "details";
 }
 
+/** Typed spatial filter options for the geofilt and bbox query parsers. */
+export interface SolrSpatialQueryOptions {
+  parser: "geofilt" | "bbox";
+  /** Indexed spatial field (sfield). */
+  field: string;
+  /** Center point; latitude,longitude for geodetic fields. */
+  point: string;
+  /** Search radius in the spatial field's configured distance units. */
+  distance: number;
+  cache?: boolean;
+  cost?: number;
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -500,6 +513,8 @@ export interface SolrStandardQueryOptions {
   collapse?: SolrCollapseOptions;
   /** Retrieve additional documents for collapsed groups. */
   expand?: SolrExpandOptions;
+  /** Typed geofilt/bbox spatial filter. */
+  spatial?: SolrSpatialQueryOptions;
   /** Boolean query operator, serialized as q.op. */
   "q.op"?: SolrQueryOperator;
   /** Response writer, serialized as wt. */

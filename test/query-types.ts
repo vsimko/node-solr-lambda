@@ -37,6 +37,12 @@ void solr.query({ query: "name:alice", defType: "lucene", parserOptions: { type:
 void solr.query({ query: "name:alice", defType: "dismax", parserOptions: { type: "dismax", qf: "name^2", mm: "2", tie: 0.2 } });
 void solr.query({ query: solrLocalParams({ type: "lucene", df: "title" }, "search terms"), fields: solrFields("id", solrFunction("sum", "price", 10)) });
 void solr.query({ filter: solrFilter("category:books", { tag: "category" }) });
+void solr.query({ spatial: { parser: "geofilt", field: "store_location", point: "45.15,-93.85", distance: 5 }, sort: "geodist() asc" });
+void solr.query({ spatial: { parser: "bbox", field: "store_location", point: "45.15,-93.85", distance: 5, cache: false } });
+// @ts-expect-error Unsupported spatial parser is rejected.
+void solr.query({ spatial: { parser: "geoFilter", field: "store", point: "0,0", distance: 5 } });
+// @ts-expect-error Spatial distance is numeric.
+void solr.query({ spatial: { parser: "geofilt", field: "store", point: "0,0", distance: "five" } });
 
 // @ts-expect-error Unknown top-level options are rejected.
 void solr.query({ query: "*:*", qurey: "*:*" });
