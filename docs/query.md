@@ -201,13 +201,17 @@ const result = await solr.query<SolrQueryResponse<Product>>({
   }
 });
 
-const similarBooks = result.moreLikeThis?.[result.response?.docs?.[0]?.id ?? ""]?.docs;
+const sourceId = result.response?.docs?.[0]?.id ?? "";
+const entries = result.moreLikeThis ?? [];
+const sourceIndex = entries.indexOf(sourceId);
+const related = sourceIndex >= 0 ? entries[sourceIndex + 1] : undefined;
+const similarBooks = typeof related === "object" && related !== null ? related.docs : undefined;
 ```
 
 - `fields` maps to `mlt.fl` and selects stored fields used for similarity; term vectors can improve performance. `queryFields` maps to `mlt.qf`, uses DisMax field/boost syntax, and must name fields also included in `fields`.
 - `count` maps to `mlt.count`. Term and document thresholds map to `mlt.mintf`, `mlt.mindf`, `mlt.maxdf`, and `mlt.maxdfpct`. Word-length, query-term, and parsed-token limits map to `mlt.minwl`, `mlt.maxwl`, `mlt.maxqt`, and `mlt.maxntp`.
-- `boost` maps to `mlt.boost`. `interestingTerms` accepts `none`, `list`, or `details`; the detailed terms mode is intended for diagnostics and may be expensive.
-- Supplying `moreLikeThis` enables the component by default. Set `enabled: false` to explicitly disable it.
+- `boost` maps to `mlt.boost`. `interestingTerms` accepts `none`, `list`, or `details`; the detailed terms mode is intended for diagnostics and may be expensive. For the Search Component, interesting terms are unavailable for distributed queries.
+- The `moreLikeThis` response is a flat alternating array of source document IDs and result objects, as returned by Solr; `SolrMoreLikeThisResponse<TDocument>` models this wire shape. Supplying `moreLikeThis` enables the component by default. Set `enabled: false` to explicitly disable it.
 - This API covers the Search Component on `/select`. It does not configure the separate MoreLikeThis request handler (`/mlt`) or the MoreLikeThis query parser. The request handler must be configured in Solr before use.
 - The source document needs a stored unique key and usable stored text fields; stored term vectors are recommended for performance. Similarity behavior depends on field analysis and the configured schema.
 
