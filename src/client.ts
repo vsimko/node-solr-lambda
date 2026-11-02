@@ -11,7 +11,7 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions,
-  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions
+  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -30,24 +30,24 @@ export class SolrClient extends SolrTransport {
     return queryApi.queryJson<T>(this, this.endpoint("/query"), request, requestOptions);
   }
 
-  add<T = unknown>(documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  add<T = SolrUpdateResponse>(documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.add<T>(this, this.endpoint("/update"), documents, options, requestOptions);
   }
 
-  update<T = unknown>(documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  update<T = SolrUpdateResponse>(documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.update<T>(this, this.endpoint("/update"), documents, options, requestOptions);
   }
 
-  updateCommands<T = unknown>(commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  updateCommands<T = SolrUpdateResponse>(commands: SolrJsonUpdateCommands, options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.updateCommands<T>(this, this.endpoint("/update"), commands, options, requestOptions);
   }
 
-  atomicUpdate<TDocument extends object, TUniqueKey extends keyof TDocument = "id" extends keyof TDocument ? "id" : never>(
+  atomicUpdate<TDocument extends object, TUniqueKey extends keyof TDocument = "id" extends keyof TDocument ? "id" : never, TResponse = SolrUpdateResponse>(
     documents: SolrAtomicUpdateDocument<TDocument, TUniqueKey> | readonly SolrAtomicUpdateDocument<TDocument, TUniqueKey>[],
     options: SolrUpdateOptions = {},
     requestOptions: RequestControlOptions = {}
-  ): Promise<unknown> {
-    return updateApi.atomicUpdate<unknown>(
+  ): Promise<TResponse> {
+    return updateApi.atomicUpdate<TResponse>(
       this,
       this.endpoint("/update"),
       documents as unknown as SolrDocument | readonly SolrDocument[],
@@ -56,17 +56,17 @@ export class SolrClient extends SolrTransport {
     );
   }
 
-  delete<T = unknown>(command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
+  delete<T = SolrUpdateResponse>(command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
     return updateApi.deleteDocuments<T>(this, this.endpoint("/update"), command, options);
   }
 
-  commit<T = unknown>(options: SolrCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  commit<T = SolrUpdateResponse>(options: SolrCommitOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.commit<T>(this, this.endpoint("/update"), options, requestOptions);
   }
 
-  softCommit<T = unknown>(requestOptions?: RequestControlOptions): Promise<T>;
-  softCommit<T = unknown>(options?: SolrSoftCommitOptions, requestOptions?: RequestControlOptions): Promise<T>;
-  softCommit<T = unknown>(
+  softCommit<T = SolrUpdateResponse>(requestOptions?: RequestControlOptions): Promise<T>;
+  softCommit<T = SolrUpdateResponse>(options?: SolrSoftCommitOptions, requestOptions?: RequestControlOptions): Promise<T>;
+  softCommit<T = SolrUpdateResponse>(
     optionsOrRequestOptions: SolrSoftCommitOptions | RequestControlOptions = {},
     requestOptions: RequestControlOptions = {}
   ): Promise<T> {
@@ -76,11 +76,11 @@ export class SolrClient extends SolrTransport {
     return updateApi.softCommit<T>(this, this.endpoint("/update"), options, controls);
   }
 
-  optimize<T = unknown>(options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  optimize<T = SolrUpdateResponse>(options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.optimize<T>(this, this.endpoint("/update"), options, requestOptions);
   }
 
-  rollback<T = unknown>(requestOptions: RequestControlOptions = {}): Promise<T> {
+  rollback<T = SolrUpdateResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.rollback<T>(this, this.endpoint("/update"), requestOptions);
   }
 
