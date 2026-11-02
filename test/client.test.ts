@@ -108,6 +108,7 @@ test("atomicUpdate serializes field modifiers without changing the document enve
     tags: string[];
     categories: string[];
     labels: string[];
+    legacyLabels: string[];
   }
   let body: unknown;
   const client = createSolrClient({
@@ -124,7 +125,8 @@ test("atomicUpdate serializes field modifiers without changing the document enve
     price: { inc: 2 },
     tags: { add: ["new", "sale"] },
     categories: { "add-distinct": "books" },
-    labels: { remove: "legacy" }
+    labels: { remove: "legacy" },
+    legacyLabels: { removeregex: "^legacy_" }
   });
   assert.deepEqual(body, [{
     id: "one",
@@ -132,7 +134,8 @@ test("atomicUpdate serializes field modifiers without changing the document enve
     price: { inc: 2 },
     tags: { add: ["new", "sale"] },
     categories: { "add-distinct": "books" },
-    labels: { remove: "legacy" }
+    labels: { remove: "legacy" },
+    legacyLabels: { removeregex: "^legacy_" }
   }]);
 });
 
