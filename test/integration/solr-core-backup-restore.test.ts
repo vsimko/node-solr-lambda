@@ -13,20 +13,12 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
     ...(username && password ? { auth: { type: "basic" as const, username, password } } : {})
   });
 
-  await client.config({
-    "add-requesthandler": {
-      name: "/replication",
-      class: "solr.ReplicationHandler",
-      customOptions: { leader: { replicateAfter: "commit" } }
-    }
-  });
-
   const id = createId("core_backup");
   const backupName = createId("snapshot");
   await client.add([{ id, title: "before backup" }]);
   await client.commit({ waitSearcher: true });
 
-  const backup = await client.replication("backup", { name: backupName, numberToKeep: 2 });
+  const backup = await client.replication("backup", { name: backupName });
   assert.equal(backup.responseHeader?.status, 0);
 
   await client.add([{ id, title: "after backup" }]);
@@ -45,7 +37,7 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   }
   assert.equal(restoreState, "success", "core restore did not finish successfully");
 
-  const result = await client.query({ q: `id:${id}`, rows: 1 }) as {
+  const result = await client.query({ params: { q: `id:${id}` }, rows: 1 }) as {
     response?: { numFound?: number; docs?: readonly { title?: string }[] };
   };
   assert.equal(result.response?.numFound, 1);
