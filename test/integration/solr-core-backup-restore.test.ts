@@ -18,7 +18,9 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   await client.add([{ id, title: "before backup" }]);
   await client.commit({ waitSearcher: true });
 
-  const backup = await client.replication("backup", { name: backupName });
+  const location = process.env.SOLR_BACKUP_LOCATION;
+  const backupParams = { name: backupName, ...(location ? { location } : {}) };
+  const backup = await client.replication("backup", backupParams);
   assert.equal(backup.responseHeader?.status, 0);
 
   let backupState = "";
@@ -35,7 +37,7 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   await client.add([{ id, title: "after backup" }]);
   await client.commit({ waitSearcher: true });
 
-  const restore = await client.replication("restore", { name: backupName });
+  const restore = await client.replication("restore", backupParams);
   assert.equal(restore.responseHeader?.status, 0);
 
   let restoreState = "";
@@ -54,6 +56,6 @@ integrationTest("ReplicationHandler core backup and asynchronous restore cycle",
   assert.equal(result.response?.numFound, 1);
   assert.ok(result.response?.docs?.[0]?.title?.includes("before backup"));
 
-  const deleted = await client.replication("deletebackup", { name: backupName });
+  const deleted = await client.replication("deletebackup", backupParams);
   assert.equal(deleted.responseHeader?.status, 0);
 });
