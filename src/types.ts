@@ -57,11 +57,8 @@ export interface SolrReplicationFileMetadata {
   [key: string]: unknown;
 }
 export interface SolrReplicationFileListResponse extends SolrReplicationCommandResponse {
-  filelist?: {
-    file?: readonly SolrReplicationFileMetadata[] | SolrReplicationFileMetadata;
-    confFiles?: readonly SolrReplicationFileMetadata[] | SolrReplicationFileMetadata;
-    [key: string]: unknown;
-  };
+  filelist?: readonly SolrReplicationFileMetadata[];
+  confFiles?: readonly SolrReplicationFileMetadata[];
 }
 export interface SolrReplicationDetailsResponse extends SolrReplicationCommandResponse {
   details?: Readonly<Record<string, unknown>>;
