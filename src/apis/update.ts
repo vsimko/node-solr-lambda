@@ -1,25 +1,52 @@
 import type { SolrTransport } from "../transport.js";
-import type { CommitOptions, RequestControlOptions, SolrDelete, SolrDocument, UpdateOptions } from "../types.js";
+import type { CommitOptions, RequestControlOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrOptimizeOptions, SolrUpdateOptions } from "../types.js";
 
-export function add<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: UpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+function updateParams(options: SolrUpdateOptions): Record<string, string | number | boolean> {
+  const { route, ...params } = options;
+  if (options.commitWithin !== undefined && (!Number.isInteger(options.commitWithin) || options.commitWithin < 0)) {
+    throw new RangeError("commitWithin must be a non-negative integer");
+  }
+  if (route !== undefined && route.trim() === "") throw new TypeError("route must be a non-empty string");
+  return { ...params, ...(route === undefined ? {} : { _route_: route }) };
+}
+
+function deleteParams(options: SolrDeleteOptions): Record<string, string | number | boolean> {
+  const { route, commitWithin } = options;
+  if (commitWithin !== undefined && (!Number.isInteger(commitWithin) || commitWithin < 0)) {
+    throw new RangeError("commitWithin must be a non-negative integer");
+  }
+  if (route !== undefined && route.trim() === "") throw new TypeError("route must be a non-empty string");
+  return {
+    ...(route === undefined ? {} : { _route_: route }),
+    ...(commitWithin === undefined ? {} : { commitWithin })
+  };
+}
+
+export function add<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   return client.request<T>(path, {
     ...requestOptions,
     method: "POST",
     body: Array.isArray(documents) ? documents : [documents],
-    query: { ...options },
+    query: updateParams(options),
     operation: "add"
   });
 }
 
-export function update<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: UpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function update<T>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   return add<T>(client, path, documents, options, requestOptions);
 }
 
-export function deleteDocuments<T>(client: SolrTransport, path: string, command: SolrDelete, requestOptions: RequestControlOptions = {}): Promise<T> {
+export function deleteDocuments<T>(client: SolrTransport, path: string, command: SolrDelete, options: SolrDeleteOptions = {}): Promise<T> {
+  const requestOptions: RequestControlOptions = {
+    ...(options.signal === undefined ? {} : { signal: options.signal }),
+    ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
+    ...(options.headers === undefined ? {} : { headers: options.headers })
+  };
   return client.request<T>(path, {
     ...requestOptions,
     method: "POST",
     body: { delete: typeof command === "string" ? { id: command } : command },
+    query: deleteParams(options),
     operation: "delete"
   });
 }
@@ -32,8 +59,12 @@ export function softCommit<T>(client: SolrTransport, path: string, requestOption
   return commit<T>(client, path, { softCommit: true, waitSearcher: false }, requestOptions);
 }
 
-export function optimize<T>(client: SolrTransport, path: string, maxSegments = 1, requestOptions: RequestControlOptions = {}): Promise<T> {
-  return client.request<T>(path, { ...requestOptions, method: "POST", body: { optimize: { maxSegments } }, operation: "optimize" });
+export function optimize<T>(client: SolrTransport, path: string, options: SolrOptimizeOptions | number = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
+  const normalized = typeof options === "number" ? { maxSegments: options } : options;
+  if (normalized.maxSegments !== undefined && (!Number.isInteger(normalized.maxSegments) || normalized.maxSegments < 1)) {
+    throw new RangeError("maxSegments must be a positive integer");
+  }
+  return client.request<T>(path, { ...requestOptions, method: "POST", body: { optimize: normalized }, operation: "optimize" });
 }
 
 export function rollback<T>(client: SolrTransport, path: string, requestOptions: RequestControlOptions = {}): Promise<T> {

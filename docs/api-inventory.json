@@ -79,13 +79,14 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/config.test.ts",
-        "test/integration/solr-smoke.test.ts"
+        "test/integration/solr-smoke.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
+      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10."
     },
     {
       "id": "update.update",
@@ -102,12 +103,13 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/integration/solr-update.test.ts"
+        "test/integration/solr-update.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified."
+      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic and JSON update commands remain unverified. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10."
     },
     {
       "id": "update.delete",
@@ -124,12 +126,14 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/modules.test.ts",
-        "test/integration/solr-smoke.test.ts"
+        "test/integration/solr-smoke.test.ts",
+        "test/client.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "Document deletion by ID is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
+      "notes": "Document deletion by ID is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Delete-by-ID and delete-by-query serialization are covered by unit tests; SolrDeleteOptions expose route and commitWithin, with runtime verification of these request options remaining unverified on Solr 8/9/10."
     },
     {
       "id": "update.commit",
@@ -146,13 +150,14 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
         "test/integration/solr-smoke.test.ts",
-        "test/integration/solr-update.test.ts"
+        "test/integration/solr-update.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
+      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Command-body serialization is covered by explicit unit tests."
     },
     {
       "id": "update.softCommit",
@@ -169,12 +174,13 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/integration/solr-update-lifecycle.test.ts"
+        "test/integration/solr-update-lifecycle.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
+      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests."
     },
     {
       "id": "update.optimize",
@@ -191,12 +197,13 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/integration/solr-optimize.test.ts"
+        "test/integration/solr-optimize.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
+      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions."
     },
     {
       "id": "update.rollback",
@@ -213,12 +220,13 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/documents.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/integration/solr-update-lifecycle.test.ts"
+        "test/integration/solr-update-lifecycle.test.ts",
+        "test/cancellation.types.ts"
       ],
-      "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
+      "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests."
     },
     {
       "id": "admin.ping",
