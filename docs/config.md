@@ -4,7 +4,7 @@ Use `config()` with the exported `SolrConfigCommand` discriminated union. Common
 
 ```ts
 await solr.config({
-  "set-property": { "query.timeout": 10_000 }
+  "set-property": { "query.maxBooleanClauses": 10_000 }
 });
 
 await solr.config({
@@ -42,8 +42,8 @@ const mutation: Promise<SolrConfigCommandResponse> = solr.config({
 });
 
 const effectiveConfig: Promise<SolrConfigReadResponse> =
-  solr.request("/solr/catalog/config");
+  solr.request<SolrConfigReadResponse>("/solr/catalog/config");
 
 const overlay: Promise<SolrConfigOverlayResponse> =
-  solr.request("/solr/catalog/config/overlay");
+  solr.request<SolrConfigOverlayResponse>("/solr/catalog/config/overlay");
 ```
