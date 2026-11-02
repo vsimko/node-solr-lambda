@@ -434,6 +434,33 @@ export interface SolrStatsOptions {
   calcDistinct?: boolean;
 }
 
+/** Typed options for Solr's MoreLikeThis search component. */
+export interface SolrMoreLikeThisOptions {
+  /** Enable the component; defaults to true when options are supplied. */
+  enabled?: boolean;
+  /** Fields used to generate similar-document queries (mlt.fl). */
+  fields?: string | readonly string[];
+  /** Similar documents returned for each input document (default 5). */
+  count?: number;
+  /** Minimum term frequency in the source document (default 2). */
+  minTermFrequency?: number;
+  /** Minimum document frequency across the index (default 5). */
+  minDocumentFrequency?: number;
+  maxDocumentFrequency?: number;
+  /** Maximum document frequency as an integer percentage from 0 to 100. */
+  maxDocumentFrequencyPercent?: number;
+  minWordLength?: number;
+  maxWordLength?: number;
+  /** Maximum query terms generated for each source document. */
+  maxQueryTerms?: number;
+  /** Maximum tokens parsed per source field without term vectors. */
+  maxParsedTokens?: number;
+  boost?: boolean;
+  /** DisMax-style query fields; each must also be included in fields. */
+  queryFields?: string;
+  interestingTerms?: "none" | "list" | "details";
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -465,6 +492,8 @@ export interface SolrStandardQueryOptions {
   highlighting?: SolrHighlightingOptions;
   /** Typed options for the Stats component. */
   stats?: SolrStatsOptions;
+  /** Typed options for the MoreLikeThis search component. */
+  moreLikeThis?: SolrMoreLikeThisOptions;
   /** Typed options for Result Grouping. */
   grouping?: SolrGroupingOptions;
   /** Collapse duplicate results using the Collapsing Query Parser. */
@@ -592,6 +621,8 @@ export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   expanded?: SolrExpandedResult<TDocument>;
   /** Stats Component response. */
   stats?: SolrStats;
+  /** Similar-document result lists keyed by source document unique key. */
+  moreLikeThis?: Readonly<Record<string, SolrQueryResult<TDocument>>>;
   /** Query parser and execution diagnostics, when debug is enabled. */
   debug?: SolrDebugInfo;
   /** Opaque cursor to pass as cursorMark on the next page. */
