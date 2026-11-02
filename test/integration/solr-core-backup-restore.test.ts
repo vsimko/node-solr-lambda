@@ -1,0 +1,56 @@
+import assert from "node:assert/strict";
+import { SolrClient } from "../../src/index.js";
+import { integrationTest } from "./fixtures.js";
+
+integrationTest("ReplicationHandler core backup and asynchronous restore cycle", async ({ createCore, createId }) => {
+  const coreName = await createCore("backup_restore");
+  const username = process.env.SOLR_USERNAME;
+  const password = process.env.SOLR_PASSWORD;
+  const client = new SolrClient({
+    baseUrl: process.env.SOLR_BASE_URL!,
+    core: coreName,
+    timeoutMs: 30_000,
+    ...(username && password ? { auth: { type: "basic" as const, username, password } } : {})
+  });
+
+  await client.config({
+    "add-requesthandler": {
+      name: "/replication",
+      class: "solr.ReplicationHandler",
+      customOptions: { leader: { replicateAfter: "commit" } }
+    }
+  });
+
+  const id = createId("core_backup");
+  const backupName = createId("snapshot");
+  await client.add([{ id, title: "before backup" }]);
+  await client.commit({ waitSearcher: true });
+
+  const backup = await client.replication("backup", { name: backupName, numberToKeep: 2 });
+  assert.equal(backup.responseHeader?.status, 0);
+
+  await client.add([{ id, title: "after backup" }]);
+  await client.commit({ waitSearcher: true });
+
+  const restore = await client.replication("restore", { name: backupName });
+  assert.equal(restore.responseHeader?.status, 0);
+
+  let restoreState = "";
+  for (let attempt = 0; attempt < 120; attempt++) {
+    const status = await client.replication("restorestatus");
+    restoreState = status.restorestatus?.status ?? status.status ?? "";
+    if (restoreState === "success") break;
+    if (restoreState === "failed") throw new Error(JSON.stringify(status));
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  assert.equal(restoreState, "success", "core restore did not finish successfully");
+
+  const result = await client.query({ q: `id:${id}`, rows: 1 }) as {
+    response?: { numFound?: number; docs?: readonly { title?: string }[] };
+  };
+  assert.equal(result.response?.numFound, 1);
+  assert.equal(result.response?.docs?.[0]?.title, "before backup");
+
+  const deleted = await client.replication("deletebackup", { name: backupName });
+  assert.equal(deleted.responseHeader?.status, 0);
+});
