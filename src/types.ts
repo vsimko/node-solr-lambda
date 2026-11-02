@@ -97,6 +97,7 @@ export interface SolrReplicationBackupStatus {
   finishedFileCount?: number;
   indexFileCount?: number;
   exception?: string | Readonly<Record<string, unknown>>;
+  snapShootException?: string | Readonly<Record<string, unknown>>;
 }
 export interface SolrReplicationRestoreStatus {
   status?: "In Progress" | "success" | "failed" | (string & {});
