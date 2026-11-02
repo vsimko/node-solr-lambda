@@ -514,7 +514,16 @@
         "test/integration/solr-update.test.ts"
       ],
       "documentation": "docs/update.md",
-      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested."
+      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit, consumer-type, and pinned-version integration-tested.",
+      "clientMethod": "updateCommands",
+      "methodImplemented": true,
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      }
     }
   ]
 }
