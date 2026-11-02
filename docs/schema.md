@@ -1,15 +1,27 @@
 # Schema API
 
-Use `schema()` with the exported `SolrSchemaCommand` discriminated union. The command name selects the payload shape, and the field/type/analyzer properties are discoverable in TypeScript.
+Use `schema()` with the exported `SolrSchemaCommand` discriminated union. The command name selects the payload shape, and the field/type/analyzer properties are discoverable in TypeScript. The method returns a typed `SolrSchemaCommandResponse` by default; supply a generic only when an application needs a narrower server-specific response.
+
+## Modify fields, dynamic fields, field types, and copy fields
 
 ```ts
-await solr.schema({
+const added = await solr.schema({
   "add-field": {
     name: "sku",
     type: "string",
     stored: true,
     indexed: true,
     docValues: true
+  }
+});
+console.log(added.responseHeader?.status, added.responseHeader?.QTime);
+
+await solr.schema({
+  "add-dynamic-field": {
+    name: "*_sku",
+    type: "string",
+    stored: true,
+    indexed: true
   }
 });
 
@@ -23,6 +35,54 @@ await solr.schema({
     }
   }
 });
+
+await solr.schema({
+  "add-copy-field": {
+    source: "title",
+    dest: ["text", "catchall"],
+    maxChars: 256
+  }
+});
 ```
 
-Supported command families include add/replace/delete field, dynamic field, field type, and copy field. Analyzer and similarity configuration remains extensible because Solr plugin parameters vary by implementation. Use a compatible Solr Schema API guide for the deployed server version; a successful TypeScript compile does not establish that a field type or analyzer is available on Solr 8, 9, and 10.
+The command union covers add/replace/delete for fields, dynamic fields, field types, and copy-field rules. A copy-field add command accepts one or more destinations; deleting a copy-field rule requires one exact source/destination pair. Analyzer, tokenizer, filter, and similarity settings retain an explicit extensibility boundary because plugin parameters vary by implementation.
+
+Schema mutation responses contain the standard `responseHeader` with numeric `status` and optional `QTime`; they do not return the complete updated schema. HTTP failures are surfaced as `SolrHttpError`, not as a successful Schema response with a non-zero status.
+
+## Read schema definitions
+
+The client exposes raw `request<T>()` for Schema API read endpoints that do not mutate the schema. Use the named response models to type those payloads:
+
+```ts
+import type {
+  SolrSchemaReadResponse,
+  SolrSchemaFieldsResponse,
+  SolrSchemaFieldTypesResponse,
+  SolrSchemaUniqueKeyResponse
+} from "node-solr-lambda";
+
+const fullSchema = await solr.request<SolrSchemaReadResponse>("/solr/books/schema");
+const fields = await solr.request<SolrSchemaFieldsResponse>("/solr/books/schema/fields");
+const fieldTypes = await solr.request<SolrSchemaFieldTypesResponse>("/solr/books/schema/fieldtypes");
+const uniqueKey = await solr.request<SolrSchemaUniqueKeyResponse>("/solr/books/schema/uniquekey");
+
+const schemaName = fullSchema.schema?.name;
+const schemaVersion = fullSchema.schema?.version;
+const keyField = fullSchema.schema?.uniqueKey ?? uniqueKey.uniqueKey;
+const firstField = fields.fields?.[0];
+const firstFieldType = fieldTypes.fieldTypes?.[0];
+void [schemaName, schemaVersion, keyField, firstField, firstFieldType];
+```
+
+Additional response models cover dynamic fields, copy fields, schema name, schema version, and global similarity. These read types reflect the JSON response envelopes; they do not imply that this client provides dedicated convenience methods for each read path. Use the documented `/schema` read paths with `request<T>()`.
+
+## Compatibility and operational behavior
+
+The v1 Schema API command names and JSON response envelope are documented across the Solr 8.11, 9.x, and 10.1 guides. The add-field mutation and response header are integration-tested against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Other mutation families and plugin-specific analyzer settings currently have type/serialization coverage only; do not infer server compatibility from compilation alone.
+
+Schema changes trigger a core reload so the new definitions apply to subsequent indexing. Existing indexed documents are not rewritten: reindex when a schema change alters how existing data is interpreted. In SolrCloud, schema changes propagate to replicas; without a replica update timeout, other replicas may apply the change asynchronously.
+
+Official references:
+- [Solr 8.11 Schema API](https://solr.apache.org/guide/8_11/indexing-guide/schema-api.html)
+- [Solr 9.9 Schema API](https://solr.apache.org/guide/solr/9_9/indexing-guide/schema-api.html)
+- [Solr 10.1 Schema API](https://solr.apache.org/guide/solr/10_1/indexing-guide/schema-api.html)

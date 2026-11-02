@@ -1,7 +1,7 @@
 import test from "node:test";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { SolrClient } from "../../src/index.js";
-import type { SolrDocument } from "../../src/index.js";
+import type { SolrDocument, SolrSchemaCommandResponse } from "../../src/index.js";
 
 const baseUrl = process.env.SOLR_BASE_URL;
 const core = process.env.SOLR_CORE;
@@ -38,7 +38,7 @@ export interface SolrIntegrationFixture {
   addDocuments(documents: readonly (SolrDocument & { id: string })[]): Promise<void>;
   commit(): Promise<void>;
   createCore(prefix?: string): Promise<string>;
-  addSchemaField(name: string, type?: string, docValues?: boolean): Promise<void>;
+  addSchemaField(name: string, type?: string, docValues?: boolean): Promise<SolrSchemaCommandResponse>;
   setUserProperty(name: string, value: string | number | boolean): Promise<void>;
   securityData: SolrSecurityFixtureData;
 }
@@ -92,8 +92,9 @@ export function integrationTest(
         return name;
       },
       async addSchemaField(name, type = "string", docValues = false) {
-        await client.schema({ "add-field": { name, type, stored: true, indexed: true, docValues } });
+        const response = await client.schema({ "add-field": { name, type, stored: true, indexed: true, docValues } });
         schemaFields.add(name);
+        return response;
       },
       async setUserProperty(name, value) {
         await client.config({ "set-user-property": { [name]: value } });

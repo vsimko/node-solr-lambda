@@ -1,6 +1,16 @@
 import type {
   SolrClient,
   SolrSchemaCommand,
+  SolrSchemaCommandResponse,
+  SolrSchemaReadResponse,
+  SolrSchemaFieldsResponse,
+  SolrSchemaDynamicFieldsResponse,
+  SolrSchemaFieldTypesResponse,
+  SolrSchemaCopyFieldsResponse,
+  SolrSchemaNameResponse,
+  SolrSchemaVersionResponse,
+  SolrSchemaUniqueKeyResponse,
+  SolrSchemaSimilarityResponse,
   SolrConfigCommand,
   CoreAdminParams,
   CollectionAdminParams
@@ -27,6 +37,33 @@ const addFieldType: SolrSchemaCommand = {
 void client.schema(addField);
 void client.schema(replaceField);
 void client.schema(addFieldType);
+
+const addDynamicField: SolrSchemaCommand = {
+  "add-dynamic-field": { name: "*_sku", type: "string", stored: true, indexed: true }
+};
+const addCopyField: SolrSchemaCommand = {
+  "add-copy-field": { source: "title", dest: ["text", "catchall"], maxChars: 256 }
+};
+void client.schema(addDynamicField);
+void client.schema(addCopyField);
+
+const commandResponse: Promise<SolrSchemaCommandResponse> = client.schema(addField);
+void commandResponse.then(result => {
+  const status: number | undefined = result.responseHeader?.status;
+  const qTime: number | undefined = result.responseHeader?.QTime;
+  void [status, qTime];
+});
+
+const fullSchema: Promise<SolrSchemaReadResponse> = client.request<SolrSchemaReadResponse>("/solr/catalog/schema");
+const fields: Promise<SolrSchemaFieldsResponse> = client.request<SolrSchemaFieldsResponse>("/solr/catalog/schema/fields");
+const dynamicFields: Promise<SolrSchemaDynamicFieldsResponse> = client.request<SolrSchemaDynamicFieldsResponse>("/solr/catalog/schema/dynamicfields");
+const fieldTypes: Promise<SolrSchemaFieldTypesResponse> = client.request<SolrSchemaFieldTypesResponse>("/solr/catalog/schema/fieldtypes");
+const copyFields: Promise<SolrSchemaCopyFieldsResponse> = client.request<SolrSchemaCopyFieldsResponse>("/solr/catalog/schema/copyfields");
+const schemaName: Promise<SolrSchemaNameResponse> = client.request<SolrSchemaNameResponse>("/solr/catalog/schema/name");
+const schemaVersion: Promise<SolrSchemaVersionResponse> = client.request<SolrSchemaVersionResponse>("/solr/catalog/schema/version");
+const uniqueKey: Promise<SolrSchemaUniqueKeyResponse> = client.request<SolrSchemaUniqueKeyResponse>("/solr/catalog/schema/uniquekey");
+const similarity: Promise<SolrSchemaSimilarityResponse> = client.request<SolrSchemaSimilarityResponse>("/solr/catalog/schema/similarity");
+void [fullSchema, fields, dynamicFields, fieldTypes, copyFields, schemaName, schemaVersion, uniqueKey, similarity];
 
 const setProperty: SolrConfigCommand = { "set-property": { "query.timeout": 10_000 } };
 const addHandler: SolrConfigCommand = {

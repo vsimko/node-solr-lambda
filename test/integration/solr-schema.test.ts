@@ -7,7 +7,8 @@ integrationTest("Schema API adds and reads an isolated field definition", async 
   addSchemaField
 }) => {
   const name = createId("fixture_field");
-  await addSchemaField(name);
+  const mutation = await addSchemaField(name);
+  assert.equal(mutation.responseHeader?.status, 0);
 
   const schema = await client.request<{ fields?: Array<{ name?: string; type?: string; stored?: boolean; indexed?: boolean }> }>(
     `/${process.env.SOLR_CORE}/schema/fields`,

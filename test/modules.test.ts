@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createSolrClient } from "../src/index.js";
+import { createSolrClient, SolrHttpError } from "../src/index.js";
 
 test("JSON query delegates to the query module", async () => {
   let url = "";
@@ -47,6 +47,33 @@ test("Schema and Config modules use their own collection endpoints", async () =>
   await client.schema({ "add-field": { name: "title", type: "string" } });
   await client.config({ "set-property": { "query.maxBooleanClauses": 2048 } });
   assert.deepEqual(paths, ["/solr/catalog/schema", "/solr/catalog/config"]);
+});
+
+test("Schema API returns the typed command envelope", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({
+      responseHeader: { status: 0, QTime: 3 }
+    }), { status: 200, headers: { "content-type": "application/json" } })
+  });
+
+  const result = await client.schema({ "add-field": { name: "sku", type: "string" } });
+  assert.equal(result.responseHeader?.status, 0);
+  assert.equal(result.responseHeader?.QTime, 3);
+});
+
+test("Schema API preserves Solr HTTP failures", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({
+      error: { code: 400, msg: "Field already exists" }
+    }), { status: 400, headers: { "content-type": "application/json" } })
+  });
+
+  await assert.rejects(
+    client.schema({ "add-field": { name: "sku", type: "string" } }),
+    error => error instanceof SolrHttpError && error.status === 400
+  );
 });
 
 test("System, Metrics, and Security modules share the transport", async () => {

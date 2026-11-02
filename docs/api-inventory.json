@@ -281,9 +281,10 @@
       "documentation": "docs/schema.md",
       "testFiles": [
         "test/modules.test.ts",
+        "test/admin-api-types.ts",
         "test/integration/solr-schema.test.ts"
       ],
-      "notes": "Schema API add-field and GET /schema/fields read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup deletes the field (CI #145)."
+      "notes": "The add-field mutation returns the typed SolrSchemaCommandResponse envelope with responseHeader.status/QTime, and the integration test asserts status 0 plus GET /schema/fields read-back on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Consumer type tests cover all command families and typed read response envelopes for full schema, fields, dynamic fields, field types, copy fields, schema name/version/uniqueKey/similarity. Other mutation families and plugin-specific analyzer settings remain runtime-unverified; analyzer and field-type plugin options preserve an extensibility index signature."
     },
     {
       "id": "config.api",

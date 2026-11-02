@@ -431,6 +431,63 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "DELETESTATUS" ? CollectionAsyncRequestDeleteParams :
   CollectionRoleParams;
 
+/** Standard response header returned by the Solr Schema API. */
+export interface SolrSchemaResponseHeader {
+  status: number;
+  QTime?: number;
+  [key: string]: unknown;
+}
+
+/** A successful Schema API mutation returns its status and processing time. */
+export interface SolrSchemaCommandResponse {
+  responseHeader?: SolrSchemaResponseHeader;
+  [key: string]: unknown;
+}
+
+/** Schema-level metadata and collections exposed by GET /schema. */
+export interface SolrSchemaProperties {
+  name?: string;
+  version?: number;
+  uniqueKey?: string;
+  similarity?: Readonly<Record<string, unknown>>;
+  fields?: readonly SolrSchemaField[];
+  dynamicFields?: readonly SolrSchemaDynamicField[];
+  fieldTypes?: readonly SolrSchemaFieldType[];
+  copyFields?: readonly SolrSchemaCopyField[];
+  [key: string]: unknown;
+}
+
+/** The complete JSON response returned by GET /schema. */
+export interface SolrSchemaReadResponse extends SolrSchemaCommandResponse {
+  schema?: SolrSchemaProperties;
+}
+
+/** Response envelopes for the individual Schema API read endpoints. */
+export interface SolrSchemaFieldsResponse extends SolrSchemaCommandResponse {
+  fields?: readonly SolrSchemaField[];
+}
+export interface SolrSchemaDynamicFieldsResponse extends SolrSchemaCommandResponse {
+  dynamicFields?: readonly SolrSchemaDynamicField[];
+}
+export interface SolrSchemaFieldTypesResponse extends SolrSchemaCommandResponse {
+  fieldTypes?: readonly SolrSchemaFieldType[];
+}
+export interface SolrSchemaCopyFieldsResponse extends SolrSchemaCommandResponse {
+  copyFields?: readonly SolrSchemaCopyField[];
+}
+export interface SolrSchemaNameResponse extends SolrSchemaCommandResponse {
+  name?: string;
+}
+export interface SolrSchemaVersionResponse extends SolrSchemaCommandResponse {
+  version?: number;
+}
+export interface SolrSchemaUniqueKeyResponse extends SolrSchemaCommandResponse {
+  uniqueKey?: string;
+}
+export interface SolrSchemaSimilarityResponse extends SolrSchemaCommandResponse {
+  similarity?: Readonly<Record<string, unknown>>;
+}
+
 /** One field definition in the Schema API. */
 export interface SolrSchemaField {
   name: string;
@@ -477,7 +534,7 @@ export interface SolrSchemaAnalyzerComponent {
   class: string;
   [key: string]: unknown;
 }
-export interface SolrSchemaCopyField { source: string; dest: string; maxChars?: number }
+export interface SolrSchemaCopyField { source: string; dest: string | readonly string[]; maxChars?: number }
 export type SolrSchemaCommand =
   | { "add-field": SolrSchemaField }
   | { "replace-field": SolrSchemaField }
