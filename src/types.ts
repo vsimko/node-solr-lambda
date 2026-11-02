@@ -662,7 +662,7 @@ export interface SolrConfigAutoSoftCommitSettings {
 export interface SolrConfigUpdateHandlerSettings {
   autoCommit?: SolrConfigAutoCommitSettings;
   autoSoftCommit?: SolrConfigAutoSoftCommitSettings;
-  commitWithin?: { softCommit?: boolean; [key: string]: SolrConfigValue | undefined };
+  commitWithin?: { softCommit?: boolean | string; [key: string]: SolrConfigValue | undefined };
   indexWriter?: Readonly<Record<string, SolrConfigValue>>;
   [key: string]: unknown;
 }
@@ -673,6 +673,8 @@ export interface SolrConfigQuerySettings {
   documentCache?: SolrConfigCacheSettings;
   fieldValueCache?: SolrConfigCacheSettings;
   maxBooleanClauses?: number | string;
+  memEnabled?: boolean | string;
+  memThreshold?: number | string;
   enableLazyFieldLoading?: boolean | string;
   useFilterForSortedQuery?: boolean | string;
   queryResultWindowSize?: number | string;
@@ -683,7 +685,7 @@ export interface SolrConfigQuerySettings {
 }
 
 export interface SolrConfigRequestDispatcherSettings {
-  handleSelect?: boolean;
+  handleSelect?: boolean | string;
   requestParsers?: {
     enableRemoteStreaming?: boolean | string;
     enableStreamBody?: boolean | string;
