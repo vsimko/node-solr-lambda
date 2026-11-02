@@ -74,7 +74,7 @@ await solr.updateCommands({
 
 `SolrJsonUpdateCommands` supports `add`, `delete`, `commit`, `optimize`, and `rollback`. Delete accepts a single ID, an ID array, `{ id, _version_? }`, or `{ query }`. The command object permits one `add` command because JavaScript objects cannot preserve duplicate JSON keys; use `add()` with an array for multiple documents. Request-level `overwrite`, `commitWithin`, and SolrCloud `route` options remain available through the existing `SolrUpdateOptions`.
 
-Solr documents these three JSON forms (single object, document array, and command map) and the `/update/json/docs` and `/update/json` convenience paths in the [Solr 10.1 Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html) and [Solr 9.4 Update Handlers guide](https://solr.apache.org/guide/solr/9_4/indexing-guide/indexing-with-update-handlers.html). The public methods are integration-tested against Solr 8.11.4, 9.11.0, and 10.1.0.
+Solr documents these three JSON forms (single object, document array, and command map) and the `/update/json/docs` and `/update/json` convenience paths in the [Solr 8.11 Update Handlers guide](https://solr.apache.org/guide/8_11/indexing-guide/indexing-with-update-handlers.html), [Solr 9.4 Update Handlers guide](https://solr.apache.org/guide/solr/9_4/indexing-guide/indexing-with-update-handlers.html), and [Solr 10.1 Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html). The public methods are integration-tested against Solr 8.11.4, 9.11.0, and 10.1.0.
 
 ## Atomic and partial document updates
 
