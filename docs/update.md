@@ -23,7 +23,7 @@ await solr.update(
 `SolrUpdateOptions` exposes:
 
 - `overwrite`: whether a document with the same unique key is replaced.
-- `commitWithin`: the maximum delay in milliseconds before the document is committed.
+- `commitWithin`: the maximum delay in whole milliseconds before the document is committed.
 - `route`: a SolrCloud shard-routing value; serialized as the `_route_` request parameter.
 - `boost`: retained as a legacy option for source compatibility.
 
