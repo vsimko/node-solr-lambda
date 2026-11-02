@@ -18,7 +18,7 @@ integrationTest("ReplicationHandler exposes index version, details, file list, a
     ...(username && password ? { auth: { type: "basic" as const, username, password } } : {})
   });
   await replicationClient.config({
-    "update-requesthandler": {
+    "add-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
       customOptions: { leader: { replicateAfter: "commit" } }
