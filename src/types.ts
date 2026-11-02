@@ -649,6 +649,32 @@ export type SolrQuery = SolrStandardQueryOptions | SolrCursorQuery;
 export type SolrDocument = Readonly<Record<string, unknown>>;
 export type SolrDelete = string | { id: string } | { query: string };
 
+/** One add command in a Solr-style JSON update command object. */
+export interface SolrJsonAddCommand {
+  doc: SolrDocument;
+  overwrite?: boolean;
+  commitWithin?: number;
+}
+
+/** Delete-by-ID, multiple IDs, or delete-by-query in a JSON update command. */
+export type SolrJsonDeleteCommand =
+  | string
+  | readonly string[]
+  | { id: string; _version_?: number }
+  | { query: string };
+
+/**
+ * JSON update command object. Use add() for a list of documents; one add
+ * command per object avoids JavaScript's inability to preserve duplicate JSON keys.
+ */
+export interface SolrJsonUpdateCommands {
+  add?: SolrJsonAddCommand;
+  delete?: SolrJsonDeleteCommand;
+  commit?: CommitOptions;
+  optimize?: SolrOptimizeOptions;
+  rollback?: Readonly<Record<string, never>>;
+}
+
 /** Atomic-update modifiers supported by Solr's JSON update syntax. */
 export type SolrAtomicUpdateOperation<TValue> =
   | { set: NonNullable<TValue> | null }
