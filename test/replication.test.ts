@@ -21,6 +21,7 @@ test("ReplicationHandler commands use the configured core and JSON response form
   });
   await client.replication("filelist", { generation: 42 });
   await client.replication("filelist", { indexversion: 42 });
+  assert.throws(() => client.replication("filelist", { generation: -1 }), /generation\/indexversion must be a non-negative integer/);
 
   assert.equal(calls[0]!.url.pathname, "/solr/catalog/replication");
   assert.equal(calls[0]!.url.searchParams.get("command"), "indexversion");
