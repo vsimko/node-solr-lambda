@@ -360,19 +360,16 @@ test("Config API reads effective config and persisted overlay through typed GET 
   assert.equal((overlay as { overlay: { userProps: { tenant: string } } }).overlay.userProps.tenant, "public");
 });
 
-test("Config API read methods preserve request controls and propagate HTTP errors", async () => {
+test("Config API read methods preserve abort controls", async () => {
   let requestedUrl = "";
   let requestedSignal: AbortSignal | undefined;
-  let resolveFetch!: (response: Response) => void;
   const controller = new AbortController();
   const client = createSolrClient({
     core: "catalog",
     fetch: (input, init) => {
       requestedUrl = String(input);
       requestedSignal = init?.signal ?? undefined;
-      return new Promise<Response>((resolve) => {
-        resolveFetch = resolve;
-      });
+      return new Promise<Response>(() => {});
     }
   });
 
@@ -383,9 +380,16 @@ test("Config API read methods preserve request controls and propagate HTTP error
   assert.equal(requestedSignal.aborted, false);
   controller.abort();
   assert.equal(requestedSignal.aborted, true);
-  resolveFetch(new Response(JSON.stringify({ error: { msg: "config unavailable" } }), { status: 503 }));
+  await assert.rejects(request, { name: "AbortError" });
+});
 
-  await assert.rejects(request, (error: unknown) => {
+test("Config API read methods propagate HTTP errors", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({ error: { msg: "config unavailable" } }), { status: 503 })
+  });
+
+  await assert.rejects(client.getConfigOverlay(), (error: unknown) => {
     assert.ok(error instanceof SolrHttpError);
     assert.equal(error.message, "config unavailable");
     return true;
