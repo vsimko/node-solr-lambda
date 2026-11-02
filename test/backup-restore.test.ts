@@ -57,6 +57,7 @@ test("SolrCloud collection backup, restore, listing, and async status use typed 
   await client.collections("DELETEBACKUP", { name: "nightly", location: "file:///var/solr/backups", backupId: 2 });
   await client.collections("REQUESTSTATUS", { requestid: "backup-1" });
   await client.collections("DELETESTATUS", { requestid: "backup-1" });
+  await client.collections("DELETESTATUS", { flush: true });
 
   assert.equal(urls[0]!.pathname, "/solr/admin/collections");
   assert.equal(urls[0]!.searchParams.get("action"), "BACKUP");
