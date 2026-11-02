@@ -138,9 +138,37 @@ await solr.rollback();
 
 `commitWithin` schedules a commit within the requested number of milliseconds. Solr's configured `commitWithin` policy determines whether that scheduled commit is soft or hard; the client does not force a commit type. The default Solr policy is a soft commit, but `solrconfig.xml` can change it. This is configuration-dependent and is not asserted as a hard/soft guarantee by the client.
 
+## Update responses and output validation
+
+All Update Handler methods default to the exported `SolrUpdateResponse` type, which exposes the optional `responseHeader` (including `status` and `QTime`) while preserving custom response typing through the existing generic parameter.
+
+Successful responses can be validated through `validation.outputs` using the public operation name:
+
+```ts
+import { z } from "zod";
+import { createSolrClient } from "node-solr-lambda";
+
+const client = createSolrClient({
+  core: "catalog",
+  validation: {
+    outputs: {
+      add: z.object({
+        responseHeader: z.object({ status: z.literal(0), QTime: z.number().optional() })
+      }),
+      atomicUpdate: z.object({ responseHeader: z.object({ status: z.literal(0) }) })
+    }
+  }
+});
+
+const result = await client.add({ id: "book-1", title: "Typed response" });
+console.log(result.responseHeader?.status);
+```
+
+Output schemas are selected by operation name: `add`, `update`, `atomicUpdate`, `updateCommands`, `delete`, `commit`, `softCommit`, `optimize`, and `rollback`. Output validation runs for successful HTTP responses. Non-success HTTP responses remain `SolrHttpError`; its `errorResponse` property exposes the typed Solr `{ error: ... }` payload, while `solrError` remains the normalized shortcut for `code`, `msg`, and `metadata`.
+
 ## Compatibility
 
-The base add, full-document update, delete-by-ID, hard/soft commit, expungeDeletes, openSearcher=false on commit, optimize with maxSegments, and rollback operations have integration coverage on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. The openSearcher=false option on optimize is unit-serialization-tested but not independently runtime-verified. Unit and consumer type tests cover the new request-option serialization and validation. The `_route_` and `commitWithin` options introduced in this typed interface remain runtime-unverified on those three versions; do not infer runtime support from their TypeScript types alone.
+The base add, full-document update, delete-by-ID, hard/soft commit, expungeDeletes, openSearcher=false on commit, optimize with maxSegments, and rollback operations have integration coverage on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Add and update response headers are asserted on all three versions; the exact shape of every version-specific error payload remains unit-tested but not exhaustively integration-certified. The openSearcher=false option on optimize is unit-serialization-tested but not independently runtime-verified. Unit and consumer type tests cover the new request-option serialization and validation. The `_route_` and `commitWithin` options introduced in this typed interface remain runtime-unverified on those three versions; do not infer runtime support from their TypeScript types alone.
 
 The request shapes follow the official [Solr 10.1 Indexing with Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html). The guide documents JSON add/delete commands, `overwrite`, `commitWithin`, and commit/optimize behavior. SolrCloud routing uses the documented `_route_` request parameter.
 

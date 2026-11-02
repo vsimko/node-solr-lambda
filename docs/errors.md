@@ -13,10 +13,11 @@ The client throws `SolrHttpError` when Solr returns a non-success HTTP status.
 | `endpoint` | Request origin and path. The query string is omitted. |
 | `body` | Raw response body as text. An empty response is an empty string. |
 | `payload` | Parsed JSON, raw text when JSON parsing fails, or `undefined` for an empty body. |
-| `solrError` | Parsed Solr `error` object when the response contains one. |
+| `solrError` | Normalized Solr error detail with `code`, `msg`, and `metadata` when present. |
+| `errorResponse` | Typed raw Solr error payload (`SolrErrorResponse`) when the response contains an `error` field. |
 | `cause` | Optional underlying error, when one exists. |
 
-The `solrError` object preserves Solr fields such as `code`, `msg`, and `metadata`. The error message uses `solrError.msg` when it is available. Otherwise, it uses the HTTP status and status text.
+The `solrError` object preserves Solr fields such as `code`, `msg`, and `metadata`. The `errorResponse` property preserves the typed response envelope, including string-form errors. The error message uses `solrError.msg` when it is available. Otherwise, it uses the HTTP status and status text.
 
 ## `SolrNetworkError`
 

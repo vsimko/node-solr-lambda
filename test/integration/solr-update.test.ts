@@ -36,7 +36,8 @@ integrationTest("Solr commit options control searcher visibility and commit beha
   createId
 }) => {
   const softId = createId("soft-commit");
-  await client.add({ id: softId, name_s: "soft" });
+  const addResponse = await client.add({ id: softId, name_s: "soft" });
+  assert.equal(addResponse.responseHeader?.status, 0);
   await client.softCommit();
   const softResult = await client.query<{ response?: { numFound?: number } }>({
     query: `id:${softId}`,
@@ -112,7 +113,8 @@ integrationTest("Solr update replaces an existing document on the pinned server"
   await addDocuments([{ id, name_s: "before" }]);
   await commit();
 
-  await client.update({ id, name_s: "after" });
+  const updateResponse = await client.update({ id, name_s: "after" });
+  assert.equal(updateResponse.responseHeader?.status, 0);
   await commit();
 
   const result = await client.query<{
