@@ -670,7 +670,7 @@ export type SolrJsonDeleteCommand =
 export interface SolrJsonUpdateCommands {
   add?: SolrJsonAddCommand;
   delete?: SolrJsonDeleteCommand;
-  commit?: CommitOptions;
+  commit?: SolrCommitOptions;
   optimize?: SolrOptimizeOptions;
   rollback?: Readonly<Record<string, never>>;
 }
@@ -721,17 +721,47 @@ export interface SolrDeleteOptions extends RequestControlOptions {
 }
 
 /** Options for the Update Handler optimize command. */
-export interface SolrOptimizeOptions {
-  /** Best-effort maximum number of index segments; omit to use Solr's default. */
-  maxSegments?: number;
-  /** Wait until the new searcher is registered (default: true). */
+/** Options for a hard commit or an explicit soft commit command. */
+export interface SolrCommitOptions {
+  /** Wait for the newly opened searcher to be registered; Solr defaults to true. */
   waitSearcher?: boolean;
+  /** Perform a near-real-time soft commit instead of a hard commit. Defaults to false. */
+  softCommit?: boolean;
+  /** Expunge deleted documents during a hard commit. Commit-only; defaults to false. */
+  expungeDeletes?: boolean;
+  /** Open a new searcher. Defaults to true; sent as the openSearcher request parameter. */
+  openSearcher?: boolean;
+}
+
+/** Options for a soft commit. Expunge and segment-merge options do not apply. */
+export interface SolrSoftCommitOptions {
+  /** Wait for the newly opened searcher to be registered; defaults to true. */
+  waitSearcher?: boolean;
+  /** Open a new searcher; defaults to true. */
+  openSearcher?: boolean;
+}
+
+/** Options for an optimize command. */
+export interface SolrOptimizeOptions {
+  /** Best-effort maximum number of index segments; omit to use Solr's unlimited default. */
+  maxSegments?: number;
+  /** Wait until the new searcher is registered; Solr defaults to true. */
+  waitSearcher?: boolean;
+  /** Open a new searcher; defaults to true. */
+  openSearcher?: boolean;
 }
 
 /** @deprecated Use SolrUpdateOptions. */
 export type UpdateOptions = SolrUpdateOptions;
 
-export interface CommitOptions { waitSearcher?: boolean; softCommit?: boolean; expungeDeletes?: boolean; maxSegments?: number; }
+/**
+ * @deprecated Use SolrCommitOptions. maxSegments is optimize-only and is
+ * rejected by commit(); use SolrOptimizeOptions for segment merging.
+ */
+export interface CommitOptions extends SolrCommitOptions {
+  /** @deprecated maxSegments is valid only for optimize(). */
+  maxSegments?: number;
+}
 export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   responseHeader?: SolrResponseHeader;
   response?: SolrQueryResult<TDocument>;
