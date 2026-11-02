@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add typed V1 ReplicationHandler commands and raw file-content streaming through `replication()` and `replicationFile()`.
+
 ### Documentation
 
 - Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.
