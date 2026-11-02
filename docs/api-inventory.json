@@ -284,7 +284,7 @@
         "test/admin-api-types.ts",
         "test/integration/solr-schema.test.ts"
       ],
-      "notes": "Add/replace/delete field, field-type, and dynamic-field commands plus add/delete copy-field rules are unit-tested for exact serialization and integration-tested with responseHeader.status plus schema read-back on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Copy-field replacement is implemented by delete+add because Solr has no native replace-copy-field command. Consumer type tests cover valid/invalid definitions and analyzer components. Typed read response envelopes cover full schema, fields, dynamic fields, field types, copy fields, schema name/version/uniqueKey/similarity. Similarity plugin behavior remains runtime-unverified."
+      "notes": "Field, field-type, dynamic-field add/replace/delete and copy-field add/delete commands are unit-tested for exact serialization and integration-tested with responseHeader.status plus schema read-back on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Copy-field replacement is implemented by delete+add because Solr has no native replace-copy-field command. Integration tests verify full schema metadata, name, version, uniqueKey, and similarity response envelopes on all pinned versions. Similarity plugin mutation remains runtime-unverified. The public client implements V1 Schema API routes; Solr 10 V2 routes are not included."
     },
     {
       "id": "config.api",
