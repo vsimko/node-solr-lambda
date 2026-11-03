@@ -89,3 +89,15 @@ Use `metrics()` with `SolrMetricsParams` to filter by one or more groups, regist
 The default response type is `SolrMetricsResponse`: a JSON registry map (`SolrMetricsJsonResponse`) or Prometheus exposition text. Registry and metric names are runtime-defined, and individual metric values can differ by plugin and Solr version; the types therefore provide a useful registry/value envelope without claiming a closed catalogue of every metric. Supply an explicit generic when the caller has negotiated a specific writer or validated a narrower payload.
 
 The integration suite verifies the JVM metrics endpoint on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. It accepts the observed JSON registry response on Solr 8/9 and Prometheus text on Solr 10. This evidence does not imply that every registry, group, plugin metric, or filter combination has been exercised.
+
+
+## System diagnostics endpoints
+
+The global System API exposes separate read-only methods for server information and diagnostics:
+
+- `systemInfo()` reads `/admin/info/system` (Solr mode, Lucene, JVM, and related server metadata).
+- `systemProperties()` reads `/admin/info/properties` (JVM and process properties).
+- `systemThreads()` reads `/admin/info/threads` (a JVM thread dump; content and detail vary by runtime).
+- `systemLogging()` reads `/admin/info/logging` (logger names, levels, and logging configuration).
+
+Each method uses the global `/solr/admin/info/*` route and supports the standard request controls. Response models intentionally preserve unknown fields because JVM properties, thread details, logger metadata, and Solr versions vary. These methods are diagnostic reads; this client does not expose logger-level mutation through this System API surface. The current unit suite verifies route selection and representative response shapes; Solr-major runtime compatibility is not claimed until each endpoint is exercised in the corresponding integration job.

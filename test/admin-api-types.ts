@@ -297,3 +297,17 @@ void [metricsJson, metricsText];
 void client.metrics({ group: 42 });
 // @ts-expect-error The Metrics API writer is JSON or Prometheus.
 void client.metrics({ wt: "xml" });
+
+
+import type { SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse } from "../src/index.js";
+const systemInfo: Promise<SolrSystemInfoResponse> = client.systemInfo();
+const systemProperties: Promise<SolrSystemPropertiesResponse> = client.systemProperties();
+const systemThreads: Promise<SolrSystemThreadsResponse> = client.systemThreads();
+const systemLogging: Promise<SolrSystemLoggingResponse> = client.systemLogging();
+void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).then(([info, properties, threads, logging]) => {
+  const mode: string | undefined = info.mode;
+  const javaVersion: string | number | boolean | null | undefined = properties.system?.["java.version"];
+  const dump: string | undefined = threads.threadDump;
+  const loggers = logging.loggers;
+  void [mode, javaVersion, dump, loggers];
+});

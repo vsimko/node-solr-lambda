@@ -31,6 +31,9 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | `SolrClient.replication()` | Execute ReplicationHandler commands | [Replication API](replication.md) |
 | `SolrClient.replicationFile()` | Read ReplicationHandler file content | [Replication API](replication.md) |
 | `SolrClient.systemInfo()` | Read Solr system information | [Administration](administration.md) |
+| `SolrClient.systemProperties()` | Read JVM and process properties | [Administration](administration.md) |
+| `SolrClient.systemThreads()` | Read JVM thread diagnostics | [Administration](administration.md) |
+| `SolrClient.systemLogging()` | Read logger configuration and levels | [Administration](administration.md) |
 | `SolrClient.metrics()` | Read Solr metrics | [Administration](administration.md) |
 | `SolrClient.security()` | Read or update authentication and authorization settings | [Administration](administration.md) |
 | `SolrClient.stream()` | Execute a Streaming Expression | [Streaming and Export](export.md) |
