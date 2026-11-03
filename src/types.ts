@@ -24,6 +24,33 @@ export interface SolrExportParams {
 
 export type SolrAdminParams = Readonly<Record<string, string | number | boolean>>;
 
+/** Query parameters supported by the Solr Metrics API. Unknown future groups and registries remain valid strings. */
+export interface SolrMetricsParams {
+  group?: string | readonly string[];
+  registry?: string | readonly string[];
+  prefix?: string;
+  regex?: string;
+  compact?: boolean;
+  wt?: "json" | "prometheus";
+  customParams?: SolrAdminParams;
+}
+
+/** Metric values vary by registry and Solr plugin; preserve unknown server values. */
+export type SolrMetricValue = string | number | boolean | null | readonly unknown[] | Readonly<Record<string, unknown>>;
+
+/** One named Metrics API registry, keyed by metric name. */
+export type SolrMetricsRegistry = Readonly<Record<string, SolrMetricValue>>;
+
+/** JSON Metrics API response. The registry names and metric names are server/plugin-defined. */
+export interface SolrMetricsJsonResponse {
+  responseHeader?: SolrResponseHeader;
+  metrics?: Readonly<Record<string, SolrMetricsRegistry>>;
+  [key: string]: unknown;
+}
+
+/** Solr may return JSON registries or Prometheus exposition text depending on writer/version. */
+export type SolrMetricsResponse = SolrMetricsJsonResponse | string;
+
 export type SolrReplicationCommand =
   | "enablereplication"
   | "disablereplication"
