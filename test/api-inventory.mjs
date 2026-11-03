@@ -6,13 +6,14 @@ const clientSource = readFileSync("src/client.ts", "utf8");
 const transportSource = readFileSync("src/transport.ts", "utf8");
 const majors = ["8", "9", "10"];
 
-// Match method declarations at the class indentation. Overloads collapse to one name.
+// Read only declarations inside the class; overloads collapse to one method name.
 const declaredMethods = source => new Set(
-  [...source.matchAll(/^  ([A-Za-z_$][\\w$]*)\\s*(?:<|\\()/gm)]
+  [...source.matchAll(/^  (?!(?:private|protected)\\b)(?:async\\s+)?([A-Za-z_$][\\w$]*)\\s*(?:<|\\()/gm)]
     .map(match => match[1])
     .filter(name => name !== "constructor")
 );
-const publicMethods = new Set([...declaredMethods(clientSource), ...declaredMethods(transportSource)]);
+const transportClass = transportSource.slice(transportSource.indexOf("export class SolrTransport"));
+const publicMethods = new Set([...declaredMethods(clientSource), ...declaredMethods(transportClass)]);
 const inventoryMethods = inventory.entries.map(entry => entry.clientMethod);
 
 assert.equal(inventory.schemaVersion, 1);
