@@ -115,13 +115,13 @@ export class SolrClient extends SolrTransport {
   }
 
   collections<const A extends CollectionAdminAction>(
-    ...args: A extends "LIST" | "LISTALIASES"
+    ...args: A extends "LIST" | "LISTALIASES" | "CLUSTERSTATUS"
       ? [action: A, params?: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
       : [action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
   ): Promise<CollectionAdminResponse<A>>;
   /** Explicit generic override for server/plugin-specific Collections response extensions. */
   collections<T, const A extends CollectionAdminAction>(
-    ...args: A extends "LIST" | "LISTALIASES"
+    ...args: A extends "LIST" | "LISTALIASES" | "CLUSTERSTATUS"
       ? [action: A, params?: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
       : [action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
   ): Promise<T>;
