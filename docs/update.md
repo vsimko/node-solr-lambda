@@ -29,6 +29,12 @@ await solr.update(
 
 `update()` is an alias for full-document replacement through the same add command. Atomic/partial document updates use a different command shape and are tracked separately in [Issue #61](https://github.com/vsimko/node-solr-lambda/issues/61).
 
+## SolrCloud routing and commitWithin
+
+`route` is sent as Solr's `_route_` update parameter. Its value must follow the collection router: for an implicit-router collection it is the target shard name; for a compositeId router it is a routing key. The SolrCloud integration test creates a disposable implicit-router collection with two shards, writes with `route: "shard2"`, and uses shard-scoped queries to verify that the document is visible on `shard2` but not `shard1`.
+
+`commitWithin` asks Solr to schedule a commit within the requested number of milliseconds. It does not make the client choose a hard or soft commit: that behavior is controlled by the server's Update Handler configuration. The SolrCloud integration test uses the pinned `_default` configset, submits an update with `commitWithin`, and polls for search visibility without issuing a manual commit. The assertion is bounded and verifies eventual visibility for that test configuration; it is not a hard/soft-commit guarantee or a strict latency SLA. Delete-option routing and `commitWithin` are not covered by this runtime test.
+
 ## XML update requests: deliberate exclusion
 
 There is no XML-specific convenience API. The typed update surface uses Solr's JSON formats; XML support would duplicate the command models and serializer without adding capabilities that are unavailable through the raw transport.
