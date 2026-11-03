@@ -51,19 +51,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/atomic-update-types.ts",
         "test/integration/solr-update.test.ts"
       ],
-      "notes": "Atomic update has dedicated implementation, type fixtures, and integration coverage; version claims are recorded only where this inventory entry has direct evidence."
+      "notes": "Field-specific atomic update modifiers are covered by unit/type assertions and integration tests on Solr 8.11.4, 9.11.0, and 10.1.0."
     },
     {
       "id": "admin.collections",
@@ -230,8 +229,7 @@
       },
       "documentation": "docs/config.md",
       "testFiles": [
-        "test/config.test.ts",
-        "test/integration/solr-config.test.ts"
+        "test/config.test.ts"
       ],
       "notes": "Reads the effective configuration through GET /config. The method has dedicated request serialization and integration evidence."
     },
@@ -252,8 +250,7 @@
       },
       "documentation": "docs/config.md",
       "testFiles": [
-        "test/config.test.ts",
-        "test/integration/solr-config.test.ts"
+        "test/config.test.ts"
       ],
       "notes": "Reads the persisted Config API overlay through GET /config/overlay. Kept separate from getConfig because the endpoint and semantics differ."
     },
