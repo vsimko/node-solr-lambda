@@ -129,3 +129,11 @@ The documented MultiAuthPlugin Basic scheme wrapper is accepted for `set-user` a
 These named types cover the stable BasicAuthPlugin operations and the documented Basic scheme wrapper, not every custom authentication plugin schema. Authentication commands remain separate from the RuleBasedAuthorizationPlugin types. The integration suite verifies authenticated reads and a `set-property`/read-back operation on pinned Solr 8.11.4, 9.11.0, and 10.1.0; user creation/deletion is covered by request serialization and compile-time tests rather than mutating shared CI security users.
 
 See the [Apache Solr Basic Authentication Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/basic-authentication-plugin.html) for the server-side command semantics. The V1 endpoint implemented here is `/solr/admin/authentication`; the Solr 10 V2 endpoint is not used by this client.
+
+## Collections alias and cluster status response models
+
+`collections("LISTALIASES")` defaults to `SolrCollectionAliasesResponse`, with an alias-to-collection map. `CREATEALIAS` and `DELETEALIAS` default to `SolrCollectionAliasResponse`.
+
+`collections("CLUSTERSTATUS")` defaults to `SolrClusterStatusResponse`. The response model exposes `cluster.live_nodes`, aliases, collections, shards, and replicas, including common replica fields such as `core`, `node_name`, `state`, `type`, `leader`, and `properties`. Filtered responses may omit cluster-wide sections, and Solr versions or plugins may add fields; modeled properties are therefore optional and unknown fields remain accessible.
+
+The alias and cluster-status integration checks exercise alias read-back, collection/shard/replica state, and lifecycle effects on pinned Solr 8.11.4, 9.11.0, and 10.1.0. See the [per-action Collections matrix](collections-api-coverage.md); untested actions are not certified by these response models.
