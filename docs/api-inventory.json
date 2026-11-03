@@ -580,12 +580,13 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/administration.md",
+      "documentation": "docs/streaming.md",
       "testFiles": [
         "test/modules.test.ts",
+        "test/streaming.test.ts",
         "test/integration/solr-streaming.test.ts"
       ],
-      "notes": "Streaming Expressions search against a disposable SolrCloud collection passes on Solr 8.11.4, 9.11.0, and 10.1.0 (CI #145)."
+      "notes": "The client sends Streaming Expressions as expr with wt=json and parses the complete JSON response through the shared transport. This is not an incremental tuple-stream parser and carries no backpressure or memory-bound guarantee. SolrCloud search is integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0; unit tests cover JSON response parsing, cancellation during response-body consumption, and cleanup after response-body stream errors."
     },
     {
       "id": "system.info",
