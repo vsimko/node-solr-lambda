@@ -1,6 +1,6 @@
 # Config API
 
-Use `config()` with the exported `SolrConfigCommand` discriminated union. Common `set-property` names and their value types are modelled explicitly for the pinned Solr 8.11, 9.11, and 10.1 baselines. The method returns a typed `SolrConfigCommandResponse` by default; use `SolrConfigReadResponse` and `SolrConfigOverlayResponse` with `request<T>()` for GET reads.
+Use `config()` with the exported `SolrConfigCommand` discriminated union. Common `set-property` names and their value types are modelled explicitly for the pinned Solr 8.11, 9.11, and 10.1 baselines. The method returns a typed `SolrConfigCommandResponse` by default. Use `getConfig()` for the effective configuration and `getConfigOverlay()` for the persisted overlay; both have typed response models.
 
 ```ts
 await solr.config({
@@ -41,9 +41,15 @@ const mutation: Promise<SolrConfigCommandResponse> = solr.config({
   }
 });
 
-const effectiveConfig: Promise<SolrConfigReadResponse> =
-  solr.request<SolrConfigReadResponse>("/solr/catalog/config");
-
-const overlay: Promise<SolrConfigOverlayResponse> =
-  solr.request<SolrConfigOverlayResponse>("/solr/catalog/config/overlay");
+const effectiveConfig: Promise<SolrConfigReadResponse> = solr.getConfig();
+const overlay: Promise<SolrConfigOverlayResponse> = solr.getConfigOverlay();
 ```
+
+
+## Read, mutation, and persistence semantics
+
+`getConfig()` issues GET `/config` and returns the effective configuration: settings from `solrconfig.xml` together with applicable persisted overlay changes. `getConfigOverlay()` issues GET `/config/overlay` and returns only the overlay state, including user properties when present.
+
+`config()` sends the typed command as POST `/config`. `set-property`, `unset-property`, and `set-user-property` modify the Config API overlay; they do not rewrite `solrconfig.xml`. Overlay changes are persisted by Solr and are distinct from transient runtime state. Solr may apply a configuration change immediately, but whether a component observes it without a core reload depends on the setting and Solr version. Treat a successful mutation response as confirmation that Solr accepted the command, not as proof that every affected component has reinitialized. Read back with `getConfigOverlay()` to verify persisted overlay content and `getConfig()` to inspect the effective result.
+
+For production changes, retain the previous overlay value and plan a rollback command. Avoid claiming a setting is hot-reloadable unless the relevant Solr version and component documentation explicitly says so.
