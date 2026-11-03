@@ -8,7 +8,7 @@ cloudIntegrationTest("SolrCloud update route targets the requested implicit-rout
 }) => {
   const collection = await createImplicitCollection("integration_update_route");
   const shard = "shard2";
-  const created = await client.collections("CREATESHARD", { collection, shard, waitForFinalState: true });
+  const created = await client.collections("CREATESHARD", { collection, shard, nrtReplicas: 1, waitForFinalState: true });
   assert.equal(created.responseHeader?.status, 0, "second implicit-router shard should be created");
 
   const shardDeadline = Date.now() + 15_000;
