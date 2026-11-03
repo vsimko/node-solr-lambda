@@ -44,6 +44,7 @@ try {
 
   const packedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "node-solr-lambda", "package.json"), "utf8"));
   assert.equal(packedManifest.name, packageInfo.name);
+  assert.equal(packedManifest.scripts?.["release:publish"], "node scripts/publish.mjs");
   assert.equal(packedManifest.repository?.url, "https://github.com/vsimko/node-solr-lambda.git");
   assert.equal(packedManifest.homepage, "https://github.com/vsimko/node-solr-lambda#readme");
   assert.equal(packedManifest.bugs?.url, "https://github.com/vsimko/node-solr-lambda/issues");
