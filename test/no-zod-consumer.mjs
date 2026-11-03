@@ -35,7 +35,6 @@ try {
     );
   }
 
-  const packedManifest = JSON.parse(readFileSync(join(consumerDir, "package.json"), "utf8"));
   assert.equal(packedManifest.name, "node-solr-lambda");
   assert.equal(packedManifest.license, "MIT");
   assert.equal(packedManifest.engines?.node, "^20.0.0 || ^22.0.0 || ^24.0.0");
@@ -55,9 +54,20 @@ try {
     { cwd: consumerDir, stdio: "inherit" }
   );
 
-  const installedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "node-solr-lambda", "package.json"), "utf8"));
-  assert.equal(installedManifest.name, packedManifest.name);
-  assert.equal(installedManifest.version, packedManifest.version);
+  const packedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "node-solr-lambda", "package.json"), "utf8"));
+  assert.equal(packedManifest.name, packageInfo.name);
+  assert.equal(packedManifest.version, packageInfo.version);
+  assert.equal(packedManifest.license, "MIT");
+  assert.equal(packedManifest.engines?.node, "^20.0.0 || ^22.0.0 || ^24.0.0");
+  assert.equal(packedManifest.peerDependenciesMeta?.zod?.optional, true);
+  assert.equal(packedManifest.exports?.["."]?.import?.default, "./dist/esm/index.js");
+  assert.equal(packedManifest.exports?.["."]?.require?.default, "./dist/cjs/index.js");
+  assert.equal(packedManifest.exports?.["."]?.import?.types, "./dist/esm/index.d.ts");
+  assert.equal(packedManifest.exports?.["."]?.require?.types, "./dist/cjs/index.d.ts");
+  assert.equal(npmDistTagForVersion(packedManifest.version), "beta");
+  assert.equal(npmDistTagForVersion("4.0.0"), "latest");
+  assert.equal(npmDistTagForVersion("4.0.0-rc.1"), "rc");
+  assert.throws(() => npmDistTagForVersion("4.0.0-dev.1"), /Unsupported prerelease channel/);
 
   const packageNodeModules = join(consumerDir, "node_modules", "node-solr-lambda", "node_modules");
   if (existsSync(join(consumerDir, "node_modules", "zod")) || existsSync(join(packageNodeModules, "zod"))) {
