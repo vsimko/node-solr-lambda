@@ -69,3 +69,15 @@ The typed Core Admin action set is `STATUS`, `CREATE`, `RELOAD`, `UNLOAD`, `RENA
 | `SPLIT` | Splits a core's index into target cores or filesystem paths. It can create or overwrite substantial index data and depends on valid split ranges/keys and target configuration. | Not exercised; target paths/cores and disk effects are environment-specific. |
 
 `CREATE` and `RELOAD` are covered by the existing isolated lifecycle test. A separate discovery test creates a unique core, calls `STATUS` without the optional `core` filter, and verifies that the returned status map includes that core. Both tests use the fixture's `finally` cleanup, which unloads only cores registered by the test. These lifecycle assertions run against the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; they do not certify the untested destructive actions above.
+
+
+## System diagnostics endpoints
+
+The global System API exposes separate read-only methods for server information and diagnostics:
+
+- `systemInfo()` reads `/admin/info/system` (Solr mode, Lucene, JVM, and related server metadata).
+- `systemProperties()` reads `/admin/info/properties` (JVM and process properties).
+- `systemThreads()` reads `/admin/info/threads` (a JVM thread dump; content and detail vary by runtime).
+- `systemLogging()` reads `/admin/info/logging` (logger names, levels, and logging configuration).
+
+Each method uses the global `/solr/admin/info/*` route and supports the standard request controls. Response models intentionally preserve unknown fields because JVM properties, thread details, logger metadata, and Solr versions vary. These methods are diagnostic reads; this client does not expose logger-level mutation through this System API surface. The current unit suite verifies route selection and representative response shapes; Solr-major runtime compatibility is not claimed until each endpoint is exercised in the corresponding integration job.
