@@ -690,18 +690,18 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
         "test/admin-api-types.ts"
       ],
-      "notes": "Read-only JVM and process properties. Response is intentionally extensible because available properties vary by runtime and deployment; route and representative shape have unit coverage, but live Solr compatibility is unverified."
+      "notes": "Read-only JVM and process properties. Response is intentionally extensible because available properties vary by runtime and deployment; integration tests verify a representative response on pinned Solr 8.11.4, 9.11.0, and 10.1.0."
     },
     {
       "id": "system.threads",
@@ -712,18 +712,18 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
         "test/admin-api-types.ts"
       ],
-      "notes": "Read-only JVM thread diagnostics. Thread detail and response payload vary by JVM; route and representative response have unit coverage, but live Solr compatibility is unverified."
+      "notes": "Read-only JVM thread diagnostics. Thread detail and response payload vary by JVM; integration tests verify a representative response on pinned Solr 8.11.4, 9.11.0, and 10.1.0."
     },
     {
       "id": "system.logging",
@@ -734,18 +734,18 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
         "test/admin-api-types.ts"
       ],
-      "notes": "Read-only logger configuration and level information. This client method does not mutate logger levels; route and representative response have unit coverage, but live Solr compatibility is unverified."
+      "notes": "Read-only logger configuration and level information. This client method does not mutate logger levels; integration tests verify a representative response on pinned Solr 8.11.4, 9.11.0, and 10.1.0."
     }
   ]
 }

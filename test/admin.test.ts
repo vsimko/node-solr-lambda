@@ -299,8 +299,8 @@ test("System API diagnostics use their global endpoints", async () => {
   const requested: string[] = [];
   const responses = [
     { mode: "standalone", lucene: { "solr-spec-version": "10.1.0" } },
-    { system: { "java.version": "21", "os.name": "Linux" } },
-    { threadDump: "solr-thread-1 RUNNABLE" },
+    { properties: { "java.version": "21", "os.name": "Linux" } },
+    { system: { threadDump: ["thread", { id: 1, name: "solr-thread-1", state: "RUNNABLE" }] } },
     { levels: ["INFO", "WARN"], loggers: { "org.apache.solr": { level: "INFO" } } }
   ];
   const client = createSolrClient({
@@ -314,8 +314,8 @@ test("System API diagnostics use their global endpoints", async () => {
   const threads = await client.systemThreads();
   const logging = await client.systemLogging();
   assert.equal(info.mode, "standalone");
-  assert.equal(properties.system?.["java.version"], "21");
-  assert.match(threads.threadDump ?? "", /RUNNABLE/);
+  assert.equal(properties.properties?.["java.version"], "21");
+  assert.ok(threads.system?.threadDump?.length);
   assert.ok(logging.loggers?.["org.apache.solr"]);
   assert.deepEqual(requested.map(value => new URL(value).pathname), [
     "/solr/admin/info/system",

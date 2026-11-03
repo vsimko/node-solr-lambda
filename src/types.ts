@@ -1730,13 +1730,24 @@ export interface SolrSystemInfoResponse {
 
 /** JVM and process properties returned by /admin/info/properties. */
 export interface SolrSystemPropertiesResponse {
-  system?: Readonly<Record<string, string | number | boolean | null>>;
+  properties?: Readonly<Record<string, string | number | boolean | null>>;
   [key: string]: unknown;
 }
 
-/** Thread diagnostics returned by /admin/info/threads; thread details vary by JVM. */
+/** One thread entry returned by the JVM thread dump handler. */
+export interface SolrSystemThreadInfo {
+  id?: number;
+  name?: string;
+  state?: string;
+  [key: string]: unknown;
+}
+
+/** Thread diagnostics use the nested system.threadDump response shape. */
 export interface SolrSystemThreadsResponse {
-  threadDump?: string;
+  system?: {
+    threadDump?: readonly (string | SolrSystemThreadInfo | { thread: SolrSystemThreadInfo })[];
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
