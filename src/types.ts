@@ -688,12 +688,12 @@ export interface CreateCollectionParams extends CollectionRequestBase {
   tlogReplicas?: number;
   pullReplicas?: number;
   maxShardsPerNode?: number;
-  createNodeSet?: string;
+  createNodeSet?: string | readonly string[];
   /** V1 Collections API switch; only meaningful together with createNodeSet. */
   "createNodeSet.shuffle"?: boolean;
   "router.name"?: "compositeId" | "implicit" | (string & {});
   "router.field"?: string;
-  shards?: string;
+  shards?: string | readonly string[];
   "collection.configName"?: string;
   autoAddReplicas?: boolean;
   perReplicaState?: boolean;
