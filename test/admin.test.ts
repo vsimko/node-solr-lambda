@@ -326,7 +326,7 @@ test("System API diagnostics use their global endpoints", async () => {
 });
 
 test("Authorization API serializes typed built-in permission and user-role commands", async () => {
-  const requested: Array<{ url: string; method?: string; body?: unknown }> = [];
+  const requested: Array<{ url: string; method: string | undefined; body: unknown }> = [];
   const client = createSolrClient({ fetch: async (input, init) => {
     requested.push({ url: String(input), method: init?.method, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) });
     return new Response(JSON.stringify({ authorization: { class: "solr.RuleBasedAuthorizationPlugin", "user-role": { alice: ["admin", "dev"] }, permissions: [{ name: "read", role: ["admin", "dev"] }] } }));
