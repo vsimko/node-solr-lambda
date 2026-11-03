@@ -54,8 +54,10 @@ const handlerDefaults: SolrConfigRequestHandlerParams = {
   echoParams: "explicit",
   fq: ["status:published"]
 };
-const requestHandlers: SolrConfigRequestHandlerSettings | undefined =
-  effectiveConfig.then(result => result.config?.requestHandler?.["/select"]);
+void effectiveConfig.then(result => {
+  const requestHandler: SolrConfigRequestHandlerSettings | undefined = result.config?.requestHandler?.["/select"];
+  void requestHandler;
+});
 const responseWriter: SolrConfigResponseWriterSettings = {
   class: "solr.JSONResponseWriter",
   contentType: "application/json",
