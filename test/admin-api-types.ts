@@ -24,6 +24,11 @@ import type {
   CoreRequestRecoveryParams,
   CoreAdminStatusResponse,
   CollectionAdminParams,
+  CollectionAdminResponse,
+  SolrCollectionListResponse,
+  SolrCollectionAdminResponse,
+  SolrCollectionReplicaResponse,
+  SolrCollectionRoleResponse,
   SolrMetricsResponse
 } from "../src/index.js";
 
@@ -257,6 +262,17 @@ void client.collections("CREATE", legacyPlacementCollection);
 void client.collections("CREATEALIAS", createAlias);
 void client.collections("ADDREPLICA", { collection: "catalog", shard: "shard1", type: "nrt" });
 void client.collections("LIST");
+const collectionListResponse: Promise<SolrCollectionListResponse> = client.collections("LIST");
+const collectionListNames: readonly string[] | undefined = (await collectionListResponse).collections;
+const collectionCreateResponse: Promise<SolrCollectionAdminResponse> = client.collections("CREATE", { name: "typed-catalog" });
+const collectionDeleteResponse: Promise<SolrCollectionAdminResponse> = client.collections("DELETE", { name: "typed-catalog" });
+const replicaAddResponse: Promise<SolrCollectionReplicaResponse> = client.collections("ADDREPLICA", { collection: "catalog", shard: "shard1", type: "nrt" });
+const replicaMoveResponse: Promise<SolrCollectionReplicaResponse> = client.collections("MOVEREPLICA", { collection: "catalog", replica: "core_node2", targetNode: "node2:8983_solr" });
+const roleAddResponse: Promise<SolrCollectionRoleResponse> = client.collections("ADDROLE", { node: "node1:8983_solr", role: "overseer" });
+const listActionResponse: CollectionAdminResponse<"LIST"> = await client.collections("LIST");
+// @ts-expect-error LIST's default response is not the generic mutation envelope.
+const incompatibleCollectionResponse: Promise<SolrCollectionListResponse> = client.collections("CREATE", { name: "typed-catalog" });
+void [collectionListNames, collectionCreateResponse, collectionDeleteResponse, replicaAddResponse, replicaMoveResponse, roleAddResponse, listActionResponse, incompatibleCollectionResponse];
 
 // @ts-expect-error Unknown collection creation options are rejected.
 const invalidCollection: CollectionAdminParams<"CREATE"> = { name: "catalog", numShards: "two" };
