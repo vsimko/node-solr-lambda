@@ -224,3 +224,34 @@ test("Core Admin STATUS accepts minimal and detailed response payloads", async (
   assert.equal(detailed.status?.catalog?.index?.numDocs, 12);
   assert.deepEqual(detailed.status?.catalog?.futureServerField, { enabled: true });
 });
+
+
+test("System API diagnostics use their global endpoints", async () => {
+  const requested: string[] = [];
+  const responses = [
+    { mode: "standalone", lucene: { "solr-spec-version": "10.1.0" } },
+    { system: { "java.version": "21", "os.name": "Linux" } },
+    { threadDump: "solr-thread-1 RUNNABLE" },
+    { levels: ["INFO", "WARN"], loggers: { "org.apache.solr": { level: "INFO" } } }
+  ];
+  const client = createSolrClient({
+    fetch: async input => {
+      requested.push(String(input));
+      return new Response(JSON.stringify(responses[requested.length - 1]));
+    }
+  });
+  const info = await client.systemInfo();
+  const properties = await client.systemProperties();
+  const threads = await client.systemThreads();
+  const logging = await client.systemLogging();
+  assert.equal(info.mode, "standalone");
+  assert.equal(properties.system?.["java.version"], "21");
+  assert.match(threads.threadDump ?? "", /RUNNABLE/);
+  assert.ok(logging.loggers?.["org.apache.solr"]);
+  assert.deepEqual(requested.map(value => new URL(value).pathname), [
+    "/solr/admin/info/system",
+    "/solr/admin/info/properties",
+    "/solr/admin/info/threads",
+    "/solr/admin/info/logging"
+  ]);
+});
