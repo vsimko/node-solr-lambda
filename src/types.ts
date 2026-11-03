@@ -508,6 +508,12 @@ export interface CoreAdminStatusResponse {
   [key: string]: unknown;
 }
 
+/** Common response envelope for non-STATUS Core Admin actions. */
+export interface CoreAdminCommandResponse {
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
+
 /** Required request ID for polling a previously submitted asynchronous Core Admin action. */
 export interface CoreRequestStatusParams {
   requestid: string;

@@ -11,7 +11,7 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import * as replicationApi from "./apis/replication.js";
 import type {
-  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClusterStatusResponse, SolrCollectionShardOperationResponse,
+  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminCommandResponse, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClusterStatusResponse, SolrCollectionShardOperationResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
   SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrAuthorizationCommand, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrAuthenticationResponse, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
 } from "./types.js";
@@ -109,7 +109,7 @@ export class SolrClient extends SolrTransport {
   }
 
   coreAdmin<T = unknown>(action: "STATUS", params?: CoreAdminParams<"STATUS">, requestOptions?: RequestControlOptions): Promise<T>;
-  coreAdmin<T = unknown, A extends Exclude<CoreAdminAction, "STATUS"> = Exclude<CoreAdminAction, "STATUS">>(action: A, params: CoreAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
+  coreAdmin<T = CoreAdminCommandResponse, A extends Exclude<CoreAdminAction, "STATUS"> = Exclude<CoreAdminAction, "STATUS">>(action: A, params: CoreAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
   coreAdmin<T = unknown, A extends CoreAdminAction = CoreAdminAction>(action: A, params: CoreAdminParams<A> = {} as CoreAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return coreAdminApi<T, A>(this, action, params, requestOptions);
   }

@@ -299,6 +299,10 @@ const detailedCoreStatus: CoreAdminStatusResponse = {
   }
 };
 const statusRequest: Promise<CoreAdminStatusResponse> = client.coreAdmin("STATUS", { core: "catalog", indexInfo: true });
+const coreCreateResponse = client.coreAdmin("CREATE", { name: "catalog" });
+const coreReloadResponse = client.coreAdmin("RELOAD", { core: "catalog" });
+const coreCommandResponse: Promise<import("../src/index.js").CoreAdminCommandResponse> = coreCreateResponse;
+void [coreReloadResponse, coreCommandResponse];
 void statusRequest.then(result => {
   const coreName: string | undefined = result.status?.catalog?.name;
   const dataDir: string | undefined = result.status?.catalog?.dataDir;
