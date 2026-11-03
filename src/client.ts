@@ -6,14 +6,14 @@ import { config as configApi } from "./apis/config.js";
 import { coreAdmin as coreAdminApi } from "./apis/core-admin.js";
 import { collections as collectionsApi } from "./apis/collections.js";
 import { security as securityApi } from "./apis/security.js";
-import { systemInfo as systemInfoApi } from "./apis/system.js";
+import { systemInfo as systemInfoApi, systemProperties as systemPropertiesApi, systemThreads as systemThreadsApi, systemLogging as systemLoggingApi } from "./apis/system.js";
 import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrAdminParams, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -154,8 +154,23 @@ export class SolrClient extends SolrTransport {
     return replicationApi.replicationFile(this, this.endpoint("/replication"), params, requestOptions);
   }
 
-  systemInfo<T = unknown>(requestOptions: RequestControlOptions = {}): Promise<T> {
+  systemInfo<T = SolrSystemInfoResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
     return systemInfoApi<T>(this, requestOptions);
+  }
+
+  /** Read JVM and process properties from the global System API. */
+  systemProperties<T = SolrSystemPropertiesResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
+    return systemPropertiesApi<T>(this, requestOptions);
+  }
+
+  /** Read the current JVM thread dump from the global System API. */
+  systemThreads<T = SolrSystemThreadsResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
+    return systemThreadsApi<T>(this, requestOptions);
+  }
+
+  /** Read logger names, levels, and logging configuration from the global System API. */
+  systemLogging<T = SolrSystemLoggingResponse>(requestOptions: RequestControlOptions = {}): Promise<T> {
+    return systemLoggingApi<T>(this, requestOptions);
   }
 
   metrics<T = unknown>(params: SolrAdminParams = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
