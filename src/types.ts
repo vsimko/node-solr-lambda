@@ -114,8 +114,35 @@ export interface SolrAuthorizationResponse {
   responseHeader?: SolrResponseHeader;
   [key: string]: unknown;
 }
-/** Authentication plugin commands remain generic until dedicated model work is complete. */
-export type SolrAuthenticationCommand = Readonly<Record<string, unknown>>;
+/** Basic Authentication plugin properties documented by Solr. Unknown plugin properties remain extensible. */
+export interface SolrBasicAuthProperties {
+  blockUnknown?: boolean;
+  realm?: string;
+  forwardCredentials?: boolean;
+  [key: string]: unknown;
+}
+
+/** set-user accepts a user-to-password map; MultiAuthPlugin may nest maps under a scheme key. */
+export type SolrAuthenticationSetUserMap = Readonly<Record<string, string | Readonly<Record<string, string>>>>;
+
+/** Typed commands for the BasicAuthPlugin and the documented MultiAuthPlugin Basic scheme wrapper. */
+export type SolrAuthenticationCommand =
+  | { "set-user": SolrAuthenticationSetUserMap }
+  | { "delete-user": readonly string[] }
+  | { "set-property": SolrBasicAuthProperties | Readonly<Record<string, SolrBasicAuthProperties>> };
+
+/** BasicAuthPlugin security.json configuration. Credential values returned by Solr are hashed strings, not plaintext passwords. */
+export interface SolrBasicAuthConfig extends SolrBasicAuthProperties {
+  class?: string;
+  credentials?: Readonly<Record<string, string>>;
+}
+
+/** Typed authentication section returned by GET /admin/authentication. */
+export interface SolrAuthenticationResponse {
+  authentication?: SolrBasicAuthConfig;
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
 
 export type SolrReplicationCommand =
   | "enablereplication"
