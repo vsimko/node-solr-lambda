@@ -40,7 +40,7 @@ Examples of intentionally unverified behavior include long-running/destructive s
 - [x] Complete and merge the focused implementation work tracked by Issue #81 / PR #222.
 - [ ] Reconcile this draft and the changelog against all merged changes on the final release candidate.
 - [ ] Run the complete CI matrix on the exact release candidate commit: Node.js 20/22/24 and Solr 8.11.4/9.11.0/10.1.0.
-- [ ] Verify npm provenance/publication settings and the rollback procedure.
+- [ ] Verify npm provenance/publication settings and the rollback procedure. **Audit finding:** the current manual publisher does not use `--provenance`, and no trusted-publishing workflow/OIDC configuration exists; provenance is not currently produced.
 - [ ] Create the stable tag and publish only after every blocking gate is explicitly complete.
 - [ ] Install the published package from npm in a clean consumer and smoke-test ESM, CommonJS, and TypeScript declarations.
 
