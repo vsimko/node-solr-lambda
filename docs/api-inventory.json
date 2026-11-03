@@ -210,7 +210,7 @@
         "test/export.test.ts",
         "test/export-api-types.ts"
       ],
-      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response; exportStream() exposes the byte body. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. includeStoredFields is documented for Solr 10.1 but remains version-specific. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; new unit tests cover typed serialization and streamed chunk consumption."
+      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. includeStoredFields is documented for Solr 10.1 but remains version-specific. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; unit tests cover typed serialization."
     },
     {
       "id": "config.get",
@@ -658,6 +658,28 @@
         "9": "tested",
         "10": "tested"
       }
+    },
+    {
+      "id": "export.stream",
+      "area": "Export",
+      "clientMethod": "exportStream",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/export",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/export.md",
+      "testFiles": [
+        "test/export.test.ts",
+        "test/integration/solr-export.test.ts"
+      ],
+      "notes": "Returns the Export response body as a backpressure-aware ReadableStream of bytes. It delegates to export(), preserving the same request parameters and server compatibility."
     }
   ]
 }
