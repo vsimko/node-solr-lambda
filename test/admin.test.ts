@@ -182,3 +182,45 @@ test("typed administrative list parameters and custom params are serialized", as
   assert.equal(status.searchParams.get("indexInfo"), "true");
   assert.equal(status.searchParams.get("wt"), "json");
 });
+
+test("Core Admin STATUS accepts minimal and detailed response payloads", async () => {
+  const payloads = [
+    { status: { catalog: { name: "catalog" } } },
+    {
+      responseHeader: { status: 0, QTime: 2 },
+      initFailures: {},
+      status: {
+        catalog: {
+          name: "catalog",
+          instanceDir: "/var/solr/data/catalog",
+          dataDir: "/var/solr/data/catalog/data",
+          config: "solrconfig.xml",
+          schema: "managed-schema",
+          startTime: "2026-11-03T05:00:00Z",
+          uptime: 120_000,
+          index: { numDocs: 12, maxDoc: 14, deletedDocs: 2, numSegments: 3, sizeInBytes: 4096, size: "4 KB" },
+          futureServerField: { enabled: true }
+        }
+      }
+    }
+  ];
+  for (const payload of payloads) {
+    const client = createSolrClient({
+      fetch: async () => new Response(JSON.stringify(payload))
+    });
+    const result = await client.coreAdmin<import("../src/index.js").CoreAdminStatusResponse>(
+      "STATUS",
+      { core: "catalog", indexInfo: true }
+    );
+    assert.equal(result.status?.catalog?.name, "catalog");
+  }
+  const client = createSolrClient({
+    fetch: async () => new Response(JSON.stringify(payloads[1]))
+  });
+  const detailed = await client.coreAdmin<import("../src/index.js").CoreAdminStatusResponse>(
+    "STATUS",
+    { core: "catalog", indexInfo: true }
+  );
+  assert.equal(detailed.status?.catalog?.index?.numDocs, 12);
+  assert.deepEqual(detailed.status?.catalog?.futureServerField, { enabled: true });
+});

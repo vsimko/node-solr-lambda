@@ -20,6 +20,7 @@ import type {
   SolrConfigOverlayResponse,
   SolrConfigCommandResponse,
   CoreAdminParams,
+  CoreAdminStatusResponse,
   CollectionAdminParams
 } from "../src/index.js";
 
@@ -244,3 +245,32 @@ void client.collections("CREATE");
 const typedConfigRead: Promise<SolrConfigReadResponse> = client.getConfig();
 const typedConfigOverlay: Promise<SolrConfigOverlayResponse> = client.getConfigOverlay();
 void [typedConfigRead, typedConfigOverlay];
+
+const minimalCoreStatus: CoreAdminStatusResponse = {
+  status: { catalog: { name: "catalog" } }
+};
+const detailedCoreStatus: CoreAdminStatusResponse = {
+  responseHeader: { status: 0, QTime: 1 },
+  initFailures: {},
+  status: {
+    catalog: {
+      name: "catalog",
+      instanceDir: "/var/solr/catalog",
+      dataDir: "/var/solr/catalog/data",
+      config: "solrconfig.xml",
+      schema: "managed-schema",
+      startTime: "2026-11-03T05:00:00Z",
+      uptime: 1000,
+      index: { numDocs: 10, maxDoc: 10, numSegments: 1, sizeInBytes: 1024 },
+      extraMetadata: "forward-compatible"
+    }
+  }
+};
+const statusRequest: Promise<CoreAdminStatusResponse> = client.coreAdmin("STATUS", { core: "catalog", indexInfo: true });
+void statusRequest.then(result => {
+  const coreName: string | undefined = result.status?.catalog?.name;
+  const dataDir: string | undefined = result.status?.catalog?.dataDir;
+  const documentCount: number | undefined = result.status?.catalog?.index?.numDocs;
+  void [coreName, dataDir, documentCount];
+});
+void [minimalCoreStatus, detailedCoreStatus];
