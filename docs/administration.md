@@ -137,3 +137,15 @@ See the [Apache Solr Basic Authentication Plugin guide](https://solr.apache.org/
 `collections("CLUSTERSTATUS")` defaults to `SolrClusterStatusResponse`. The response model exposes `cluster.live_nodes`, aliases, collections, shards, and replicas, including common replica fields such as `core`, `node_name`, `state`, `type`, `leader`, and `properties`. Filtered responses may omit cluster-wide sections, and Solr versions or plugins may add fields; modeled properties are therefore optional and unknown fields remain accessible.
 
 The alias and cluster-status integration checks exercise alias read-back, collection/shard/replica state, and lifecycle effects on pinned Solr 8.11.4, 9.11.0, and 10.1.0. See the [per-action Collections matrix](collections-api-coverage.md); untested actions are not certified by these response models.
+
+## Shard lifecycle and document migration
+
+`CREATESHARD` and `DELETESHARD` use `CreateShardParams` and `DeleteShardParams` and return `SolrCollectionShardOperationResponse`. Their lifecycle is integration-tested against disposable implicit collections on Solr 8.11.4, 9.11.0, and 10.1.0. The tests verify creation/read-back and deletion/read-back, with fixture cleanup.
+
+`SPLITSHARD` uses the V1 Collections API parameter `split.key` (not the V2 camel-case `splitKey`). Supply either `shard` or `split.key`; `ranges` accepts comma-separated hexadecimal hash ranges, and `numSubShards`, `splitMethod`, `waitForFinalState`, and `async` are available where supported by the server. The operation applies to hash-routed collections created with `numShards`, may run for a long time, and with the default `rewrite` method needs more than twice the index size in free disk space on the parent leader. Use `async` for long operations. It is deliberately not run in shared CI and remains runtime-unverified.
+
+`MIGRATE` uses the V1 wire names `collection`, `split.key`, `target.collection`, and `forward.timeout` (default 60 seconds), plus `async`. It migrates documents for a compositeId routing-key prefix from a source collection to a target collection. The target must not receive writes while migration is running; the action does not deduplicate documents already present in the target. It is long-running and may create temporary collections, so the client has typed request/response contracts and serialization coverage but no shared-CI runtime claim.
+
+The V1 parameter spellings are intentional: this client calls `/solr/admin/collections`, not the Solr 10 V2 `/api/collections` resources. The V2 API maps `split.key` to `splitKey` and `target.collection` to `target`; those V2 names must not be sent through this V1 client.
+
+Reference guides: [Solr 8.1 Collections API](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-8.1.pdf), [Solr 9.2 Collection Management](https://solr.apache.org/guide/solr/9_2/deployment-guide/collection-management.html), [Solr 9.10 Shard Management](https://solr.apache.org/guide/solr/9_10/deployment-guide/shard-management.html), and [Solr 10.0 Collections API](https://solr.apache.org/guide/solr/10_0/configuration-guide/collections-api.html).
