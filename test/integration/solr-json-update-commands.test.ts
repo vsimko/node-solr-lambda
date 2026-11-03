@@ -44,7 +44,7 @@ integrationTest("JSON update commands delete documents by ID and query", async (
     });
     assert.equal(byQueryResult.response?.numFound, 0);
   } finally {
-    await client.delete([id, queryId]);
+    await Promise.all([client.delete(id), client.delete(queryId)]);
     await client.commit({ waitSearcher: true });
   }
 });
