@@ -1,0 +1,55 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_publish:
+        description: "Confirm publication of the package version currently on master"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: inputs.confirm_publish == true && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Ensure npm supports trusted publishing
+        run: |
+          npm install --global npm@11.5.1
+          node --version
+          npm --version
+          node --input-type=module -e '
+            import { execFileSync } from "node:child_process";
+            const [nodeMajor, nodeMinor] = process.versions.node.split(".").map(Number);
+            if (nodeMajor < 22 || (nodeMajor === 22 && nodeMinor < 14)) {
+              throw new Error("Trusted publishing requires Node.js 22.14.0 or newer");
+            }
+            const [npmMajor, npmMinor, npmPatch] = execFileSync("npm", ["--version"], { encoding: "utf8" }).trim().split(".").map(Number);
+            if (npmMajor < 11 || (npmMajor === 11 && (npmMinor < 5 || (npmMinor === 5 && npmPatch < 1)))) {
+              throw new Error("Trusted publishing requires npm 11.5.1 or newer");
+            }
+          '
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test:types
+      - run: npm test
+      - run: npm run build
+      - run: npm run release:check
+      - name: Publish with npm trusted publishing
+        run: npm run release:publish -- --provenance
