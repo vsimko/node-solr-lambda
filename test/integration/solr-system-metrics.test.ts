@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import type { SolrMetricsJsonResponse } from "../../src/index.js";
 import { integrationTest } from "./fixtures.js";
 
 integrationTest("System info endpoint returns stable server metadata", async ({ client }) => {
@@ -43,4 +44,38 @@ integrationTest("Metrics API returns a non-empty JVM metrics registry or exposit
       count + Object.keys(registry).length, 0);
     assert.ok(metricCount > 0, "JVM metrics JSON should contain at least one metric");
   }
+});
+
+
+integrationTest("Metrics API exposes node metrics and applies registry, prefix, and regex filters", async ({ client }) => {
+  const result = await client.metrics<SolrMetricsJsonResponse>({ group: "node", wt: "json" });
+  const registries = result.metrics ?? {};
+  const nonEmptyRegistry = Object.entries(registries).find(([, metrics]) => Object.keys(metrics).length > 0);
+  assert.ok(nonEmptyRegistry, "node group should expose a non-empty JSON metrics registry");
+
+  const [registryName, registry] = nonEmptyRegistry;
+  const metricName = Object.keys(registry)[0];
+  assert.ok(metricName, "node registry should contain at least one metric");
+
+  const byRegistry = await client.metrics<SolrMetricsJsonResponse>({
+    group: "node", registry: registryName, wt: "json"
+  });
+  assert.deepEqual(Object.keys(byRegistry.metrics ?? {}), [registryName],
+    "registry filter should return only the requested registry");
+
+  const prefix = metricName.slice(0, Math.min(3, metricName.length));
+  const byPrefix = await client.metrics<SolrMetricsJsonResponse>({
+    group: "node", registry: registryName, prefix, wt: "json"
+  });
+  const prefixNames = Object.keys(byPrefix.metrics?.[registryName] ?? {});
+  assert.ok(prefixNames.length > 0, "prefix filter should retain matching node metrics");
+  assert.ok(prefixNames.every(name => name.startsWith(prefix)),
+    "prefix filter should exclude metric names outside the requested prefix");
+
+  const escapedMetricName = metricName.replaceAll(".", "\\\\.");
+  const byRegex = await client.metrics<SolrMetricsJsonResponse>({
+    group: "node", registry: registryName, regex: "^" + escapedMetricName + "$", wt: "json"
+  });
+  assert.deepEqual(Object.keys(byRegex.metrics?.[registryName] ?? {}), [metricName],
+    "regex filter should return only the exact matching metric");
 });
