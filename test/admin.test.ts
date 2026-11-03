@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createSolrClient } from "../src/index.js";
+import { createSolrClient, SolrHttpError } from "../src/index.js";
 
 test("Core Admin uses the global endpoint", async () => {
   let target = "";
@@ -372,4 +372,17 @@ test("Authentication API serializes typed BasicAuth user and property commands",
     { "set-user": { basic: { alice: "secret-password" } } },
     { "set-property": { basic: { realm: "Basic realm" } } }
   ]);
+});
+
+test("Authentication command passwords are not copied into client-generated HTTP error metadata", async () => {
+  const password = "do-not-expose-this-password";
+  const client = createSolrClient({
+    fetch: async () => new Response(JSON.stringify({ error: { msg: "invalid authentication configuration" } }), { status: 400, statusText: "Bad Request" })
+  });
+  await assert.rejects(client.security("authentication", { "set-user": { alice: password } }), error => {
+    assert.ok(error instanceof SolrHttpError);
+    const publicError = [error.message, error.body, JSON.stringify(error.errorResponse)].join(" ");
+    assert.equal(publicError.includes(password), false);
+    return true;
+  });
 });
