@@ -56,7 +56,6 @@ The issue list below reflects the current open follow-up work, rather than histo
 | Work | Tracking |
 | --- | --- |
 | Complete Streaming Expressions tuple/error response contracts and distinguish its transport from Export streaming | [Issues #92–#93](https://github.com/vsimko/node-solr-lambda/issues/92) |
-| Finish the remaining advanced API coverage tracked for Export and related streaming behavior | [Issue #94](https://github.com/vsimko/node-solr-lambda/issues/94) |
 | Complete Streaming Expressions tuple/error response contracts and distinguish its transport from Export streaming | [Issues #92–#93](https://github.com/vsimko/node-solr-lambda/issues/92) |
 
 ## Completed foundation and historical work
