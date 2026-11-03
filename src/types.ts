@@ -784,6 +784,28 @@ export interface SolrCollectionAliasResponse {
   responseHeader?: SolrResponseHeader;
   [key: string]: unknown;
 }
+
+/** Response to Collections API LIST. Collection names are server-defined identifiers. */
+export interface SolrCollectionListResponse {
+  responseHeader?: SolrResponseHeader;
+  collections?: readonly string[];
+  [key: string]: unknown;
+}
+/** Common response envelope for collection lifecycle and policy actions. */
+export interface SolrCollectionAdminResponse {
+  responseHeader?: SolrResponseHeader;
+  success?: boolean | Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+/** Response envelope for replica lifecycle, movement, balancing, and property actions. */
+export interface SolrCollectionReplicaResponse extends SolrCollectionAdminResponse {
+  requestid?: string;
+}
+/** Response envelope for cluster-wide node role assignment actions. */
+export interface SolrCollectionRoleResponse {
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
 export interface CreateShardParams extends CollectionRequestBase { collection: string; shard: string; createNodeSet?: string; nrtReplicas?: number; tlogReplicas?: number; pullReplicas?: number; waitForFinalState?: boolean }
 export interface DeleteShardParams extends CollectionRequestBase { collection: string; shard: string; deleteInstanceDir?: boolean; deleteDataDir?: boolean; deleteIndex?: boolean }
 export type SplitShardParams = CollectionRequestBase & {
