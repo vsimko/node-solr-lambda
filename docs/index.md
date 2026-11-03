@@ -19,4 +19,5 @@
 - [Solr server compatibility](compatibility.md)
 - [Development roadmap](roadmap.md)
 - [Migration from v3 to v4](migration-v3-to-v4.md)
+- [Release process](release-process.md)
 - [v4.0.0 release notes (draft)](release-notes-v4.0.0.md)
