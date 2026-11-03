@@ -55,3 +55,17 @@ The Collections API also exposes action-specific parameter models for `MOVEREPLI
 Use the exported `CoreAdminStatusResponse` type when reading `coreAdmin("STATUS")`. The response models the optional response header, per-core status map, initialization failures, core paths/configuration metadata, and index statistics returned when `indexInfo=true`. Individual properties are optional because unloaded/unavailable cores and requests without index details return smaller payloads. Index signatures preserve additional server- or version-specific metadata.
 
 The unit suite checks both a minimal response and a detailed response containing index statistics and an unknown future field. The isolated-core integration test requests index information, checks the returned core paths and document count, and repeats STATUS after RELOAD on each pinned Solr 8.11.4, 9.11.0, and 10.1.0 CI image. These assertions verify the exercised response shape; they do not claim every optional field is present on every version.
+
+## Core Admin lifecycle safety and evidence
+
+The typed Core Admin action set is `STATUS`, `CREATE`, `RELOAD`, `UNLOAD`, `RENAME`, `SWAP`, `MERGEINDEXES`, and `SPLIT`. The current shared integration suite exercises isolated `CREATE`, filtered and unfiltered `STATUS`, `RELOAD`, and fixture-cleanup `UNLOAD`. The `UNLOAD` cleanup test removes only a core created by that test fixture.
+
+| Action | Operational effect and safety boundary | Shared CI evidence |
+| --- | --- | --- |
+| `UNLOAD` | Removes a core from the running Solr node. `deleteIndex`, `deleteDataDir`, and `deleteInstanceDir` can permanently remove on-disk data; do not set them for a core whose data must be retained. | Used only for cleanup of a uniquely created test core with all three deletion flags enabled. |
+| `RENAME` | Changes the registered core name. Update clients, aliases, and operational references that use the old name; do not rename a shared fixture. | Not exercised; no shared fixture is renamed. |
+| `SWAP` | Exchanges the names of two existing cores. Both cores must be disposable and isolated; the operation changes which data each name resolves to. | Not exercised; no shared fixture names are swapped. |
+| `MERGEINDEXES` | Merges index segments from source core(s) or index directories into the target core. Validate schema/field compatibility and target contents; use disposable cores and backups because this mutates the target index. | Not exercised; it requires isolated source and target indexes. |
+| `SPLIT` | Splits a core's index into target cores or filesystem paths. It can create or overwrite substantial index data and depends on valid split ranges/keys and target configuration. | Not exercised; target paths/cores and disk effects are environment-specific. |
+
+`CREATE` and `RELOAD` are covered by the existing isolated lifecycle test. A separate discovery test creates a unique core, calls `STATUS` without the optional `core` filter, and verifies that the returned status map includes that core. Both tests use the fixture's `finally` cleanup, which unloads only cores registered by the test. These lifecycle assertions run against the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; they do not certify the untested destructive actions above.
