@@ -4,7 +4,7 @@
 
 ## Response and memory behavior
 
-This API is **not** an incremental tuple-stream parser. It does not expose response chunks, parse a chunked tuple protocol, or provide a memory-bound/backpressure guarantee. Chunk-boundary and malformed tuple-protocol tests are therefore not applicable to the current implementation. A non-JSON response is handled by the shared response parser, not by a Streaming Expressions-specific wire parser.
+The default TypeScript response type is `SolrStreamingExpressionResponse`. Its `result-set.docs` array contains extensible tuples; `SolrStreamingExpressionErrorTuple` describes an `EXCEPTION` tuple, while generic tuple parameters let callers describe expression-specific fields. Unknown tuple and envelope fields are preserved. A server-side expression error represented as a tuple remains part of the successful JSON response; HTTP-level Solr errors are raised by the shared transport as typed request errors.\n\nThis API is **not** an incremental tuple-stream parser. It does not expose response chunks, parse a chunked tuple protocol, or provide a memory-bound/backpressure guarantee. Chunk-boundary and malformed tuple-protocol tests are therefore not applicable to the current implementation. A non-JSON response is handled by the shared response parser, not by a Streaming Expressions-specific wire parser.
 
 The integration suite verifies a `search()` expression against a disposable SolrCloud collection on Solr 8.11.4, 9.11.0, and 10.1.0. Unit tests verify the JSON response envelope, caller cancellation while the response body is being consumed, and cleanup after a response-body stream error.
 
