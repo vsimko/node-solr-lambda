@@ -36,7 +36,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | `SolrClient.systemLogging()` | Read logger configuration and levels | [Administration](administration.md) |
 | `SolrClient.metrics()` | Read Solr metrics | [Administration](administration.md) |
 | `SolrClient.security()` | Read or update authentication and authorization settings | [Administration](administration.md) |
-| `SolrClient.stream()` | Execute a Streaming Expression | [Streaming and Export](export.md) |
+| `SolrClient.stream()` | Execute a Streaming Expression and parse its JSON response | [Streaming Expressions](streaming.md) |
 | `SolrClient.export()` | Return the raw Export handler response | [Streaming and Export](export.md) |
 | `SolrClient.exportStream()` | Return the Export response body as a byte stream | [Streaming and Export](export.md) |
 | `SolrClient.request()` | Send a custom request through the shared transport | [Raw requests](raw-requests.md) |
