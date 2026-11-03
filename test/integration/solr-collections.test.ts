@@ -3,7 +3,7 @@ import { cloudIntegrationTest } from "./fixtures.js";
 
 cloudIntegrationTest("Collections API reloads an isolated collection", async ({ client, createCollection }) => {
   const collection = await createCollection();
-  const result = await client.collections<{ responseHeader?: { status?: number } }>("RELOAD", { name: collection });
+  const result = await client.collections("RELOAD", { name: collection });
   assert.equal(result.responseHeader?.status, 0, "RELOAD should succeed for the disposable collection");
 
   const status = await client.collections("CLUSTERSTATUS", { collection });
@@ -17,12 +17,10 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
   createAlias
 }) => {
   const name = await createCollection();
-  const result = await client.collections<{ collections?: string[] }>("LIST");
+  const result = await client.collections("LIST");
   assert.ok(result.collections?.includes(name), `collection list should contain ${name}`);
 
-  const cluster = await client.collections<{
-    cluster?: { live_nodes?: string[]; collections?: Record<string, unknown> };
-  }>("CLUSTERSTATUS");
+  const cluster = await client.collections("CLUSTERSTATUS");
   assert.ok((cluster.cluster?.live_nodes?.length ?? 0) > 0, "cluster status should report live nodes");
   assert.ok(cluster.cluster?.collections?.[name], `cluster status should contain ${name}`);
 
@@ -34,9 +32,7 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
   const shard = "integration_shard";
   const createdShard = await client.collections("CREATESHARD", { collection: implicitName, shard });
   assert.equal(createdShard.responseHeader?.status, 0, "CREATESHARD should succeed");
-  const withShard = await client.collections<{
-    cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
-  }>("CLUSTERSTATUS", { collection: implicitName });
+  const withShard = await client.collections("CLUSTERSTATUS", { collection: implicitName });
   assert.ok(
     withShard.cluster?.collections?.[implicitName]?.shards?.[shard],
     `cluster status should contain shard ${shard}`
