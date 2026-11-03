@@ -1,6 +1,6 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
-export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
+export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT" | "REQUESTSTATUS" | "REQUESTRECOVERY";
 export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
 /** Field types supported by the Solr Export Handler field list. */
 export type SolrExportFieldType = "int" | "long" | "float" | "double" | "string" | "date" | "boolean";
@@ -388,6 +388,18 @@ export interface CoreAdminStatusResponse {
   [key: string]: unknown;
 }
 
+/** Required request ID for polling a previously submitted asynchronous Core Admin action. */
+export interface CoreRequestStatusParams {
+  requestid: string;
+  customParams?: SolrAdminCustomParams;
+}
+
+/** Expert-only request to ask a core to recover from its leader. */
+export interface CoreRequestRecoveryParams {
+  core: string;
+  customParams?: SolrAdminCustomParams;
+}
+
 /** A typed Core Admin STATUS request. */
 export interface CoreStatusParams {
   core?: string;
@@ -444,7 +456,9 @@ export type CoreAdminParams<A extends CoreAdminAction> =
   A extends "RENAME" ? CoreRenameParams :
   A extends "SWAP" ? CoreSwapParams :
   A extends "MERGEINDEXES" ? CoreMergeIndexesParams :
-  CoreSplitParams;
+  A extends "SPLIT" ? CoreSplitParams :
+  A extends "REQUESTSTATUS" ? CoreRequestStatusParams :
+  CoreRequestRecoveryParams;
 
 /** Replica types accepted by the SolrCloud Collections API. */
 export type CollectionReplicaType = "nrt" | "tlog" | "pull";

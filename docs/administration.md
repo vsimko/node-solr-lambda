@@ -69,3 +69,14 @@ The typed Core Admin action set is `STATUS`, `CREATE`, `RELOAD`, `UNLOAD`, `RENA
 | `SPLIT` | Splits a core's index into target cores or filesystem paths. It can create or overwrite substantial index data and depends on valid split ranges/keys and target configuration. | Not exercised; target paths/cores and disk effects are environment-specific. |
 
 `CREATE` and `RELOAD` are covered by the existing isolated lifecycle test. A separate discovery test creates a unique core, calls `STATUS` without the optional `core` filter, and verifies that the returned status map includes that core. Both tests use the fixture's `finally` cleanup, which unloads only cores registered by the test. These lifecycle assertions run against the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; they do not certify the untested destructive actions above.
+
+## Additional Core Admin actions
+
+The typed V1 Core Admin surface includes `REQUESTSTATUS` and `REQUESTRECOVERY`:
+
+- `REQUESTSTATUS` requires `requestid` and polls a previously submitted asynchronous Core Admin action. The ID is supplied by the caller in the original action's `async` parameter.
+- `REQUESTRECOVERY` requires `core` and asks that core to synchronize with its leader. Apache documents this as an expert-level recovery operation; use it only when automatic recovery has failed and after verifying the target replica.
+
+Both actions have action-specific exported parameter interfaces and request-serialization tests. The shared integration matrix does not invoke `REQUESTRECOVERY`, because forcing recovery on a shared CI node could interfere with SolrCloud replica availability. `REQUESTSTATUS` is not yet runtime-tested against a submitted Core Admin async job; only its request contract is covered.
+
+`UPGRADEINDEX` is intentionally not in the shared `CoreAdminAction` union: it is documented in the Solr 9.11 and 10.1 guides but is not part of the pinned Solr 8.11.4 baseline. It is also an expensive, in-place index rewrite, unsupported in SolrCloud, and can discard non-stored/non-docValues fields. Use the generic request escape hatch only when the caller has explicitly established server-version and deployment-mode support, and test on a copy with a backup.
