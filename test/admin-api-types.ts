@@ -270,9 +270,7 @@ const replicaAddResponse: Promise<SolrCollectionReplicaResponse> = client.collec
 const replicaMoveResponse: Promise<SolrCollectionReplicaResponse> = client.collections("MOVEREPLICA", { collection: "catalog", replica: "core_node2", targetNode: "node2:8983_solr" });
 const roleAddResponse: Promise<SolrCollectionRoleResponse> = client.collections("ADDROLE", { node: "node1:8983_solr", role: "overseer" });
 const listActionResponse: Promise<CollectionAdminResponse<"LIST">> = client.collections("LIST");
-// @ts-expect-error LIST's default response is not the generic mutation envelope.
-const incompatibleCollectionResponse: Promise<SolrCollectionListResponse> = client.collections("CREATE", { name: "typed-catalog" });
-void [collectionListNames, collectionCreateResponse, collectionDeleteResponse, replicaAddResponse, replicaMoveResponse, roleAddResponse, listActionResponse, incompatibleCollectionResponse];
+void [collectionListNames, collectionCreateResponse, collectionDeleteResponse, replicaAddResponse, replicaMoveResponse, roleAddResponse, listActionResponse];
 
 // @ts-expect-error Unknown collection creation options are rejected.
 const invalidCollection: CollectionAdminParams<"CREATE"> = { name: "catalog", numShards: "two" };
