@@ -341,3 +341,31 @@ const invalidPermissionDelete: SolrAuthorizationCommand = { "delete-permission":
 // @ts-expect-error Built-in permission creation requires an explicit role assignment.
 const invalidPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read" } };
 void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission];
+
+import type { SolrAuthenticationCommand, SolrAuthenticationResponse, SolrBasicAuthConfig } from "../src/index.js";
+declare const authenticationClient: SolrClient;
+const authenticationRead: Promise<SolrAuthenticationResponse> = authenticationClient.security("authentication");
+void authenticationRead.then(result => {
+  const pluginClass: string | undefined = result.authentication?.class;
+  const realm: string | undefined = result.authentication?.realm;
+  const blocked: boolean | undefined = result.authentication?.blockUnknown;
+  const hashedCredential: string | undefined = result.authentication?.credentials?.admin;
+  const config: SolrBasicAuthConfig | undefined = result.authentication;
+  void [pluginClass, realm, blocked, hashedCredential, config];
+});
+const setUsers: SolrAuthenticationCommand = { "set-user": { alice: "password-1", bob: "password-2" } };
+const deleteUsers: SolrAuthenticationCommand = { "delete-user": ["alice", "bob"] };
+const setProperties: SolrAuthenticationCommand = { "set-property": { blockUnknown: true, realm: "Solr", forwardCredentials: false } };
+const multiAuthUser: SolrAuthenticationCommand = { "set-user": { basic: { alice: "password-1" } } };
+const multiAuthProperty: SolrAuthenticationCommand = { "set-property": { basic: { realm: "Basic realm" } } };
+void [setUsers, deleteUsers, setProperties, multiAuthUser, multiAuthProperty];
+void authenticationClient.security("authentication", setUsers);
+void authenticationClient.security("authentication", deleteUsers);
+void authenticationClient.security("authentication", setProperties);
+// @ts-expect-error set-user values must be passwords or MultiAuth scheme maps.
+const invalidSetUser: SolrAuthenticationCommand = { "set-user": { alice: 42 } };
+// @ts-expect-error delete-user requires a list of user IDs.
+const invalidDeleteUser: SolrAuthenticationCommand = { "delete-user": "alice" };
+// @ts-expect-error BasicAuth blockUnknown is boolean.
+const invalidAuthProperty: SolrAuthenticationCommand = { "set-property": { blockUnknown: "yes" } };
+void [invalidSetUser, invalidDeleteUser, invalidAuthProperty];

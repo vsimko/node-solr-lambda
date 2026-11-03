@@ -73,7 +73,7 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "partial",
+      "integrationTests": "tested",
       "versions": {
         "8": "tested",
         "9": "tested",
@@ -88,7 +88,7 @@
         "test/backup-restore-api-types.ts",
         "test/integration/solrcloud-backup-restore.test.ts"
       ],
-      "notes": "Per-action SolrCloud integration evidence is documented in docs/collections-api-coverage.md. Tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0: CREATE/LIST/DELETE; CREATEALIAS/LISTALIASES/DELETEALIAS; CLUSTERSTATUS; CREATESHARD/DELETESHARD; ADDREPLICA/DELETEREPLICA; ADDREPLICAPROP/DELETEREPLICAPROP; BALANCESHARDUNIQUE; MOVEREPLICA/REBALANCELEADERS; BACKUP/LISTBACKUP/RESTORE/DELETEBACKUP; REQUESTSTATUS/DELETESTATUS. RELOAD, MODIFYCOLLECTION, SPLITSHARD, ADDROLE, and REMOVEROLE are not runtime-tested and remain unverified. Non-backup action responses remain consumer-generic; the matrix does not imply complete response models."
+      "notes": "SolrCloud CREATE/LIST/DELETE, alias lifecycle, implicit-router shard lifecycle, named ADDREPLICA/DELETEREPLICA lifecycle, replica property add/delete and BALANCESHARDUNIQUE responses, plus multi-node MOVEREPLICA and REBALANCELEADERS leader reassignment are tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #177, #192, #209, and PR #142 CI #224). MOVEREPLICA verifies the named replica becomes active on a different live node. REBALANCELEADERS assigns preferredLeader to an active non-leader and verifies it becomes shard leader. Snapshot, backup, and cluster-state response models remain unverified. Additional operation evidence: Typed SolrCloud collection backup/restore actions and asynchronous REQUESTSTATUS/DELETESTATUS tracking. Full backup, list, restore, query read-back, and delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0 with a shared local filesystem volume mounted on both SolrCloud nodes. S3 and other external repositories are not certified."
     },
     {
       "id": "update.commit",
@@ -538,7 +538,7 @@
         "test/modules.test.ts",
         "test/integration/solr-security.test.ts"
       ],
-      "notes": "Authorization overloads provide SolrAuthorizationResponse and SolrAuthorizationCommand for the built-in RuleBasedAuthorizationPlugin: set-user-role (including null role removal), set-permission, update-permission by numeric index, and delete-permission by numeric index. Permission/configuration fields remain extensible for plugin-specific options. Authentication commands remain generic and are tracked separately in Issue #86. Unit tests verify authorization command serialization and consumer type fixtures; authenticated authorization reads are integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Mutating authorization commands are not run against shared integration security state."
+      "notes": "Authentication overloads default to SolrAuthenticationResponse and accept SolrAuthenticationCommand for BasicAuthPlugin set-user, delete-user, and set-property operations, including documented MultiAuthPlugin Basic scheme wrappers for set-user/set-property. BasicAuth configuration exposes hashed credential strings; these must not be logged or treated as plaintext. Authorization has separate SolrAuthorizationResponse/SolrAuthorizationCommand types for RuleBasedAuthorizationPlugin. Custom plugin schemas remain open/unsupported beyond the explicit extension points. Unit serialization and compile-time fixtures cover auth command shapes; existing authenticated read and set-property/read-back integration tests pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0. User create/delete mutations are not performed against shared integration security state."
     },
     {
       "id": "update.softCommit",
