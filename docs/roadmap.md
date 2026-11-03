@@ -22,79 +22,50 @@ The aim is not to recreate every historical Solr client abstraction. Keep the na
 - Transport: Node.js Fetch API.
 - Optional runtime validation: Zod.
 - Target Solr server lines: 8.x, 9.x, and 10.x.
-- Partial runtime evidence exists on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images for basic query/cursorMark and document add/update/delete/hard-commit behavior. Broad compatibility across all API operations remains **unverified**; see [compatibility.md](compatibility.md) and [api-inventory.json](api-inventory.json).
-- Package metadata currently identifies the package as `4.0.0-beta.0`; that release version does not imply a separate development branch.
+- Pinned integration images: Solr 8.11.4, 9.11.0, and 10.1.0. Compatibility is operation-specific; a green matrix does not certify every action. See [compatibility.md](compatibility.md) and [api-inventory.json](api-inventory.json).
+- Package metadata identifies the current package line as `4.0.0-beta.0`; this does not imply a separate development branch.
+- `master` is the only active development line. Historical branches are retained only as audit evidence and are not valid bases for new work.
 
-## Priorities
+## Active priorities
 
-### P0 — Mainline consistency and release confidence
+The issue list below reflects the current open follow-up work, rather than historical issue ranges. Closed implementation issues are intentionally omitted from active priorities.
 
-| Work | Tracking |
-| --- | --- |
-| Use `master` as the only active development line; align CI, docs, roadmap, and issue wording | [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122) |
-| Establish the autocomplete-first TypeScript API contract and consumer acceptance tests | [Issue #121](https://github.com/vsimko/node-solr-lambda/issues/121) |
-| Maintain an explicit endpoint/feature inventory and definition of done | [Issue #39](https://github.com/vsimko/node-solr-lambda/issues/39) |
-| Build repeatable Solr Docker integration infrastructure and fixtures | [#41](https://github.com/vsimko/node-solr-lambda/issues/41), [#42](https://github.com/vsimko/node-solr-lambda/issues/42), [#43](https://github.com/vsimko/node-solr-lambda/issues/43) |
-| Expand the Solr 8/9/10 integration matrix; JSON update commands now have explicit per-version read-back coverage | [Issue #42](https://github.com/vsimko/node-solr-lambda/issues/42), [#109](https://github.com/vsimko/node-solr-lambda/issues/109) |
-
-### P1 — Query API and IDE experience
-
-The query API is the most visible area where autocomplete quality directly affects daily use.
+### P0 — Release readiness and public contract
 
 | Work | Tracking |
 | --- | --- |
-| Typed common query parameters and explicit custom parameter escape hatch | [Issue #44](https://github.com/vsimko/node-solr-lambda/issues/44) |
-| Parser-specific parameters (Lucene, DisMax, eDisMax) | [Issue #45](https://github.com/vsimko/node-solr-lambda/issues/45) |
-| Typed sort and field-list helpers | [Issue #46](https://github.com/vsimko/node-solr-lambda/issues/46) |
-| Filter collections, tagged filters, and local parameters | [Issue #47](https://github.com/vsimko/node-solr-lambda/issues/47) |
-| Cursor pagination | [Issue #48](https://github.com/vsimko/node-solr-lambda/issues/48) |
-| Typed query response and document generics | [Issue #49](https://github.com/vsimko/node-solr-lambda/issues/49) |
-| Classic facets and JSON Facet API | [Issues #50](https://github.com/vsimko/node-solr-lambda/issues/50), [#52](https://github.com/vsimko/node-solr-lambda/issues/52) |
-| Highlighting, grouping, stats, MoreLikeThis, spatial search, and debug response | [Issues #53–#58](https://github.com/vsimko/node-solr-lambda/issues/53) |
-| Query API documentation and consumer examples | [Issue #59](https://github.com/vsimko/node-solr-lambda/issues/59) |
+| Verify npm package metadata, packed-tarball contents, ESM/CommonJS consumer imports, declaration resolution, and prerelease publication procedure | [Issue #104](https://github.com/vsimko/node-solr-lambda/issues/104) |
+| Review package-root exports and decide which APIs are stable, experimental, or internal; add consumer compile checks and migration guidance | [Issue #108](https://github.com/vsimko/node-solr-lambda/issues/108) |
+| Complete the v4.0 release checklist, changelog, migration notes, compatibility evidence, and release/rollback procedure after implementation gates are closed | [Issue #110](https://github.com/vsimko/node-solr-lambda/issues/110) |
+| Make the machine-readable inventory enumerate every public client method and require exact documentation/test evidence | [Issue #184](https://github.com/vsimko/node-solr-lambda/issues/184) |
+| Keep endpoint inventory and roadmap aligned with the implemented API and current issue status | [Issue #185](https://github.com/vsimko/node-solr-lambda/issues/185) |
 
-### P1 — Update API
+### P1 — Administration API completeness and evidence
 
 | Work | Tracking |
 | --- | --- |
-| Complete typed update command models and atomic updates | [Issues #60–#61](https://github.com/vsimko/node-solr-lambda/issues/60) |
-| JSON/XML update request support and commit parameter semantics | [Issues #62–#64](https://github.com/vsimko/node-solr-lambda/issues/62) |
-| Typed response validation, integration tests, and docs | [Issues #65–#67](https://github.com/vsimko/node-solr-lambda/issues/65) |
+| Complete Config component lifecycle and payload evidence; distinguish serialization coverage from live-server behavior | [Issue #75](https://github.com/vsimko/node-solr-lambda/issues/75) |
+| Complete Core Admin action-specific inputs and response models | [Issues #77–#79](https://github.com/vsimko/node-solr-lambda/issues/77) |
+| Audit Collections action/parameter coverage, CREATE configuration, shard lifecycle, aliases, and per-operation compatibility evidence | [Issues #80–#85](https://github.com/vsimko/node-solr-lambda/issues/80) |
+| Improve Security input/authorization models and operation-level negative/secret-handling evidence | [Issues #86–#88](https://github.com/vsimko/node-solr-lambda/issues/86) |
+| Define finite typed System endpoints and complete Metrics registry/value models with observed response fixtures | [Issues #89–#90](https://github.com/vsimko/node-solr-lambda/issues/89) |
+| Make System/Metrics integration and documentation coverage explicit per public method | [Issue #91](https://github.com/vsimko/node-solr-lambda/issues/91) |
 
-### P2 — Administration and SolrCloud
-
-| Work | Tracking |
-| --- | --- |
-| Schema API types and operations | [Issues #68–#72](https://github.com/vsimko/node-solr-lambda/issues/68) |
-| Config API types and operations | [Issues #73–#76](https://github.com/vsimko/node-solr-lambda/issues/73) |
-| Core Admin action and response models | [Issues #77–#79](https://github.com/vsimko/node-solr-lambda/issues/77) |
-| Collections, aliases, shards, replicas, and cluster state | [Issues #80–#85](https://github.com/vsimko/node-solr-lambda/issues/80) |
-| Security, system information, and metrics | [Issues #86–#91](https://github.com/vsimko/node-solr-lambda/issues/86) |
-
-### P3 — Advanced APIs and release hardening
+### P2 — Advanced APIs and compatibility
 
 | Work | Tracking |
 | --- | --- |
-| Streaming Expressions, stream parsing, and export | [Issues #92–#94](https://github.com/vsimko/node-solr-lambda/issues/92) |
-| Replication and backup/restore | [Issues #95–#96](https://github.com/vsimko/node-solr-lambda/issues/95) |
-| Remaining endpoints and safe raw request API; explicit typed-client boundary in [endpoint inventory](endpoint-inventory.md) | [Issues #97–#98](https://github.com/vsimko/node-solr-lambda/issues/97) |
-| URL serialization, retry behavior, and auth guidance | [Issues #99–#101](https://github.com/vsimko/node-solr-lambda/issues/99) |
-| README, API reference, migration, public API, compatibility, and release checklist | [Issues #102–#104](https://github.com/vsimko/node-solr-lambda/issues/102), [#107–#110](https://github.com/vsimko/node-solr-lambda/issues/107) |
+| Complete Streaming Expressions tuple/error response contracts and distinguish its transport from Export streaming | [Issues #92–#93](https://github.com/vsimko/node-solr-lambda/issues/92) |
 
-## Historical branch audit
+## Completed foundation and historical work
 
-The historical branch audit requested by [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122) was completed on 2026-11-02. A fresh comparison against `master` on 2026-11-02 confirms that only two of the nine refs listed in the earlier audit remain on GitHub; the ahead/behind counts below are the current comparison:
+The following workstreams are complete or superseded by merged implementation and are retained here as historical context, not active priorities:
 
-| Remaining historical branch | Ahead of master | Behind master | Related work accounted for |
-| --- | ---: | ---: | --- |
-| `v4.0` | 64 | 47 | Foundation and documentation in PRs #113/#114; compatibility matrix in #117; domain modules and endpoint work in #118; transport configuration/retry policy in #119. The later update/commit, atomic-update, raw-request, and response work is represented by the focused mainline PRs #152, #153, #156, #159, and #160. |
-| `v4-npm-issue-112` | 6 | 45 | Temporary lockfile bootstrap in PR #115 and the final npm/release workflow in PR #116. |
-
-The other seven refs from the previous inventory no longer exist: `v4-client-modules-issue-32`, `v4-config-transport-issue-33`, `v4-npm-issue-112-final`, `v4-solr-compat-issue-31`, `v4-docs-issue-114`, `v4-foundation-issue-113`, and `npm-lock-bootstrap-issue-112`.
-
-The original broad PR #111 is closed and explicitly superseded. Its scoped work was delivered through the merged PRs listed above. The temporary npm bootstrap PR #115 and final npm migration PR #116 are both merged. The unique changes represented by the two remaining branches have therefore been accounted for by merged historical PRs or superseding mainline implementation; no change should be merged from either branch into current `master`.
-
-Both remaining refs are retained as historical evidence for now. They are not valid bases for new work, and no force-merge or branch deletion is required to complete the audit. If they are later deleted, that should be a separate housekeeping action after confirming that no external consumer relies on the refs.
+- Mainline/branch strategy and historical branch audit: [Issue #122](https://github.com/vsimko/node-solr-lambda/issues/122).
+- Query API and consumer-facing TypeScript surface: [Issues #44–#59](https://github.com/vsimko/node-solr-lambda/issues/44).
+- Update API and response handling: [Issues #60–#67](https://github.com/vsimko/node-solr-lambda/issues/60).
+- Schema API: [Issues #68–#72](https://github.com/vsimko/node-solr-lambda/issues/68).
+- Replication, backup/restore, raw-request, URL serialization, retry, and authentication foundations are complete or superseded by merged implementation; see the [endpoint inventory](endpoint-inventory.md) and [API inventory](api-inventory.json) for the current tested boundary.
 
 ## Workflow
 
