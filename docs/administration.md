@@ -116,3 +116,16 @@ The permission and authorization configuration models remain extensible with unk
 `SolrAuthorizationRole`, `SolrAuthorizationPermission`, `SolrAuthorizationCommand`, and `SolrAuthorizationResponse` are exported from the package root. Compile-time fixtures cover role assignment/removal, permission create/update/delete, extension fields, and invalid command shapes. Serialization tests verify the exact JSON command body. Live Solr security integration tests verify authenticated authorization reads on Solr 8.11.4, 9.11.0, and 10.1.0; mutating authorization commands are not run against shared integration security state.
 
 See the [Apache Solr Rule-Based Authorization Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/rule-based-authorization-plugin.html) for the server-side permission and role semantics. The client intentionally models the common V1 command contract and leaves plugin-specific extensions open.
+## Authentication API models
+
+The `security("authentication")` overload defaults to `SolrAuthenticationResponse` and accepts `SolrAuthenticationCommand` for the Basic Authentication API:
+
+- `set-user` creates a user or changes its password using a user-to-password map.
+- `delete-user` removes one or more user IDs.
+- `set-property` updates the BasicAuthPlugin properties `blockUnknown`, `realm`, and `forwardCredentials`.
+
+The documented MultiAuthPlugin Basic scheme wrapper is accepted for `set-user` and `set-property`. The response model exposes `credentials` as strings because Solr returns stored credential hashes; these are sensitive security material and must not be logged or treated as plaintext passwords. Passwords supplied in `set-user` commands are request data and are not copied into client-generated error metadata. Server-controlled error response bodies remain caller-owned and should be redacted before logging.
+
+These named types cover the stable BasicAuthPlugin operations and the documented Basic scheme wrapper, not every custom authentication plugin schema. Authentication commands remain separate from the RuleBasedAuthorizationPlugin types. The integration suite verifies authenticated reads and a `set-property`/read-back operation on pinned Solr 8.11.4, 9.11.0, and 10.1.0; user creation/deletion is covered by request serialization and compile-time tests rather than mutating shared CI security users.
+
+See the [Apache Solr Basic Authentication Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/basic-authentication-plugin.html) for the server-side command semantics. The V1 endpoint implemented here is `/solr/admin/authentication`; the Solr 10 V2 endpoint is not used by this client.
