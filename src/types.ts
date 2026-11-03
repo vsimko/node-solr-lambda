@@ -284,7 +284,7 @@ export type SolrConfigValue = string | number | boolean | null | readonly SolrCo
 export type SolrConfigParameterMap = Readonly<Record<string, SolrConfigValue>>;
 
 /** Common request-handler defaults/appends/invariants; arbitrary Solr request parameters remain extensible. */
-export interface SolrConfigRequestHandlerParams extends SolrConfigParameterMap {
+export interface SolrConfigRequestHandlerParams {
   q?: string;
   fq?: string | readonly string[];
   fl?: string | readonly string[];
@@ -300,6 +300,7 @@ export interface SolrConfigRequestHandlerParams extends SolrConfigParameterMap {
   distrib?: boolean;
   shards?: string | readonly string[];
   useParams?: string | readonly string[];
+  [key: string]: SolrConfigValue | undefined;
 }
 
 /** Events supported by Solr's standard searcher/commit listeners; custom plugin event names remain possible. */
@@ -448,9 +449,9 @@ export interface SolrConfigReadPlugin {
   name?: string;
   class?: string;
   startup?: "lazy" | "eager";
-  defaults?: SolrConfigParameterMap;
-  appends?: SolrConfigParameterMap;
-  invariants?: SolrConfigParameterMap;
+  defaults?: SolrConfigParameterMap | SolrConfigRequestHandlerParams;
+  appends?: SolrConfigParameterMap | SolrConfigRequestHandlerParams;
+  invariants?: SolrConfigParameterMap | SolrConfigRequestHandlerParams;
   useParams?: string | readonly string[];
   [key: string]: unknown;
 }
