@@ -73,7 +73,7 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "tested",
+      "integrationTests": "partial",
       "versions": {
         "8": "tested",
         "9": "tested",
@@ -88,7 +88,7 @@
         "test/backup-restore-api-types.ts",
         "test/integration/solrcloud-backup-restore.test.ts"
       ],
-      "notes": "SolrCloud CREATE/LIST/DELETE, alias lifecycle, implicit-router shard lifecycle, named ADDREPLICA/DELETEREPLICA lifecycle, replica property add/delete and BALANCESHARDUNIQUE responses, plus multi-node MOVEREPLICA and REBALANCELEADERS leader reassignment are tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #177, #192, #209, and PR #142 CI #224). MOVEREPLICA verifies the named replica becomes active on a different live node. REBALANCELEADERS assigns preferredLeader to an active non-leader and verifies it becomes shard leader. Snapshot, backup, and cluster-state response models remain unverified. Additional operation evidence: Typed SolrCloud collection backup/restore actions and asynchronous REQUESTSTATUS/DELETESTATUS tracking. Full backup, list, restore, query read-back, and delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0 with a shared local filesystem volume mounted on both SolrCloud nodes. S3 and other external repositories are not certified."
+      "notes": "Per-action SolrCloud integration evidence is documented in docs/collections-api-coverage.md. Tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0: CREATE/LIST/DELETE; CREATEALIAS/LISTALIASES/DELETEALIAS; CLUSTERSTATUS; CREATESHARD/DELETESHARD; ADDREPLICA/DELETEREPLICA; ADDREPLICAPROP/DELETEREPLICAPROP; BALANCESHARDUNIQUE; MOVEREPLICA/REBALANCELEADERS; BACKUP/LISTBACKUP/RESTORE/DELETEBACKUP; REQUESTSTATUS/DELETESTATUS. RELOAD, MODIFYCOLLECTION, SPLITSHARD, ADDROLE, and REMOVEROLE are not runtime-tested and remain unverified. Non-backup action responses remain consumer-generic; the matrix does not imply complete response models."
     },
     {
       "id": "update.commit",
