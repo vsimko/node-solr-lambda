@@ -164,12 +164,12 @@ function wrapResponse(response: Response, context: RequestSignalContext, endpoin
 
 /** Shared HTTP transport. Domain APIs use this class for all Solr requests. */
 export class SolrTransport {
-  readonly clientConfig: Readonly<SolrClientConfig>;
+  readonly #clientConfig: Readonly<SolrClientConfig>;
   private readonly requestFetch: typeof fetch;
 
   constructor(config: SolrClientConfig = {}) {
     this.validateConfig(config);
-    this.clientConfig = Object.freeze({ ...config });
+    this.#clientConfig = Object.freeze({ ...config });
     this.requestFetch = config.fetch ?? globalThis.fetch;
     if (!this.requestFetch) throw new Error("Node.js 20 or later with global fetch is required");
   }
@@ -221,7 +221,7 @@ export class SolrTransport {
   }
 
   private requestTimeout(options: RequestOptions): number {
-    const timeoutMs = options.timeoutMs ?? this.clientConfig.timeoutMs ?? 30_000;
+    const timeoutMs = options.timeoutMs ?? this.#clientConfig.timeoutMs ?? 30_000;
     if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
       throw new RangeError("Request timeoutMs must be a positive number");
     }
@@ -229,7 +229,7 @@ export class SolrTransport {
   }
 
   private async validate(operation: string, direction: "inputs" | "outputs", value: unknown): Promise<unknown> {
-    const schema: ValidationSchema | undefined = this.clientConfig.validation?.[direction]?.[operation];
+    const schema: ValidationSchema | undefined = this.#clientConfig.validation?.[direction]?.[operation];
     if (!schema) return value;
     let result: Awaited<ReturnType<ValidationSchema["safeParseAsync"]>>;
     try {
@@ -238,18 +238,18 @@ export class SolrTransport {
       throw new SolrValidationError(operation, [], cause);
     }
     if (result.success) return result.data;
-    if (this.clientConfig.validation?.onError === "ignore") return value;
+    if (this.#clientConfig.validation?.onError === "ignore") return value;
     throw new SolrValidationError(operation, result.error.issues);
   }
 
   private authorizationHeader(): string | undefined {
-    const auth: SolrAuth | undefined = this.clientConfig.auth;
+    const auth: SolrAuth | undefined = this.#clientConfig.auth;
     if (auth?.type === "bearer") return `Bearer ${auth.token}`;
     if (auth?.type === "basic") {
       return `Basic ${Buffer.from(`${auth.username}:${auth.password ?? ""}`).toString("base64")}`;
     }
-    if (this.clientConfig.username !== undefined) {
-      return `Basic ${Buffer.from(`${this.clientConfig.username}:${this.clientConfig.password ?? ""}`).toString("base64")}`;
+    if (this.#clientConfig.username !== undefined) {
+      return `Basic ${Buffer.from(`${this.#clientConfig.username}:${this.#clientConfig.password ?? ""}`).toString("base64")}`;
     }
     return undefined;
   }
@@ -262,7 +262,7 @@ export class SolrTransport {
     callerSignal: AbortSignal | undefined,
     timeoutMs: number
   ): Promise<{ response: Response; signalContext: RequestSignalContext }> {
-    const policy: SolrRetryPolicy = this.clientConfig.retry === false ? {} : (this.clientConfig.retry ?? {});
+    const policy: SolrRetryPolicy = this.#clientConfig.retry === false ? {} : (this.#clientConfig.retry ?? {});
     const maxAttempts = policy.maxAttempts ?? 1;
     const retryMethods = policy.methods ?? ["GET"];
     const retryStatuses = policy.retryableStatuses ?? DEFAULT_RETRY_STATUSES;
@@ -308,18 +308,18 @@ export class SolrTransport {
   async request<T = unknown>(path: string, options: RequestOptions = {}): Promise<T> {
     const method = options.method ?? "GET";
     const operation = options.operation ?? method;
-    const query = withDefaultParams(this.clientConfig.requestDefaults?.params, options.query);
-    const input = this.clientConfig.validation
+    const query = withDefaultParams(this.#clientConfig.requestDefaults?.params, options.query);
+    const input = this.#clientConfig.validation
       ? await this.validate(operation, "inputs", options.body ?? query)
       : (options.body ?? query);
-    const url = resolveUrl(path, this.clientConfig.baseUrl ?? DEFAULT_BASE_URL);
+    const url = resolveUrl(path, this.#clientConfig.baseUrl ?? DEFAULT_BASE_URL);
     appendSearchParams(url.searchParams, options.body === undefined ? input as RequestOptions["query"] : query);
     const headers: Record<string, string> = {
       accept: "application/json",
       ...(options.body === undefined ? {} : { "content-type": "application/json" }),
-      ...this.clientConfig.requestDefaults?.headers,
+      ...this.#clientConfig.requestDefaults?.headers,
       ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
-      ...this.clientConfig.headers,
+      ...this.#clientConfig.headers,
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
@@ -338,14 +338,14 @@ export class SolrTransport {
       if (!response.ok) {
         throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, payload);
       }
-      return (this.clientConfig.validation ? await this.validate(operation, "outputs", payload) : payload) as T;
+      return (this.#clientConfig.validation ? await this.validate(operation, "outputs", payload) : payload) as T;
     } finally {
       signalContext.cleanup();
     }
   }
 
   protected endpoint(path: string): string {
-    const target = this.clientConfig.core ?? this.clientConfig.collection;
+    const target = this.#clientConfig.core ?? this.#clientConfig.collection;
     if (!target) throw new Error("Set 'core' or 'collection' in the Solr client configuration");
     return `/solr/${encodeURIComponent(target)}${path}`;
   }
@@ -358,19 +358,19 @@ export class SolrTransport {
   async requestRaw(path: string, options: RequestOptions = {}): Promise<Response> {
     const method = options.method ?? "GET";
     const operation = options.operation ?? method;
-    const query = withDefaultParams(this.clientConfig.requestDefaults?.params, options.query);
-    const input = this.clientConfig.validation
+    const query = withDefaultParams(this.#clientConfig.requestDefaults?.params, options.query);
+    const input = this.#clientConfig.validation
       ? await this.validate(operation, "inputs", options.body ?? query)
       : (options.body ?? query);
-    const url = resolveUrl(path, this.clientConfig.baseUrl ?? DEFAULT_BASE_URL);
+    const url = resolveUrl(path, this.#clientConfig.baseUrl ?? DEFAULT_BASE_URL);
     appendSearchParams(url.searchParams, options.body === undefined ? input as RequestOptions["query"] : query);
     const rawStringBody = typeof input === "string";
     const headers: Record<string, string> = {
       accept: "*/*",
       ...(options.body === undefined || rawStringBody ? {} : { "content-type": "application/json" }),
-      ...this.clientConfig.requestDefaults?.headers,
+      ...this.#clientConfig.requestDefaults?.headers,
       ...(this.authorizationHeader() ? { authorization: this.authorizationHeader() as string } : {}),
-      ...this.clientConfig.headers,
+      ...this.#clientConfig.headers,
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
