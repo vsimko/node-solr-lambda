@@ -263,7 +263,7 @@ void client.collections("CREATEALIAS", createAlias);
 void client.collections("ADDREPLICA", { collection: "catalog", shard: "shard1", type: "nrt" });
 void client.collections("LIST");
 const collectionListResponse: Promise<SolrCollectionListResponse> = client.collections("LIST");
-const collectionListNames: readonly string[] | undefined = (await collectionListResponse).collections;
+const collectionListNames: Promise<readonly string[] | undefined> = collectionListResponse.then(result => result.collections);
 const collectionCreateResponse: Promise<SolrCollectionAdminResponse> = client.collections("CREATE", { name: "typed-catalog" });
 const collectionDeleteResponse: Promise<SolrCollectionAdminResponse> = client.collections("DELETE", { name: "typed-catalog" });
 const replicaAddResponse: Promise<SolrCollectionReplicaResponse> = client.collections("ADDREPLICA", { collection: "catalog", shard: "shard1", type: "nrt" });
