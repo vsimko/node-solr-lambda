@@ -403,7 +403,9 @@ export type CoreAdminParams<A extends CoreAdminAction> =
   A extends "RENAME" ? CoreRenameParams :
   A extends "SWAP" ? CoreSwapParams :
   A extends "MERGEINDEXES" ? CoreMergeIndexesParams :
-  CoreSplitParams;
+  A extends "SPLIT" ? CoreSplitParams :
+  A extends "REQUESTSTATUS" ? CoreRequestStatusParams :
+  CoreRequestRecoveryParams;
 
 /** Replica types accepted by the SolrCloud Collections API. */
 export type CollectionReplicaType = "nrt" | "tlog" | "pull";
