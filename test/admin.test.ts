@@ -324,3 +324,26 @@ test("System API diagnostics use their global endpoints", async () => {
     "/solr/admin/info/logging"
   ]);
 });
+
+test("Authorization API serializes typed built-in permission and user-role commands", async () => {
+  const requested: Array<{ url: string; method: string | undefined; body: unknown }> = [];
+  const client = createSolrClient({ fetch: async (input, init) => {
+    requested.push({ url: String(input), method: init?.method, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) });
+    return new Response(JSON.stringify({ authorization: { class: "solr.RuleBasedAuthorizationPlugin", "user-role": { alice: ["admin", "dev"] }, permissions: [{ name: "read", role: ["admin", "dev"] }] } }));
+  } });
+  const response = await client.security("authorization");
+  assert.equal(response.authorization?.class, "solr.RuleBasedAuthorizationPlugin");
+  assert.deepEqual(response.authorization?.["user-role"]?.alice, ["admin", "dev"]);
+  await client.security("authorization", { "set-user-role": { alice: ["admin", "dev"], guest: null } });
+  await client.security("authorization", { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { wt: ["json", "xml"], rows: 10 }, role: ["admin", "reader"], customPluginOption: { enabled: true } } });
+  await client.security("authorization", { "update-permission": { index: 2, role: "admin", path: "/update" } });
+  await client.security("authorization", { "delete-permission": 3 });
+  assert.deepEqual(requested.map(item => new URL(item.url).pathname), Array(5).fill("/solr/admin/authorization"));
+  assert.deepEqual(requested.slice(1).map(item => item.method), ["POST", "POST", "POST", "POST"]);
+  assert.deepEqual(requested.slice(1).map(item => item.body), [
+    { "set-user-role": { alice: ["admin", "dev"], guest: null } },
+    { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { wt: ["json", "xml"], rows: 10 }, role: ["admin", "reader"], customPluginOption: { enabled: true } } },
+    { "update-permission": { index: 2, role: "admin", path: "/update" } },
+    { "delete-permission": 3 }
+  ]);
+});

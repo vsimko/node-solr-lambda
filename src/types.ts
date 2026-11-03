@@ -79,6 +79,44 @@ export interface SolrStreamingExpressionResponse<TTuple extends SolrStreamingExp
   [key: string]: unknown;
 }
 
+/** A single role or the set of roles assigned to a user. */
+export type SolrAuthorizationRole = string | readonly string[];
+/** Request-parameter constraints supported by the built-in RuleBasedAuthorizationPlugin. */
+export type SolrAuthorizationParameterValues = string | number | boolean | null | readonly (string | number | boolean | null)[];
+/** Stable built-in permission fields; plugin-specific properties remain extensible. */
+export interface SolrAuthorizationPermission {
+  name?: string;
+  role?: SolrAuthorizationRole;
+  collection?: string | readonly string[] | null;
+  path?: string | readonly string[];
+  method?: string | readonly string[];
+  params?: Readonly<Record<string, SolrAuthorizationParameterValues>>;
+  before?: number;
+  index?: number;
+  [key: string]: unknown;
+}
+export interface SolrAuthorizationSetPermission extends SolrAuthorizationPermission { role: SolrAuthorizationRole; }
+export interface SolrAuthorizationUpdatePermission extends SolrAuthorizationPermission { index: number; }
+/** Commands supported by Solr's built-in RuleBasedAuthorizationPlugin. */
+export type SolrAuthorizationCommand =
+  | { "set-user-role": Readonly<Record<string, SolrAuthorizationRole | null>> }
+  | { "set-permission": SolrAuthorizationSetPermission }
+  | { "update-permission": SolrAuthorizationUpdatePermission }
+  | { "delete-permission": number };
+export interface SolrAuthorizationConfig {
+  class?: string;
+  "user-role"?: Readonly<Record<string, SolrAuthorizationRole>>;
+  permissions?: readonly SolrAuthorizationPermission[];
+  [key: string]: unknown;
+}
+export interface SolrAuthorizationResponse {
+  authorization?: SolrAuthorizationConfig;
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
+/** Authentication plugin commands remain generic until dedicated model work is complete. */
+export type SolrAuthenticationCommand = Readonly<Record<string, unknown>>;
+
 export type SolrReplicationCommand =
   | "enablereplication"
   | "disablereplication"

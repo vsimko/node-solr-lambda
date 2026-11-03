@@ -101,3 +101,18 @@ The global System API exposes separate read-only methods for server information 
 - `systemLogging()` reads `/admin/info/logging` (logger names, levels, and logging configuration).
 
 Each method uses the global `/solr/admin/info/*` route and supports the standard request controls. Response models intentionally preserve unknown fields because JVM properties, thread details, logger metadata, and Solr versions vary. These methods are diagnostic reads; this client does not expose logger-level mutation through this System API surface. The current unit suite verifies route selection and representative response shapes; Solr-major runtime compatibility is not claimed until each endpoint is exercised in the corresponding integration job.
+
+## Authorization API models
+
+The `security("authorization")` overload defaults to `SolrAuthorizationResponse` and accepts `SolrAuthorizationCommand` for the built-in `RuleBasedAuthorizationPlugin` operations:
+
+- `set-user-role` maps user IDs to one or more roles. Use `null` to remove a user's role mapping; Solr does not provide a separate delete-user-role command.
+- `set-permission` creates a built-in or custom permission. Stable fields include `name`, `role`, `collection`, `path`, `method`, `params`, and `before`.
+- `update-permission` updates an existing permission by its numeric `index`.
+- `delete-permission` removes a permission by its numeric index.
+
+The permission and authorization configuration models remain extensible with unknown fields for custom plugins and future Solr additions. The type model covers the stable built-in RuleBasedAuthorizationPlugin contract; it does not claim that every plugin-specific authorization schema is modeled. Authentication commands remain generic under `security("authentication")` and are tracked separately in Issue #86.
+
+`SolrAuthorizationRole`, `SolrAuthorizationPermission`, `SolrAuthorizationCommand`, and `SolrAuthorizationResponse` are exported from the package root. Compile-time fixtures cover role assignment/removal, permission create/update/delete, extension fields, and invalid command shapes. Serialization tests verify the exact JSON command body. Live Solr security integration tests verify authenticated authorization reads on Solr 8.11.4, 9.11.0, and 10.1.0; mutating authorization commands are not run against shared integration security state.
+
+See the [Apache Solr Rule-Based Authorization Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/rule-based-authorization-plugin.html) for the server-side permission and role semantics. The client intentionally models the common V1 command contract and leaves plugin-specific extensions open.

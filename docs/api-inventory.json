@@ -538,7 +538,7 @@
         "test/modules.test.ts",
         "test/integration/solr-security.test.ts"
       ],
-      "notes": "Authenticated standalone BasicAuth and RuleBasedAuthorization integration tests pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images: anonymous rejection, authenticated configuration reads, and authentication set-property/read-back (CI #162)."
+      "notes": "Authorization overloads provide SolrAuthorizationResponse and SolrAuthorizationCommand for the built-in RuleBasedAuthorizationPlugin: set-user-role (including null role removal), set-permission, update-permission by numeric index, and delete-permission by numeric index. Permission/configuration fields remain extensible for plugin-specific options. Authentication commands remain generic and are tracked separately in Issue #86. Unit tests verify authorization command serialization and consumer type fixtures; authenticated authorization reads are integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Mutating authorization commands are not run against shared integration security state."
     },
     {
       "id": "update.softCommit",

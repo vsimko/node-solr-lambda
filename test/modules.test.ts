@@ -234,7 +234,7 @@ test("System, Metrics, and Security modules share the transport", async () => {
   await client.systemInfo();
   await client.metrics({ group: "jvm" });
   await client.security("authentication");
-  await client.security("authorization", { "set-user": { name: "reader" } });
+  await client.security("authorization", { "set-user-role": { reader: "read" } });
   assert.deepEqual(calls, [
     { path: "/solr/admin/info/system", method: "GET", query: null },
     { path: "/solr/admin/metrics", method: "GET", query: "jvm" },
