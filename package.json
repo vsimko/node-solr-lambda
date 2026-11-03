@@ -59,5 +59,17 @@
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "zod": "^4.0.0"
-  }
+  },
+  "homepage": "https://github.com/vsimko/node-solr-lambda#readme",
+  "bugs": {
+    "url": "https://github.com/vsimko/node-solr-lambda/issues"
+  },
+  "keywords": [
+    "apache-solr",
+    "solr",
+    "search",
+    "node.js",
+    "typescript",
+    "solr-client"
+  ]
 }
