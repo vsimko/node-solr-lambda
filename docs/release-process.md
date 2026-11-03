@@ -6,6 +6,8 @@ The package is currently on `4.0.0-beta.0`. During the v4 prerelease cycle, incr
 
 `scripts/release-policy.mjs` maps supported SemVer channels (`alpha`, `beta`, `rc`, stable) to npm dist-tags and rejects unknown prerelease identifiers. `npm run release:publish` invokes `scripts/publish.mjs`, which reads the package version and selects the correct tag. Publication is never part of CI; it requires an explicit maintainer command and valid npm credentials.
 
+**Provenance status:** the current `scripts/publish.mjs` invokes `npm publish --access public --tag <tag>` and does not pass `--provenance`. The repository has no dedicated npm publication workflow or GitHub Actions OIDC publishing configuration. Therefore this path does **not** establish an npm provenance attestation. Before a stable release, inspect the actual npm account/organization settings and decide whether provenance is required. If it is required or desired, add a trusted-publishing workflow with `id-token: write`, use `npm publish --provenance`, and verify the attestation on the published package. Until then, do not describe the package as provenance-backed.
+
 ## Pre-publication verification
 
 Run the following from a clean checkout:
@@ -27,7 +29,7 @@ The package supports Node.js 20, 22, and 24 (`engines.node` and the CI matrix mu
 
 1. Complete and approve the release checklist in Issue #110, including the exact release-candidate commit and full Node.js/Solr matrix.
 2. Confirm `npm view node-solr-lambda dist-tags` and the current version before publication.
-3. Verify the npm account has publish rights and that two-factor authentication/provenance requirements for the account and organization are satisfied.
+3. Verify the npm account has publish rights and that two-factor authentication/provenance requirements for the account and organization are satisfied. The current manual script does not create provenance; if an attestation is a release requirement, trusted publishing must be implemented before publication.
 4. Run `npm run release:publish -- --dry-run` to inspect the npm publication operation without publishing.
 5. Publish explicitly with `npm run release:publish`. The script chooses `beta`, `rc`, or `latest` based on the package version; never manually override the tag without a recorded release decision.
 6. Verify `npm view node-solr-lambda@<version> version dist.tarball` and the corresponding dist-tag, then install that exact version in a clean consumer and repeat the ESM/CommonJS/type smoke test.
