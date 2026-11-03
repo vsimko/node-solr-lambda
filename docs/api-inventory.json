@@ -158,7 +158,7 @@
         "test/admin.test.ts",
         "test/integration/solr-core-lifecycle.test.ts"
       ],
-      "notes": "CoreAdmin CREATE, STATUS, and RELOAD pass with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them (CI #145)."
+      "notes": "STATUS has exported CoreAdminStatusResponse with typed per-core paths/config metadata, optional index statistics, initialization failures, and extensible unknown fields. Non-STATUS actions default to exported CoreAdminCommandResponse (responseHeader plus extensible fields); callers can supply a more specific generic. Unit and consumer type fixtures cover minimal/detailed STATUS payloads and non-STATUS response inference. Isolated CREATE, STATUS, and RELOAD pass with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them (CI #145). RENAME, SWAP, MERGEINDEXES, SPLIT, REQUESTSTATUS, and REQUESTRECOVERY are not runtime-certified."
     },
     {
       "id": "update.delete",
