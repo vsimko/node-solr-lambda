@@ -407,3 +407,31 @@ test("Collections alias and cluster status operations use typed default response
   assert.equal(status.cluster?.collections?.["books-v2"]?.shards?.shard1?.replicas?.core_node1?.leader, true);
   assert.equal(status.cluster?.aliases?.["books-current"], "books-v2");
 });
+
+test("Collections shard lifecycle and MIGRATE actions serialize V1 parameters exactly", async () => {
+  const requests: URL[] = [];
+  const client = createSolrClient({ fetch: async input => {
+    requests.push(new URL(String(input)));
+    return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 1 }, requestid: "async-1" }));
+  } });
+  const created = await client.collections("CREATESHARD", { collection: "books", shard: "shard2", createNodeSet: "solr-1:8983_solr", nrtReplicas: 2, tlogReplicas: 1, pullReplicas: 0, waitForFinalState: true, async: "create-1" });
+  assert.equal(created.responseHeader?.status, 0);
+  await client.collections("DELETESHARD", { collection: "books", shard: "shard2", deleteInstanceDir: true, deleteDataDir: true, deleteIndex: true });
+  await client.collections("SPLITSHARD", { collection: "books", "split.key": "tenant!", ranges: "0-7fffffff,80000000-ffffffff", splitMethod: "rewrite", waitForFinalState: true, async: "split-1" });
+  const migrated = await client.collections("MIGRATE", { collection: "source", "split.key": "tenant!", "target.collection": "target", "forward.timeout": 60, async: "migrate-1" });
+  assert.equal(migrated.requestid, "async-1");
+  assert.equal(requests[0]?.searchParams.get("action"), "CREATESHARD");
+  assert.equal(requests[0]?.searchParams.get("createNodeSet"), "solr-1:8983_solr");
+  assert.equal(requests[0]?.searchParams.get("nrtReplicas"), "2");
+  assert.equal(requests[0]?.searchParams.get("async"), "create-1");
+  assert.equal(requests[1]?.searchParams.get("deleteInstanceDir"), "true");
+  assert.equal(requests[2]?.searchParams.get("split.key"), "tenant!");
+  assert.equal(requests[2]?.searchParams.has("splitKey"), false, "V1 handler must use split.key, not V2 splitKey");
+  assert.equal(requests[2]?.searchParams.get("ranges"), "0-7fffffff,80000000-ffffffff");
+  assert.equal(requests[3]?.searchParams.get("action"), "MIGRATE");
+  assert.equal(requests[3]?.searchParams.get("collection"), "source");
+  assert.equal(requests[3]?.searchParams.get("split.key"), "tenant!");
+  assert.equal(requests[3]?.searchParams.get("target.collection"), "target");
+  assert.equal(requests[3]?.searchParams.get("forward.timeout"), "60");
+  assert.equal(requests[3]?.searchParams.get("async"), "migrate-1");
+});

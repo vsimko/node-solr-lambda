@@ -23,7 +23,8 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
 
   const implicitName = await createImplicitCollection();
   const shard = "integration_shard";
-  await client.collections("CREATESHARD", { collection: implicitName, shard });
+  const createdShard = await client.collections("CREATESHARD", { collection: implicitName, shard });
+  assert.equal(createdShard.responseHeader?.status, 0, "CREATESHARD should succeed");
   const withShard = await client.collections<{
     cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
   }>("CLUSTERSTATUS", { collection: implicitName });
@@ -32,7 +33,8 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
     `cluster status should contain shard ${shard}`
   );
 
-  await client.collections("DELETESHARD", { collection: implicitName, shard });
+  const deletedShard = await client.collections("DELETESHARD", { collection: implicitName, shard });
+  assert.equal(deletedShard.responseHeader?.status, 0, "DELETESHARD should succeed");
   const withoutShard = await client.collections<{
     cluster?: { collections?: Record<string, { shards?: Record<string, unknown> }> };
   }>("CLUSTERSTATUS", { collection: implicitName });

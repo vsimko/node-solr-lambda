@@ -1,7 +1,7 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT" | "REQUESTSTATUS" | "REQUESTRECOVERY";
-export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
+export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "MIGRATE" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
 /** Field types supported by the Solr Export Handler field list. */
 export type SolrExportFieldType = "int" | "long" | "float" | "double" | "string" | "date" | "boolean";
 /** One field-based Export sort criterion. Sort fields must be single-valued and have docValues. */
@@ -770,7 +770,29 @@ export interface SolrCollectionAliasResponse {
 }
 export interface CreateShardParams extends CollectionRequestBase { collection: string; shard: string; createNodeSet?: string; nrtReplicas?: number; tlogReplicas?: number; pullReplicas?: number; waitForFinalState?: boolean }
 export interface DeleteShardParams extends CollectionRequestBase { collection: string; shard: string; deleteInstanceDir?: boolean; deleteDataDir?: boolean; deleteIndex?: boolean }
-export interface SplitShardParams extends CollectionRequestBase { collection: string; shard?: string; splitKey?: string; ranges?: string; numSubShards?: number; splitMethod?: "rewrite" | "link" | "router"; waitForFinalState?: boolean }
+export type SplitShardParams = CollectionRequestBase & {
+  collection: string;
+  ranges?: string;
+  numSubShards?: number;
+  splitMethod?: "rewrite" | "link" | "router";
+  waitForFinalState?: boolean;
+} & (
+  | { shard: string; "split.key"?: string }
+  | { shard?: never; "split.key": string }
+);
+export interface MigrateCollectionParams extends CollectionRequestBase {
+  collection: string;
+  "split.key": string;
+  "target.collection": string;
+  "forward.timeout"?: number;
+}
+/** Response envelope shared by shard lifecycle and MIGRATE actions. */
+export interface SolrCollectionShardOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  requestid?: string;
+  success?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
 export interface CollectionRoleParams extends CollectionRequestBase { node: string; role: string }
 
 /** Parameters for Collections API ADDREPLICA. */
@@ -826,6 +848,7 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "DELETE" ? DeleteCollectionParams :
   A extends "RELOAD" ? ReloadCollectionParams :
   A extends "MODIFYCOLLECTION" ? ModifyCollectionParams :
+  A extends "MIGRATE" ? MigrateCollectionParams :
   A extends "CREATEALIAS" ? CreateAliasParams :
   A extends "DELETEALIAS" ? DeleteAliasParams :
   A extends "LISTALIASES" ? ListAliasesParams :

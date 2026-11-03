@@ -82,3 +82,21 @@ const rebalanceParams = {
   maxWaitSeconds: 30
 } satisfies import("../src/index.js").RebalanceLeadersParams;
 void moveClient.collections("REBALANCELEADERS", rebalanceParams);
+
+import type { MigrateCollectionParams, SplitShardParams, SolrCollectionShardOperationResponse } from "../src/index.js";
+const splitByShard: SplitShardParams = { collection: "books", shard: "shard1", ranges: "0-7fffffff,80000000-ffffffff", splitMethod: "rewrite", async: "split-1" };
+const splitByRouteKey: SplitShardParams = { collection: "books", "split.key": "tenant!", numSubShards: 2, async: "split-2" };
+const migrate: MigrateCollectionParams = { collection: "source", "split.key": "tenant!", "target.collection": "target", "forward.timeout": 60, async: "migrate-1" };
+const shardOperation: Promise<SolrCollectionShardOperationResponse> = client.collections("SPLITSHARD", splitByRouteKey);
+const migrateOperation: Promise<SolrCollectionShardOperationResponse> = client.collections("MIGRATE", migrate);
+void [splitByShard, splitByRouteKey, migrate, shardOperation, migrateOperation];
+// @ts-expect-error SPLITSHARD needs either a shard name or split.key.
+const invalidSplit: SplitShardParams = { collection: "books" };
+// @ts-expect-error V1 Collections API uses the split.key wire parameter, not splitKey.
+const invalidSplitAlias: SplitShardParams = { collection: "books", splitKey: "tenant!" };
+// @ts-expect-error MIGRATE requires the source collection, routing key, and target collection.
+const invalidMigrate: MigrateCollectionParams = { collection: "source", "split.key": "tenant!" };
+void [invalidSplit, invalidSplitAlias, invalidMigrate];
+void client.collections("CREATESHARD", { collection: "books", shard: "shard2" });
+void client.collections("DELETESHARD", { collection: "books", shard: "shard2" });
+void client.collections("MIGRATE", migrate);
