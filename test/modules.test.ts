@@ -252,7 +252,8 @@ test("Streaming Expressions delegate to the advanced API module", async () => {
       return new Response(JSON.stringify({ "result-set": { docs: [] } }));
     }
   });
-  await client.stream("search(catalog, q=*:*)");
+  const result = await client.stream<{ "result-set": { docs: unknown[] } }>("search(catalog, q=*:*)");
+  assert.deepEqual(result, { "result-set": { docs: [] } });
   const parsed = new URL(url);
   assert.equal(parsed.pathname, "/solr/catalog/stream");
   assert.equal(parsed.searchParams.get("expr"), "search(catalog, q=*:*)");
