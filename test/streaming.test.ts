@@ -25,6 +25,31 @@ test("Streaming Expressions parse the complete JSON response envelope", async ()
   assert.equal(accept, "application/json");
 });
 
+test("Streaming Expressions retain expression tuples and server error tuples in the JSON envelope", async () => {
+  const payload = {
+    "result-set": {
+      docs: [
+        { id: "doc-1", score: 1.5, customOperatorField: { value: true } },
+        { EXCEPTION: "Expression evaluation failed", EOF: true }
+      ],
+      EOF: true,
+      RESPONSE_TIME: 12
+    },
+    futureEnvelopeField: "preserved"
+  };
+  const client = createSolrClient({
+    collection: "catalog",
+    fetch: async () => new Response(JSON.stringify(payload), {
+      headers: { "content-type": "application/json" }
+    })
+  });
+
+  const result = await client.stream("search(catalog, q=*:*)");
+  assert.deepEqual(result, payload);
+  assert.equal(result["result-set"]?.docs?.[1]?.EXCEPTION, "Expression evaluation failed");
+  assert.equal(result.futureEnvelopeField, "preserved");
+});
+
 test("Streaming Expressions caller cancellation interrupts response-body consumption", async () => {
   const controller = new AbortController();
   const reason = new Error("cancel Streaming Expressions response");
