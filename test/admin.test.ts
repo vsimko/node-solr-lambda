@@ -347,3 +347,24 @@ test("Authorization API serializes typed built-in permission and user-role comma
     { "delete-permission": 3 }
   ]);
 });
+
+test("Collections alias and cluster status operations use typed default response models", async () => {
+  const responses = [
+    { aliases: { "books-current": "books-v2" } },
+    { responseHeader: { status: 0, QTime: 1 } },
+    { responseHeader: { status: 0, QTime: 2 } },
+    { cluster: { live_nodes: ["solr-0:8983_solr"], aliases: { "books-current": "books-v2" }, collections: { "books-v2": { replicationFactor: 1, shards: { shard1: { state: "active", replicas: { core_node1: { core: "books-v2_shard1_replica_n1", node_name: "solr-0:8983_solr", state: "active", leader: true, type: "NRT", properties: { preferredLeader: "true" } } } } } } } } }
+  ];
+  let index = 0;
+  const client = createSolrClient({ fetch: async () => new Response(JSON.stringify(responses[index++])) });
+  const aliases = await client.collections("LISTALIASES");
+  assert.equal(aliases.aliases?.["books-current"], "books-v2");
+  const created = await client.collections("CREATEALIAS", { name: "books-current", collections: ["books-v1", "books-v2"] });
+  assert.equal(created.responseHeader?.status, 0);
+  const deleted = await client.collections("DELETEALIAS", { name: "books-current" });
+  assert.equal(deleted.responseHeader?.status, 0);
+  const status = await client.collections("CLUSTERSTATUS", { collection: "books-v2" });
+  assert.ok(status.cluster?.live_nodes?.includes("solr-0:8983_solr"));
+  assert.equal(status.cluster?.collections?.["books-v2"]?.shards?.shard1?.replicas?.core_node1?.leader, true);
+  assert.equal(status.cluster?.aliases?.["books-current"], "books-v2");
+});
