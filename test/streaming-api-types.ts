@@ -23,7 +23,7 @@ interface SearchTuple extends SolrStreamingExpressionTuple {
   score?: number;
 }
 const typedResponse: Promise<SolrStreamingExpressionResponse<SearchTuple>> =
-  client.stream<SearchTuple>("search(catalog, q=*:*)");
+  client.stream<SolrStreamingExpressionResponse<SearchTuple>>("search(catalog, q=*:*)");
 void typedResponse.then(result => {
   const id: string | undefined = result["result-set"]?.docs?.[0]?.id;
   const score: number | undefined = result["result-set"]?.docs?.[0]?.score;
