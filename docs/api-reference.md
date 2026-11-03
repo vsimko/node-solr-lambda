@@ -31,6 +31,9 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | `SolrClient.replication()` | Execute ReplicationHandler commands | [Replication API](replication.md) |
 | `SolrClient.replicationFile()` | Read ReplicationHandler file content | [Replication API](replication.md) |
 | `SolrClient.systemInfo()` | Read Solr system information | [Administration](administration.md) |
+| `SolrClient.systemProperties()` | Read JVM and process properties | [Administration](administration.md) |
+| `SolrClient.systemThreads()` | Read JVM thread diagnostics | [Administration](administration.md) |
+| `SolrClient.systemLogging()` | Read logger configuration and levels | [Administration](administration.md) |
 | `SolrClient.metrics()` | Read Solr metrics | [Administration](administration.md) |
 | `SolrClient.security()` | Read or update authentication and authorization settings | [Administration](administration.md) |
 | `SolrClient.stream()` | Execute a Streaming Expression | [Streaming and Export](export.md) |
@@ -41,7 +44,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command models; replication and backup/restore models; Export models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command models; replication and backup/restore models; Export models; System API response models; and error/validation models.
 
 Use named imports from the package root:
 
