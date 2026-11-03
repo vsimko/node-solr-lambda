@@ -219,25 +219,54 @@ const createCollection: CollectionAdminParams<"CREATE"> = {
   numShards: 2,
   replicationFactor: 2,
   "router.name": "compositeId",
+  "router.field": "tenant_s",
   "collection.configName": "_default",
-  waitForFinalState: true
+  nrtReplicas: 2,
+  tlogReplicas: 1,
+  pullReplicas: 1,
+  createNodeSet: "node1,node2",
+  "createNodeSet.shuffle": false,
+  perReplicaState: true,
+  waitForFinalState: true,
+  alias: "catalog-current",
+  customParams: { "property.dataDir": "/var/solr/catalog" }
+};
+const implicitCollection: CollectionAdminParams<"CREATE"> = {
+  name: "catalog-implicit",
+  "router.name": "implicit",
+  shards: ["catalog-a", "catalog-b"],
+  replicationFactor: 0,
+  createNodeSet: "EMPTY"
+};
+// Solr 8.11 legacy placement options; not supported by Solr 9+.
+const legacyPlacementCollection: CollectionAdminParams<"CREATE"> = {
+  name: "catalog-legacy-placement",
+  numShards: 1,
+  rule: ["replica:<2", "freedisk:>10"],
+  snitch: ["class:example.ZoneSnitch"],
+  policy: "legacy-policy",
+  withCollection: "catalog-metadata"
 };
 const createAlias: CollectionAdminParams<"CREATEALIAS"> = {
   name: "catalog-current",
   collections: ["catalog-v1", "catalog-v2"]
 };
 void client.collections("CREATE", createCollection);
+void client.collections("CREATE", implicitCollection);
+void client.collections("CREATE", legacyPlacementCollection);
 void client.collections("CREATEALIAS", createAlias);
 void client.collections("ADDREPLICA", { collection: "catalog", shard: "shard1", type: "nrt" });
 void client.collections("LIST");
 
 // @ts-expect-error Unknown collection creation options are rejected.
 const invalidCollection: CollectionAdminParams<"CREATE"> = { name: "catalog", numShards: "two" };
+// @ts-expect-error The V1 createNodeSet.shuffle option is boolean.
+const invalidShuffle: CollectionAdminParams<"CREATE"> = { name: "catalog", "createNodeSet.shuffle": "false" };
 // @ts-expect-error Alias creation requires its target collection list.
 const invalidAlias: CollectionAdminParams<"CREATEALIAS"> = { name: "catalog-current" };
 // @ts-expect-error Invalid replica types are rejected.
 void client.collections("ADDREPLICA", { collection: "catalog", type: "replica" });
-void [invalidCollection, invalidAlias];
+void [invalidCollection, invalidShuffle, invalidAlias];
 
 // @ts-expect-error CREATE requires a parameter object with a core name.
 void client.coreAdmin("CREATE");

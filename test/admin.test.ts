@@ -157,7 +157,18 @@ test("typed administrative list parameters and custom params are serialized", as
     shards: "shard1,shard2",
     "router.name": "implicit",
     "collection.configName": "_default",
-    rule: ["replica:<2", "freedisk:>10"]
+    nrtReplicas: 2,
+    tlogReplicas: 1,
+    pullReplicas: 1,
+    createNodeSet: "node1,node2",
+    "createNodeSet.shuffle": false,
+    perReplicaState: true,
+    alias: "books-current",
+    rule: ["replica:<2", "freedisk:>10"],
+    snitch: ["class:example.ZoneSnitch"],
+    policy: "legacy-policy",
+    withCollection: "books-metadata",
+    customParams: { "property.dataDir": "/var/solr/books" }
   });
   await client.collections("CREATEALIAS", {
     name: "books-current",
@@ -172,7 +183,18 @@ test("typed administrative list parameters and custom params are serialized", as
   assert.equal(create.searchParams.get("action"), "CREATE");
   assert.equal(create.searchParams.get("router.name"), "implicit");
   assert.equal(create.searchParams.get("collection.configName"), "_default");
+  assert.equal(create.searchParams.get("nrtReplicas"), "2");
+  assert.equal(create.searchParams.get("tlogReplicas"), "1");
+  assert.equal(create.searchParams.get("pullReplicas"), "1");
+  assert.equal(create.searchParams.get("createNodeSet"), "node1,node2");
+  assert.equal(create.searchParams.get("createNodeSet.shuffle"), "false");
+  assert.equal(create.searchParams.get("perReplicaState"), "true");
+  assert.equal(create.searchParams.get("alias"), "books-current");
   assert.equal(create.searchParams.get("rule"), "replica:<2,freedisk:>10");
+  assert.equal(create.searchParams.get("snitch"), "class:example.ZoneSnitch");
+  assert.equal(create.searchParams.get("policy"), "legacy-policy");
+  assert.equal(create.searchParams.get("withCollection"), "books-metadata");
+  assert.equal(create.searchParams.get("property.dataDir"), "/var/solr/books");
 
   const alias = new URL(requested[1]!);
   assert.equal(alias.searchParams.get("collections"), "books-v1,books-v2");

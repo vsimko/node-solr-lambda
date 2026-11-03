@@ -688,15 +688,25 @@ export interface CreateCollectionParams extends CollectionRequestBase {
   tlogReplicas?: number;
   pullReplicas?: number;
   maxShardsPerNode?: number;
-  createNodeSet?: string;
+  createNodeSet?: string | readonly string[];
+  /** V1 Collections API switch; only meaningful together with createNodeSet. */
+  "createNodeSet.shuffle"?: boolean;
   "router.name"?: "compositeId" | "implicit" | (string & {});
   "router.field"?: string;
-  shards?: string;
+  shards?: string | readonly string[];
   "collection.configName"?: string;
   autoAddReplicas?: boolean;
+  perReplicaState?: boolean;
   waitForFinalState?: boolean;
+  alias?: string;
+  /** Solr 8.11 legacy autoscaling placement options; removed in Solr 9+. */
   rule?: string | readonly string[];
+  /** Solr 8.11 legacy autoscaling placement options; removed in Solr 9+. */
   snitch?: string | readonly string[];
+  /** Solr 8.11 legacy collection policy; removed with autoscaling in Solr 9+. */
+  policy?: string;
+  /** Solr 8.11 legacy collection colocation; removed with autoscaling in Solr 9+. */
+  withCollection?: string;
 }
 export interface DeleteCollectionParams extends CollectionRequestBase { name: string }
 export interface ReloadCollectionParams extends CollectionRequestBase { name: string }
