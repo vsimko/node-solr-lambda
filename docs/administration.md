@@ -80,3 +80,15 @@ The typed V1 Core Admin surface includes `REQUESTSTATUS` and `REQUESTRECOVERY`:
 Both actions have action-specific exported parameter interfaces and request-serialization tests. The shared integration matrix does not invoke `REQUESTRECOVERY`, because forcing recovery on a shared CI node could interfere with SolrCloud replica availability. `REQUESTSTATUS` is not yet runtime-tested against a submitted Core Admin async job; only its request contract is covered.
 
 `UPGRADEINDEX` is intentionally not in the shared `CoreAdminAction` union: it is documented in the Solr 9.11 and 10.1 guides but is not part of the pinned Solr 8.11.4 baseline. It is also an expensive, in-place index rewrite, unsupported in SolrCloud, and can discard non-stored/non-docValues fields. Use the generic request escape hatch only when the caller has explicitly established server-version and deployment-mode support, and test on a copy with a backup.
+
+
+## System diagnostics endpoints
+
+The global System API exposes separate read-only methods for server information and diagnostics:
+
+- `systemInfo()` reads `/admin/info/system` (Solr mode, Lucene, JVM, and related server metadata).
+- `systemProperties()` reads `/admin/info/properties` (JVM and process properties).
+- `systemThreads()` reads `/admin/info/threads` (a JVM thread dump; content and detail vary by runtime).
+- `systemLogging()` reads `/admin/info/logging` (logger names, levels, and logging configuration).
+
+Each method uses the global `/solr/admin/info/*` route and supports the standard request controls. Response models intentionally preserve unknown fields because JVM properties, thread details, logger metadata, and Solr versions vary. These methods are diagnostic reads; this client does not expose logger-level mutation through this System API surface. The current unit suite verifies route selection and representative response shapes; Solr-major runtime compatibility is not claimed until each endpoint is exercised in the corresponding integration job.
