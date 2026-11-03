@@ -686,6 +686,67 @@ export interface CreateAliasParams extends CollectionRequestBase { name: string;
 export interface DeleteAliasParams extends CollectionRequestBase { name: string }
 export interface ListAliasesParams extends CollectionRequestBase {}
 export interface ClusterStatusParams extends CollectionRequestBase { collection?: string; shard?: string; route?: string; coreInfo?: boolean }
+
+/** One replica entry in a SolrCloud CLUSTERSTATUS response. */
+export interface SolrClusterReplica {
+  core?: string;
+  node_name?: string;
+  base_url?: string;
+  state?: string;
+  type?: string;
+  replicaType?: string;
+  leader?: boolean | string;
+  properties?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+/** One shard entry in a SolrCloud CLUSTERSTATUS response. */
+export interface SolrClusterShard {
+  state?: string;
+  range?: string;
+  replicas?: Readonly<Record<string, SolrClusterReplica>>;
+  [key: string]: unknown;
+}
+
+/** One collection entry in a SolrCloud CLUSTERSTATUS response. */
+export interface SolrClusterCollection {
+  configName?: string;
+  replicationFactor?: number;
+  nrtReplicas?: number;
+  tlogReplicas?: number;
+  pullReplicas?: number;
+  shards?: Readonly<Record<string, SolrClusterShard>>;
+  [key: string]: unknown;
+}
+
+/** Cluster metadata is optional because filtered and version-specific responses vary. */
+export interface SolrClusterStatus {
+  live_nodes?: readonly string[];
+  collections?: Readonly<Record<string, SolrClusterCollection>>;
+  aliases?: Readonly<Record<string, string>>;
+  roles?: Readonly<Record<string, readonly string[]>>;
+  [key: string]: unknown;
+}
+
+/** Response to Collections API CLUSTERSTATUS; unknown server fields remain accessible. */
+export interface SolrClusterStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  cluster?: SolrClusterStatus;
+  [key: string]: unknown;
+}
+
+/** Response to LISTALIASES. Alias values may contain comma-separated collection names. */
+export interface SolrCollectionAliasesResponse {
+  responseHeader?: SolrResponseHeader;
+  aliases?: Readonly<Record<string, string>>;
+  [key: string]: unknown;
+}
+
+/** Response envelope returned by CREATEALIAS and DELETEALIAS. */
+export interface SolrCollectionAliasResponse {
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
 export interface CreateShardParams extends CollectionRequestBase { collection: string; shard: string; createNodeSet?: string; nrtReplicas?: number; tlogReplicas?: number; pullReplicas?: number; waitForFinalState?: boolean }
 export interface DeleteShardParams extends CollectionRequestBase { collection: string; shard: string; deleteInstanceDir?: boolean; deleteDataDir?: boolean; deleteIndex?: boolean }
 export interface SplitShardParams extends CollectionRequestBase { collection: string; shard?: string; splitKey?: string; ranges?: string; numSubShards?: number; splitMethod?: "rewrite" | "link" | "router"; waitForFinalState?: boolean }
