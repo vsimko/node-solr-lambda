@@ -3,7 +3,7 @@ import { cloudIntegrationTest } from "./fixtures.js";
 
 cloudIntegrationTest("Collections API reloads an isolated collection", async ({ client, createCollection }) => {
   const collection = await createCollection();
-  const result = await client.collections("RELOAD", { name: collection });
+  const result = await client.collections<{ responseHeader?: { status?: number } }>("RELOAD", { name: collection });
   assert.equal(result.responseHeader?.status, 0, "RELOAD should succeed for the disposable collection");
 
   const status = await client.collections("CLUSTERSTATUS", { collection });
