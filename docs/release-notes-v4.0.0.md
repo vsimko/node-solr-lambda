@@ -37,7 +37,7 @@ Examples of intentionally unverified behavior include long-running/destructive s
 
 - [x] Package metadata, packed-tarball consumer checks, ESM/CommonJS imports, declarations, and optional-Zod behavior reviewed in PR #220.
 - [x] Public API surface and export decisions reviewed in PR #213 / Issue #108.
-- [ ] Complete and merge the remaining focused implementation work (including Issue #81 / PR #222).
+- [x] Complete and merge the focused implementation work tracked by Issue #81 / PR #222.
 - [ ] Reconcile this draft and the changelog against all merged changes on the final release candidate.
 - [ ] Run the complete CI matrix on the exact release candidate commit: Node.js 20/22/24 and Solr 8.11.4/9.11.0/10.1.0.
 - [ ] Verify npm provenance/publication settings and the rollback procedure.
