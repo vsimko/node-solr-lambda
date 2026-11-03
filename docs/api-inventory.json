@@ -680,6 +680,72 @@
         "test/integration/solr-export.test.ts"
       ],
       "notes": "Returns the Export response body as a backpressure-aware ReadableStream of bytes. It delegates to export(), preserving the same request parameters and server compatibility."
+    },
+    {
+      "id": "system.properties",
+      "area": "System",
+      "clientMethod": "systemProperties",
+      "httpMethod": "GET",
+      "path": "/solr/admin/info/properties",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/admin-api-types.ts"
+      ],
+      "notes": "Read-only JVM and process properties. Response is intentionally extensible because available properties vary by runtime and deployment; route and representative shape have unit coverage, but live Solr compatibility is unverified."
+    },
+    {
+      "id": "system.threads",
+      "area": "System",
+      "clientMethod": "systemThreads",
+      "httpMethod": "GET",
+      "path": "/solr/admin/info/threads",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/admin-api-types.ts"
+      ],
+      "notes": "Read-only JVM thread diagnostics. Thread detail and response payload vary by JVM; route and representative response have unit coverage, but live Solr compatibility is unverified."
+    },
+    {
+      "id": "system.logging",
+      "area": "System",
+      "clientMethod": "systemLogging",
+      "httpMethod": "GET",
+      "path": "/solr/admin/info/logging",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/admin-api-types.ts"
+      ],
+      "notes": "Read-only logger configuration and level information. This client method does not mutate logger levels; route and representative response have unit coverage, but live Solr compatibility is unverified."
     }
   ]
 }
