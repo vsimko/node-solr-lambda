@@ -342,7 +342,7 @@ const invalidPermissionDelete: SolrAuthorizationCommand = { "delete-permission":
 const invalidPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read" } };
 void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission];
 
-import type { SolrClusterStatusResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClient } from "../src/index.js";
+import type { SolrClusterStatusResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse } from "../src/index.js";
 declare const collectionClient: SolrClient;
 const aliasList: Promise<SolrCollectionAliasesResponse> = collectionClient.collections("LISTALIASES");
 const clusterStatus: Promise<SolrClusterStatusResponse> = collectionClient.collections("CLUSTERSTATUS", { collection: "books" });
