@@ -19,8 +19,8 @@ integrationTest("System properties endpoint returns JVM/process properties", asy
 
 integrationTest("System threads endpoint returns a thread dump", async ({ client }) => {
   const result = await client.systemThreads();
-  assert.equal(typeof result.threadDump, "string");
-  assert.ok(result.threadDump.length > 0, "thread dump should not be empty");
+  assert.ok(typeof result.threadDump === "string" && result.threadDump.length > 0,
+    "thread dump should be a non-empty string");
 });
 
 integrationTest("System logging endpoint returns logger metadata", async ({ client }) => {
