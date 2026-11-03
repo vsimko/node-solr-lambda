@@ -335,6 +335,45 @@ export interface SolrConfigOverlayResponse {
   responseHeader?: SolrConfigResponseHeader;
 }
 
+/** Index statistics included by Core Admin STATUS when indexInfo=true. */
+export interface SolrCoreIndexStatus {
+  numDocs?: number;
+  maxDoc?: number;
+  deletedDocs?: number;
+  version?: number;
+  segmentCount?: number;
+  numSegments?: number;
+  sizeInBytes?: number;
+  size?: string;
+  [key: string]: unknown;
+}
+
+/** Per-core metadata returned in the Core Admin STATUS response. */
+export interface SolrCoreStatus {
+  name?: string;
+  instanceDir?: string;
+  dataDir?: string;
+  indexDir?: string;
+  config?: string;
+  schema?: string;
+  startTime?: string;
+  uptime?: number;
+  index?: SolrCoreIndexStatus;
+  [key: string]: unknown;
+}
+
+/**
+ * Core Admin STATUS response. Fields are optional because a core may be
+ * unloaded, unavailable, or returned with indexInfo disabled. Unknown
+ * server/version-specific metadata remains accessible through index signatures.
+ */
+export interface CoreAdminStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  status?: Readonly<Record<string, SolrCoreStatus>>;
+  initFailures?: Readonly<Record<string, string | Readonly<Record<string, unknown>>>>;
+  [key: string]: unknown;
+}
+
 /** A typed Core Admin STATUS request. */
 export interface CoreStatusParams {
   core?: string;
