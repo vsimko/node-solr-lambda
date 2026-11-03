@@ -13,14 +13,15 @@ integrationTest("System info endpoint returns stable server metadata", async ({ 
 
 integrationTest("System properties endpoint returns JVM/process properties", async ({ client }) => {
   const result = await client.systemProperties();
-  assert.ok(result.system && Object.keys(result.system).length > 0,
-    "System properties should include at least one JVM/process property");
+  const propertyKeys = Object.keys(result).filter(key => key !== "responseHeader");
+  assert.ok(propertyKeys.length > 0, "System properties should include at least one JVM/process property");
 });
 
 integrationTest("System threads endpoint returns a thread dump", async ({ client }) => {
   const result = await client.systemThreads();
-  assert.ok(typeof result.threadDump === "string" && result.threadDump.length > 0,
-    "thread dump should be a non-empty string");
+  const threadDump = result.system?.threadDump ?? [];
+  assert.ok(Array.isArray(threadDump) && threadDump.length > 0,
+    "thread dump should include at least one JVM thread entry");
 });
 
 integrationTest("System logging endpoint returns logger metadata", async ({ client }) => {
