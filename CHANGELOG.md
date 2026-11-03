@@ -33,12 +33,13 @@
 
 - Add a public API reference and machine-readable operation inventory, with consistency checks against package exports and client methods.
 - Add action-specific Collections API evidence and an explicit public API review, including the stable, generic escape-hatch, and internal export decisions.
-- Document npm tarball validation, prerelease dist-tag behavior, and the release/rollback workflow.
+- Document npm tarball validation, prerelease dist-tag behavior, release rollback, and the manually gated GitHub Actions/npm OIDC trusted-publishing workflow.
 - Add a Solr 8.11.4/9.11.0/10.1.0 Schema API compatibility matrix with explicit V1/V2 scope and unverified similarity plugin behavior.
 - Add typed Schema API command responses and read-response models for schema metadata, fields, dynamic fields, field types, copy fields, uniqueKey, and similarity.
 - Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.
 - Expand the v3-to-v4 migration guide with a complete v4 CRUD example and link its compile-time and Solr integration checks.
 - Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.
+- Expand standalone, authenticated, and SolrCloud integration CI to Node.js 20/22/24 across Solr 8.11.4/9.11.0/10.1.0; document the complete matrix and its successful CI evidence.
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
