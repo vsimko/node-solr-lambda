@@ -303,6 +303,10 @@ export interface SolrConfigReadPlugin {
   name?: string;
   class?: string;
   startup?: "lazy" | "eager";
+  defaults?: Readonly<Record<string, SolrConfigValue>>;
+  appends?: Readonly<Record<string, SolrConfigValue>>;
+  invariants?: Readonly<Record<string, SolrConfigValue>>;
+  useParams?: readonly string[];
   [key: string]: unknown;
 }
 export type SolrConfigReadPluginCollection = Readonly<Record<string, SolrConfigReadPlugin>> | readonly SolrConfigReadPlugin[];
@@ -329,10 +333,59 @@ export interface SolrConfigReadResponse {
 export interface SolrConfigOverlayResponse {
   overlay?: {
     znodeVersion?: number;
-    props?: Readonly<Record<string, unknown>>;
+    props?: {
+      query?: {
+        filterCache?: SolrConfigCacheSettings;
+        [key: string]: unknown;
+      };
+      updateHandler?: {
+        autoCommit?: SolrConfigCommitSettings;
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
+    };
     userProps?: Readonly<Record<string, SolrConfigValue>>;
   };
   responseHeader?: SolrConfigResponseHeader;
+}
+
+/** Index statistics included by Core Admin STATUS when indexInfo=true. */
+export interface SolrCoreIndexStatus {
+  numDocs?: number;
+  maxDoc?: number;
+  deletedDocs?: number;
+  version?: number;
+  segmentCount?: number;
+  numSegments?: number;
+  sizeInBytes?: number;
+  size?: string;
+  [key: string]: unknown;
+}
+
+/** Per-core metadata returned in the Core Admin STATUS response. */
+export interface SolrCoreStatus {
+  name?: string;
+  instanceDir?: string;
+  dataDir?: string;
+  indexDir?: string;
+  config?: string;
+  schema?: string;
+  startTime?: string;
+  uptime?: number;
+  index?: SolrCoreIndexStatus;
+  [key: string]: unknown;
+}
+
+/**
+ * Core Admin STATUS response. Fields are optional because a core may be
+ * unloaded, unavailable, or returned with indexInfo disabled. Unknown
+ * server/version-specific metadata remains accessible through index signatures.
+ */
+export interface CoreAdminStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  status?: Readonly<Record<string, SolrCoreStatus>>;
+  initFailures?: Readonly<Record<string, string | Readonly<Record<string, unknown>>>>;
+  [key: string]: unknown;
 }
 
 /** Required request ID for polling a previously submitted asynchronous Core Admin action. */
