@@ -274,3 +274,13 @@ void statusRequest.then(result => {
   void [coreName, dataDir, documentCount];
 });
 void [minimalCoreStatus, detailedCoreStatus];
+
+
+const metricsJson: Promise<SolrMetricsResponse> = client.metrics({ group: ["jvm", "node"], registry: "solr.core.catalog", prefix: "QUERY", regex: ".*requests.*" });
+const metricsText: Promise<string> = client.metrics<string>({ group: "jvm", wt: "prometheus" });
+void [metricsJson, metricsText];
+
+// @ts-expect-error Metrics groups are strings or arrays of strings.
+void client.metrics({ group: 42 });
+// @ts-expect-error The Metrics API writer is JSON or Prometheus.
+void client.metrics({ wt: "xml" });
