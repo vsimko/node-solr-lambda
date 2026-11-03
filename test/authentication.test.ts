@@ -31,6 +31,8 @@ test("Basic authentication sends an Authorization header without exposing creden
     ].join(" ");
     assert.equal(errorText.includes(password), false);
     assert.equal(errorText.includes(authorization), false);
+    assert.equal("authorization" in error, false, "HTTP errors must not expose request authorization headers");
+    assert.equal("headers" in error, false, "HTTP errors must not expose request headers");
     return true;
   });
   assert.equal(sentAuthorization, authorization);
@@ -54,6 +56,8 @@ test("Bearer authentication sends a token header without exposing the token in e
     const errorText = [error.message, error.endpoint, error.body, JSON.stringify(error.payload)].join(" ");
     assert.equal(errorText.includes(token), false);
     assert.equal(errorText.includes(`Bearer ${token}`), false);
+    assert.equal("authorization" in error, false, "HTTP errors must not expose bearer authorization headers");
+    assert.equal("headers" in error, false, "HTTP errors must not expose request headers");
     return true;
   });
   assert.equal(sentAuthorization, `Bearer ${token}`);
