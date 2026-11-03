@@ -20,6 +20,8 @@ import type {
   SolrConfigOverlayResponse,
   SolrConfigCommandResponse,
   CoreAdminParams,
+  CoreRequestStatusParams,
+  CoreRequestRecoveryParams,
   CoreAdminStatusResponse,
   CollectionAdminParams
 } from "../src/index.js";
@@ -274,3 +276,13 @@ void statusRequest.then(result => {
   void [coreName, dataDir, documentCount];
 });
 void [minimalCoreStatus, detailedCoreStatus];
+
+
+const coreRequestStatus: CoreRequestStatusParams = { requestid: "core-job-42" };
+const coreRequestRecovery: CoreRequestRecoveryParams = { core: "catalog_shard1_replica1" };
+void client.coreAdmin("REQUESTSTATUS", coreRequestStatus);
+void client.coreAdmin("REQUESTRECOVERY", coreRequestRecovery);
+// @ts-expect-error REQUESTSTATUS requires the asynchronous request ID.
+void client.coreAdmin("REQUESTSTATUS", {});
+// @ts-expect-error REQUESTRECOVERY requires a core name.
+void client.coreAdmin("REQUESTRECOVERY", {});
