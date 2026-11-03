@@ -341,3 +341,22 @@ const invalidPermissionDelete: SolrAuthorizationCommand = { "delete-permission":
 // @ts-expect-error Built-in permission creation requires an explicit role assignment.
 const invalidPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read" } };
 void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission];
+
+import type { SolrClusterStatusResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClient } from "../src/index.js";
+declare const collectionClient: SolrClient;
+const aliasList: Promise<SolrCollectionAliasesResponse> = collectionClient.collections("LISTALIASES");
+const clusterStatus: Promise<SolrClusterStatusResponse> = collectionClient.collections("CLUSTERSTATUS", { collection: "books" });
+const aliasCreate: Promise<SolrCollectionAliasResponse> = collectionClient.collections("CREATEALIAS", { name: "books-current", collections: ["books-v1", "books-v2"] });
+const aliasDelete: Promise<SolrCollectionAliasResponse> = collectionClient.collections("DELETEALIAS", { name: "books-current" });
+void [aliasList, clusterStatus, aliasCreate, aliasDelete];
+void clusterStatus.then(result => {
+  const liveNodes: readonly string[] | undefined = result.cluster?.live_nodes;
+  const aliases: Readonly<Record<string, string>> | undefined = result.cluster?.aliases;
+  const replicaState: string | undefined = result.cluster?.collections?.books?.shards?.shard1?.replicas?.core_node1?.state;
+  const leader: boolean | string | undefined = result.cluster?.collections?.books?.shards?.shard1?.replicas?.core_node1?.leader;
+  void [liveNodes, aliases, replicaState, leader];
+});
+// @ts-expect-error CREATEALIAS requires both the alias name and target collections.
+void collectionClient.collections("CREATEALIAS", { name: "books-current" });
+// @ts-expect-error CLUSTERSTATUS collection filters must be strings.
+void collectionClient.collections("CLUSTERSTATUS", { collection: 42 });
