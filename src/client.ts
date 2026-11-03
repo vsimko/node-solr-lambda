@@ -119,12 +119,6 @@ export class SolrClient extends SolrTransport {
       ? [action: A, params?: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
       : [action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
   ): Promise<CollectionAdminResponse<A>>;
-  /** Explicit generic override for server/plugin-specific Collections response extensions. */
-  collections<T, A extends CollectionAdminAction = CollectionAdminAction>(
-    action: A,
-    params: CollectionAdminParams<NoInfer<A>>,
-    requestOptions?: RequestControlOptions
-  ): Promise<NoInfer<T>>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
