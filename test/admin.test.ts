@@ -224,3 +224,26 @@ test("Core Admin STATUS accepts minimal and detailed response payloads", async (
   assert.equal(detailed.status?.catalog?.index?.numDocs, 12);
   assert.deepEqual(detailed.status?.catalog?.futureServerField, { enabled: true });
 });
+
+test("Core Admin async status and recovery actions serialize their required parameters", async () => {
+  const requested: string[] = [];
+  const client = createSolrClient({
+    fetch: async (input) => {
+      requested.push(String(input));
+      return new Response(JSON.stringify({ status: "completed" }));
+    }
+  });
+
+  await client.coreAdmin("REQUESTSTATUS", { requestid: "core-job-42" });
+  await client.coreAdmin("REQUESTRECOVERY", { core: "catalog_shard1_replica1" });
+
+  const requestStatus = new URL(requested[0]!);
+  assert.equal(requestStatus.pathname, "/solr/admin/cores");
+  assert.equal(requestStatus.searchParams.get("action"), "REQUESTSTATUS");
+  assert.equal(requestStatus.searchParams.get("requestid"), "core-job-42");
+
+  const recovery = new URL(requested[1]!);
+  assert.equal(recovery.pathname, "/solr/admin/cores");
+  assert.equal(recovery.searchParams.get("action"), "REQUESTRECOVERY");
+  assert.equal(recovery.searchParams.get("core"), "catalog_shard1_replica1");
+});
