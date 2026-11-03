@@ -120,3 +120,38 @@ integrationTest("Config API sets and unsets a cache property with overlay read-b
     }
   }
 });
+
+integrationTest("Config API sets and unsets an update-handler property with overlay read-back", async ({ client }) => {
+  const property = "updateHandler.autoCommit.maxTime";
+  const before = await client.getConfigOverlay();
+  const previousValue = before.overlay?.props?.updateHandler?.autoCommit?.maxTime;
+  let changed = false;
+
+  try {
+    const set = await client.config({ "set-property": { [property]: 100_000 } });
+    changed = true;
+    assert.equal(set.responseHeader?.status, 0);
+
+    const afterSet = await client.getConfigOverlay();
+    assert.equal(String(afterSet.overlay?.props?.updateHandler?.autoCommit?.maxTime), "100000");
+
+    const unset = await client.config({ "unset-property": property });
+    changed = false;
+    assert.equal(unset.responseHeader?.status, 0);
+
+    const afterUnset = await client.getConfigOverlay();
+    assert.equal(afterUnset.overlay?.props?.updateHandler?.autoCommit?.maxTime, undefined);
+
+    if (previousValue !== undefined) {
+      await client.config({ "set-property": { [property]: Number(previousValue) } });
+    }
+  } finally {
+    if (changed) {
+      if (previousValue === undefined) {
+        await client.config({ "unset-property": property });
+      } else {
+        await client.config({ "set-property": { [property]: Number(previousValue) } });
+      }
+    }
+  }
+});
