@@ -57,9 +57,7 @@ The issue list below reflects the current open follow-up work, rather than histo
 | --- | --- |
 | Complete Streaming Expressions tuple/error response contracts and distinguish its transport from Export streaming | [Issues #92–#93](https://github.com/vsimko/node-solr-lambda/issues/92) |
 | Finish the remaining advanced API coverage tracked for Export and related streaming behavior | [Issue #94](https://github.com/vsimko/node-solr-lambda/issues/94) |
-| Complete the remaining ReplicationHandler operation and compatibility evidence; core backup/restore V1 operations are implemented and tested | [Issue #95](https://github.com/vsimko/node-solr-lambda/issues/95) |
-| Continue endpoint-specific implementation only where the typed-client boundary explicitly includes it; keep generic/raw escape hatches distinct | [Issues #97–#98](https://github.com/vsimko/node-solr-lambda/issues/97) |
-| Review URL serialization, retry semantics, and authentication guidance | [Issues #99–#101](https://github.com/vsimko/node-solr-lambda/issues/99) |
+| Complete Streaming Expressions tuple/error response contracts and distinguish its transport from Export streaming | [Issues #92–#93](https://github.com/vsimko/node-solr-lambda/issues/92) |
 
 ## Completed foundation and historical work
 
@@ -69,7 +67,7 @@ The following workstreams are complete or superseded by merged implementation an
 - Query API and consumer-facing TypeScript surface: [Issues #44–#59](https://github.com/vsimko/node-solr-lambda/issues/44).
 - Update API and response handling: [Issues #60–#67](https://github.com/vsimko/node-solr-lambda/issues/60).
 - Schema API: [Issues #68–#72](https://github.com/vsimko/node-solr-lambda/issues/68).
-- Earlier endpoint inventory/raw-request foundation: [Issues #97–#98](https://github.com/vsimko/node-solr-lambda/issues/97).
+- Replication, backup/restore, raw-request, URL serialization, retry, and authentication foundations are complete or superseded by merged implementation; see the [endpoint inventory](endpoint-inventory.md) and [API inventory](api-inventory.json) for the current tested boundary.
 
 ## Workflow
 
