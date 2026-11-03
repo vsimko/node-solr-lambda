@@ -255,7 +255,7 @@ test("Metrics API serializes typed registry filters and custom parameters", asyn
   }
   const url = new URL(requested);
   assert.equal(url.pathname, "/solr/admin/metrics");
-  assert.equal(url.searchParams.get("group"), "jvm,node");
+  assert.deepEqual(url.searchParams.getAll("group"), ["jvm", "node"]);
   assert.equal(url.searchParams.get("registry"), "solr.core.catalog");
   assert.equal(url.searchParams.get("prefix"), "QUERY");
   assert.equal(url.searchParams.get("regex"), ".*requests.*");
