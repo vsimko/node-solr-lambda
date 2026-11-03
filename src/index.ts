@@ -5,6 +5,7 @@ export { solrExcludeTags, solrFieldAlias, solrFields, solrFilter, solrFunction, 
 export type { SolrFieldListEntry, SolrFunctionArgument, SolrLocalParamValue, SolrSortClause, SolrSortDirection, SolrSortInput, SolrSpatialFilterOptions } from "./query-helpers.js";
 export type { SolrExportFieldType, SolrExportSortClause, SolrExportSort, SolrExportParams } from "./types.js";
 export type { SolrStatsFieldOptions, SolrStatsOptions } from "./types.js";
+export type { SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse } from "./types.js";
 export type { SolrReplicationCommand, SolrReplicationBaseParams, SolrReplicationFetchIndexParams, SolrReplicationBackupParams, SolrReplicationRestoreParams, SolrReplicationDeleteBackupParams, SolrReplicationFileListParams, SolrReplicationParams, SolrReplicationResponseHeader, SolrReplicationCommandResponse, SolrReplicationIndexVersionResponse, SolrReplicationFileMetadata, SolrReplicationFileListResponse, SolrReplicationBackupStatus, SolrReplicationRestoreStatus, SolrReplicationDetailsResponse, SolrReplicationRestoreStatusResponse, SolrReplicationResponse, SolrReplicationFileContentParams } from "./types.js";
 export type { SolrMoreLikeThisOptions, SolrMoreLikeThisResponse } from "./types.js";
 export type { SolrCollapseHint, SolrCollapseNullPolicy, SolrCollapseOptions, SolrExpandOptions, SolrExpandedResult, SolrGroupFormat, SolrGroupingOptions } from "./types.js";
