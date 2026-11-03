@@ -50,6 +50,12 @@ The Collections API also exposes action-specific parameter models for `MOVEREPLI
 
 `BALANCESHARDUNIQUE` balances a shard-unique property such as `preferredLeader`. `ADDREPLICAPROP` and `DELETEREPLICAPROP` manage an individual replica's property. Property add/delete and preferred-leader balancing return successful responses on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #209). The multi-node SolrCloud suite also assigns `preferredLeader` to an active non-leader replica, runs `REBALANCELEADERS`, and verifies through `CLUSTERSTATUS` that the preferred replica becomes leader. This runtime test runs against Solr 8.11.4, 9.11.0, and 10.1.0.
 
+## Core Admin STATUS response
+
+Use the exported `CoreAdminStatusResponse` type when reading `coreAdmin("STATUS")`. The response models the optional response header, per-core status map, initialization failures, core paths/configuration metadata, and index statistics returned when `indexInfo=true`. Individual properties are optional because unloaded/unavailable cores and requests without index details return smaller payloads. Index signatures preserve additional server- or version-specific metadata.
+
+The unit suite checks both a minimal response and a detailed response containing index statistics and an unknown future field. The isolated-core integration test requests index information, checks the returned core paths and document count, and repeats STATUS after RELOAD on each pinned Solr 8.11.4, 9.11.0, and 10.1.0 CI image. These assertions verify the exercised response shape; they do not claim every optional field is present on every version.
+
 ## Core Admin lifecycle safety and evidence
 
 The typed Core Admin action set is `STATUS`, `CREATE`, `RELOAD`, `UNLOAD`, `RENAME`, `SWAP`, `MERGEINDEXES`, and `SPLIT`. The current shared integration suite exercises isolated `CREATE`, filtered and unfiltered `STATUS`, `RELOAD`, and fixture-cleanup `UNLOAD`. The `UNLOAD` cleanup test removes only a core created by that test fixture.
