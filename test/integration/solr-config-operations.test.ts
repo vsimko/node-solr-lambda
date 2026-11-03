@@ -83,3 +83,40 @@ integrationTest("Config API adds, reads, and deletes an isolated search componen
     }
   }
 });
+
+
+integrationTest("Config API sets and unsets a cache property with overlay read-back", async ({ client }) => {
+  const property = "query.filterCache.size";
+  const readOverlay = () => client.getConfigOverlay();
+  const before = await readOverlay();
+  const previousSize = before.overlay?.props?.query?.filterCache?.size;
+  let changed = false;
+
+  try {
+    const set = await client.config({ "set-property": { [property]: 333 } });
+    changed = true;
+    assert.equal(set.responseHeader?.status, 0);
+
+    const afterSet = await readOverlay();
+    assert.equal(String(afterSet.overlay?.props?.query?.filterCache?.size), "333");
+
+    const unset = await client.config({ "unset-property": property });
+    changed = false;
+    assert.equal(unset.responseHeader?.status, 0);
+
+    const afterUnset = await readOverlay();
+    assert.equal(afterUnset.overlay?.props?.query?.filterCache?.size, undefined);
+
+    if (previousSize !== undefined) {
+      await client.config({ "set-property": { [property]: Number(previousSize) } });
+    }
+  } finally {
+    if (changed) {
+      if (previousSize === undefined) {
+        await client.config({ "unset-property": property });
+      } else {
+        await client.config({ "set-property": { [property]: Number(previousSize) } });
+      }
+    }
+  }
+});
