@@ -35,19 +35,16 @@ jobs:
           node --version
           npm --version
           node --input-type=module -e '
-            const [major, minor] = process.versions.node.split(".").map(Number);
-            if (major < 22 || (major === 22 && minor < 14)) {
+            import { execFileSync } from "node:child_process";
+            const [nodeMajor, nodeMinor] = process.versions.node.split(".").map(Number);
+            if (nodeMajor < 22 || (nodeMajor === 22 && nodeMinor < 14)) {
               throw new Error("Trusted publishing requires Node.js 22.14.0 or newer");
             }
-          '
-          node --input-type=module -e '
-            const [major, minor, patch] = (process.env.NPM_VERSION ?? "").split(".").map(Number);
-            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+            const [npmMajor, npmMinor, npmPatch] = execFileSync("npm", ["--version"], { encoding: "utf8" }).trim().split(".").map(Number);
+            if (npmMajor < 11 || (npmMajor === 11 && (npmMinor < 5 || (npmMinor === 5 && npmPatch < 1)))) {
               throw new Error("Trusted publishing requires npm 11.5.1 or newer");
             }
           '
-        env:
-          NPM_VERSION: ${{ steps.npm-version.outputs.version }}
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:types
