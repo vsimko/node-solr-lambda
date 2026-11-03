@@ -51,6 +51,34 @@ export interface SolrMetricsJsonResponse {
 /** Solr may return JSON registries or Prometheus exposition text depending on writer/version. */
 export type SolrMetricsResponse = SolrMetricsJsonResponse | string;
 
+/** An extensible tuple emitted by a Streaming Expression. Expression operators define their own fields. */
+export interface SolrStreamingExpressionTuple {
+  /** Present on the terminal tuple in common Streaming Expressions responses. */
+  EOF?: boolean;
+  /** Optional execution-time metadata emitted by some expressions. */
+  RESPONSE_TIME?: number;
+  [key: string]: unknown;
+}
+
+/** A server-side expression failure represented as a tuple in an otherwise successful HTTP response. */
+export interface SolrStreamingExpressionErrorTuple extends SolrStreamingExpressionTuple {
+  EXCEPTION: string;
+}
+
+/** The result-set envelope returned by the JSON Streaming Expressions writer. */
+export interface SolrStreamingExpressionResultSet<TTuple extends SolrStreamingExpressionTuple = SolrStreamingExpressionTuple | SolrStreamingExpressionErrorTuple> {
+  docs?: readonly TTuple[];
+  EOF?: boolean;
+  RESPONSE_TIME?: number;
+  [key: string]: unknown;
+}
+
+/** JSON response envelope for /stream. Unknown envelope and tuple fields remain available. */
+export interface SolrStreamingExpressionResponse<TTuple extends SolrStreamingExpressionTuple = SolrStreamingExpressionTuple | SolrStreamingExpressionErrorTuple> {
+  "result-set"?: SolrStreamingExpressionResultSet<TTuple>;
+  [key: string]: unknown;
+}
+
 export type SolrReplicationCommand =
   | "enablereplication"
   | "disablereplication"
