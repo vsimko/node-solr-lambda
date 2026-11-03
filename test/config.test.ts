@@ -258,3 +258,49 @@ test("Config API preserves Solr HTTP failures", async () => {
     error => error instanceof SolrHttpError && error.status === 400
   );
 });
+
+
+test("Config API serializes listener lifecycle commands", async () => {
+  const bodies: unknown[] = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.config({
+    "add-listener": {
+      name: "post-commit-test",
+      class: "solr.QuerySenderListener",
+      event: "postCommit"
+    }
+  });
+  await client.config({
+    "update-listener": {
+      name: "post-commit-test",
+      class: "solr.QuerySenderListener",
+      event: "postCommit"
+    }
+  });
+  await client.config({ "delete-listener": "post-commit-test" });
+
+  assert.deepEqual(bodies, [
+    {
+      "add-listener": {
+        name: "post-commit-test",
+        class: "solr.QuerySenderListener",
+        event: "postCommit"
+      }
+    },
+    {
+      "update-listener": {
+        name: "post-commit-test",
+        class: "solr.QuerySenderListener",
+        event: "postCommit"
+      }
+    },
+    { "delete-listener": "post-commit-test" }
+  ]);
+});
