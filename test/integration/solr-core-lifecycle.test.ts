@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { integrationTest } from "./fixtures.js";
+import type { CoreAdminStatusResponse } from "../../src/index.js";
 
 integrationTest("CoreAdmin creates, reports, reloads, and cleans up an isolated core", async ({
   client,
@@ -9,15 +10,17 @@ integrationTest("CoreAdmin creates, reports, reloads, and cleans up an isolated 
   assert.equal(ping.status, "OK");
 
   const name = await createCore();
-  const status = await client.coreAdmin<{ status?: Record<string, { name?: string }> }>(
+  const status: CoreAdminStatusResponse = await client.coreAdmin(
     "STATUS",
-    { core: name }
+    { core: name, indexInfo: true }
   );
 
   assert.equal(status.status?.[name]?.name, name);
+  assert.equal(typeof status.status?.[name]?.instanceDir, "string");
+  assert.equal(typeof status.status?.[name]?.index?.numDocs, "number");
 
   await client.coreAdmin("RELOAD", { core: name });
-  const reloaded = await client.coreAdmin<{ status?: Record<string, { name?: string }> }>(
+  const reloaded: CoreAdminStatusResponse = await client.coreAdmin(
     "STATUS",
     { core: name }
   );
