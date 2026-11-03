@@ -4,9 +4,7 @@
 
 The package is currently on `4.0.0-beta.0`. During the v4 prerelease cycle, increment the beta prerelease (`4.0.0-beta.1`, `4.0.0-beta.2`, …) and publish it under the npm `beta` dist-tag. Do not move the `latest` tag while publishing prereleases. Release candidates use `4.0.0-rc.N` and the `rc` tag. The stable release is `4.0.0` and is published under `latest` only after the v4 release checklist (#110) is approved.
 
-`scripts/release-policy.mjs` maps supported SemVer channels (`alpha`, `beta`, `rc`, stable) to npm dist-tags and rejects unknown prerelease identifiers. `npm run release:publish` invokes `scripts/publish.mjs`, which reads the package version and selects the correct tag. Publication is never part of CI; it requires an explicit maintainer command and valid npm credentials.
-
-**Provenance status:** the current `scripts/publish.mjs` invokes `npm publish --access public --tag <tag>` and does not pass `--provenance`. The repository has no dedicated npm publication workflow or GitHub Actions OIDC publishing configuration. Therefore this path does **not** establish an npm provenance attestation. Before a stable release, inspect the actual npm account/organization settings and decide whether provenance is required. If it is required or desired, add a trusted-publishing workflow with `id-token: write`, use `npm publish --provenance`, and verify the attestation on the published package. Until then, do not describe the package as provenance-backed.
+`scripts/release-policy.mjs` maps supported SemVer channels (`alpha`, `beta`, `rc`, stable) to npm dist-tags and rejects unknown prerelease identifiers. `npm run release:publish` invokes `scripts/publish.mjs`, which reads the package version and selects the correct tag. Publication is never part of CI; it requires an explicit maintainer action.
 
 ## Pre-publication verification
 
@@ -25,14 +23,30 @@ npm run release:check
 
 The package supports Node.js 20, 22, and 24 (`engines.node` and the CI matrix must stay aligned). The package root exposes conditional ESM and CommonJS runtime entry points and matching declaration entry points. `zod` is an optional peer dependency; the core client must remain usable without it.
 
+## Trusted npm publishing
+
+The repository provides a separate, manually dispatched workflow at `.github/workflows/publish.yml`. It is restricted to the `master` ref, requires an explicit `confirm_publish` input, runs the complete release checks, and publishes through npm OIDC trusted publishing. It requests only `contents: read` and `id-token: write`; no long-lived npm write token is used. The workflow uses Node.js 24 and npm 11.5.1 or later, which are required for npm trusted publishing.
+
+Before enabling publication:
+
+1. On npmjs.com, open the `node-solr-lambda` package settings and add a GitHub Actions trusted publisher.
+2. Set the owner/user to `vsimko`, repository to `node-solr-lambda`, workflow filename to `publish.yml`, and environment to `npm-publish`.
+3. Allow direct `npm publish` for this trusted publisher.
+4. In GitHub repository settings, create the `npm-publish` environment and configure required reviewers / deployment protection. Restrict who can approve and dispatch releases.
+5. Verify the package is public and its `package.json` repository URL exactly matches `https://github.com/vsimko/node-solr-lambda.git`.
+6. Do not test this workflow by publishing a real version until the release owner explicitly approves a prerelease test. The first successful trusted publish must occur within two days of creating the npm trusted-publisher configuration; otherwise recreate the configuration.
+
+The workflow passes `--provenance` to the existing version-aware publisher. npm trusted publishing also generates provenance automatically for public packages published from a public repository. The account's existing npm settings and the trusted-publisher configuration cannot be verified from this repository. A merged workflow alone does not mean trusted publishing is configured or that an attestation has been produced.
+
+To publish, select the workflow on the `master` branch, set `confirm_publish` to true, and complete the `npm-publish` environment approval. Publication remains an explicit release-owner action and must only happen after Issue #110 is approved. The workflow must not be dispatched for this task or for ordinary CI validation.
+
 ## Publication
 
 1. Complete and approve the release checklist in Issue #110, including the exact release-candidate commit and full Node.js/Solr matrix.
 2. Confirm `npm view node-solr-lambda dist-tags` and the current version before publication.
-3. Verify the npm account has publish rights and that two-factor authentication/provenance requirements for the account and organization are satisfied. The current manual script does not create provenance; if an attestation is a release requirement, trusted publishing must be implemented before publication.
-4. Run `npm run release:publish -- --dry-run` to inspect the npm publication operation without publishing.
-5. Publish explicitly with `npm run release:publish`. The script chooses `beta`, `rc`, or `latest` based on the package version; never manually override the tag without a recorded release decision.
-6. Verify `npm view node-solr-lambda@<version> version dist.tarball` and the corresponding dist-tag, then install that exact version in a clean consumer and repeat the ESM/CommonJS/type smoke test.
+3. Confirm npm trusted publishing is configured exactly as above and that the `npm-publish` environment is protected.
+4. Run the `Publish to npm` workflow manually from `master`, with `confirm_publish: true`, and approve the protected environment.
+5. Verify `npm view node-solr-lambda@<version> version dist.tarball`, the corresponding dist-tag, and the published provenance attestation; then install that exact version in a clean consumer and repeat the ESM/CommonJS/type smoke test.
 
 ## Rollback
 
