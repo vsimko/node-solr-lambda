@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import type { SolrMetricsJsonResponse } from "../../src/index.js";
 import { integrationTest } from "./fixtures.js";
 
 integrationTest("System info endpoint returns stable server metadata", async ({ client }) => {
@@ -62,14 +63,14 @@ integrationTest("Metrics API exposes node metrics and applies registry, prefix, 
   const metricName = Object.keys(registry)[0];
   assert.ok(metricName, "node registry should contain at least one metric");
 
-  const byRegistry = await client.metrics({
+  const byRegistry = await client.metrics<SolrMetricsJsonResponse>({
     group: "node", registry: registryName
   });
   assert.deepEqual(Object.keys(byRegistry.metrics ?? {}), [registryName],
     "registry filter should return only the requested registry");
 
   const prefix = metricName.slice(0, Math.min(3, metricName.length));
-  const byPrefix = await client.metrics({
+  const byPrefix = await client.metrics<SolrMetricsJsonResponse>({
     group: "node", registry: registryName, prefix
   });
   const prefixNames = Object.keys(byPrefix.metrics?.[registryName] ?? {});
@@ -78,7 +79,7 @@ integrationTest("Metrics API exposes node metrics and applies registry, prefix, 
     "prefix filter should exclude metric names outside the requested prefix");
 
   const regexPrefix = metricName.slice(0, 1);
-  const byRegex = await client.metrics({
+  const byRegex = await client.metrics<SolrMetricsJsonResponse>({
     group: "node", registry: registryName, regex: "^" + regexPrefix + ".*$"
   });
   const regexNames = Object.keys(byRegex.metrics?.[registryName] ?? {});
