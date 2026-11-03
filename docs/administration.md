@@ -116,3 +116,10 @@ The permission and authorization configuration models remain extensible with unk
 `SolrAuthorizationRole`, `SolrAuthorizationPermission`, `SolrAuthorizationCommand`, and `SolrAuthorizationResponse` are exported from the package root. Compile-time fixtures cover role assignment/removal, permission create/update/delete, extension fields, and invalid command shapes. Serialization tests verify the exact JSON command body. Live Solr security integration tests verify authenticated authorization reads on Solr 8.11.4, 9.11.0, and 10.1.0; mutating authorization commands are not run against shared integration security state.
 
 See the [Apache Solr Rule-Based Authorization Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/rule-based-authorization-plugin.html) for the server-side permission and role semantics. The client intentionally models the common V1 command contract and leaves plugin-specific extensions open.
+## Collections alias and cluster status response models
+
+`collections("LISTALIASES")` defaults to `SolrCollectionAliasesResponse`, with an alias-to-collection map. `CREATEALIAS` and `DELETEALIAS` default to `SolrCollectionAliasResponse`.
+
+`collections("CLUSTERSTATUS")` defaults to `SolrClusterStatusResponse`. The response model exposes `cluster.live_nodes`, aliases, collections, shards, and replicas, including common replica fields such as `core`, `node_name`, `state`, `type`, `leader`, and `properties`. Filtered responses may omit cluster-wide sections, and Solr versions or plugins may add fields; modeled properties are therefore optional and unknown fields remain accessible.
+
+The alias and cluster-status integration checks exercise alias read-back, collection/shard/replica state, and lifecycle effects on pinned Solr 8.11.4, 9.11.0, and 10.1.0. See the [per-action Collections matrix](collections-api-coverage.md); untested actions are not certified by these response models.
