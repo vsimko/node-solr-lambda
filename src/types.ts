@@ -280,6 +280,31 @@ export type SolrAdminCustomParams = SolrAdminParams;
 /** Values accepted by Config API properties and plugin configuration. */
 export type SolrConfigValue = string | number | boolean | null | readonly SolrConfigValue[] | { readonly [key: string]: SolrConfigValue };
 
+/** Open Config API parameter map. Known keys below receive autocomplete and value checking; Solr/plugin extensions remain supported. */
+export type SolrConfigParameterMap = Readonly<Record<string, SolrConfigValue>>;
+
+/** Common request-handler defaults/appends/invariants; arbitrary Solr request parameters remain extensible. */
+export interface SolrConfigRequestHandlerParams extends SolrConfigParameterMap {
+  q?: string;
+  fq?: string | readonly string[];
+  fl?: string | readonly string[];
+  sort?: string;
+  start?: number;
+  rows?: number;
+  wt?: string;
+  indent?: boolean;
+  echoParams?: "none" | "explicit" | "all";
+  omitHeader?: boolean;
+  timeAllowed?: number;
+  cpuAllowed?: number;
+  distrib?: boolean;
+  shards?: string | readonly string[];
+  useParams?: string | readonly string[];
+}
+
+/** Events supported by Solr's standard searcher/commit listeners; custom plugin event names remain possible. */
+export type SolrConfigListenerEvent = "firstSearcher" | "newSearcher" | "preCommit" | "postCommit" | (string & {});
+
 /** Common Config API property names documented across the pinned Solr 8.11, 9.11, and 10.1 baselines. */
 export type SolrConfigPropertyName =
   | "updateHandler.autoCommit.maxDocs"
@@ -423,22 +448,40 @@ export interface SolrConfigReadPlugin {
   name?: string;
   class?: string;
   startup?: "lazy" | "eager";
-  defaults?: Readonly<Record<string, SolrConfigValue>>;
-  appends?: Readonly<Record<string, SolrConfigValue>>;
-  invariants?: Readonly<Record<string, SolrConfigValue>>;
-  useParams?: readonly string[];
+  defaults?: SolrConfigParameterMap;
+  appends?: SolrConfigParameterMap;
+  invariants?: SolrConfigParameterMap;
+  useParams?: string | readonly string[];
   [key: string]: unknown;
+}
+/** Effective request-handler entry; request defaults retain known parameter types and custom parameters. */
+export interface SolrConfigRequestHandlerSettings extends SolrConfigReadPlugin {
+  defaults?: SolrConfigRequestHandlerParams;
+  appends?: SolrConfigRequestHandlerParams;
+  invariants?: SolrConfigRequestHandlerParams;
+  components?: string | readonly string[];
+}
+/** Effective search-component entry. Plugin-specific configuration remains open. */
+export interface SolrConfigSearchComponentSettings extends SolrConfigReadPlugin {}
+/** Effective response-writer entry with its stable content negotiation fields. */
+export interface SolrConfigResponseWriterSettings extends SolrConfigReadPlugin {
+  contentType?: string;
+  charset?: string;
+}
+/** Effective listener entry with the standard Solr event names and custom plugin events. */
+export interface SolrConfigListenerSettings extends SolrConfigReadPlugin {
+  event?: SolrConfigListenerEvent;
 }
 export type SolrConfigReadPluginCollection = Readonly<Record<string, SolrConfigReadPlugin>> | readonly SolrConfigReadPlugin[];
 export interface SolrConfigSettings {
   query?: SolrConfigQuerySettings;
   updateHandler?: SolrConfigUpdateHandlerSettings;
   requestDispatcher?: SolrConfigRequestDispatcherSettings;
-  requestHandler?: Readonly<Record<string, SolrConfigReadPlugin>>;
-  searchComponent?: Readonly<Record<string, SolrConfigReadPlugin>>;
-  queryResponseWriter?: Readonly<Record<string, SolrConfigReadPlugin>>;
+  requestHandler?: Readonly<Record<string, SolrConfigRequestHandlerSettings>>;
+  searchComponent?: Readonly<Record<string, SolrConfigSearchComponentSettings>>;
+  queryResponseWriter?: Readonly<Record<string, SolrConfigResponseWriterSettings>>;
   initParams?: SolrConfigReadPluginCollection;
-  listener?: SolrConfigReadPluginCollection;
+  listener?: Readonly<Record<string, SolrConfigListenerSettings>> | readonly SolrConfigListenerSettings[];
   directoryFactory?: SolrConfigReadPlugin;
   indexConfig?: Readonly<Record<string, unknown>>;
   codecFactory?: SolrConfigReadPlugin;
@@ -1053,9 +1096,9 @@ export interface SolrConfigPlugin {
   customOptions?: Readonly<Record<string, SolrConfigValue>>;
 }
 export interface SolrRequestHandlerConfig extends SolrConfigPlugin {
-  defaults?: Readonly<Record<string, SolrConfigValue>>;
-  appends?: Readonly<Record<string, SolrConfigValue>>;
-  invariants?: Readonly<Record<string, SolrConfigValue>>;
+  defaults?: SolrConfigRequestHandlerParams;
+  appends?: SolrConfigRequestHandlerParams;
+  invariants?: SolrConfigRequestHandlerParams;
   useParams?: string | readonly string[];
   components?: string | readonly string[];
 }
@@ -1078,7 +1121,7 @@ export interface SolrInitParamsConfig {
   customOptions?: Readonly<Record<string, SolrConfigValue>>;
 }
 export interface SolrListenerConfig extends SolrConfigPlugin {
-  event: string;
+  event: SolrConfigListenerEvent;
 }
 export interface SolrOtherComponentConfig extends SolrConfigPlugin {}
 export type SolrConfigCommand =
