@@ -177,3 +177,130 @@ test("Config API customOptions are flattened into the native plugin definition",
     }
   });
 });
+
+
+test("Config API serializes request-handler and search-component lifecycle commands", async () => {
+  const bodies: unknown[] = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 1 } }));
+    }
+  });
+
+  const addedHandler = await client.config({
+    "add-requesthandler": {
+      name: "/select-test",
+      class: "solr.SearchHandler",
+      defaults: { rows: 5, wt: "json" }
+    }
+  });
+  await client.config({
+    "update-requesthandler": {
+      name: "/select-test",
+      class: "solr.SearchHandler",
+      defaults: { rows: 10, wt: "json" }
+    }
+  });
+  await client.config({ "delete-requesthandler": "/select-test" });
+  await client.config({
+    "add-searchcomponent": {
+      name: "terms-test",
+      class: "solr.TermsComponent"
+    }
+  });
+  await client.config({ "delete-searchcomponent": "terms-test" });
+
+  assert.equal(addedHandler.responseHeader?.status, 0);
+  assert.equal(addedHandler.responseHeader?.QTime, 1);
+  assert.deepEqual(bodies, [
+    {
+      "add-requesthandler": {
+        name: "/select-test",
+        class: "solr.SearchHandler",
+        defaults: { rows: 5, wt: "json" }
+      }
+    },
+    {
+      "update-requesthandler": {
+        name: "/select-test",
+        class: "solr.SearchHandler",
+        defaults: { rows: 10, wt: "json" }
+      }
+    },
+    { "delete-requesthandler": "/select-test" },
+    {
+      "add-searchcomponent": {
+        name: "terms-test",
+        class: "solr.TermsComponent"
+      }
+    },
+    { "delete-searchcomponent": "terms-test" }
+  ]);
+});
+
+test("Config API preserves Solr HTTP failures", async () => {
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(JSON.stringify({
+      error: { code: 400, msg: "Unknown Config API command" }
+    }), { status: 400, headers: { "content-type": "application/json" } })
+  });
+
+  await assert.rejects(
+    client.config({
+      "add-requesthandler": {
+        name: "/invalid",
+        class: "solr.SearchHandler"
+      }
+    }),
+    error => error instanceof SolrHttpError && error.status === 400
+  );
+});
+
+
+test("Config API serializes listener lifecycle commands", async () => {
+  const bodies: unknown[] = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.config({
+    "add-listener": {
+      name: "post-commit-test",
+      class: "solr.QuerySenderListener",
+      event: "postCommit"
+    }
+  });
+  await client.config({
+    "update-listener": {
+      name: "post-commit-test",
+      class: "solr.QuerySenderListener",
+      event: "postCommit"
+    }
+  });
+  await client.config({ "delete-listener": "post-commit-test" });
+
+  assert.deepEqual(bodies, [
+    {
+      "add-listener": {
+        name: "post-commit-test",
+        class: "solr.QuerySenderListener",
+        event: "postCommit"
+      }
+    },
+    {
+      "update-listener": {
+        name: "post-commit-test",
+        class: "solr.QuerySenderListener",
+        event: "postCommit"
+      }
+    },
+    { "delete-listener": "post-commit-test" }
+  ]);
+});

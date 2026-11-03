@@ -303,6 +303,10 @@ export interface SolrConfigReadPlugin {
   name?: string;
   class?: string;
   startup?: "lazy" | "eager";
+  defaults?: Readonly<Record<string, SolrConfigValue>>;
+  appends?: Readonly<Record<string, SolrConfigValue>>;
+  invariants?: Readonly<Record<string, SolrConfigValue>>;
+  useParams?: readonly string[];
   [key: string]: unknown;
 }
 export type SolrConfigReadPluginCollection = Readonly<Record<string, SolrConfigReadPlugin>> | readonly SolrConfigReadPlugin[];
@@ -329,7 +333,17 @@ export interface SolrConfigReadResponse {
 export interface SolrConfigOverlayResponse {
   overlay?: {
     znodeVersion?: number;
-    props?: Readonly<Record<string, unknown>>;
+    props?: {
+      query?: {
+        filterCache?: SolrConfigCacheSettings;
+        [key: string]: unknown;
+      };
+      updateHandler?: {
+        autoCommit?: SolrConfigCommitSettings;
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
+    };
     userProps?: Readonly<Record<string, SolrConfigValue>>;
   };
   responseHeader?: SolrConfigResponseHeader;

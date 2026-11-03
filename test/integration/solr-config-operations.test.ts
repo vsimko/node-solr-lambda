@@ -1,0 +1,157 @@
+import assert from "node:assert/strict";
+import { integrationTest } from "./fixtures.js";
+import type { SolrConfigReadResponse } from "../../src/index.js";
+
+integrationTest("Config API adds, reads, updates, and deletes an isolated request handler", async ({
+  client,
+  createId
+}) => {
+  const name = `/integration_${createId("handler")}`;
+  const readConfig = () => client.getConfig<SolrConfigReadResponse>();
+  let created = false;
+
+  try {
+    const added = await client.config({
+      "add-requesthandler": {
+        name,
+        class: "solr.SearchHandler",
+        defaults: { rows: 3, wt: "json" }
+      }
+    });
+    created = true;
+    assert.equal(added.responseHeader?.status, 0);
+
+    const afterAdd = await readConfig();
+    assert.equal(afterAdd.config?.requestHandler?.[name]?.class, "solr.SearchHandler");
+    assert.equal(afterAdd.config?.requestHandler?.[name]?.defaults?.rows, 3);
+
+    const updated = await client.config({
+      "update-requesthandler": {
+        name,
+        class: "solr.SearchHandler",
+        defaults: { rows: 7, wt: "json" }
+      }
+    });
+    assert.equal(updated.responseHeader?.status, 0);
+
+    const afterUpdate = await readConfig();
+    assert.equal(afterUpdate.config?.requestHandler?.[name]?.defaults?.rows, 7);
+
+    const deleted = await client.config({ "delete-requesthandler": name });
+    created = false;
+    assert.equal(deleted.responseHeader?.status, 0);
+
+    const afterDelete = await readConfig();
+    assert.equal(afterDelete.config?.requestHandler?.[name], undefined);
+  } finally {
+    if (created) {
+      await client.config({ "delete-requesthandler": name });
+    }
+  }
+});
+
+integrationTest("Config API adds, reads, and deletes an isolated search component", async ({
+  client,
+  createId
+}) => {
+  const name = createId("terms_component");
+  const readConfig = () => client.getConfig<SolrConfigReadResponse>();
+  let created = false;
+
+  try {
+    const added = await client.config({
+      "add-searchcomponent": {
+        name,
+        class: "solr.TermsComponent"
+      }
+    });
+    created = true;
+    assert.equal(added.responseHeader?.status, 0);
+
+    const afterAdd = await readConfig();
+    assert.equal(afterAdd.config?.searchComponent?.[name]?.class, "solr.TermsComponent");
+
+    const deleted = await client.config({ "delete-searchcomponent": name });
+    created = false;
+    assert.equal(deleted.responseHeader?.status, 0);
+
+    const afterDelete = await readConfig();
+    assert.equal(afterDelete.config?.searchComponent?.[name], undefined);
+  } finally {
+    if (created) {
+      await client.config({ "delete-searchcomponent": name });
+    }
+  }
+});
+
+
+integrationTest("Config API sets and unsets a cache property with overlay read-back", async ({ client }) => {
+  const property = "query.filterCache.size";
+  const readOverlay = () => client.getConfigOverlay();
+  const before = await readOverlay();
+  const previousSize = before.overlay?.props?.query?.filterCache?.size;
+  let changed = false;
+
+  try {
+    const set = await client.config({ "set-property": { [property]: 333 } });
+    changed = true;
+    assert.equal(set.responseHeader?.status, 0);
+
+    const afterSet = await readOverlay();
+    assert.equal(String(afterSet.overlay?.props?.query?.filterCache?.size), "333");
+
+    const unset = await client.config({ "unset-property": property });
+    changed = false;
+    assert.equal(unset.responseHeader?.status, 0);
+
+    const afterUnset = await readOverlay();
+    assert.equal(afterUnset.overlay?.props?.query?.filterCache?.size, undefined);
+
+    if (previousSize !== undefined) {
+      await client.config({ "set-property": { [property]: Number(previousSize) } });
+    }
+  } finally {
+    if (changed) {
+      if (previousSize === undefined) {
+        await client.config({ "unset-property": property });
+      } else {
+        await client.config({ "set-property": { [property]: Number(previousSize) } });
+      }
+    }
+  }
+});
+
+integrationTest("Config API sets and unsets an update-handler property with overlay read-back", async ({ client }) => {
+  const property = "updateHandler.autoCommit.maxTime";
+  const before = await client.getConfigOverlay();
+  const previousValue = before.overlay?.props?.updateHandler?.autoCommit?.maxTime;
+  let changed = false;
+
+  try {
+    const set = await client.config({ "set-property": { [property]: 100_000 } });
+    changed = true;
+    assert.equal(set.responseHeader?.status, 0);
+
+    const afterSet = await client.getConfigOverlay();
+    assert.equal(String(afterSet.overlay?.props?.updateHandler?.autoCommit?.maxTime), "100000");
+
+    const unset = await client.config({ "unset-property": property });
+    changed = false;
+    assert.equal(unset.responseHeader?.status, 0);
+
+    const afterUnset = await client.getConfigOverlay();
+    assert.equal(afterUnset.overlay?.props?.updateHandler?.autoCommit?.maxTime, undefined);
+
+    if (previousValue !== undefined) {
+      await client.config({ "set-property": { [property]: Number(previousValue) } });
+    }
+  } finally {
+    if (changed) {
+      if (previousValue === undefined) {
+        await client.config({ "unset-property": property });
+      } else {
+        await client.config({ "set-property": { [property]: Number(previousValue) } });
+      }
+    }
+  }
+});
