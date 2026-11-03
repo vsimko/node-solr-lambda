@@ -8,8 +8,19 @@ cloudIntegrationTest("SolrCloud update route targets the requested implicit-rout
 }) => {
   const collection = await createImplicitCollection("integration_update_route");
   const shard = "shard2";
-  const created = await client.collections("CREATESHARD", { collection, shard });
+  const created = await client.collections("CREATESHARD", { collection, shard, waitForFinalState: true });
   assert.equal(created.responseHeader?.status, 0, "second implicit-router shard should be created");
+
+  const shardDeadline = Date.now() + 15_000;
+  let shardActive = false;
+  while (Date.now() < shardDeadline) {
+    const status = await client.collections("CLUSTERSTATUS", { collection });
+    const replicas = status.cluster?.collections?.[collection]?.shards?.[shard]?.replicas ?? {};
+    shardActive = Object.values(replicas).some(replica => replica.state === "active");
+    if (shardActive) break;
+    await new Promise(resolve => setTimeout(resolve, 250));
+  }
+  assert.equal(shardActive, true, "new implicit-router shard should have an active replica before routing updates");
 
   const routedClient = clientForCollection(collection);
   const id = `routed_${collection}`;
