@@ -17,7 +17,7 @@ await solr.config({
 });
 ```
 
-Typed command families include set/unset properties, request handlers, search components, query response writers, init params, query parsers, value-source parsers, transformers, update processors, query converters, listeners, and expressible components. Cache settings are configured through `set-property` (for example, `query.filterCache.size`), not through a separate cache command. Plugin-specific properties can be supplied through the explicit `customOptions` escape hatch, which is flattened into the native component definition. Plugin-specific settings and values remain subject to the Solr Config API and installed plugin implementation. Check the documentation for the target Solr version before applying configuration changes.
+Typed command families include set/unset properties, request handlers, search components, query response writers, init params, query parsers, value-source parsers, transformers, update processors, query converters, listeners, and expressible components. `SolrRequestHandlerConfig` exposes typed `defaults`, `appends`, and `invariants` through `SolrConfigRequestHandlerParams`; common request parameters such as `q`, `fq`, `fl`, `rows`, `start`, `sort`, `wt`, `echoParams`, and time limits receive value-aware autocomplete, while the parameter map remains open for Solr extensions. Read models distinguish request handlers, search components, response writers, listeners, and init-params sets; response writers expose `contentType`/`charset`, and listeners expose standard event names with custom plugin event names still accepted. Cache settings are configured through `set-property` (for example, `query.filterCache.size`), not through a separate cache command. Search-component option maps and other plugin-defined component settings remain open; `customOptions` is the explicit flattened escape hatch for plugin-specific command properties. The library does not claim to validate every plugin's schema. Check the documentation for the target Solr version before applying configuration changes.
 
 ## Common properties and response types
 
@@ -30,6 +30,10 @@ The typed read models expose the common sections returned by GET `/config`: quer
 ```ts
 import type {
   SolrConfigCommandResponse,
+  SolrConfigRequestHandlerParams,
+  SolrConfigRequestHandlerSettings,
+  SolrConfigResponseWriterSettings,
+  SolrConfigListenerSettings,
   SolrConfigReadResponse,
   SolrConfigOverlayResponse
 } from "node-solr-lambda";
@@ -43,6 +47,27 @@ const mutation: Promise<SolrConfigCommandResponse> = solr.config({
 
 const effectiveConfig: Promise<SolrConfigReadResponse> = solr.getConfig();
 const overlay: Promise<SolrConfigOverlayResponse> = solr.getConfigOverlay();
+
+const handlerDefaults: SolrConfigRequestHandlerParams = {
+  rows: 25,
+  wt: "json",
+  echoParams: "explicit",
+  fq: ["status:published"]
+};
+void effectiveConfig.then(result => {
+  const requestHandler: SolrConfigRequestHandlerSettings | undefined = result.config?.requestHandler?.["/select"];
+  void requestHandler;
+});
+const responseWriter: SolrConfigResponseWriterSettings = {
+  class: "solr.JSONResponseWriter",
+  contentType: "application/json",
+  charset: "UTF-8"
+};
+const listener: SolrConfigListenerSettings = {
+  class: "solr.QuerySenderListener",
+  event: "postCommit"
+};
+void [handlerDefaults, requestHandlers, responseWriter, listener];
 ```
 
 

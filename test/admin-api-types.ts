@@ -19,6 +19,12 @@ import type {
   SolrConfigReadResponse,
   SolrConfigOverlayResponse,
   SolrConfigCommandResponse,
+  SolrConfigParameterMap,
+  SolrConfigRequestHandlerParams,
+  SolrConfigRequestHandlerSettings,
+  SolrConfigResponseWriterSettings,
+  SolrConfigListenerSettings,
+  SolrConfigListenerEvent,
   CoreAdminParams,
   CoreRequestStatusParams,
   CoreRequestRecoveryParams,
@@ -152,7 +158,33 @@ void configRead.then(result => {
   void [maxDocs, cacheSize, handlerClass];
 });
 const commonProperty: SolrConfigPropertyName = "query.maxBooleanClauses";
-void commonProperty;
+const handlerParams: SolrConfigRequestHandlerParams = {
+  q: "*:*",
+  fq: ["tenant:public", "status:active"],
+  fl: "id,title",
+  rows: 25,
+  start: 0,
+  wt: "json",
+  echoParams: "explicit",
+  customPluginParam: { enabled: true }
+};
+const openPluginParams: SolrConfigParameterMap = { pluginFlag: true, pluginOptions: ["one", "two"] };
+const requestHandlerRead: SolrConfigRequestHandlerSettings = {
+  class: "solr.SearchHandler",
+  defaults: handlerParams,
+  components: ["query", "facet"]
+};
+const responseWriterRead: SolrConfigResponseWriterSettings = {
+  class: "solr.JSONResponseWriter",
+  contentType: "application/json",
+  charset: "UTF-8"
+};
+const listenerRead: SolrConfigListenerSettings = {
+  class: "solr.QuerySenderListener",
+  event: "postCommit"
+};
+const listenerEvent: SolrConfigListenerEvent = "newSearcher";
+void [commonProperty, handlerParams, openPluginParams, requestHandlerRead, responseWriterRead, listenerRead, listenerEvent];
 // @ts-expect-error Common property names are a documented allow-list; misspellings are rejected.
 const invalidConfigProperty: SolrConfigCommand = { "set-property": { "query.maxBooleanClause": 100 } };
 // @ts-expect-error Numeric Config API properties do not accept booleans.
@@ -196,9 +228,13 @@ const invalidReplaceField: SolrSchemaCommand = { "replace-field": { name: "sku",
 const invalidDeleteField: SolrSchemaCommand = { "delete-field": {} };
 // @ts-expect-error Config plugin startup values are constrained.
 const invalidHandler: SolrConfigCommand = { "add-requesthandler": { name: "/select", class: "solr.SearchHandler", startup: "sometimes" } };
+// @ts-expect-error Common request-handler row limits are numeric.
+const invalidHandlerRows: SolrConfigCommand = { "add-requesthandler": { name: "/select", class: "solr.SearchHandler", defaults: { rows: "many" } } };
+// @ts-expect-error Standard echoParams values are constrained.
+const invalidEchoParams: SolrConfigRequestHandlerParams = { echoParams: "sometimes" };
 // @ts-expect-error set-property values must be valid JSON-compatible configuration values.
 const invalidProperty: SolrConfigCommand = { "set-property": { "query.timeout": () => 5 } };
-void [invalidSchema, invalidField, invalidReplaceField, invalidDeleteField, invalidHandler, invalidProperty];
+void [invalidSchema, invalidField, invalidReplaceField, invalidDeleteField, invalidHandler, invalidHandlerRows, invalidEchoParams, invalidProperty];
 
 const createCore: CoreAdminParams<"CREATE"> = {
   name: "catalog",
