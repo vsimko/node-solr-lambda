@@ -144,7 +144,7 @@ The standalone `solrGeofilt()` and `solrBbox()` helpers build raw filter express
 - `geodist()` computes distance for sorting/scoring. Field-type support and units depend on the Solr schema.
 - The client does not convert units. Common lat/lon fields use kilometers by default; RPT and BBoxField may configure `distanceUnits`.
 
-See the [Solr 8.11](https://solr.apache.org/guide/8_11/query-guide/spatial-search.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/query-guide/spatial-search.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/query-guide/spatial-search.html) Spatial Search references. Runtime compatibility remains unverified until tests run against all pinned images.
+See the [Solr 8.11](https://solr.apache.org/guide/8_11/query-guide/spatial-search.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/query-guide/spatial-search.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/query-guide/spatial-search.html) Spatial Search references. Runtime behavior is integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0: geofilt and bbox both include the center and nearby point while excluding a distant point, and geodist sorting orders documents by increasing distance.
 
 ## Highlighting
 
