@@ -11,10 +11,10 @@ This matrix is deliberately action-specific. A generic `client.collections<T>()`
 | `DELETE` | `DeleteCollectionParams` | Consumer-shaped generic response | No dedicated serialization fixture | Fixture cleanup deletes only collections created by the test; all three pinned versions |
 | `RELOAD` | `ReloadCollectionParams` | Consumer-shaped generic response | No dedicated action-specific fixture | No direct Collections RELOAD integration assertion currently recorded |
 | `MODIFYCOLLECTION` | `ModifyCollectionParams` | Consumer-shaped generic response | No dedicated action-specific fixture | No direct integration assertion currently recorded |
-| `CREATEALIAS` | `CreateAliasParams` | Consumer-shaped generic response | Serialization and compile fixture | Alias is created and then used by the test fixture; all three pinned versions |
-| `DELETEALIAS` | `DeleteAliasParams` | Consumer-shaped generic response | No dedicated serialization fixture | Alias cleanup removes only the alias created by the fixture; all three pinned versions |
-| `LISTALIASES` | `ListAliasesParams` | Consumer-shaped generic response | No dedicated serialization fixture | Alias read-back verifies the created alias target; all three pinned versions |
-| `CLUSTERSTATUS` | `ClusterStatusParams` | Ad-hoc consumer response shapes in tests; no exported named cluster-status response model | Generic response shape in integration test source | Reads live nodes, collection/shard/replica state, and verifies lifecycle effects; all three pinned versions |
+| `CREATEALIAS` | `CreateAliasParams` | `SolrCollectionAliasResponse` | Serialization and compile fixture | Alias is created and then used by the test fixture; all three pinned versions |
+| `DELETEALIAS` | `DeleteAliasParams` | `SolrCollectionAliasResponse` | Serialization and compile fixture | Alias cleanup removes only the alias created by the fixture; all three pinned versions |
+| `LISTALIASES` | `ListAliasesParams` | `SolrCollectionAliasesResponse` | Serialization and compile fixture | Alias read-back verifies the created alias target; all three pinned versions |
+| `CLUSTERSTATUS` | `ClusterStatusParams` | `SolrClusterStatusResponse` with extensible collection, shard, and replica models | Default response and nested access compile fixtures; representative runtime envelope unit fixture | Reads live nodes, collection/shard/replica state, and verifies lifecycle effects; all three pinned versions |
 | `ADDREPLICA` | `AddReplicaParams` | Consumer-shaped generic response | Serialization and compile fixtures | Adds a named NRT replica and verifies active state; all three pinned versions |
 | `DELETEREPLICA` | `DeleteReplicaParams` | Consumer-shaped generic response | Serialization and compile fixtures | Removes only the disposable replica created by the test; all three pinned versions |
 | `MOVEREPLICA` | `MoveReplicaParams` | Consumer-shaped generic response | Serialization and compile fixtures | Multi-node test verifies active replica on target node; all three pinned versions |
@@ -47,7 +47,7 @@ This matrix is deliberately action-specific. A generic `client.collections<T>()`
 
 ## Gaps and scope boundaries
 
-1. **Cluster status response typing:** tests currently define local ad-hoc shapes. A public, forward-compatible response model is tracked by [Issue #84](https://github.com/vsimko/node-solr-lambda/issues/84).
+1. **Cluster status response typing:** `SolrClusterStatusResponse` now models the stable live-node, alias, collection, shard, and replica envelope. Unknown and version-specific fields remain open; it is not a closed schema for every SolrCloud response variation.
 2. **Shard split lifecycle:** `SPLITSHARD` has an input type but no safe shared-CI runtime test. Keep it explicitly unverified; [Issue #82](https://github.com/vsimko/node-solr-lambda/issues/82) owns the shard-operation audit.
 3. **Collection role operations:** `ADDROLE` and `REMOVEROLE` currently share `CollectionRoleParams` and have no dedicated serialization or integration evidence. They should not be described as runtime-certified.
 4. **Collection `RELOAD` and `MODIFYCOLLECTION`:** input types exist, but no direct integration assertions are recorded in the current test suite.
