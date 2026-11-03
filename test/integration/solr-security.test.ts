@@ -17,8 +17,17 @@ test("Security API reads and updates BasicAuth and RuleBasedAuthorization config
     auth: { type: "basic", username: username!, password: password! }
   });
 
-  const anonymousResponse = await fetch(`${baseUrl}/admin/authentication`);
-  assert.equal(anonymousResponse.status, 401, "blockUnknown must reject anonymous Security API requests");
+  const anonymousResponses = await Promise.all([
+    fetch(`${baseUrl}/admin/authentication`),
+    fetch(`${baseUrl}/admin/authorization`)
+  ]);
+  assert.deepEqual(anonymousResponses.map(response => response.status), [401, 401],
+    "blockUnknown must reject anonymous authentication and authorization API requests");
+  for (const response of anonymousResponses) {
+    const body = await response.text();
+    assert.equal(body.includes(username!), false, "unauthenticated error must not echo the username");
+    assert.equal(body.includes(password!), false, "unauthenticated error must not echo the password");
+  }
 
   const authentication = await client.security<{
     authentication?: { class?: string; blockUnknown?: boolean };
@@ -39,4 +48,14 @@ test("Security API reads and updates BasicAuth and RuleBasedAuthorization config
     authentication?: { realm?: string };
   }>("authentication");
   assert.equal(updated.authentication?.realm, "integration-security-test");
+
+  const malformed = await client.requestRaw("/solr/admin/authentication", {
+    method: "POST",
+    body: "{",
+    headers: { "content-type": "application/json" }
+  });
+  assert.equal(malformed.ok, false, "malformed Security API JSON must be rejected");
+  const malformedBody = await malformed.text();
+  assert.equal(malformedBody.includes(username!), false, "malformed-request response must not echo the username");
+  assert.equal(malformedBody.includes(password!), false, "malformed-request response must not echo the password");
 });
