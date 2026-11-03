@@ -13,7 +13,7 @@ import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrAuthorizationCommand, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -177,7 +177,13 @@ export class SolrClient extends SolrTransport {
     return metricsApi<T>(this, params, requestOptions);
   }
 
-  security<T = unknown>(area: "authentication" | "authorization", command?: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
+  security<T = SolrAuthorizationResponse>(area: "authorization", command?: SolrAuthorizationCommand, requestOptions?: RequestControlOptions): Promise<T>;
+  security<T = unknown>(area: "authentication", command?: SolrAuthenticationCommand, requestOptions?: RequestControlOptions): Promise<T>;
+  security<T = unknown>(
+    area: "authentication" | "authorization",
+    command?: SolrAuthenticationCommand | SolrAuthorizationCommand,
+    requestOptions: RequestControlOptions = {}
+  ): Promise<T> {
     return securityApi<T>(this, area, command, requestOptions);
   }
 
