@@ -306,8 +306,8 @@ const systemThreads: Promise<SolrSystemThreadsResponse> = client.systemThreads()
 const systemLogging: Promise<SolrSystemLoggingResponse> = client.systemLogging();
 void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).then(([info, properties, threads, logging]) => {
   const mode: string | undefined = info.mode;
-  const javaVersion: string | number | boolean | null | undefined = properties.system?.["java.version"];
-  const dump: string | undefined = threads.threadDump;
+  const javaVersion: string | number | boolean | null | undefined = properties.properties?.["java.version"];
+  const dump = threads.system?.threadDump;
   const loggers = logging.loggers;
   void [mode, javaVersion, dump, loggers];
 });
