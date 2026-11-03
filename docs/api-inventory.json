@@ -538,7 +538,7 @@
         "test/modules.test.ts",
         "test/integration/solr-security.test.ts"
       ],
-      "notes": "Authorization overloads provide SolrAuthorizationResponse and SolrAuthorizationCommand for the built-in RuleBasedAuthorizationPlugin: set-user-role (including null role removal), set-permission, update-permission by numeric index, and delete-permission by numeric index. Permission/configuration fields remain extensible for plugin-specific options. Authentication commands remain generic and are tracked separately in Issue #86. Unit tests verify authorization command serialization and consumer type fixtures; authenticated authorization reads are integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Mutating authorization commands are not run against shared integration security state."
+      "notes": "Authentication overloads default to SolrAuthenticationResponse and accept SolrAuthenticationCommand for BasicAuthPlugin set-user, delete-user, and set-property operations, including documented MultiAuthPlugin Basic scheme wrappers for set-user/set-property. BasicAuth configuration exposes hashed credential strings; these must not be logged or treated as plaintext. Authorization has separate SolrAuthorizationResponse/SolrAuthorizationCommand types for RuleBasedAuthorizationPlugin. Custom plugin schemas remain open/unsupported beyond the explicit extension points. Unit serialization and compile-time fixtures cover auth command shapes; existing authenticated read and set-property/read-back integration tests pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0. User create/delete mutations are not performed against shared integration security state."
     },
     {
       "id": "update.softCommit",
