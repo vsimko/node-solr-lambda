@@ -16,9 +16,17 @@
 
 - Add typed core-level and SolrCloud collection backup/restore APIs with asynchronous status handling.
 - Add typed V1 ReplicationHandler commands and raw file-content streaming through `replication()` and `replicationFile()`.
+- Add typed response contracts for Schema and Config reads, Security authentication/authorization, Metrics, System diagnostics, Core Admin status/async actions, and Collections aliases/cluster status.
+- Add typed Collections shard lifecycle and MIGRATE operations, including V1 wire-name corrections and explicit runtime-verification boundaries.
+- Add typed Streaming Expressions JSON envelopes and Export Handler request/sort models; distinguish parsed JSON expressions from raw streamed Export responses.
+- Harden the public client boundary by keeping transport configuration private and verifying the package-root stable/experimental/internal export decisions.
+- Verify the packed npm tarball in clean consumers, including ESM/CommonJS runtime imports, TypeScript declarations, optional Zod absence, and prerelease/stable dist-tag policy.
 
 ### Documentation
 
+- Add a public API reference and machine-readable operation inventory, with consistency checks against package exports and client methods.
+- Add action-specific Collections API evidence and an explicit public API review, including the stable, generic escape-hatch, and internal export decisions.
+- Document npm tarball validation, prerelease dist-tag behavior, and the release/rollback workflow.
 - Add a Solr 8.11.4/9.11.0/10.1.0 Schema API compatibility matrix with explicit V1/V2 scope and unverified similarity plugin behavior.
 - Add typed Schema API command responses and read-response models for schema metadata, fields, dynamic fields, field types, copy fields, uniqueKey, and similarity.
 - Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.
