@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { cloudIntegrationTest } from "./fixtures.js";
 
+cloudIntegrationTest("Collections API reloads an isolated collection", async ({ client, createCollection }) => {
+  const collection = await createCollection();
+  const result = await client.collections<{ responseHeader?: { status?: number } }>("RELOAD", { name: collection });
+  assert.equal(result.responseHeader?.status, 0, "RELOAD should succeed for the disposable collection");
+
+  const status = await client.collections("CLUSTERSTATUS", { collection });
+  assert.ok(status.cluster?.collections?.[collection], "reloaded collection should remain available");
+});
+
 cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated collection", async ({
   client,
   createCollection,

@@ -31,6 +31,48 @@ test("Collections Admin uses the global endpoint", async () => {
   assert.equal(url.searchParams.get("action"), "LIST");
 });
 
+test("Collections RELOAD, MODIFYCOLLECTION, and role actions serialize action-specific parameters", async () => {
+  const requested: string[] = [];
+  const client = createSolrClient({
+    fetch: async input => {
+      requested.push(String(input));
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.collections("RELOAD", { name: "books" });
+  await client.collections("MODIFYCOLLECTION", {
+    collection: "books",
+    replicationFactor: 2,
+    autoAddReplicas: true,
+    maxShardsPerNode: 4,
+    rule: ["replica:<2"],
+    snitch: ["class:example.ZoneSnitch"]
+  });
+  await client.collections("ADDROLE", { node: "solr-node-1:8983_solr", role: "overseer" });
+  await client.collections("REMOVEROLE", { node: "solr-node-1:8983_solr", role: "overseer" });
+
+  const reload = new URL(requested[0]!);
+  assert.equal(reload.searchParams.get("action"), "RELOAD");
+  assert.equal(reload.searchParams.get("name"), "books");
+
+  const modify = new URL(requested[1]!);
+  assert.equal(modify.searchParams.get("action"), "MODIFYCOLLECTION");
+  assert.equal(modify.searchParams.get("collection"), "books");
+  assert.equal(modify.searchParams.get("replicationFactor"), "2");
+  assert.equal(modify.searchParams.get("autoAddReplicas"), "true");
+  assert.equal(modify.searchParams.get("maxShardsPerNode"), "4");
+  assert.equal(modify.searchParams.get("rule"), "replica:<2");
+  assert.equal(modify.searchParams.get("snitch"), "class:example.ZoneSnitch");
+
+  for (const [index, action] of [[2, "ADDROLE"], [3, "REMOVEROLE"]] as const) {
+    const url = new URL(requested[index]!);
+    assert.equal(url.searchParams.get("action"), action);
+    assert.equal(url.searchParams.get("node"), "solr-node-1:8983_solr");
+    assert.equal(url.searchParams.get("role"), "overseer");
+  }
+});
+
 test("export returns a raw response stream", async () => {
   const client = createSolrClient({
     core: "catalog",

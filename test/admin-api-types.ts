@@ -417,3 +417,23 @@ void clusterStatus.then(result => {
 void collectionClient.collections("CREATEALIAS", { name: "books-current" });
 // @ts-expect-error CLUSTERSTATUS collection filters must be strings.
 void collectionClient.collections("CLUSTERSTATUS", { collection: 42 });
+
+const collectionReload = collectionClient.collections("RELOAD", { name: "books" });
+const collectionModify = collectionClient.collections("MODIFYCOLLECTION", {
+  collection: "books",
+  replicationFactor: 2,
+  readOnly: true,
+  autoAddReplicas: false,
+  maxShardsPerNode: 4
+});
+const addNodeRole = collectionClient.collections("ADDROLE", { node: "solr-node-1:8983_solr", role: "overseer" });
+const removeNodeRole = collectionClient.collections("REMOVEROLE", { node: "solr-node-1:8983_solr", role: "overseer" });
+void [collectionReload, collectionModify, addNodeRole, removeNodeRole];
+// @ts-expect-error RELOAD requires a collection name.
+void collectionClient.collections("RELOAD", {});
+// @ts-expect-error MODIFYCOLLECTION replicationFactor must be numeric.
+void collectionClient.collections("MODIFYCOLLECTION", { collection: "books", replicationFactor: "two" });
+// @ts-expect-error ADDROLE requires a string role.
+void collectionClient.collections("ADDROLE", { node: "solr-node-1:8983_solr", role: 42 });
+// @ts-expect-error REMOVEROLE requires a node.
+void collectionClient.collections("REMOVEROLE", { role: "overseer" });
