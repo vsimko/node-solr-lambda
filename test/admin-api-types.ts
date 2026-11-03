@@ -21,7 +21,8 @@ import type {
   SolrConfigCommandResponse,
   CoreAdminParams,
   CoreAdminStatusResponse,
-  CollectionAdminParams
+  CollectionAdminParams,
+  SolrMetricsResponse
 } from "../src/index.js";
 
 declare const client: SolrClient;
