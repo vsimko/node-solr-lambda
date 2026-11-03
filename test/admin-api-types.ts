@@ -23,7 +23,8 @@ import type {
   CoreRequestStatusParams,
   CoreRequestRecoveryParams,
   CoreAdminStatusResponse,
-  CollectionAdminParams
+  CollectionAdminParams,
+  SolrMetricsResponse
 } from "../src/index.js";
 
 declare const client: SolrClient;
@@ -286,3 +287,13 @@ void client.coreAdmin("REQUESTRECOVERY", coreRequestRecovery);
 void client.coreAdmin("REQUESTSTATUS", {});
 // @ts-expect-error REQUESTRECOVERY requires a core name.
 void client.coreAdmin("REQUESTRECOVERY", {});
+
+
+const metricsJson: Promise<SolrMetricsResponse> = client.metrics({ group: ["jvm", "node"], registry: "solr.core.catalog", prefix: "QUERY", regex: ".*requests.*" });
+const metricsText: Promise<string> = client.metrics<string>({ group: "jvm", wt: "prometheus" });
+void [metricsJson, metricsText];
+
+// @ts-expect-error Metrics groups are strings or arrays of strings.
+void client.metrics({ group: 42 });
+// @ts-expect-error The Metrics API writer is JSON or Prometheus.
+void client.metrics({ wt: "xml" });

@@ -80,3 +80,12 @@ The typed V1 Core Admin surface includes `REQUESTSTATUS` and `REQUESTRECOVERY`:
 Both actions have action-specific exported parameter interfaces and request-serialization tests. The shared integration matrix does not invoke `REQUESTRECOVERY`, because forcing recovery on a shared CI node could interfere with SolrCloud replica availability. `REQUESTSTATUS` is not yet runtime-tested against a submitted Core Admin async job; only its request contract is covered.
 
 `UPGRADEINDEX` is intentionally not in the shared `CoreAdminAction` union: it is documented in the Solr 9.11 and 10.1 guides but is not part of the pinned Solr 8.11.4 baseline. It is also an expensive, in-place index rewrite, unsupported in SolrCloud, and can discard non-stored/non-docValues fields. Use the generic request escape hatch only when the caller has explicitly established server-version and deployment-mode support, and test on a copy with a backup.
+
+
+## Metrics API types and response formats
+
+Use `metrics()` with `SolrMetricsParams` to filter by one or more groups, registry, metric-name prefix, or regular expression. Additional server-specific parameters can be passed through `customParams`. Group and registry names remain open strings because Solr plugins and deployments can register additional values.
+
+The default response type is `SolrMetricsResponse`: a JSON registry map (`SolrMetricsJsonResponse`) or Prometheus exposition text. Registry and metric names are runtime-defined, and individual metric values can differ by plugin and Solr version; the types therefore provide a useful registry/value envelope without claiming a closed catalogue of every metric. Supply an explicit generic when the caller has negotiated a specific writer or validated a narrower payload.
+
+The integration suite verifies the JVM metrics endpoint on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. It accepts the observed JSON registry response on Solr 8/9 and Prometheus text on Solr 10. This evidence does not imply that every registry, group, plugin metric, or filter combination has been exercised.
