@@ -16,6 +16,318 @@
   },
   "entries": [
     {
+      "id": "update.add",
+      "area": "Update",
+      "clientMethod": "add",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/config.test.ts",
+        "test/integration/solr-smoke.test.ts",
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts",
+        "test/validation.test.ts",
+        "test/modules.test.ts"
+      ],
+      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0. commitWithin is a scheduling hint whose hard/soft behavior is controlled by Solr's commitWithin configuration; the client does not force either commit type. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0. Unit tests assert the single-document, document-array, and command-map JSON endpoint selection, typed response header, and HTTP error propagation. Unit tests assert single-document, document-array, and command-map endpoint selection, typed response headers, and HTTP error propagation. "
+    },
+    {
+      "id": "update.atomicUpdate",
+      "area": "Update",
+      "clientMethod": "atomicUpdate",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/atomic-update-types.ts",
+        "test/integration/solr-update.test.ts"
+      ],
+      "notes": "Atomic update has dedicated implementation, type fixtures, and integration coverage; version claims are recorded only where this inventory entry has direct evidence."
+    },
+    {
+      "id": "admin.collections",
+      "area": "Collections",
+      "clientMethod": "collections",
+      "httpMethod": "GET",
+      "path": "/solr/admin/collections?action={action}",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/integration/solr-collections.test.ts",
+        "test/collections-types.ts",
+        "test/backup-restore.test.ts",
+        "test/backup-restore-api-types.ts",
+        "test/integration/solrcloud-backup-restore.test.ts"
+      ],
+      "notes": "SolrCloud CREATE/LIST/DELETE, alias lifecycle, implicit-router shard lifecycle, named ADDREPLICA/DELETEREPLICA lifecycle, replica property add/delete and BALANCESHARDUNIQUE responses, plus multi-node MOVEREPLICA and REBALANCELEADERS leader reassignment are tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #177, #192, #209, and PR #142 CI #224). MOVEREPLICA verifies the named replica becomes active on a different live node. REBALANCELEADERS assigns preferredLeader to an active non-leader and verifies it becomes shard leader. Snapshot, backup, and cluster-state response models remain unverified. Additional operation evidence: Typed SolrCloud collection backup/restore actions and asynchronous REQUESTSTATUS/DELETESTATUS tracking. Full backup, list, restore, query read-back, and delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0 with a shared local filesystem volume mounted on both SolrCloud nodes. S3 and other external repositories are not certified."
+    },
+    {
+      "id": "update.commit",
+      "area": "Update",
+      "clientMethod": "commit",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/integration/solr-smoke.test.ts",
+        "test/integration/solr-update.test.ts",
+        "test/cancellation.types.ts",
+        "test/validation.test.ts"
+      ],
+      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Command-body serialization is covered by explicit unit tests. SolrCommitOptions expose waitSearcher, softCommit, expungeDeletes (hard-commit only), and openSearcher (request parameter); integration tests cover openSearcher=false and expungeDeletes on Solr 8.11.4/9.11.0/10.1.0. Legacy CommitOptions.maxSegments is deprecated and rejected. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
+    },
+    {
+      "id": "config.api",
+      "area": "Config",
+      "clientMethod": "config",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/config",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/config.md",
+      "testFiles": [
+        "test/modules.test.ts",
+        "test/integration/solr-config-security.test.ts",
+        "test/admin-api-types.ts"
+      ],
+      "notes": "Config API set-user-property plus GET /config/overlay userProps read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property (CI #166). Live Security API authentication and authorization checks pass in the dedicated security matrix (CI #162). Common set-property/unset-property names and property-specific values are exported for the shared Solr 8.11/9.11/10.1 baseline; typed command, effective-config, and config-overlay response models are exported. Version-specific common properties remain outside the cross-version property union. TypeScript consumer fixtures cover the shared documented set-property allow-list with value-specific types, unset-property names, arbitrary user properties, and typed effective-config/overlay/command response models; these are compile-time guarantees, not additional live-server assertions."
+    },
+    {
+      "id": "admin.core",
+      "area": "Core Admin",
+      "clientMethod": "coreAdmin",
+      "httpMethod": "GET",
+      "path": "/solr/admin/cores?action={action}",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/integration/solr-core-lifecycle.test.ts"
+      ],
+      "notes": "CoreAdmin CREATE, STATUS, and RELOAD pass with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them (CI #145)."
+    },
+    {
+      "id": "update.delete",
+      "area": "Update",
+      "clientMethod": "delete",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/modules.test.ts",
+        "test/integration/solr-smoke.test.ts",
+        "test/client.test.ts",
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts",
+        "test/validation.test.ts"
+      ],
+      "notes": "Document deletion by ID is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Delete-by-ID and delete-by-query serialization are covered by unit tests; SolrDeleteOptions expose route and commitWithin, with runtime verification of these request options remaining unverified on Solr 8/9/10. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0. Delete-by-query is integration-tested with persisted-state assertions: all matching documents are removed while a non-matching document remains on Solr 8.11.4, 9.11.0, and 10.1.0. "
+    },
+    {
+      "id": "export.api",
+      "area": "Export",
+      "clientMethod": "export",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/export",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/export.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/errors.test.ts",
+        "test/cancellation.test.ts",
+        "test/integration/solr-export.test.ts",
+        "test/export.test.ts",
+        "test/export-api-types.ts"
+      ],
+      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response; exportStream() exposes the byte body. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. includeStoredFields is documented for Solr 10.1 but remains version-specific. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; new unit tests cover typed serialization and streamed chunk consumption."
+    },
+    {
+      "id": "config.get",
+      "area": "Config",
+      "clientMethod": "getConfig",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/config",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/config.md",
+      "testFiles": [
+        "test/config.test.ts",
+        "test/integration/solr-config.test.ts"
+      ],
+      "notes": "Reads the effective configuration through GET /config. The method has dedicated request serialization and integration evidence."
+    },
+    {
+      "id": "config.getOverlay",
+      "area": "Config",
+      "clientMethod": "getConfigOverlay",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/config",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/config.md",
+      "testFiles": [
+        "test/config.test.ts",
+        "test/integration/solr-config.test.ts"
+      ],
+      "notes": "Reads the persisted Config API overlay through GET /config/overlay. Kept separate from getConfig because the endpoint and semantics differ."
+    },
+    {
+      "id": "metrics.api",
+      "area": "Metrics",
+      "clientMethod": "metrics",
+      "httpMethod": "GET",
+      "path": "/solr/admin/metrics",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/modules.test.ts",
+        "test/integration/solr-system-metrics.test.ts"
+      ],
+      "notes": "JVM Metrics API response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Solr 8/9 return the classic JSON registry; Solr 10.1 returns Prometheus exposition text."
+    },
+    {
+      "id": "update.optimize",
+      "area": "Update",
+      "clientMethod": "optimize",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/integration/solr-optimize.test.ts",
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts",
+        "test/validation.test.ts"
+      ],
+      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions. SolrOptimizeOptions expose maxSegments, waitSearcher, and openSearcher; maxSegments is optimize-only and defaults to Solr's unlimited target. The integration test exercises maxSegments on all pinned versions. openSearcher is request-parameter serialized; its optimize-specific runtime effect remains unverified. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
+    },
+    {
+      "id": "admin.ping",
+      "area": "Core Admin",
+      "clientMethod": "ping",
+      "httpMethod": "GET",
+      "path": "/solr/{core-or-collection}/admin/ping",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/administration.md",
+      "testFiles": [
+        "test/admin.test.ts",
+        "test/cancellation.test.ts",
+        "test/integration/solr-core-lifecycle.test.ts"
+      ],
+      "notes": "Ping response status OK is asserted on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
+    },
+    {
       "id": "query.select",
       "area": "Query",
       "clientMethod": "query",
@@ -65,157 +377,52 @@
       "notes": "JSON Request API query body now has a typed SolrJsonQueryRequest model and recursive JSON Facet API terms/query/range definitions, nested metrics, and domain transformations. SolrJsonQueryResponse<TDocument, TJsonFacet> exposes caller-typed facet results. Unit and consumer type tests cover nested serialization and invalid discriminators; integration tests verify terms/query/range facets, nested metrics, and excludeTags domain behavior on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Other JSON Request API options remain available through params or the legacy custom-body overload."
     },
     {
-      "id": "update.add",
-      "area": "Update",
-      "clientMethod": "add",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/update",
+      "id": "replication.handler",
+      "area": "Replication",
+      "clientMethod": "replication",
+      "httpMethod": "GET",
+      "path": "/solr/{core}/replication?command={command}",
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
       "integrationTests": "tested",
+      "documentation": "docs/replication.md",
       "versions": {
         "8": "tested",
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/update.md",
       "testFiles": [
-        "test/client.test.ts",
-        "test/config.test.ts",
-        "test/integration/solr-smoke.test.ts",
-        "test/cancellation.types.ts",
-        "test/integration/solr-update.test.ts",
-        "test/validation.test.ts",
-        "test/modules.test.ts"
+        "test/replication.test.ts",
+        "test/replication-api-types.ts",
+        "test/integration/solr-replication.test.ts",
+        "test/backup-restore.test.ts",
+        "test/backup-restore-api-types.ts",
+        "test/integration/solr-core-backup-restore.test.ts"
       ],
-      "notes": "Document add is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0. commitWithin is a scheduling hint whose hard/soft behavior is controlled by Solr's commitWithin configuration; the client does not force either commit type. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0. Unit tests assert the single-document, document-array, and command-map JSON endpoint selection, typed response header, and HTTP error propagation. Unit tests assert single-document, document-array, and command-map endpoint selection, typed response headers, and HTTP error propagation. "
+      "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, snappull, abort, enablepoll, disablepoll, details, filelist, backup, restore, restorestatus, and deletebackup; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, and filecontent. enablereplication/disablereplication are integration-tested on a configured leader; fetchindex/abortfetch (Solr 10), snappull/abort (Solr 8/9), enablepoll, and disablepoll have unit serialization coverage, but a multi-core leader/follower fetch cycle is not yet certified. Core-level backup, restore, restorestatus, and deletebackup are integration-tested on all three pinned versions. Filelist uses the generation returned by newer Solr indexversion responses and falls back to the legacy indexversion parameter when that field is absent. Additional operation evidence: Core-level ReplicationHandler backup, restore, restorestatus, and deletebackup are typed. Backup defaults to the core dataDir; restore status is polled with restorestatus. Full backup/restore/read-back/delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0. Custom filesystem locations must be permitted by server allowPaths."
     },
     {
-      "id": "update.update",
-      "area": "Update",
-      "clientMethod": "update",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/update",
+      "id": "replication.file",
+      "area": "Replication",
+      "clientMethod": "replicationFile",
+      "httpMethod": "GET",
+      "path": "/solr/{core}/replication?command={command}",
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "tested",
+      "integrationTests": "not-run",
+      "documentation": "docs/replication.md",
       "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
       },
-      "documentation": "docs/update.md",
       "testFiles": [
-        "test/client.test.ts",
-        "test/integration/solr-update.test.ts",
-        "test/cancellation.types.ts",
-        "test/validation.test.ts",
-        "test/modules.test.ts"
+        "test/replication.test.ts",
+        "test/integration/solr-replication.test.ts"
       ],
-      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic updates are integration-tested on all three pinned versions. Typed JSON updateCommands() has its own inventory entry; its add + commit + persisted-document read-back path is integration-tested on all three pinned versions. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0. commitWithin is a scheduling hint whose hard/soft behavior is controlled by Solr's commitWithin configuration; the client does not force either commit type. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
-    },
-    {
-      "id": "update.delete",
-      "area": "Update",
-      "clientMethod": "delete",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/update",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/update.md",
-      "testFiles": [
-        "test/modules.test.ts",
-        "test/integration/solr-smoke.test.ts",
-        "test/client.test.ts",
-        "test/cancellation.types.ts",
-        "test/integration/solr-update.test.ts",
-        "test/validation.test.ts"
-      ],
-      "notes": "Document deletion by ID is exercised in the CRUD smoke test on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Delete-by-ID and delete-by-query serialization are covered by unit tests; SolrDeleteOptions expose route and commitWithin, with runtime verification of these request options remaining unverified on Solr 8/9/10. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0. Delete-by-query is integration-tested with persisted-state assertions: all matching documents are removed while a non-matching document remains on Solr 8.11.4, 9.11.0, and 10.1.0. "
-    },
-    {
-      "id": "update.commit",
-      "area": "Update",
-      "clientMethod": "commit",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/update",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/update.md",
-      "testFiles": [
-        "test/client.test.ts",
-        "test/integration/solr-smoke.test.ts",
-        "test/integration/solr-update.test.ts",
-        "test/cancellation.types.ts",
-        "test/validation.test.ts"
-      ],
-      "notes": "Hard commit with waitSearcher is exercised by the CRUD and update integration tests on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Command-body serialization is covered by explicit unit tests. SolrCommitOptions expose waitSearcher, softCommit, expungeDeletes (hard-commit only), and openSearcher (request parameter); integration tests cover openSearcher=false and expungeDeletes on Solr 8.11.4/9.11.0/10.1.0. Legacy CommitOptions.maxSegments is deprecated and rejected. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
-    },
-    {
-      "id": "update.softCommit",
-      "area": "Update",
-      "clientMethod": "softCommit",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/update",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/update.md",
-      "testFiles": [
-        "test/client.test.ts",
-        "test/integration/solr-update-lifecycle.test.ts",
-        "test/cancellation.types.ts",
-        "test/integration/solr-update.test.ts",
-        "test/validation.test.ts"
-      ],
-      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests. SolrSoftCommitOptions expose waitSearcher/openSearcher; softCommit() now waits for searcher registration by default and is integration-tested for immediate visibility on all pinned versions. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
-    },
-    {
-      "id": "update.optimize",
-      "area": "Update",
-      "clientMethod": "optimize",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/update",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/update.md",
-      "testFiles": [
-        "test/client.test.ts",
-        "test/integration/solr-optimize.test.ts",
-        "test/cancellation.types.ts",
-        "test/integration/solr-update.test.ts",
-        "test/validation.test.ts"
-      ],
-      "notes": "Optimize followed by query asserting committed documents remain available passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. SolrOptimizeOptions expose maxSegments and waitSearcher with unit and consumer type coverage; the existing optimize behavior remains integration-tested on all pinned versions. SolrOptimizeOptions expose maxSegments, waitSearcher, and openSearcher; maxSegments is optimize-only and defaults to Solr's unlimited target. The integration test exercises maxSegments on all pinned versions. openSearcher is request-parameter serialized; its optimize-specific runtime effect remains unverified. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
+      "notes": "Returns raw replication file content as a Response stream; distinct from command-based replication operations."
     },
     {
       "id": "update.rollback",
@@ -243,29 +450,6 @@
       "notes": "Rollback discards a pending, uncommitted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
     },
     {
-      "id": "admin.ping",
-      "area": "Core Admin",
-      "clientMethod": "ping",
-      "httpMethod": "GET",
-      "path": "/solr/{core-or-collection}/admin/ping",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/administration.md",
-      "testFiles": [
-        "test/admin.test.ts",
-        "test/cancellation.test.ts",
-        "test/integration/solr-core-lifecycle.test.ts"
-      ],
-      "notes": "Ping response status OK is asserted on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145)."
-    },
-    {
       "id": "schema.api",
       "area": "Schema",
       "clientMethod": "schema",
@@ -287,118 +471,6 @@
         "test/integration/solr-schema.test.ts"
       ],
       "notes": "Field, field-type, dynamic-field add/replace/delete and copy-field add/delete commands are unit-tested for exact serialization and integration-tested with responseHeader.status plus schema read-back on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Copy-field replacement is implemented by delete+add because Solr has no native replace-copy-field command. Integration tests verify full schema metadata, name, version, uniqueKey, and similarity response envelopes on all pinned versions. Similarity plugin mutation remains runtime-unverified. The public client implements V1 Schema API routes; Solr 10 V2 routes are not included."
-    },
-    {
-      "id": "config.api",
-      "area": "Config",
-      "clientMethod": "config",
-      "httpMethod": "POST",
-      "path": "/solr/{core-or-collection}/config",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/config.md",
-      "testFiles": [
-        "test/modules.test.ts",
-        "test/integration/solr-config-security.test.ts",
-        "test/admin-api-types.ts"
-      ],
-      "notes": "Config API set-user-property plus GET /config/overlay userProps read-back pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup unsets the property (CI #166). Live Security API authentication and authorization checks pass in the dedicated security matrix (CI #162). Common set-property/unset-property names and property-specific values are exported for the shared Solr 8.11/9.11/10.1 baseline; typed command, effective-config, and config-overlay response models are exported. Version-specific common properties remain outside the cross-version property union. TypeScript consumer fixtures cover the shared documented set-property allow-list with value-specific types, unset-property names, arbitrary user properties, and typed effective-config/overlay/command response models; these are compile-time guarantees, not additional live-server assertions."
-    },
-    {
-      "id": "admin.core",
-      "area": "Core Admin",
-      "clientMethod": "coreAdmin",
-      "httpMethod": "GET",
-      "path": "/solr/admin/cores?action={action}",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/administration.md",
-      "testFiles": [
-        "test/admin.test.ts",
-        "test/integration/solr-core-lifecycle.test.ts"
-      ],
-      "notes": "CoreAdmin CREATE, STATUS, and RELOAD pass with unique disposable cores on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; fixture cleanup UNLOADs them (CI #145)."
-    },
-    {
-      "id": "admin.collections",
-      "area": "Collections",
-      "clientMethod": "collections",
-      "httpMethod": "GET",
-      "path": "/solr/admin/collections?action={action}",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/administration.md",
-      "testFiles": [
-        "test/admin.test.ts",
-        "test/integration/solr-collections.test.ts",
-        "test/collections-types.ts"
-      ],
-      "notes": "SolrCloud CREATE/LIST/DELETE, alias lifecycle, implicit-router shard lifecycle, named ADDREPLICA/DELETEREPLICA lifecycle, replica property add/delete and BALANCESHARDUNIQUE responses, plus multi-node MOVEREPLICA and REBALANCELEADERS leader reassignment are tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #177, #192, #209, and PR #142 CI #224). MOVEREPLICA verifies the named replica becomes active on a different live node. REBALANCELEADERS assigns preferredLeader to an active non-leader and verifies it becomes shard leader. Snapshot, backup, and cluster-state response models remain unverified."
-    },
-    {
-      "id": "system.info",
-      "area": "System",
-      "clientMethod": "systemInfo",
-      "httpMethod": "GET",
-      "path": "/solr/admin/info/system",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/administration.md",
-      "testFiles": [
-        "test/modules.test.ts",
-        "test/integration/solr-system-metrics.test.ts"
-      ],
-      "notes": "System info metadata response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
-    },
-    {
-      "id": "metrics.api",
-      "area": "Metrics",
-      "clientMethod": "metrics",
-      "httpMethod": "GET",
-      "path": "/solr/admin/metrics",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "documentation": "docs/administration.md",
-      "testFiles": [
-        "test/modules.test.ts",
-        "test/integration/solr-system-metrics.test.ts"
-      ],
-      "notes": "JVM Metrics API response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Solr 8/9 return the classic JSON registry; Solr 10.1 returns Prometheus exposition text."
     },
     {
       "id": "security.api",
@@ -423,6 +495,31 @@
       "notes": "Authenticated standalone BasicAuth and RuleBasedAuthorization integration tests pass on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images: anonymous rejection, authenticated configuration reads, and authentication set-property/read-back (CI #162)."
     },
     {
+      "id": "update.softCommit",
+      "area": "Update",
+      "clientMethod": "softCommit",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "partial",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/client.test.ts",
+        "test/integration/solr-update-lifecycle.test.ts",
+        "test/cancellation.types.ts",
+        "test/integration/solr-update.test.ts",
+        "test/validation.test.ts"
+      ],
+      "notes": "A newly added document becomes searchable after softCommit on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images (CI #145). Command-body serialization is covered by explicit unit tests. SolrSoftCommitOptions expose waitSearcher/openSearcher; softCommit() now waits for searcher registration by default and is integration-tested for immediate visibility on all pinned versions. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
+    },
+    {
       "id": "streaming.api",
       "area": "Streaming",
       "clientMethod": "stream",
@@ -445,13 +542,13 @@
       "notes": "Streaming Expressions search against a disposable SolrCloud collection passes on Solr 8.11.4, 9.11.0, and 10.1.0 (CI #145)."
     },
     {
-      "id": "export.api",
-      "area": "Export",
-      "clientMethod": "export",
+      "id": "system.info",
+      "area": "System",
+      "clientMethod": "systemInfo",
       "httpMethod": "GET",
-      "path": "/solr/{core-or-collection}/export",
+      "path": "/solr/admin/info/system",
       "methodImplemented": true,
-      "typeCoverage": "complete",
+      "typeCoverage": "partial",
       "unitTests": "present",
       "integrationTests": "tested",
       "versions": {
@@ -459,65 +556,37 @@
         "9": "tested",
         "10": "tested"
       },
-      "documentation": "docs/export.md",
+      "documentation": "docs/administration.md",
       "testFiles": [
-        "test/client.test.ts",
-        "test/errors.test.ts",
-        "test/cancellation.test.ts",
-        "test/integration/solr-export.test.ts",
-        "test/export.test.ts",
-        "test/export-api-types.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response; exportStream() exposes the byte body. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. includeStoredFields is documented for Solr 10.1 but remains version-specific. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; new unit tests cover typed serialization and streamed chunk consumption."
+      "notes": "System info metadata response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images."
     },
     {
-      "id": "transport.request",
-      "area": "Transport",
-      "clientMethod": "request",
-      "httpMethod": "GET|POST|PUT|DELETE",
-      "path": "caller-defined path",
+      "id": "update.update",
+      "area": "Update",
+      "clientMethod": "update",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
       "methodImplemented": true,
-      "typeCoverage": "generic-by-design",
+      "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
-      "documentation": "docs/configuration.md",
+      "documentation": "docs/update.md",
       "testFiles": [
         "test/client.test.ts",
-        "test/config.test.ts",
-        "test/cancellation.test.ts",
-        "test/authentication.test.ts"
+        "test/integration/solr-update.test.ts",
+        "test/cancellation.types.ts",
+        "test/validation.test.ts",
+        "test/modules.test.ts"
       ],
-      "notes": "Generic escape hatch. It does not imply typed support for every Solr endpoint. Basic and Bearer Authorization header construction is unit-tested. The built-in transport does not log requests or add configured authorization values to error properties; custom Fetch logging and server-controlled response bodies still require caller-side redaction."
-    },
-    {
-      "id": "transport.requestRaw",
-      "area": "Transport",
-      "clientMethod": "requestRaw",
-      "httpMethod": "GET|POST|PUT|DELETE",
-      "path": "caller-defined path",
-      "methodImplemented": true,
-      "typeCoverage": "generic-by-design",
-      "unitTests": "present",
-      "integrationTests": "not-run",
-      "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
-      },
-      "documentation": "docs/raw-requests.md",
-      "testFiles": [
-        "test/errors.test.ts",
-        "test/cancellation.test.ts",
-        "test/client.test.ts",
-        "test/raw-request.test.ts",
-        "test/authentication.test.ts"
-      ],
-      "notes": "Generic raw-response escape hatch using the shared Solr transport. Supports typed methods, query parameters, headers, request bodies, cancellation, timeouts, retry policy, configured validation, and standard Solr error classes. Relative paths and same-origin absolute URLs are supported; cross-origin absolute URLs, embedded credentials, and fragments are rejected before Fetch to prevent credential leakage. String bodies are passed through unchanged when callers supply an explicit Content-Type. Custom endpoint behavior is unverified on Solr 8/9/10 until endpoint-specific integration tests are added. Basic and Bearer Authorization header construction is unit-tested. The built-in transport does not log requests or add configured authorization values to error properties; custom Fetch logging and server-controlled response bodies still require caller-side redaction."
+      "notes": "Replacing an existing document and reading back its updated field is tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Atomic updates are integration-tested on all three pinned versions. Typed JSON updateCommands() has its own inventory entry; its add + commit + persisted-document read-back path is integration-tested on all three pinned versions. Named SolrUpdateOptions now expose overwrite, commitWithin, and SolrCloud _route_ serialization; request parameter serialization and invalid values are covered by unit tests. Runtime verification of route/commitWithin options remains unverified on Solr 8/9/10. Field-specific SolrAtomicUpdateOperation and SolrAtomicUpdateDocument types plus atomicUpdate() support set, add, add-distinct, remove, removeregex, and numeric inc. Unit, consumer type, and pinned Solr 8.11.4/9.11.0/10.1.0 integration tests cover atomic updates. Single JSON documents use /update/json/docs; arrays use /update. Both forms are integration-tested on pinned Solr 8.11.4/9.11.0/10.1.0. commitWithin is a scheduling hint whose hard/soft behavior is controlled by Solr's commitWithin configuration; the client does not force either commit type. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0."
     },
     {
       "id": "update.commands",
@@ -543,75 +612,6 @@
         "9": "tested",
         "10": "tested"
       }
-    },
-    {
-      "id": "replication.handler",
-      "area": "Replication",
-      "clientMethod": "replication / replicationFile",
-      "httpMethod": "GET",
-      "path": "/solr/{core}/replication?command={command}",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "documentation": "docs/replication.md",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "testFiles": [
-        "test/replication.test.ts",
-        "test/replication-api-types.ts",
-        "test/integration/solr-replication.test.ts"
-      ],
-      "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, snappull, abort, enablepoll, disablepoll, details, filelist, backup, restore, restorestatus, and deletebackup; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, and filecontent. enablereplication/disablereplication are integration-tested on a configured leader; fetchindex/abortfetch (Solr 10), snappull/abort (Solr 8/9), enablepoll, and disablepoll have unit serialization coverage, but a multi-core leader/follower fetch cycle is not yet certified. Core-level backup, restore, restorestatus, and deletebackup are integration-tested on all three pinned versions. Filelist uses the generation returned by newer Solr indexversion responses and falls back to the legacy indexversion parameter when that field is absent."
-    },
-    {
-      "id": "replication.backup",
-      "area": "Backup and restore",
-      "clientMethod": "replication",
-      "httpMethod": "GET",
-      "path": "/solr/{core}/replication?command=backup|restore|restorestatus|deletebackup",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "documentation": "docs/backup-restore.md",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "testFiles": [
-        "test/backup-restore.test.ts",
-        "test/backup-restore-api-types.ts",
-        "test/integration/solr-core-backup-restore.test.ts"
-      ],
-      "notes": "Core-level ReplicationHandler backup, restore, restorestatus, and deletebackup are typed. Backup defaults to the core dataDir; restore status is polled with restorestatus. Full backup/restore/read-back/delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0. Custom filesystem locations must be permitted by server allowPaths."
-    },
-    {
-      "id": "collections.backup",
-      "area": "Backup and restore",
-      "clientMethod": "collections",
-      "httpMethod": "GET",
-      "path": "/solr/admin/collections?action=BACKUP|RESTORE|LISTBACKUP|DELETEBACKUP|REQUESTSTATUS|DELETESTATUS",
-      "methodImplemented": true,
-      "typeCoverage": "partial",
-      "unitTests": "present",
-      "integrationTests": "tested",
-      "documentation": "docs/backup-restore.md",
-      "versions": {
-        "8": "tested",
-        "9": "tested",
-        "10": "tested"
-      },
-      "testFiles": [
-        "test/backup-restore.test.ts",
-        "test/backup-restore-api-types.ts",
-        "test/integration/solrcloud-backup-restore.test.ts"
-      ],
-      "notes": "Typed SolrCloud collection backup/restore actions and asynchronous REQUESTSTATUS/DELETESTATUS tracking. Full backup, list, restore, query read-back, and delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0 with a shared local filesystem volume mounted on both SolrCloud nodes. S3 and other external repositories are not certified."
     }
   ]
 }
