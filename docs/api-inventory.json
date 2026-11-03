@@ -648,10 +648,11 @@
         "test/cancellation.types.ts",
         "test/integration/solr-update.test.ts",
         "test/validation.test.ts",
-        "test/modules.test.ts"
+        "test/modules.test.ts",
+        "test/integration/solr-json-update-commands.test.ts"
       ],
       "documentation": "docs/update.md",
-      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit and consumer-type tested. The integration suite executes updateCommands() with an add command and commit, then queries and asserts the persisted document on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. openSearcher values in commit/optimize command objects are extracted to the request parameter; conflicting values are rejected. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0.",
+      "notes": "Typed SolrJsonUpdateCommands supports add, delete, commit, optimize, and rollback command objects; command-object serialization and single/array document routing are unit and consumer-type tested. The integration suite independently executes updateCommands() add + commit, delete by ID, delete by query, optimize, and rollback on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Persisted-state assertions verify both delete forms, preservation after optimize, and discard of an uncommitted add after rollback. Commit command options are exercised for searcher visibility. optimize-specific openSearcher behavior remains unverified. openSearcher values in commit/optimize command objects are extracted to the request parameter; conflicting values are rejected. Update methods default to SolrUpdateResponse; successful output validation is wired to the public operation key. SolrHttpError.errorResponse exposes SolrErrorResponse while solrError remains the normalized detail. Mock validation tests cover success/error paths; add/update responseHeader.status is integration-tested on Solr 8.11.4/9.11.0/10.1.0.",
       "clientMethod": "updateCommands",
       "methodImplemented": true,
       "unitTests": "present",
