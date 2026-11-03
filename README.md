@@ -132,3 +132,7 @@ npm run release:check
 ```
 
 Create a short-lived branch from `master`, link changes to a GitHub issue, and open a pull request targeting `master`. CI validates Node.js 20, 22, and 24 and the configured Solr integration matrix. Pull-request merges do not publish the package; releases are published manually after review.
+
+## Release process
+
+Package versioning, prerelease dist-tags, packed-tarball verification, publication, and rollback guidance are documented in [docs/release-process.md](docs/release-process.md).
