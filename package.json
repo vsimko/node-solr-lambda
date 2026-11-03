@@ -49,7 +49,7 @@
     "test:types": "tsc --noEmit -p test/tsconfig.json",
     "release:check": "npm run test:api-inventory && npm run docs:check && npm run test:consumer:no-zod && npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",
-    "release:publish": "npm publish --access public",
+    "release:publish": "node scripts/publish.mjs",
     "test:consumer:no-zod": "node test/no-zod-consumer.mjs",
     "test:api-inventory": "node test/api-inventory.mjs",
     "docs:check": "node scripts/check-docs.mjs"
