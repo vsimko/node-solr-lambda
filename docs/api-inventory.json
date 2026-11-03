@@ -572,7 +572,7 @@
       "httpMethod": "GET",
       "path": "/solr/{core-or-collection}/stream",
       "methodImplemented": true,
-      "typeCoverage": "partial",
+      "typeCoverage": "complete",
       "unitTests": "present",
       "integrationTests": "tested",
       "versions": {
@@ -584,9 +584,10 @@
       "testFiles": [
         "test/modules.test.ts",
         "test/streaming.test.ts",
+        "test/streaming-api-types.ts",
         "test/integration/solr-streaming.test.ts"
       ],
-      "notes": "The client sends Streaming Expressions as expr with wt=json and parses the complete JSON response through the shared transport. This is not an incremental tuple-stream parser and carries no backpressure or memory-bound guarantee. SolrCloud search is integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0; unit tests cover JSON response parsing, cancellation during response-body consumption, and cleanup after response-body stream errors."
+      "notes": "Default SolrStreamingExpressionResponse models the JSON result-set envelope and extensible tuple fields; SolrStreamingExpressionErrorTuple describes in-band EXCEPTION tuples. Callers can supply a response or tuple-specific generic shape. Unknown envelope and tuple fields remain accessible. HTTP-level Solr errors continue through the shared typed transport. SolrCloud search is integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0. Unit tests cover response parsing, in-band error tuples, cancellation during body consumption, and cleanup after body-stream errors. This API parses the complete JSON response and is not an incremental tuple-stream parser."
     },
     {
       "id": "system.info",
