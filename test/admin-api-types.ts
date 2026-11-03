@@ -342,7 +342,7 @@ const invalidPermissionDelete: SolrAuthorizationCommand = { "delete-permission":
 const invalidPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read" } };
 void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission];
 
-import type { SolrAuthenticationCommand, SolrAuthenticationResponse, SolrBasicAuthConfig, SolrClient } from "../src/index.js";
+import type { SolrAuthenticationCommand, SolrAuthenticationResponse, SolrBasicAuthConfig } from "../src/index.js";
 declare const authenticationClient: SolrClient;
 const authenticationRead: Promise<SolrAuthenticationResponse> = authenticationClient.security("authentication");
 void authenticationRead.then(result => {
