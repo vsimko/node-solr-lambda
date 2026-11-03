@@ -74,7 +74,7 @@ integrationTest("Metrics API exposes node metrics and applies registry, prefix, 
 
   const regexPrefix = metricName.slice(0, 1);
   const byRegex = await client.metrics<SolrMetricsJsonResponse>({
-    group: "node", registry: registryName, regex: "^" + regexPrefix, wt: "json"
+    group: "node", registry: registryName, regex: "^" + regexPrefix + ".*$", wt: "json"
   });
   const regexNames = Object.keys(byRegex.metrics?.[registryName] ?? {});
   assert.ok(regexNames.length > 0, "regex filter should retain matching node metrics");
