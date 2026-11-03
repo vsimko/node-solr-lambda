@@ -22,5 +22,6 @@ import "./solr-streaming.test.js";
 import "./solr-system-metrics.test.js";
 import "./solr-update-lifecycle.test.js";
 import "./solr-update.test.js";
+import "./solr-update-cloud.test.js";
 import "./solr-v3-migration.test.js";
 import "./solr-morelikethis.test.js";
