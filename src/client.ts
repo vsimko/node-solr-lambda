@@ -11,7 +11,7 @@ import { metrics as metricsApi } from "./apis/metrics.js";
 import * as advancedApi from "./apis/advanced.js";
 import * as replicationApi from "./apis/replication.js";
 import type {
-  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
+  CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClusterStatusResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
   SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrAuthorizationCommand, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
 } from "./types.js";
@@ -114,15 +114,18 @@ export class SolrClient extends SolrTransport {
     return coreAdminApi<T, A>(this, action, params, requestOptions);
   }
 
-  collections<T = unknown>(action: "LIST" | "LISTALIASES", params?: CollectionAdminParams<"LIST" | "LISTALIASES">, requestOptions?: RequestControlOptions): Promise<T>;
-  collections<T = unknown>(action: "CLUSTERSTATUS", params?: CollectionAdminParams<"CLUSTERSTATUS">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = unknown>(action: "LIST", params?: CollectionAdminParams<"LIST">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionAliasesResponse>(action: "LISTALIASES", params?: CollectionAdminParams<"LISTALIASES">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrClusterStatusResponse>(action: "CLUSTERSTATUS", params?: CollectionAdminParams<"CLUSTERSTATUS">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionAliasResponse>(action: "CREATEALIAS", params: CollectionAdminParams<"CREATEALIAS">, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = SolrCollectionAliasResponse>(action: "DELETEALIAS", params: CollectionAdminParams<"DELETEALIAS">, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = SolrCollectionBackupResponse>(action: "BACKUP", params: CollectionBackupParams, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = SolrCollectionBackupResponse>(action: "RESTORE", params: CollectionRestoreParams, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = SolrCollectionBackupListResponse>(action: "LISTBACKUP", params: CollectionListBackupParams, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = SolrCollectionBackupDeleteResponse>(action: "DELETEBACKUP", params: CollectionDeleteBackupParams, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = SolrCollectionAsyncRequestStatusResponse>(action: "REQUESTSTATUS", params: CollectionAsyncRequestStatusParams, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = SolrCollectionAsyncRequestDeleteResponse>(action: "DELETESTATUS", params: CollectionAsyncRequestDeleteParams, requestOptions?: RequestControlOptions): Promise<T>;
-  collections<T = unknown, A extends Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS"> = Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS">>(action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T = unknown, A extends Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS" | "CREATEALIAS" | "DELETEALIAS" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS"> = Exclude<CollectionAdminAction, "LIST" | "LISTALIASES" | "CLUSTERSTATUS" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS">>(action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
