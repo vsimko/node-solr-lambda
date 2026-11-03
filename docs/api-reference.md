@@ -44,7 +44,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command models; replication and backup/restore models; Export models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
 
 Use named imports from the package root:
 
@@ -66,7 +66,7 @@ try {
 }
 ```
 
-The full operation inventory, type-coverage notes, unit-test status, and Solr 8/9/10 evidence are maintained in the [API coverage matrix](api-coverage.md) and [machine-readable API inventory](api-inventory.json). See [compatibility](compatibility.md) before relying on behavior that is marked unverified. Generic `request()` and `requestRaw()` are escape hatches and do not imply typed support for arbitrary Solr handlers.
+The full operation inventory, type-coverage notes, unit-test status, and Solr 8/9/10 evidence are maintained in the [API coverage matrix](api-coverage.md) and [machine-readable API inventory](api-inventory.json). The stable/experimental/internal decision for every root export and the client method review are recorded in the [public API review](public-api-review.md). See [compatibility](compatibility.md) before relying on behavior that is marked unverified. Generic `request()` and `requestRaw()` are escape hatches and do not imply typed support for arbitrary Solr handlers.
 
 ## Module and declaration entry points
 
