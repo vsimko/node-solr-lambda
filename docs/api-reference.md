@@ -66,7 +66,7 @@ try {
 }
 ```
 
-The full operation inventory, type-coverage notes, unit-test status, and Solr 8/9/10 evidence are maintained in the [API coverage matrix](api-coverage.md) and [machine-readable API inventory](api-inventory.json). See [compatibility](compatibility.md) before relying on behavior that is marked unverified. Generic `request()` and `requestRaw()` are escape hatches and do not imply typed support for arbitrary Solr handlers.
+The full operation inventory, type-coverage notes, unit-test status, and Solr 8/9/10 evidence are maintained in the [API coverage matrix](api-coverage.md) and [machine-readable API inventory](api-inventory.json). The stable/experimental/internal decision for every root export and the client method review are recorded in the [public API review](public-api-review.md). See [compatibility](compatibility.md) before relying on behavior that is marked unverified. Generic `request()` and `requestRaw()` are escape hatches and do not imply typed support for arbitrary Solr handlers.
 
 ## Module and declaration entry points
 
