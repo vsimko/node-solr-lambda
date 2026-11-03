@@ -119,6 +119,11 @@ export class SolrClient extends SolrTransport {
       ? [action: A, params?: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
       : [action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
   ): Promise<CollectionAdminResponse<A>>;
+  collections<T>(
+    action: CollectionAdminAction,
+    params?: CollectionAdminParams<CollectionAdminAction>,
+    requestOptions?: RequestControlOptions
+  ): Promise<T>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
