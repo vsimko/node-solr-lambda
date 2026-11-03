@@ -21,7 +21,7 @@ try {
   const packedFiles = new Set(packageInfo.files.map(file => file.path));
   const requiredFiles = [
     "package.json", "README.md", "LICENSE",
-    "dist/esm/index.js", "dist/cjs/index.js",
+    "dist/esm/index.js", "dist/cjs/index.js", "dist/esm/index.d.ts", "dist/cjs/index.d.ts", "dist/types/index.d.ts",
     "dist/esm/index.d.ts", "dist/cjs/index.d.ts", "dist/types/index.d.ts"
   ];
   for (const path of requiredFiles) {
@@ -44,6 +44,13 @@ try {
 
   const packedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "node-solr-lambda", "package.json"), "utf8"));
   assert.equal(packedManifest.name, packageInfo.name);
+  assert.equal(packedManifest.repository?.url, "https://github.com/vsimko/node-solr-lambda.git");
+  assert.equal(packedManifest.homepage, "https://github.com/vsimko/node-solr-lambda#readme");
+  assert.equal(packedManifest.bugs?.url, "https://github.com/vsimko/node-solr-lambda/issues");
+  assert.ok(packedManifest.keywords?.includes("apache-solr"));
+  assert.equal(packedManifest.main, "./dist/cjs/index.js");
+  assert.equal(packedManifest.module, "./dist/esm/index.js");
+  assert.equal(packedManifest.types, "./dist/types/index.d.ts");
   assert.equal(packedManifest.version, packageInfo.version);
   assert.equal(packedManifest.license, "MIT");
   assert.equal(packedManifest.engines?.node, "^20.0.0 || ^22.0.0 || ^24.0.0");
