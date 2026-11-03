@@ -20,6 +20,8 @@ import type {
   SolrConfigOverlayResponse,
   SolrConfigCommandResponse,
   CoreAdminParams,
+  CoreRequestStatusParams,
+  CoreRequestRecoveryParams,
   CoreAdminStatusResponse,
   CollectionAdminParams
 } from "../src/index.js";
