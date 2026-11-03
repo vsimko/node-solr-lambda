@@ -114,11 +114,17 @@ export class SolrClient extends SolrTransport {
     return coreAdminApi<T, A>(this, action, params, requestOptions);
   }
 
-  collections(action: "LIST", params?: CollectionAdminParams<"LIST">, requestOptions?: RequestControlOptions): Promise<CollectionAdminResponse<"LIST">>;
-  collections<A extends Exclude<CollectionAdminAction, "LIST">>(action: A, params: CollectionAdminParams<NoInfer<A>>, requestOptions?: RequestControlOptions): Promise<CollectionAdminResponse<A>>;
+  collections<const A extends CollectionAdminAction>(
+    ...args: A extends "LIST" | "LISTALIASES"
+      ? [action: A, params?: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
+      : [action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
+  ): Promise<CollectionAdminResponse<A>>;
   /** Explicit generic override for server/plugin-specific Collections response extensions. */
-  collections<T>(action: "LIST", params?: CollectionAdminParams<"LIST">, requestOptions?: RequestControlOptions): Promise<T>;
-  collections<T, A extends Exclude<CollectionAdminAction, "LIST">>(action: A, params: CollectionAdminParams<NoInfer<A>>, requestOptions?: RequestControlOptions): Promise<T>;
+  collections<T, const A extends CollectionAdminAction>(
+    ...args: A extends "LIST" | "LISTALIASES"
+      ? [action: A, params?: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
+      : [action: A, params: CollectionAdminParams<A>, requestOptions?: RequestControlOptions]
+  ): Promise<T>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return collectionsApi<T>(this, action, params, requestOptions);
   }
