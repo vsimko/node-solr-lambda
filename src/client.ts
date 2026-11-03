@@ -122,7 +122,7 @@ export class SolrClient extends SolrTransport {
   /** Explicit generic override for server/plugin-specific Collections response extensions. */
   collections<T, A extends CollectionAdminAction = CollectionAdminAction>(
     action: A,
-    params?: CollectionAdminParams<NoInfer<A>>,
+    params: CollectionAdminParams<NoInfer<A>>,
     requestOptions?: RequestControlOptions
   ): Promise<NoInfer<T>>;
   collections<T = unknown, A extends CollectionAdminAction = CollectionAdminAction>(action: A, params: CollectionAdminParams<A> = {} as CollectionAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
