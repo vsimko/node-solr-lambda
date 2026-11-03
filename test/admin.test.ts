@@ -73,6 +73,32 @@ test("Collections RELOAD, MODIFYCOLLECTION, and role actions serialize action-sp
   }
 });
 
+test("Collections action responses retain their named default envelopes", async () => {
+  const payloads = [
+    { responseHeader: { status: 0, QTime: 1 }, collections: ["books", "catalog"] },
+    { responseHeader: { status: 0, QTime: 2 } },
+    { responseHeader: { status: 0, QTime: 3 }, success: { "10.0.0.1:8983_solr": "core_node2" } },
+    { responseHeader: { status: 0, QTime: 4 } }
+  ];
+  let index = 0;
+  const client = createSolrClient({
+    fetch: async () => new Response(JSON.stringify(payloads[index++]))
+  });
+
+  const listed = await client.collections("LIST");
+  assert.deepEqual(listed.collections, ["books", "catalog"]);
+  assert.equal(listed.responseHeader?.status, 0);
+
+  const created = await client.collections("CREATE", { name: "books" });
+  assert.equal(created.responseHeader?.status, 0);
+
+  const replica = await client.collections("ADDREPLICA", { collection: "books", shard: "shard1", type: "nrt" });
+  assert.deepEqual(replica.success, { "10.0.0.1:8983_solr": "core_node2" });
+
+  const role = await client.collections("ADDROLE", { node: "solr-node-1:8983_solr", role: "overseer" });
+  assert.equal(role.responseHeader?.status, 0);
+});
+
 test("export returns a raw response stream", async () => {
   const client = createSolrClient({
     core: "catalog",

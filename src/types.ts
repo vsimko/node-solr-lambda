@@ -784,6 +784,28 @@ export interface SolrCollectionAliasResponse {
   responseHeader?: SolrResponseHeader;
   [key: string]: unknown;
 }
+
+/** Response to Collections API LIST. Collection names are server-defined identifiers. */
+export interface SolrCollectionListResponse {
+  responseHeader?: SolrResponseHeader;
+  collections?: readonly string[];
+  [key: string]: unknown;
+}
+/** Common response envelope for collection lifecycle and policy actions. */
+export interface SolrCollectionAdminResponse {
+  responseHeader?: SolrResponseHeader;
+  success?: boolean | Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+/** Response envelope for replica lifecycle, movement, balancing, and property actions. */
+export interface SolrCollectionReplicaResponse extends SolrCollectionAdminResponse {
+  requestid?: string;
+}
+/** Response envelope for cluster-wide node role assignment actions. */
+export interface SolrCollectionRoleResponse {
+  responseHeader?: SolrResponseHeader;
+  [key: string]: unknown;
+}
 export interface CreateShardParams extends CollectionRequestBase { collection: string; shard: string; createNodeSet?: string; nrtReplicas?: number; tlogReplicas?: number; pullReplicas?: number; waitForFinalState?: boolean }
 export interface DeleteShardParams extends CollectionRequestBase { collection: string; shard: string; deleteInstanceDir?: boolean; deleteDataDir?: boolean; deleteIndex?: boolean }
 export type SplitShardParams = CollectionRequestBase & {
@@ -886,6 +908,23 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "REQUESTSTATUS" ? CollectionAsyncRequestStatusParams :
   A extends "DELETESTATUS" ? CollectionAsyncRequestDeleteParams :
   CollectionRoleParams;
+
+/** Default response contract selected by the Collections action literal. */
+export type CollectionAdminResponse<A extends CollectionAdminAction> =
+  A extends "LIST" ? SolrCollectionListResponse :
+  A extends "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" ? SolrCollectionAdminResponse :
+  A extends "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" ? SolrCollectionReplicaResponse :
+  A extends "ADDROLE" | "REMOVEROLE" ? SolrCollectionRoleResponse :
+  A extends "LISTALIASES" ? SolrCollectionAliasesResponse :
+  A extends "CLUSTERSTATUS" ? SolrClusterStatusResponse :
+  A extends "CREATEALIAS" | "DELETEALIAS" ? SolrCollectionAliasResponse :
+  A extends "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "MIGRATE" ? SolrCollectionShardOperationResponse :
+  A extends "BACKUP" | "RESTORE" ? SolrCollectionBackupResponse :
+  A extends "LISTBACKUP" ? SolrCollectionBackupListResponse :
+  A extends "DELETEBACKUP" ? SolrCollectionBackupDeleteResponse :
+  A extends "REQUESTSTATUS" ? SolrCollectionAsyncRequestStatusResponse :
+  A extends "DELETESTATUS" ? SolrCollectionAsyncRequestDeleteResponse :
+  never;
 
 /** Standard response header returned by the Solr Schema API. */
 export interface SolrSchemaResponseHeader {
