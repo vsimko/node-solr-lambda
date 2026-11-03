@@ -347,3 +347,29 @@ test("Authorization API serializes typed built-in permission and user-role comma
     { "delete-permission": 3 }
   ]);
 });
+
+test("Authentication API serializes typed BasicAuth user and property commands", async () => {
+  const requested: Array<{ url: string; method: string | undefined; body: unknown }> = [];
+  const client = createSolrClient({ fetch: async (input, init) => {
+    requested.push({ url: String(input), method: init?.method, body: init?.body === undefined ? undefined : JSON.parse(String(init.body)) });
+    return new Response(JSON.stringify({ authentication: { class: "solr.BasicAuthPlugin", blockUnknown: true, realm: "Solr", credentials: { admin: "salted-hash" } } }));
+  } });
+  const response = await client.security("authentication");
+  assert.equal(response.authentication?.class, "solr.BasicAuthPlugin");
+  assert.equal(response.authentication?.blockUnknown, true);
+  assert.equal(response.authentication?.credentials?.admin, "salted-hash");
+  await client.security("authentication", { "set-user": { alice: "secret-password", bob: "another-secret" } });
+  await client.security("authentication", { "delete-user": ["alice", "bob"] });
+  await client.security("authentication", { "set-property": { blockUnknown: true, realm: "Internal Solr", forwardCredentials: false } });
+  await client.security("authentication", { "set-user": { basic: { alice: "secret-password" } } });
+  await client.security("authentication", { "set-property": { basic: { realm: "Basic realm" } } });
+  assert.deepEqual(requested.map(item => new URL(item.url).pathname), Array(6).fill("/solr/admin/authentication"));
+  assert.deepEqual(requested.slice(1).map(item => item.method), Array(5).fill("POST"));
+  assert.deepEqual(requested.slice(1).map(item => item.body), [
+    { "set-user": { alice: "secret-password", bob: "another-secret" } },
+    { "delete-user": ["alice", "bob"] },
+    { "set-property": { blockUnknown: true, realm: "Internal Solr", forwardCredentials: false } },
+    { "set-user": { basic: { alice: "secret-password" } } },
+    { "set-property": { basic: { realm: "Basic realm" } } }
+  ]);
+});
