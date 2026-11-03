@@ -247,3 +247,49 @@ test("Core Admin async status and recovery actions serialize their required para
   assert.equal(recovery.searchParams.get("action"), "REQUESTRECOVERY");
   assert.equal(recovery.searchParams.get("core"), "catalog_shard1_replica1");
 });
+
+
+test("Metrics API serializes typed registry filters and custom parameters", async () => {
+  let requested = "";
+  const client = createSolrClient({
+    fetch: async input => {
+      requested = String(input);
+      return new Response(JSON.stringify({
+        metrics: {
+          "solr.core.catalog": {
+            "QUERY./select.requests": 12,
+            "QUERY./select.errors": 1,
+            "QUERY./select.requestTimes.meanRate": 2.5
+          }
+        }
+      }));
+    }
+  });
+  const result = await client.metrics({
+    group: ["jvm", "node"],
+    registry: "solr.core.catalog",
+    prefix: "QUERY",
+    regex: ".*requests.*",
+    customParams: { wt: "json" }
+  });
+  assert.equal(typeof result, "object");
+  if (typeof result === "object" && result !== null) {
+    assert.equal(result.metrics?.["solr.core.catalog"]?.["QUERY./select.requests"], 12);
+  }
+  const url = new URL(requested);
+  assert.equal(url.pathname, "/solr/admin/metrics");
+  assert.deepEqual(url.searchParams.getAll("group"), ["jvm", "node"]);
+  assert.equal(url.searchParams.get("registry"), "solr.core.catalog");
+  assert.equal(url.searchParams.get("prefix"), "QUERY");
+  assert.equal(url.searchParams.get("regex"), ".*requests.*");
+  assert.equal(url.searchParams.get("wt"), "json");
+});
+
+test("Metrics API accepts Prometheus exposition text", async () => {
+  const client = createSolrClient({
+    fetch: async () => new Response("# HELP jvm_memory_bytes JVM memory\\njvm_memory_bytes 1024\\n")
+  });
+  const result = await client.metrics();
+  assert.equal(typeof result, "string");
+  if (typeof result === "string") assert.match(result, /jvm_memory_bytes 1024/);
+});
