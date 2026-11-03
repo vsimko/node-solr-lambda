@@ -286,3 +286,17 @@ void client.coreAdmin("REQUESTRECOVERY", coreRequestRecovery);
 void client.coreAdmin("REQUESTSTATUS", {});
 // @ts-expect-error REQUESTRECOVERY requires a core name.
 void client.coreAdmin("REQUESTRECOVERY", {});
+
+
+import type { SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse } from "../src/index.js";
+const systemInfo: Promise<SolrSystemInfoResponse> = client.systemInfo();
+const systemProperties: Promise<SolrSystemPropertiesResponse> = client.systemProperties();
+const systemThreads: Promise<SolrSystemThreadsResponse> = client.systemThreads();
+const systemLogging: Promise<SolrSystemLoggingResponse> = client.systemLogging();
+void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).then(([info, properties, threads, logging]) => {
+  const mode: string | undefined = info.mode;
+  const javaVersion: string | number | boolean | null | undefined = properties.system?.["java.version"];
+  const dump: string | undefined = threads.threadDump;
+  const loggers = logging.loggers;
+  void [mode, javaVersion, dump, loggers];
+});
