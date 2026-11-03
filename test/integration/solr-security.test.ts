@@ -49,10 +49,13 @@ test("Security API reads and updates BasicAuth and RuleBasedAuthorization config
   }>("authentication");
   assert.equal(updated.authentication?.realm, "integration-security-test");
 
-  const malformed = await client.requestRaw("/solr/admin/authentication", {
+  const malformed = await fetch(`${baseUrl}/admin/authentication`, {
     method: "POST",
-    body: "{",
-    headers: { "content-type": "application/json" }
+    headers: {
+      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
+      "content-type": "application/json"
+    },
+    body: "{"
   });
   assert.equal(malformed.ok, false, "malformed Security API JSON must be rejected");
   const malformedBody = await malformed.text();
