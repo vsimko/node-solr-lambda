@@ -29,6 +29,9 @@ import type {
   SolrCollectionAdminResponse,
   SolrCollectionReplicaResponse,
   SolrCollectionRoleResponse,
+  SolrMetricValue,
+  SolrMetricsRegistry,
+  SolrMetricsJsonResponse,
   SolrMetricsResponse
 } from "../src/index.js";
 
@@ -338,7 +341,11 @@ void client.coreAdmin("REQUESTRECOVERY", {});
 
 const metricsJson: Promise<SolrMetricsResponse> = client.metrics({ group: ["jvm", "node"], registry: "solr.core.catalog", prefix: "QUERY", regex: ".*requests.*" });
 const metricsText: Promise<string> = client.metrics<string>({ group: "jvm", wt: "prometheus" });
-void [metricsJson, metricsText];
+const metricValue: SolrMetricValue = { count: 2, samples: [1, 2], active: true };
+const metricRegistry: SolrMetricsRegistry = { "QUERY./select.requests": metricValue };
+const metricsEnvelope: SolrMetricsJsonResponse = { metrics: { "solr.core.catalog": metricRegistry } };
+const metricNames: string[] = Object.keys(metricsEnvelope.metrics?.["solr.core.catalog"] ?? {});
+void [metricsJson, metricsText, metricValue, metricRegistry, metricNames];
 
 // @ts-expect-error Metrics groups are strings or arrays of strings.
 void client.metrics({ group: 42 });

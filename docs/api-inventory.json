@@ -274,7 +274,7 @@
         "test/modules.test.ts",
         "test/integration/solr-system-metrics.test.ts"
       ],
-      "notes": "JVM Metrics API response passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Solr 8/9 return the classic JSON registry; Solr 10.1 returns Prometheus exposition text."
+      "notes": "JVM response-format coverage remains distinct: observed JSON registry on Solr 8/9 and Prometheus exposition on Solr 10.1. A node group check asserts non-empty JSON registry data on Solr 8/9 and Prometheus samples on Solr 10.1. Registry, prefix, and regex filters are asserted against JSON responses on Solr 8/9; Solr 10.1 supports Prometheus/OpenMetrics rather than the JSON writer. Exported SolrMetricsJsonResponse, SolrMetricsRegistry, and SolrMetricValue model stable envelope/value shapes while leaving registry and metric names open for plugins and future Solr versions."
     },
     {
       "id": "update.optimize",
