@@ -13,7 +13,7 @@ import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CoreAdminAction, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
@@ -181,7 +181,7 @@ export class SolrClient extends SolrTransport {
     return securityApi<T>(this, area, command, requestOptions);
   }
 
-  stream<T = unknown>(expression: string, requestOptions: RequestControlOptions = {}): Promise<T> {
+  stream<T = SolrStreamingExpressionResponse>(expression: string, requestOptions: RequestControlOptions = {}): Promise<T> {
     return advancedApi.stream<T>(this, this.endpoint("/stream"), expression, requestOptions);
   }
 
