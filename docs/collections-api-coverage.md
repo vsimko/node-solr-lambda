@@ -1,6 +1,6 @@
 # Collections API action coverage
 
-This matrix is deliberately action-specific. A generic `client.collections<T>()` call allows callers to describe a response shape, but it is not a named public response model and does not prove server compatibility. Solr-version evidence below refers only to the pinned Solr 8.11.4, 9.11.0, and 10.1.0 integration jobs.
+This matrix is deliberately action-specific. The public client infers a named response contract from each action literal. The lower-level request helpers remain available for callers that need to model server- or plugin-specific response payloads. Solr-version evidence below refers only to the pinned Solr 8.11.4, 9.11.0, and 10.1.0 integration jobs.
 
 ## Action matrix
 
