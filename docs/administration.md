@@ -69,3 +69,12 @@ The typed Core Admin action set is `STATUS`, `CREATE`, `RELOAD`, `UNLOAD`, `RENA
 | `SPLIT` | Splits a core's index into target cores or filesystem paths. It can create or overwrite substantial index data and depends on valid split ranges/keys and target configuration. | Not exercised; target paths/cores and disk effects are environment-specific. |
 
 `CREATE` and `RELOAD` are covered by the existing isolated lifecycle test. A separate discovery test creates a unique core, calls `STATUS` without the optional `core` filter, and verifies that the returned status map includes that core. Both tests use the fixture's `finally` cleanup, which unloads only cores registered by the test. These lifecycle assertions run against the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images; they do not certify the untested destructive actions above.
+
+
+## Metrics API types and response formats
+
+Use `metrics()` with `SolrMetricsParams` to filter by one or more groups, registry, metric-name prefix, or regular expression. Additional server-specific parameters can be passed through `customParams`. Group and registry names remain open strings because Solr plugins and deployments can register additional values.
+
+The default response type is `SolrMetricsResponse`: a JSON registry map (`SolrMetricsJsonResponse`) or Prometheus exposition text. Registry and metric names are runtime-defined, and individual metric values can differ by plugin and Solr version; the types therefore provide a useful registry/value envelope without claiming a closed catalogue of every metric. Supply an explicit generic when the caller has negotiated a specific writer or validated a narrower payload.
+
+The integration suite verifies the JVM metrics endpoint on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. It accepts the observed JSON registry response on Solr 8/9 and Prometheus text on Solr 10. This evidence does not imply that every registry, group, plugin metric, or filter combination has been exercised.
