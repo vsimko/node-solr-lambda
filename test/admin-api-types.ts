@@ -311,3 +311,33 @@ void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).t
   const loggers = logging.loggers;
   void [mode, javaVersion, dump, loggers];
 });
+
+import type { SolrAuthorizationCommand, SolrAuthorizationPermission, SolrAuthorizationResponse, SolrClient } from "../src/index.js";
+declare const authorizationClient: SolrClient;
+const authorizationRead: Promise<SolrAuthorizationResponse> = authorizationClient.security("authorization");
+void authorizationRead.then(result => {
+  const pluginClass: string | undefined = result.authorization?.class;
+  const role: string | readonly string[] | undefined = result.authorization?.["user-role"]?.alice;
+  const permission: SolrAuthorizationPermission | undefined = result.authorization?.permissions?.[0];
+  const permissionName: string | undefined = permission?.name;
+  void [pluginClass, role, permissionName];
+});
+const setRoles: SolrAuthorizationCommand = { "set-user-role": { alice: ["admin", "dev"], guest: null } };
+const setPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { action: ["LIST", "CLUSTERSTATUS"] }, role: ["admin", "reader"], pluginExtension: { enabled: true } } };
+const updatePermission: SolrAuthorizationCommand = { "update-permission": { index: 1, role: "admin" } };
+const deletePermission: SolrAuthorizationCommand = { "delete-permission": 3 };
+void [setRoles, setPermission, updatePermission, deletePermission];
+void authorizationClient.security("authorization", setRoles);
+void authorizationClient.security("authorization", setPermission);
+void authorizationClient.security("authorization", updatePermission);
+void authorizationClient.security("authorization", deletePermission);
+void authorizationClient.security("authentication", { "set-property": { realm: "Solr" } });
+// @ts-expect-error Permission updates require a numeric index.
+const invalidPermissionUpdate: SolrAuthorizationCommand = { "update-permission": { role: "admin" } };
+// @ts-expect-error User roles are strings, arrays of strings, or null to clear a user mapping.
+const invalidRoleMapping: SolrAuthorizationCommand = { "set-user-role": { alice: 42 } };
+// @ts-expect-error Permission deletion uses the existing permission numeric index.
+const invalidPermissionDelete: SolrAuthorizationCommand = { "delete-permission": "read" };
+// @ts-expect-error Built-in permission creation requires an explicit role assignment.
+const invalidPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read" } };
+void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission];
