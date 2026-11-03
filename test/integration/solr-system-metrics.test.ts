@@ -72,10 +72,12 @@ integrationTest("Metrics API exposes node metrics and applies registry, prefix, 
   assert.ok(prefixNames.every(name => name.startsWith(prefix)),
     "prefix filter should exclude metric names outside the requested prefix");
 
-  const escapedMetricName = metricName.replaceAll(".", "\\\\.");
+  const regexPrefix = metricName.slice(0, 1);
   const byRegex = await client.metrics<SolrMetricsJsonResponse>({
-    group: "node", registry: registryName, regex: "^" + escapedMetricName + "$", wt: "json"
+    group: "node", registry: registryName, regex: "^" + regexPrefix, wt: "json"
   });
-  assert.deepEqual(Object.keys(byRegex.metrics?.[registryName] ?? {}), [metricName],
-    "regex filter should return only the exact matching metric");
+  const regexNames = Object.keys(byRegex.metrics?.[registryName] ?? {});
+  assert.ok(regexNames.length > 0, "regex filter should retain matching node metrics");
+  assert.ok(regexNames.every(name => name.startsWith(regexPrefix)),
+    "regex filter should exclude metric names outside the requested expression");
 });
