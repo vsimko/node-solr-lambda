@@ -18,7 +18,7 @@ cloudIntegrationTest("Collections API creates, lists, and cleans up an isolated 
   assert.ok(cluster.cluster?.collections?.[name], `cluster status should contain ${name}`);
 
   const alias = await createAlias(name);
-  const aliases = await client.collections<{ aliases?: Record<string, string> }>("LISTALIASES");
+  const aliases = await client.collections("LISTALIASES");
   assert.equal(aliases.aliases?.[alias], name);
 
   const implicitName = await createImplicitCollection();
