@@ -1,5 +1,6 @@
 import "./solr-collections.test.js";
 import "./solr-config-security.test.js";
+import "./solr-config-operations.test.js";
 import "./solr-core-lifecycle.test.js";
 import "./solr-export.test.js";
 import "./solr-facets.test.js";
