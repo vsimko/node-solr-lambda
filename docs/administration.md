@@ -55,3 +55,14 @@ The Collections API also exposes action-specific parameter models for `MOVEREPLI
 Use the exported `CoreAdminStatusResponse` type when reading `coreAdmin("STATUS")`. The response models the optional response header, per-core status map, initialization failures, core paths/configuration metadata, and index statistics returned when `indexInfo=true`. Individual properties are optional because unloaded/unavailable cores and requests without index details return smaller payloads. Index signatures preserve additional server- or version-specific metadata.
 
 The unit suite checks both a minimal response and a detailed response containing index statistics and an unknown future field. The isolated-core integration test requests index information, checks the returned core paths and document count, and repeats STATUS after RELOAD on each pinned Solr 8.11.4, 9.11.0, and 10.1.0 CI image. These assertions verify the exercised response shape; they do not claim every optional field is present on every version.
+
+## Additional Core Admin actions
+
+The typed V1 Core Admin surface includes `REQUESTSTATUS` and `REQUESTRECOVERY`:
+
+- `REQUESTSTATUS` requires `requestid` and polls a previously submitted asynchronous Core Admin action. The ID is supplied by the caller in the original action's `async` parameter.
+- `REQUESTRECOVERY` requires `core` and asks that core to synchronize with its leader. Apache documents this as an expert-level recovery operation; use it only when automatic recovery has failed and after verifying the target replica.
+
+Both actions have action-specific exported parameter interfaces and request-serialization tests. The shared integration matrix does not invoke `REQUESTRECOVERY`, because forcing recovery on a shared CI node could interfere with SolrCloud replica availability. `REQUESTSTATUS` is not yet runtime-tested against a submitted Core Admin async job; only its request contract is covered.
+
+`UPGRADEINDEX` is intentionally not in the shared `CoreAdminAction` union: it is documented in the Solr 9.11 and 10.1 guides but is not part of the pinned Solr 8.11.4 baseline. It is also an expensive, in-place index rewrite, unsupported in SolrCloud, and can discard non-stored/non-docValues fields. Use the generic request escape hatch only when the caller has explicitly established server-version and deployment-mode support, and test on a copy with a backup.
