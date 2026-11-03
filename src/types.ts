@@ -1687,3 +1687,35 @@ export interface RequestOptions extends RequestControlOptions {
   body?: unknown;
   operation?: string;
 }
+
+
+
+/** Common envelope for Solr Admin System API information responses. */
+export interface SolrSystemInfoResponse {
+  mode?: string;
+  solr_home?: string;
+  core_root?: string;
+  lucene?: Readonly<Record<string, unknown>>;
+  jvm?: Readonly<Record<string, unknown>>;
+  security?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+/** JVM and process properties returned by /admin/info/properties. */
+export interface SolrSystemPropertiesResponse {
+  system?: Readonly<Record<string, string | number | boolean | null>>;
+  [key: string]: unknown;
+}
+
+/** Thread diagnostics returned by /admin/info/threads; thread details vary by JVM. */
+export interface SolrSystemThreadsResponse {
+  threadDump?: string;
+  [key: string]: unknown;
+}
+
+/** Logging configuration and level data returned by /admin/info/logging. */
+export interface SolrSystemLoggingResponse {
+  levels?: readonly (string | Readonly<Record<string, unknown>>)[];
+  loggers?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
