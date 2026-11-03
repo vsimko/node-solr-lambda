@@ -109,7 +109,7 @@ export class SolrClient extends SolrTransport {
   }
 
   coreAdmin<T = unknown>(action: "STATUS", params?: CoreAdminParams<"STATUS">, requestOptions?: RequestControlOptions): Promise<T>;
-  coreAdmin<T = unknown, A extends Exclude<CoreAdminAction, "STATUS"> = Exclude<CoreAdminAction, "STATUS">>(action: A, params: CoreAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
+  coreAdmin<T = CoreAdminCommandResponse, A extends Exclude<CoreAdminAction, "STATUS"> = Exclude<CoreAdminAction, "STATUS">>(action: A, params: CoreAdminParams<A>, requestOptions?: RequestControlOptions): Promise<T>;
   coreAdmin<T = unknown, A extends CoreAdminAction = CoreAdminAction>(action: A, params: CoreAdminParams<A> = {} as CoreAdminParams<A>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return coreAdminApi<T, A>(this, action, params, requestOptions);
   }
