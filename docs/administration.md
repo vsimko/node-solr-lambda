@@ -26,6 +26,18 @@ Core Admin and Collections API actions now use action-specific exported paramete
 
 `CoreAdminParams<A>` and `CollectionAdminParams<A>` map each action literal to its corresponding parameter interface. Unsupported or version-specific server options should be supplied through `customParams` and checked against the documentation for the target Solr version.
 
+## Collection creation parameters
+
+The V1 `collections("CREATE", params)` contract exposes the documented collection layout options: `numShards`, `shards`, `replicationFactor`, `nrtReplicas`, `tlogReplicas`, and `pullReplicas`. Use `router.name` with `numShards` for the default `compositeId` router, or with `shards` for the `implicit` router. `router.field` selects the field used for compositeId routing instead of the unique key.
+
+The V1 placement options include `createNodeSet` (a comma-separated node list or `EMPTY`), `createNodeSet.shuffle`, `maxShardsPerNode`, and `waitForFinalState`. `perReplicaState` selects per-replica state storage, `alias` creates an alias alongside the collection, and `collection.configName` selects an existing configset. Replica counts and placement are validated by the server against live cluster topology; the client does not predict whether the requested placement is feasible.
+
+Core properties use V1 query parameters with the `property.` prefix. Pass them through `customParams`, for example `customParams: { "property.dataDir": "/var/solr/catalog" }`. This preserves the actual V1 wire format instead of sending a JSON `properties` object.
+
+`rule`, `snitch`, `policy`, `withCollection`, and `autoAddReplicas` are legacy Solr 8.11 autoscaling/placement options. The autoscaling framework was removed in Solr 9, so these fields are not portable to the Solr 9.11 or 10.1 baselines and are retained only for callers explicitly targeting Solr 8.11.4. They are compile-time request options, not a claim that the same placement behavior is available on all supported majors.
+
+The client uses the V1 `/solr/admin/collections` endpoint. V2-only names such as `nodeSet`, `shuffleNodes`, `config`, `router`, `shardNames`, and `createReplicas` must not be sent as V1 parameters. See `test/admin-api-types.ts` for compositeId, implicit-router, replica-type, placement, and config examples.
+
 ## Replica lifecycle parameters
 
 `collections("ADDREPLICA", params)` accepts the exported `AddReplicaParams` model. It exposes the target collection and shard, replica type (`NRT`, `TLOG`, or `PULL`), placement node or candidate node set, optional replica name, final-state wait, and async request ID.
