@@ -28,24 +28,24 @@ assert.deepEqual([...inventoryMethods].sort(), [...publicMethods].sort(),
 
 for (const entry of inventory.entries) {
   assert.ok(entry.id, "Every inventory entry needs an id");
-  assert.equal(entry.methodImplemented, true, `Missing implementation flag for \${entry.id}`);
+  assert.equal(entry.methodImplemented, true, `Missing implementation flag for ${entry.id}`);
   assert.ok(["partial", "complete", "generic-by-design"].includes(entry.typeCoverage));
   assert.ok(["present", "partial", "missing"].includes(entry.unitTests));
   assert.ok(["not-run", "partial", "tested"].includes(entry.integrationTests));
-  assert.ok(entry.documentation && existsSync(entry.documentation), `Missing documentation for \${entry.id}`);
+  assert.ok(entry.documentation && existsSync(entry.documentation), `Missing documentation for ${entry.id}`);
   assert.ok(Array.isArray(entry.testFiles) && entry.testFiles.length > 0);
-  for (const file of entry.testFiles) assert.ok(existsSync(file), `Missing test file \${file} for \${entry.id}`);
+  for (const file of entry.testFiles) assert.ok(existsSync(file), `Missing test file ${file} for ${entry.id}`);
   for (const major of majors) {
     assert.ok(["tested", "unverified"].includes(entry.versions?.[major]),
-      `Invalid Solr \${major} status for \${entry.id}`);
+      `Invalid Solr ${major} status for ${entry.id}`);
   }
   if (entry.integrationTests === "tested") {
     for (const major of majors) assert.equal(entry.versions?.[major], "tested",
-      `Missing Solr \${major} integration evidence for \${entry.id}`);
+      `Missing Solr ${major} integration evidence for ${entry.id}`);
   }
   if (entry.integrationTests === "not-run") {
     for (const major of majors) assert.equal(entry.versions?.[major], "unverified",
-      `Unexpected Solr \${major} evidence for \${entry.id}`);
+      `Unexpected Solr ${major} evidence for ${entry.id}`);
   }
 }
-console.log(`Validated \${inventory.entries.length} method-level API inventory entries.`);
+console.log(`Validated ${inventory.entries.length} method-level API inventory entries.`);
