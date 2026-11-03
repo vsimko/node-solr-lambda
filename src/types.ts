@@ -472,7 +472,12 @@ export interface SolrConfigResponseWriterSettings extends SolrConfigReadPlugin {
 export interface SolrConfigListenerSettings extends SolrConfigReadPlugin {
   event?: SolrConfigListenerEvent;
 }
+/** Effective init-params set with its path selectors and open parameter values. */
+export interface SolrConfigInitParamsSettings extends SolrConfigReadPlugin {
+  path?: string | readonly string[];
+}
 export type SolrConfigReadPluginCollection = Readonly<Record<string, SolrConfigReadPlugin>> | readonly SolrConfigReadPlugin[];
+export type SolrConfigInitParamsCollection = Readonly<Record<string, SolrConfigInitParamsSettings>> | readonly SolrConfigInitParamsSettings[];
 export interface SolrConfigSettings {
   query?: SolrConfigQuerySettings;
   updateHandler?: SolrConfigUpdateHandlerSettings;
@@ -480,7 +485,7 @@ export interface SolrConfigSettings {
   requestHandler?: Readonly<Record<string, SolrConfigRequestHandlerSettings>>;
   searchComponent?: Readonly<Record<string, SolrConfigSearchComponentSettings>>;
   queryResponseWriter?: Readonly<Record<string, SolrConfigResponseWriterSettings>>;
-  initParams?: SolrConfigReadPluginCollection;
+  initParams?: SolrConfigInitParamsCollection;
   listener?: Readonly<Record<string, SolrConfigListenerSettings>> | readonly SolrConfigListenerSettings[];
   directoryFactory?: SolrConfigReadPlugin;
   indexConfig?: Readonly<Record<string, unknown>>;
@@ -1103,10 +1108,10 @@ export interface SolrRequestHandlerConfig extends SolrConfigPlugin {
   components?: string | readonly string[];
 }
 export interface SolrSearchComponentConfig extends SolrConfigPlugin {
-  query?: Readonly<Record<string, SolrConfigValue>>;
-  highlighting?: Readonly<Record<string, SolrConfigValue>>;
-  spellcheck?: Readonly<Record<string, SolrConfigValue>>;
-  terms?: Readonly<Record<string, SolrConfigValue>>;
+  query?: SolrConfigParameterMap;
+  highlighting?: SolrConfigParameterMap;
+  spellcheck?: SolrConfigParameterMap;
+  terms?: SolrConfigParameterMap;
 }
 export interface SolrQueryResponseWriterConfig extends SolrConfigPlugin {
   contentType?: string;
@@ -1115,10 +1120,10 @@ export interface SolrQueryResponseWriterConfig extends SolrConfigPlugin {
 export interface SolrInitParamsConfig {
   name: string;
   path?: string | readonly string[];
-  defaults?: Readonly<Record<string, SolrConfigValue>>;
-  appends?: Readonly<Record<string, SolrConfigValue>>;
-  invariants?: Readonly<Record<string, SolrConfigValue>>;
-  customOptions?: Readonly<Record<string, SolrConfigValue>>;
+  defaults?: SolrConfigParameterMap;
+  appends?: SolrConfigParameterMap;
+  invariants?: SolrConfigParameterMap;
+  customOptions?: SolrConfigParameterMap;
 }
 export interface SolrListenerConfig extends SolrConfigPlugin {
   event: SolrConfigListenerEvent;
