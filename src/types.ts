@@ -1,6 +1,6 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
-export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT";
+export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT" | "REQUESTSTATUS" | "REQUESTRECOVERY";
 export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
 /** Field types supported by the Solr Export Handler field list. */
 export type SolrExportFieldType = "int" | "long" | "float" | "double" | "string" | "date" | "boolean";
@@ -333,6 +333,18 @@ export interface SolrConfigOverlayResponse {
     userProps?: Readonly<Record<string, SolrConfigValue>>;
   };
   responseHeader?: SolrConfigResponseHeader;
+}
+
+/** Required request ID for polling a previously submitted asynchronous Core Admin action. */
+export interface CoreRequestStatusParams {
+  requestid: string;
+  customParams?: SolrAdminCustomParams;
+}
+
+/** Expert-only request to ask a core to recover from its leader. */
+export interface CoreRequestRecoveryParams {
+  core: string;
+  customParams?: SolrAdminCustomParams;
 }
 
 /** A typed Core Admin STATUS request. */
