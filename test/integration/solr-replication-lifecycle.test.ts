@@ -51,8 +51,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const leaderGeneration = leaderVersion.generation ?? Number(leaderVersion.indexversion);
   assert.ok(Number.isFinite(leaderGeneration) && leaderGeneration > 0, "leader must publish a replicable index");
 
-  const solrMajor = process.env.SOLR_VERSION?.split(".")[0];
-  const fetchCommand = solrMajor === "10" ? "fetchindex" : "snappull";
+  const fetchCommand = solrMajor >= 10 ? "fetchindex" : "snappull";
   const fetchResponse = await follower.replication(fetchCommand, { leaderUrl });
   assert.equal(fetchResponse.responseHeader?.status, 0, `${fetchCommand} should complete successfully`);
 
