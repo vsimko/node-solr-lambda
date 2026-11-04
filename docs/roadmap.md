@@ -29,7 +29,8 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 | Work | Tracking |
 | --- | --- |
-| Classify residual documented API gaps as focused follow-up work, deferred scope, or explicit non-goals | [#256](https://github.com/vsimko/node-solr-lambda/issues/256) |
+| Verify Solr 10.1 Export `includeStoredFields` behavior and record exact version evidence | [#258](https://github.com/vsimko/node-solr-lambda/issues/258) |
+| Verify isolated ReplicationHandler abort/async lifecycle semantics, or explicitly retain unverified status | [#259](https://github.com/vsimko/node-solr-lambda/issues/259) |
 
 ### P1 — SolrCloud operation evidence
 
@@ -43,7 +44,7 @@ v4.0 stable publication remains a separate release-owner decision and must not b
 
 ## Dependencies and execution
 
-- #255 is the documentation baseline for #256; keep operation status grounded in exact tests and pinned versions.
+- #255 established the documentation baseline. The #256 gap triage is delivered by this roadmap/API-coverage update; accepted follow-ups are #258 and #259. Keep operation status grounded in exact tests and pinned versions.
 - #232 is independent of the documentation cleanup, but its results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
