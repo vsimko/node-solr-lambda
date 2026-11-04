@@ -23,7 +23,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const documentId = createId("replication_lifecycle");
 
   await leader.config({
-    "add-requesthandler": {
+    "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
       customOptions: { leader: { replicateAfter: "commit" } }
