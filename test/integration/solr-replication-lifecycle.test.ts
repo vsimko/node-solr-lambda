@@ -33,7 +33,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
     "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
-      customOptions: { follower: { leaderUrl } }
+      customOptions: { follower: { leaderUrl, ...(username && password ? { httpBasicAuthUser: username, httpBasicAuthPassword: password } : {}) } }
     }
   });
 
