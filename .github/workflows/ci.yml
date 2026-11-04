@@ -69,6 +69,10 @@ jobs:
       - name: Prepare a reusable configset for CoreAdmin lifecycle fixtures
         run: |
           docker exec solr bash -lc 'mkdir -p /var/solr/data/configsets && cp -a /opt/solr/server/solr/configsets/_default /var/solr/data/configsets/_default'
+          if [[ "${{ matrix.solr-version }}" == "8.11.4" ]]; then
+            docker exec solr sed -i 's/<requestDispatcher>/<requestDispatcher handleSelect="true">/' /var/solr/data/configsets/_default/conf/solrconfig.xml
+            docker exec solr grep -q '<requestDispatcher handleSelect="true">' /var/solr/data/configsets/_default/conf/solrconfig.xml
+          fi
       - name: Run Solr integration smoke tests
         run: npm run test:integration
         env:
@@ -152,6 +156,10 @@ jobs:
       - name: Prepare a reusable configset for CoreAdmin lifecycle fixtures
         run: |
           docker exec solr-secure bash -lc 'mkdir -p /var/solr/data/configsets && cp -a /opt/solr/server/solr/configsets/_default /var/solr/data/configsets/_default'
+          if [[ "${{ matrix.solr-version }}" == "8.11.4" ]]; then
+            docker exec solr-secure sed -i 's/<requestDispatcher>/<requestDispatcher handleSelect="true">/' /var/solr/data/configsets/_default/conf/solrconfig.xml
+            docker exec solr-secure grep -q '<requestDispatcher handleSelect="true">' /var/solr/data/configsets/_default/conf/solrconfig.xml
+          fi
       - name: Run authenticated Solr integration tests
         run: npm run test:integration
         env:
