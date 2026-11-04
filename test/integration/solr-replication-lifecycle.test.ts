@@ -29,7 +29,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
       name: "/replication",
       class: "solr.ReplicationHandler",
       handleSelect: true,
-      customOptions: { leader: { replicateAfter: "commit" } }
+      customOptions: { leader: { replicateAfter: ["commit"] } }
     }
   });
   assert.equal(leaderConfig.responseHeader?.status, 0);
