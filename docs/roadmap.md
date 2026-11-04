@@ -29,7 +29,6 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 | Work | Tracking |
 | --- | --- |
-| Verify Solr 10.1 Export `includeStoredFields` behavior and record exact version evidence | [#258](https://github.com/vsimko/node-solr-lambda/issues/258) |
 | Verify isolated ReplicationHandler abort/async lifecycle semantics, or explicitly retain unverified status | [#259](https://github.com/vsimko/node-solr-lambda/issues/259) |
 
 ### P1 — SolrCloud operation evidence
@@ -44,7 +43,7 @@ v4.0 stable publication remains a separate release-owner decision and must not b
 
 ## Dependencies and execution
 
-- #255 established the documentation baseline. The #256 gap triage is delivered by this roadmap/API-coverage update; accepted follow-ups are #258 and #259. Keep operation status grounded in exact tests and pinned versions.
+- #255 established the documentation baseline. The #256 gap triage is delivered by the merged roadmap/API-coverage update; #258 is verified by PR #261, while #259 remains the focused ReplicationHandler lifecycle follow-up. Keep operation status grounded in exact tests and pinned versions.
 - #232 is independent of the documentation cleanup, but its results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
@@ -63,6 +62,7 @@ Closed issues are retained as historical evidence, not active priorities:
 - Packaging, public API review, and operation inventory foundations: #104, #108, #184, and #185.
 - Feature and evidence follow-ups #228–#231 and #233–#238 are completed and merged. #238 (ReplicationHandler one-shot leader/follower fetch and read-back) was completed by merged PR #253.
 - The post-#253 documentation reconciliation is delivered by PR #257 (#255); it is not a continuing roadmap priority once merged.
+- Solr 10.1 Export `includeStoredFields=true` stored-only field read-back is verified by PR #261 (#258); Solr 8/9 behavior remains unclaimed.
 - PR #253 also added the isolated opt-in SolrCloud test harness for SPLITSHARD/MIGRATE. Those actions remain unverified until the manual workflow has actually passed.
 
 ## Workflow

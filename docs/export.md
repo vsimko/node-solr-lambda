@@ -52,4 +52,4 @@ The field type union is descriptive metadata for application schemas; the client
 
 The supported Export writers are `json` and `javabin`; legacy `xsort` is accepted as an alias for JSON. Local `expr` processing must use `input()` as its source. Distributed export requires Streaming Expressions.
 
-The existing live integration test exercises a raw Export response with a docValues sort field on Solr 8.11.4, 9.11.0, and 10.1.0. Typed parameter serialization and incremental stream consumption have unit coverage. `includeStoredFields` is documented by Solr 10.1; its behavior on Solr 8/9 is not claimed.
+The live integration test exercises a raw Export response with a docValues sort field on Solr 8.11.4, 9.11.0, and 10.1.0. A separate Solr 10.1-only test creates a stored-only field and verifies that `includeStoredFields=true` returns its value (PR #261 / CI #648). This option is not claimed for Solr 8/9. Typed parameter serialization and incremental stream consumption have unit coverage.
