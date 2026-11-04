@@ -20,7 +20,6 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const leader = makeClient(leaderCore);
   const follower = makeClient(followerCore);
   const solrMajor = Number(process.env.SOLR_VERSION?.split(".")[0] ?? "0");
-  // Solr routes qt=/replication through /select; handleSelect belongs on /select.
   const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}/replication`;
   const documentId = createId("replication_lifecycle");
 
@@ -32,14 +31,6 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
     }
   });
   assert.equal(leaderConfig.responseHeader?.status, 0);
-  const selectConfig = await leader.config({
-    "update-requesthandler": {
-      name: "/select",
-      class: "solr.SearchHandler",
-      handleSelect: true
-    }
-  });
-  assert.equal(selectConfig.responseHeader?.status, 0);
   const followerConfig = await follower.config({
     "update-requesthandler": {
       name: "/replication",
@@ -57,7 +48,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const leaderGeneration = leaderVersion.generation ?? Number(leaderVersion.indexversion);
   assert.ok(Number.isFinite(leaderGeneration) && leaderGeneration > 0, "leader must publish a replicable index");
 
-  const fetchCommand = solrMajor >= 10 ? "fetchindex" : "snappull";
+  const fetchCommand = solrMajor >= 9 ? "fetchindex" : "snappull";
   const fetchResponse = await follower.replication(fetchCommand, { leaderUrl });
   assert.equal(fetchResponse.responseHeader?.status, 0, `${fetchCommand} should complete successfully`);
 
@@ -74,7 +65,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   }
   if (!found) {
     const details = await follower.replication("details");
-    const abortCommand = solrMajor >= 10 ? "abortfetch" : "abort";
+    const abortCommand = solrMajor >= 9 ? "abortfetch" : "abort";
     await follower.replication(abortCommand).catch(() => undefined);
     assert.fail(`follower did not expose the leader document after fetch; details: ${JSON.stringify(details)}`);
   }
