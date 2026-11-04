@@ -29,7 +29,6 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 | Work | Tracking |
 | --- | --- |
-| Reconcile roadmap, compatibility matrix, API coverage, inventory, and test evidence after the latest merged work | [#255](https://github.com/vsimko/node-solr-lambda/issues/255) |
 | Classify residual documented API gaps as focused follow-up work, deferred scope, or explicit non-goals | [#256](https://github.com/vsimko/node-solr-lambda/issues/256) |
 
 ### P1 — SolrCloud operation evidence
@@ -61,7 +60,8 @@ Closed issues are retained as historical evidence, not active priorities:
 - CoreAdmin and Collections implementation: [#77–#85](https://github.com/vsimko/node-solr-lambda/issues/77).
 - Security, System, Metrics, Streaming Expressions, and Export foundations: [#86–#94](https://github.com/vsimko/node-solr-lambda/issues/86).
 - Packaging, public API review, and operation inventory foundations: #104, #108, #184, and #185.
-- Feature and evidence follow-ups #228–#231 and #233–#237 are completed and merged. #238 (ReplicationHandler one-shot leader/follower fetch and read-back) was completed by merged PR #253.
+- Feature and evidence follow-ups #228–#231 and #233–#238 are completed and merged. #238 (ReplicationHandler one-shot leader/follower fetch and read-back) was completed by merged PR #253.
+- The post-#253 documentation reconciliation is delivered by PR #257 (#255); it is not a continuing roadmap priority once merged.
 - PR #253 also added the isolated opt-in SolrCloud test harness for SPLITSHARD/MIGRATE. Those actions remain unverified until the manual workflow has actually passed.
 
 ## Workflow
