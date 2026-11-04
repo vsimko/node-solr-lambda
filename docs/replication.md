@@ -103,4 +103,7 @@ Supported directory types are `file` (Lucene index files), `cf` (configuration f
 - The client currently exposes the V1 handler path. Solr 10.1 also documents V2 equivalents for selected file and index-version operations; no dedicated V2 wrapper is provided.
 - The handler may not be configured for user-managed leader/follower replication on every core. The server must have the appropriate ReplicationHandler configuration before control commands can be used.
 
+- The pinned integration matrix creates disposable leader and follower cores, commits a unique leader document, triggers `snappull` on Solr 8/9 or `fetchindex` on Solr 10, and verifies that the document becomes searchable on the follower. This verifies a complete fetch/read-back cycle, not polling or abort of an in-progress transfer.
+- `abort` (Solr 8/9) and `abortfetch` (Solr 10), plus `enablepoll`/`disablepoll`, have request-serialization unit coverage; cancellation of a live transfer remains unverified.
+
 See the [Solr 8.11](https://solr.apache.org/__root/docs.solr.apache.org/guide/8_11/deployment-guide/user-managed-index-replication.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/deployment-guide/user-managed-index-replication.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/user-managed-index-replication.html) guides for server configuration and command semantics.
