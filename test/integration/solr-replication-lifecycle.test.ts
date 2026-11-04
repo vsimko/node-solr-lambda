@@ -82,9 +82,6 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
 integrationTest("ReplicationHandler aborts an in-progress fetch and reports its state", async ({
   createCore,
   createId,
-  addSchemaField,
-  addDocuments,
-  commit
 }) => {
   const leaderCore = await createCore("replication_abort_leader");
   const followerCore = await createCore("replication_abort_follower");
@@ -104,7 +101,7 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
   const storedField = createId("replication_payload");
   const payload = randomBytes(12 * 1024 * 1024).toString("base64");
 
-  await addSchemaField(storedField, "string", false, false);
+  await leader.schema({ "add-field": { name: storedField, type: "string", stored: true, indexed: false, docValues: false } });
   await leader.add([{ id: documentId, [storedField]: payload }]);
   await leader.commit({ waitSearcher: true });
 
