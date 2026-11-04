@@ -192,6 +192,7 @@ const invalidConfigValue: SolrConfigCommand = { "set-property": { "query.maxBool
 // @ts-expect-error unset-property only accepts known common Config API property names.
 const invalidUnsetProperty: SolrConfigCommand = { "unset-property": "query.notARealSetting" };
 void [invalidConfigProperty, invalidConfigValue, invalidUnsetProperty];
+const handleSelectHandler: SolrConfigCommand = { "add-requesthandler": { name: "/replication", class: "solr.ReplicationHandler", handleSelect: true } };
 const addHandler: SolrConfigCommand = {
   "add-requesthandler": {
     name: "/select",
@@ -214,6 +215,7 @@ const addInitParams: SolrConfigCommand = {
   "add-initparams": { name: "shared-search-params", path: ["/select", "/query"], defaults: { rows: 20, wt: "json" } }
 };
 void client.config(setProperty);
+void client.config(handleSelectHandler);
 void client.config(addHandler);
 void client.config(addListener);
 void client.config(addInitParams);
