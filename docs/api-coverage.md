@@ -32,6 +32,31 @@ A generic request method does not mean that every endpoint has a typed wrapper, 
 | Export | `export()`, `exportStream()`; exported `SolrExportParams`, `SolrExportSort`, and `SolrExportFieldType` | Export requests require typed `fl` and `sort` parameters, support repeated filter queries, structured or raw sort expressions, batch sizing, JSON/JavaBin writers, and an explicit custom-parameter escape hatch. The raw Response preserves backpressure-aware streaming; `exportStream()` exposes its byte body directly. Sort fields must be single-valued docValues fields (int, long, float, double, or string); field lists additionally support date and boolean and may be multi-valued. Solr 10.1 `includeStoredFields` support is exposed but requires version-specific verification. Existing raw Export response tests pass on pinned Solr 8.11.4/9.11.0/10.1.0; typed parameter serialization and streamed chunk consumption have unit coverage. See [Export docs](export.md) and Issues #92–#94. |
 | Advanced / Raw | `requestRaw(path, options)` with typed method/query/header/body/control options and a raw Fetch `Response` | Relative paths and same-origin absolute URLs use the shared transport. Cross-origin URLs, embedded credentials, and URL fragments are rejected before Fetch, preventing configured credentials from being sent to unrelated hosts. Generic request()/requestRaw() transport behavior has unit coverage only; arbitrary custom endpoint behavior remains unverified until endpoint-specific integration tests exist. See [raw requests](raw-requests.md) and Issue #98. |
 
+## Deferred work and explicit scope boundaries
+
+The following gaps were reviewed for the TypeScript-first, balanced product scope. They are not implicit implementation commitments.
+
+### Accepted, focused verification work
+
+- **Export `includeStoredFields`** — Solr 10.1 behavior needs an isolated runtime assertion; tracked by [#258](https://github.com/vsimko/node-solr-lambda/issues/258). Existing Export streaming tests do not certify this option.
+- **ReplicationHandler abort/async lifecycle** — one-shot `fetchindex` and follower read-back are verified, but abort/polling semantics are not; tracked by [#259](https://github.com/vsimko/node-solr-lambda/issues/259).
+
+### Deferred pending a concrete consumer requirement
+
+- **Solr-version-specific error payload variants** — error envelopes preserve unknown fields and expose the typed common shape. Add version-specific models only when a concrete incompatible payload is identified and can be tested.
+- **Advanced authentication (for example OAuth or mTLS)** — deployment-specific credential acquisition and certificate lifecycle are outside the built-in Basic/Bearer transport contract. The custom Fetch/headers extension points remain available.
+- **Retry telemetry** — retry policy is opt-in; logging/metrics integration belongs to caller observability policy. The transport deliberately avoids logging credentials or server-controlled bodies.
+- **Additional validation adapters and operation-specific schema examples** — the generic schema interface and optional Zod peer cover the supported extension contract. Add another adapter only for a demonstrated ecosystem demand.
+- **Runtime verification of Core Admin `RENAME`, `SWAP`, `MERGEINDEXES`, `SPLIT`, `REQUESTSTATUS`, and `REQUESTRECOVERY`** — these operations have isolated/destructive or operational side effects and remain type/serialization-covered only until a safe, deterministic disposable environment is justified.
+- **Collections `MODIFYCOLLECTION`, `ADDROLE`, and `REMOVEROLE` runtime verification** — these mutate cluster-wide policy/configuration and are not run against shared CI state. SPLITSHARD/MIGRATE have the separate opt-in gate in [#232](https://github.com/vsimko/node-solr-lambda/issues/232).
+
+### Intentional non-goals
+
+- **Plugin-specific Schema similarity mutation and plugin-specific Metrics/Auth schemas** — arbitrary plugin contracts are not part of the closed typed surface. Common stable fields remain typed and extension points preserve unknown/custom fields.
+- **Solr 10 V2 routes where the client explicitly implements V1 contracts** — V2 is a distinct API surface, not a silent compatibility extension. Add it only as a separately scoped feature with its own types and tests.
+
+These decisions do not change the compatibility matrix: unverified operations remain unverified until exact runtime evidence exists.
+ 
 ## Request controls
 
 Typed client methods support per-request cancellation and timeout controls. Caller cancellation throws `SolrAbortError`; a configured timeout throws `SolrTimeoutError`. The timeout remains active while JSON response bodies are read and while raw `requestRaw()` or export response streams are consumed. See [error handling](errors.md).
