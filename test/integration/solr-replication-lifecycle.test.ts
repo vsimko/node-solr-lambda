@@ -27,11 +27,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
     "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
-      customOptions: {
-        leader: { replicateAfter: ["commit"] },
-        // Throttle leader file streaming so the follower remains in a real in-progress fetch.
-        defaults: { maxWriteMBPerSec: 0.05 }
-      }
+      customOptions: { leader: { replicateAfter: ["commit"] } }
     }
   });
   assert.equal(leaderConfig.responseHeader?.status, 0);
@@ -113,7 +109,11 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
     "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
-      customOptions: { leader: { replicateAfter: ["commit"] } }
+      customOptions: {
+        leader: { replicateAfter: ["commit"] },
+        // Throttle leader file streaming so the follower remains in a real in-progress fetch.
+        defaults: { maxWriteMBPerSec: 0.05 }
+      }
     }
   });
   await follower.config({
