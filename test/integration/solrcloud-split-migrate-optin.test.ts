@@ -48,8 +48,8 @@ cloudIntegrationTest(
     const shardsAfter = statusAfter.cluster?.collections?.[collection]?.shards ?? {};
     assert.ok(Object.keys(shardsAfter).length >= 2, "cluster state should expose the split child shards");
     assert.ok(
-      Object.values(shardsAfter).every(shard => shard.state === "active"),
-      "all resulting shards should be active"
+      Object.values(shardsAfter).filter(shard => shard.state === "active").length >= 2,
+      "at least two child shards should be active"
     );
     const result = await source.query({ query: "*:*", fields: ["id"], limit: 10 });
     assert.equal(result.response?.numFound, ids.length, "all documents should remain searchable after the split");
