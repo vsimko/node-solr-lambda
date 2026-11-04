@@ -20,7 +20,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const leader = makeClient(leaderCore);
   const follower = makeClient(followerCore);
   const solrMajor = Number(process.env.SOLR_VERSION?.split(".")[0] ?? "0");
-  // `leaderUrl` is the fully qualified ReplicationHandler URL.
+  // Solr routes qt=/replication through /select; handleSelect belongs on /select.
   const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}/replication`;
   const documentId = createId("replication_lifecycle");
 
@@ -28,16 +28,22 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
     "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
-      handleSelect: true,
       customOptions: { leader: { replicateAfter: ["commit"] } }
     }
   });
   assert.equal(leaderConfig.responseHeader?.status, 0);
+  const selectConfig = await leader.config({
+    "update-requesthandler": {
+      name: "/select",
+      class: "solr.SearchHandler",
+      handleSelect: true
+    }
+  });
+  assert.equal(selectConfig.responseHeader?.status, 0);
   const followerConfig = await follower.config({
     "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
-      handleSelect: true,
       customOptions: { follower: { leaderUrl, ...(username && password ? { httpBasicAuthUser: username, httpBasicAuthPassword: password } : {}) } }
     }
   });
