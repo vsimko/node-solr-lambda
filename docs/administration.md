@@ -161,3 +161,19 @@ The alias and cluster-status integration checks exercise alias read-back, collec
 The V1 parameter spellings are intentional: this client calls `/solr/admin/collections`, not the Solr 10 V2 `/api/collections` resources. The V2 API maps `split.key` to `splitKey` and `target.collection` to `target`; those V2 names must not be sent through this V1 client.
 
 Reference guides: [Solr 8.1 Collections API](https://archive.apache.org/dist/lucene/solr/ref-guide/apache-solr-ref-guide-8.1.pdf), [Solr 9.2 Collection Management](https://solr.apache.org/guide/solr/9_2/deployment-guide/collection-management.html), [Solr 9.10 Shard Management](https://solr.apache.org/guide/solr/9_10/deployment-guide/shard-management.html), and [Solr 10.0 Collections API](https://solr.apache.org/guide/solr/10_0/configuration-guide/collections-api.html).
+
+
+## Opt-in SPLITSHARD and MIGRATE verification
+
+These operations are intentionally excluded from normal push/pull-request CI. The opt-in suite uses only collections created by the fixture with unique `integration_*` names. It refuses to run unless all of the following are true:
+
+- `SOLR_CLOUD=true` and `SOLR_MULTINODE=true`.
+- `SOLR_DESTRUCTIVE_OPT_IN=true` is explicitly set.
+- `SOLR_BASE_URL` resolves to localhost / loopback; remote Solr endpoints are skipped.
+- The disposable cluster reports at least two live nodes; the split test additionally confirms its new collection starts with one shard and the migration test confirms the target collection is empty.
+
+Run it from the GitHub Actions **CI** workflow using **Run workflow** and enable `enable_destructive_solrcloud_tests`. This provisions the workflow's ephemeral two-node SolrCloud cluster and runs the opt-in tests for the pinned Solr version matrix. Leaving the input disabled keeps both tests skipped, including on ordinary pull requests.
+
+The tests use asynchronous request IDs and poll `REQUESTSTATUS` for up to 180 seconds, then remove completed status records. They verify active child-shard state and post-split document visibility, and verify that every routed document is searchable in the migration target. They do not claim to test concurrent writes, rollback of a partially completed operation, or recovery after a cluster/node failure.
+
+If a request times out or fails, do not rerun against a reused cluster. Preserve the CI job logs, inspect `CLUSTERSTATUS` and `REQUESTSTATUS`, and discard the ephemeral cluster. Fixture cleanup deletes only the collections it created; if Solr still has an operation in flight and refuses deletion, destroy the ephemeral cluster rather than attempting cleanup against a shared server. The suite is an opt-in verification harness, not permission to point these destructive actions at a user-owned cluster.
