@@ -1,7 +1,24 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { cloudIntegrationTest } from "./fixtures.js";
 
 const routeKey = "tenant!";
+
+async function waitForCollectionRequest(client: import("../../src/index.js").SolrClient, requestId: string): Promise<void> {
+  for (let attempt = 0; attempt < 180; attempt += 1) {
+    const result = await client.collections("REQUESTSTATUS", { requestid: requestId });
+    const state = result.status?.state;
+    if (state === "completed") {
+      await client.collections("DELETESTATUS", { requestid: requestId });
+      return;
+    }
+    if (state === "failed" || state === "notfound") {
+      throw new Error(`Collection request ${requestId} ended in ${state}: ${JSON.stringify(result)}`);
+    }
+    await new Promise(resolve => setTimeout(resolve, 1_000));
+  }
+  throw new Error(`Collection request ${requestId} did not complete within 180 seconds`);
+}
 
 cloudIntegrationTest(
   "SPLITSHARD splits an isolated compositeId collection and preserves routed documents",
@@ -18,12 +35,14 @@ cloudIntegrationTest(
     await source.add(ids.map(id => ({ id, title: "splitshard opt-in verification" })));
     await source.commit({ waitSearcher: true });
 
+    const splitRequestId = `split-${randomUUID()}`;
     const split = await client.collections("SPLITSHARD", {
       collection,
       "split.key": routeKey,
-      waitForFinalState: true
+      async: splitRequestId
     });
-    assert.equal(split.responseHeader?.status, 0, "SPLITSHARD should complete successfully");
+    assert.equal(split.responseHeader?.status, 0, "SPLITSHARD should be accepted");
+    await waitForCollectionRequest(client, splitRequestId);
 
     const statusAfter = await client.collections("CLUSTERSTATUS", { collection });
     const shardsAfter = statusAfter.cluster?.collections?.[collection]?.shards ?? {};
@@ -56,13 +75,16 @@ cloudIntegrationTest(
     const targetBefore = await target.query({ query: "*:*", fields: ["id"], limit: 10 });
     assert.equal(targetBefore.response?.numFound, 0, "migration target must be empty before mutation");
 
+    const migrationRequestId = `migrate-${randomUUID()}`;
     const migrated = await client.collections("MIGRATE", {
       collection: sourceName,
       "split.key": routeKey,
       "target.collection": targetName,
-      "forward.timeout": 120
+      "forward.timeout": 120,
+      async: migrationRequestId
     });
-    assert.equal(migrated.responseHeader?.status, 0, "MIGRATE should complete successfully");
+    assert.equal(migrated.responseHeader?.status, 0, "MIGRATE should be accepted");
+    await waitForCollectionRequest(client, migrationRequestId);
 
     let targetCount = 0;
     for (let attempt = 0; attempt < 60; attempt += 1) {
