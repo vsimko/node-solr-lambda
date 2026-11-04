@@ -51,7 +51,7 @@ cloudIntegrationTest(
       Object.values(shardsAfter).filter(shard => shard.state === "active").length >= 2,
       "at least two child shards should be active"
     );
-    const result = await source.query({ query: "*:*", fields: ["id"], limit: 10 });
+    const result = await source.query<{ response?: { numFound?: number } }>({ query: "*:*", fields: ["id"], limit: 10 });
     assert.equal(result.response?.numFound, ids.length, "all documents should remain searchable after the split");
   },
   true,
@@ -72,7 +72,7 @@ cloudIntegrationTest(
     await source.add(ids.map(id => ({ id, title: "migration opt-in verification" })));
     await source.commit({ waitSearcher: true });
 
-    const targetBefore = await target.query({ query: "*:*", fields: ["id"], limit: 10 });
+    const targetBefore = await target.query<{ response?: { numFound?: number } }>({ query: "*:*", fields: ["id"], limit: 10 });
     assert.equal(targetBefore.response?.numFound, 0, "migration target must be empty before mutation");
 
     const migrationRequestId = `migrate-${randomUUID()}`;
@@ -88,13 +88,13 @@ cloudIntegrationTest(
 
     let targetCount = 0;
     for (let attempt = 0; attempt < 60; attempt += 1) {
-      const result = await target.query({ query: "*:*", fields: ["id"], limit: 10 });
+      const result = await target.query<{ response?: { numFound?: number } }>({ query: "*:*", fields: ["id"], limit: 10 });
       targetCount = result.response?.numFound ?? 0;
       if (targetCount === ids.length) break;
       await new Promise(resolve => setTimeout(resolve, 1_000));
     }
     assert.equal(targetCount, ids.length, "target collection should contain every migrated routing-key document");
-    const targetReadBack = await target.query({ query: "*:*", fields: ["id"], limit: 10 });
+    const targetReadBack = await target.query<{ response?: { docs?: Array<{ id: string }> } }>({ query: "*:*", fields: ["id"], limit: 10 });
     const foundIds = new Set(targetReadBack.response?.docs?.map(document => String(document.id)) ?? []);
     for (const id of ids) assert.ok(foundIds.has(id), `target collection should contain migrated document ${id}`);
   },
