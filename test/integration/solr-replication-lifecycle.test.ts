@@ -116,11 +116,14 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
     "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
-      customOptions: { follower: { leaderUrl } }
+      customOptions: { follower: { leaderUrl, ...(username && password ? { httpBasicAuthUser: username, httpBasicAuthPassword: password } : {}) } }
     }
   });
 
-  const fetchResponse = await follower.replication("fetchindex", { leaderUrl });
+  const fetchResponse = await follower.replication("fetchindex", {
+    leaderUrl,
+    ...(username && password ? { customParams: { httpBasicAuthUser: username, httpBasicAuthPassword: password } } : {})
+  });
   assert.equal(fetchResponse.status, "OK", "fetchindex should start asynchronously");
 
   const isReplicating = async (): Promise<boolean> => {
