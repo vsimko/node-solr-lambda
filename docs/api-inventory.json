@@ -224,17 +224,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/config.md",
       "testFiles": [
-        "test/config.test.ts"
+        "test/integration/solr-config-components.test.ts",
+        "test/integration/solr-config-operations.test.ts"
       ],
-      "notes": "Reads the effective configuration through GET /config. The method has dedicated request serialization and integration evidence."
+      "notes": "GET /config reads back an isolated request handler after add and update, and confirms its removal after delete on pinned Solr 8.11.4, 9.11.0, and 10.1.0. The effective configuration response is asserted, not merely the HTTP status."
     },
     {
       "id": "config.getOverlay",
@@ -245,17 +246,17 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/config.md",
       "testFiles": [
-        "test/config.test.ts"
+        "test/integration/solr-config-operations.test.ts"
       ],
-      "notes": "Reads the persisted Config API overlay through GET /config/overlay. Kept separate from getConfig because the endpoint and semantics differ."
+      "notes": "GET /config/overlay reads back Config API property mutations and verifies unset cleanup on pinned Solr 8.11.4, 9.11.0, and 10.1.0. This is persisted overlay state, distinct from effective GET /config."
     },
     {
       "id": "metrics.api",
@@ -402,7 +403,7 @@
         "test/backup-restore-api-types.ts",
         "test/integration/solr-core-backup-restore.test.ts"
       ],
-      "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, snappull, abort, enablepoll, disablepoll, details, filelist, backup, restore, restorestatus, and deletebackup; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, filecontent, leader enable/disable, and a disposable two-core leader/follower fetch with follower query read-back is implemented but remains pending runtime verification until the pinned-version CI jobs pass. The integration job supplies SOLR_VERSION so the test uses fetchindex on Solr 10 and snappull on Solr 8/9. abortfetch/abort, enablepoll, and disablepoll retain unit serialization coverage only; an in-progress abort lifecycle is not certified. Core-level backup, restore, restorestatus, and deletebackup are integration-tested on all three pinned versions. Filelist uses the generation returned by newer Solr indexversion responses and falls back to the legacy indexversion parameter when that field is absent. Additional operation evidence: Core-level ReplicationHandler backup, restore, restorestatus, and deletebackup are typed. Backup defaults to the core dataDir; restore status is polled with restorestatus. Full backup/restore/read-back/delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0. Custom filesystem locations must be permitted by server allowPaths."
+      "notes": "Typed V1 ReplicationHandler commands for enablereplication, disablereplication, indexversion, fetchindex, abortfetch, snappull, abort, enablepoll, disablepoll, details, filelist, backup, restore, restorestatus, and deletebackup; replicationFile() returns raw filecontent streams. Live integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0 covers indexversion, details, filelist, filecontent, leader enable/disable, and a disposable two-core leader/follower fetch using fetchindex with follower query read-back passed the full standalone/security matrix on Solr 8.11.4, 9.11.0, and 10.1.0 (CI #640). abortfetch/abort, enablepoll, and disablepoll retain unit serialization coverage only; an in-progress abort lifecycle is not certified. Core-level backup, restore, restorestatus, and deletebackup are integration-tested on all three pinned versions. Filelist uses the generation returned by newer Solr indexversion responses and falls back to the legacy indexversion parameter when that field is absent. Additional operation evidence: Core-level ReplicationHandler backup, restore, restorestatus, and deletebackup are typed. Backup defaults to the core dataDir; restore status is polled with restorestatus. Full backup/restore/read-back/delete cycle is integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0. Custom filesystem locations must be permitted by server allowPaths."
     },
     {
       "id": "replication.file",
@@ -413,18 +414,18 @@
       "methodImplemented": true,
       "typeCoverage": "partial",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "documentation": "docs/replication.md",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "testFiles": [
         "test/replication.test.ts",
         "test/integration/solr-replication.test.ts"
       ],
-      "notes": "Returns raw replication file content as a Response stream; distinct from command-based replication operations."
+      "notes": "Returns raw replication file content as a Response stream; integration coverage requests a listed leader index file and verifies a successful non-empty binary response on pinned Solr 8.11.4, 9.11.0, and 10.1.0."
     },
     {
       "id": "transport.request",
