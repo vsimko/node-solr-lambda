@@ -59,7 +59,7 @@ await client.replication("enablepoll");
 await client.replication("abortfetch");
 ```
 
-`fetchindex` accepts the documented follower connection and compression settings. `leaderUrl` is the fully qualified ReplicationHandler URL, including the `/replication` suffix, on the pinned Solr 8, 9, and 10 lines. The follower's IndexFetcher requests leader details through `qt=/replication`; if the leader's `/select` handler has `handleSelect` disabled, enable it so that request can be routed to the replication handler. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
+`fetchindex` accepts the documented follower connection and compression settings. `leaderUrl` is the fully qualified ReplicationHandler URL, including the `/replication` suffix, on the pinned Solr 8, 9, and 10 lines. The follower's IndexFetcher requests leader details through `qt=/replication`; if the leader's `/select` handler has `handleSelect` disabled, enable it on the `/select` handler (not on `/replication`) so that the legacy `qt` request can be routed to the replication handler. For example, use the Config API to update `/select` with `handleSelect: true`. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
 
 ## Control a leader
 
