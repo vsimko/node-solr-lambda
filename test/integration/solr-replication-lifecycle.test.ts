@@ -33,7 +33,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   });
   assert.equal(leaderConfig.responseHeader?.status, 0);
   const selectConfig = await leader.config({
-    "update-requesthandler": { name: "/select", handleSelect: true }
+    "update-requesthandler": { name: "/select", class: "solr.SearchHandler", handleSelect: true }
   });
   assert.equal(selectConfig.responseHeader?.status, 0);
   const followerConfig = await follower.config({
