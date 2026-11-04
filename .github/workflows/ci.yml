@@ -159,6 +159,7 @@ jobs:
         env:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CORE: integration
+          SOLR_VERSION: "${{ matrix.solr-version }}"
           SOLR_SECURITY: "true"
           SOLR_USERNAME: integration-admin
           SOLR_PASSWORD: integration-password
