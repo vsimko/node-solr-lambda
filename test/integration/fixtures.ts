@@ -38,7 +38,7 @@ export interface SolrIntegrationFixture {
   addDocuments(documents: readonly (SolrDocument & { id: string })[]): Promise<void>;
   commit(): Promise<void>;
   createCore(prefix?: string): Promise<string>;
-  addSchemaField(name: string, type?: string, docValues?: boolean, indexed?: boolean): Promise<SolrSchemaCommandResponse>;
+  addSchemaField(name: string, type?: string, docValues?: boolean): Promise<SolrSchemaCommandResponse>;
   deleteSchemaField(name: string): Promise<SolrSchemaCommandResponse>;
   addSchemaFieldType(fieldType: SolrSchemaFieldType): Promise<SolrSchemaCommandResponse>;
   addSchemaDynamicField(field: SolrSchemaDynamicField): Promise<SolrSchemaCommandResponse>;
@@ -101,8 +101,8 @@ export function integrationTest(
         createdCores.add(name);
         return name;
       },
-      async addSchemaField(name, type = "string", docValues = false, indexed = true) {
-        const response = await client.schema({ "add-field": { name, type, stored: true, indexed, docValues } });
+      async addSchemaField(name, type = "string", docValues = false) {
+        const response = await client.schema({ "add-field": { name, type, stored: true, indexed: true, docValues } });
         schemaFields.add(name);
         return response;
       },
