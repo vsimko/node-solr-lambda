@@ -19,7 +19,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   });
   const leader = makeClient(leaderCore);
   const follower = makeClient(followerCore);
-  const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}/replication`;
+  const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}`;
   const documentId = createId("replication_lifecycle");
 
   const leaderConfig = await leader.config({
