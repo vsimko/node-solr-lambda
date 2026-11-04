@@ -46,7 +46,7 @@ The `indexversion` response includes the current `generation` on newer Solr vers
 // Use fetchindex/abortfetch across the pinned Solr 8, 9, and 10 versions.
 // leaderUrl may be omitted when configured on the follower.
 await client.replication("fetchindex", {
-  leaderUrl: "http://leader:8983/solr/catalog/replication",
+  leaderUrl: "http://leader:8983/solr/catalog",
   compression: "internal",
   httpConnTimeout: 5_000,
   httpReadTimeout: 10_000
@@ -59,7 +59,7 @@ await client.replication("enablepoll");
 await client.replication("abortfetch");
 ```
 
-`fetchindex`/`abortfetch` are the canonical fetch and cancellation commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. `leaderUrl` is the fully qualified ReplicationHandler URL, including the `/replication` suffix. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
+`fetchindex`/`abortfetch` are the canonical fetch and cancellation commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. `leaderUrl` is the leader core URL without the `/replication` suffix; Solr appends the handler path when fetching files. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
 
 ## Control a leader
 
