@@ -213,7 +213,7 @@
         "test/export.test.ts",
         "test/export-api-types.ts"
       ],
-      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. includeStoredFields is documented for Solr 10.1 but remains version-specific. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; unit tests cover typed serialization."
+      "notes": "Typed SolrExportParams requires fl and sort, supports filter query arrays, raw or structured sort expressions, batchSize, response writer selection, optional local expr, and customParams. export() returns the raw backpressure-aware Response. Sort fields must be single-valued docValues int/long/float/double/string fields; fl additionally supports date/boolean and multi-valued fields. `includeStoredFields=true` is runtime-tested only on Solr 10.1.0 with a stored-only field read-back (PR #261 / CI #648); no Solr 8/9 claim is made. Existing live raw-response integration test covers Solr 8.11.4, 9.11.0, and 10.1.0; unit tests cover typed serialization."
     },
     {
       "id": "config.get",
