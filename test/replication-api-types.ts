@@ -6,13 +6,13 @@ void client.replication("indexversion");
 void client.replication("details");
 void client.replication("filelist", { generation: 12 });
 void client.replication("filelist", { indexversion: 12 });
-void client.replication("fetchindex", { leaderUrl: "http://leader:8983/solr/catalog", compression: "internal" });
+void client.replication("fetchindex", { leaderUrl: "http://leader:8983/solr/catalog/replication", compression: "internal" });
 void client.replication("enablereplication");
 void client.replication("disablereplication");
 void client.replication("enablepoll");
 void client.replication("disablepoll");
 void client.replication("abortfetch");
-void client.replication("snappull", { leaderUrl: "http://leader:8983/solr/catalog" });
+void client.replication("snappull", { leaderUrl: "http://leader:8983/solr/catalog/replication" });
 void client.replication("abort");
 void client.replicationFile({ directoryType: "cf", filePath: "managed-schema", checksum: true });
 
