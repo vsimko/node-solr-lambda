@@ -54,7 +54,7 @@ jobs:
             --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
-            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups -Dsolr.disable.shardsWhitelist=true" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups -Dsolr.disable.shardsWhitelist=true -Dsolr.security.allow.urls.enabled=false" \
             "solr:${{ matrix.solr-version }}" \
             solr-precreate integration
       - name: Wait for Solr and integration core
@@ -134,7 +134,7 @@ jobs:
             --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
-            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups -Dsolr.disable.shardsWhitelist=true" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups -Dsolr.disable.shardsWhitelist=true -Dsolr.security.allow.urls.enabled=false" \
             --entrypoint /bin/bash \
             "solr:${{ matrix.solr-version }}" \
             -lc 'mkdir -p /var/solr/data && cp /tmp/security.json /var/solr/data/security.json && chmod 666 /var/solr/data/security.json && exec docker-entrypoint.sh solr-precreate integration'
