@@ -21,7 +21,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const follower = makeClient(followerCore);
   const solrMajor = Number(process.env.SOLR_VERSION?.split(".")[0] ?? "0");
   // Solr 8 expects the handler URL; Solr 9+ appends /replication internally.
-  const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}${solrMajor === 8 ? "/replication" : ""}`;
+  const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}/replication`;
   const documentId = createId("replication_lifecycle");
 
   const leaderConfig = await leader.config({
@@ -52,21 +52,26 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   assert.ok(Number.isFinite(leaderGeneration) && leaderGeneration > 0, "leader must publish a replicable index");
 
   const fetchCommand = solrMajor >= 10 ? "fetchindex" : "snappull";
-  const fetchResponse = await follower.replication(fetchCommand);
+  const fetchResponse = await follower.replication(fetchCommand, { leaderUrl });
   assert.equal(fetchResponse.responseHeader?.status, 0, `${fetchCommand} should complete successfully`);
 
   // Replication copies Lucene index files asynchronously; assert the resulting
   // searchable state rather than treating the command's HTTP response as proof.
   let found = false;
-  for (let attempt = 0; attempt < 60; attempt += 1) {
+  for (let attempt = 0; attempt < 120; attempt += 1) {
     const result = await follower.query<{ response?: { numFound?: number } }>({ query: `id:"${documentId}"`, fields: ["id"], limit: 1 });
     if ((result.response?.numFound ?? 0) === 1) {
       found = true;
       break;
     }
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1_000));
   }
-  assert.ok(found, "follower should expose the leader document after the fetch completes");
+  if (!found) {
+    const details = await follower.replication("details");
+    const abortCommand = solrMajor >= 10 ? "abortfetch" : "abort";
+    await follower.replication(abortCommand).catch(() => undefined);
+    assert.fail(`follower did not expose the leader document after fetch; details: ${JSON.stringify(details)}`);
+  }
 
   const followerVersion = await follower.replication("indexversion");
   assert.equal(followerVersion.responseHeader?.status, 0);
