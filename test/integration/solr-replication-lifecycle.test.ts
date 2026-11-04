@@ -50,7 +50,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const fetchCommand = "fetchindex";
   const fetchResponse = await follower.replication(fetchCommand, {
     leaderUrl,
-    ...(username && password ? { httpBasicAuthUser: username, httpBasicAuthPassword: password } : {})
+    ...(username && password ? { customParams: { httpBasicAuthUser: username, httpBasicAuthPassword: password } } : {})
   });
   assert.equal(fetchResponse.responseHeader?.status, 0, `${fetchCommand} should complete successfully`);
 
