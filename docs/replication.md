@@ -59,7 +59,7 @@ await client.replication("enablepoll");
 await client.replication("abortfetch");
 ```
 
-`fetchindex`/`abortfetch` are the canonical fetch and cancellation commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. `leaderUrl` is the leader core URL without the `/replication` suffix; Solr appends the handler path when fetching files. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
+`fetchindex`/`abortfetch` are the canonical fetch and cancellation commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. `leaderUrl` is the leader core URL without the `/replication` suffix; Solr appends the handler path when fetching files. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings and pass `httpBasicAuthUser` / `httpBasicAuthPassword` as `customParams` on the `fetchindex` request when the server requires them. Do not put credentials into URLs or log them.
 
 ## Control a leader
 
@@ -103,7 +103,7 @@ Supported directory types are `file` (Lucene index files), `cf` (configuration f
 - The client currently exposes the V1 handler path. Solr 10.1 also documents V2 equivalents for selected file and index-version operations; no dedicated V2 wrapper is provided.
 - The handler may not be configured for user-managed leader/follower replication on every core. The server must have the appropriate ReplicationHandler configuration before control commands can be used.
 
-- A regular standalone/security integration test creates disposable leader and follower cores, commits a unique leader document, triggers `fetchindex` on Solr 8/9/10 with the fully qualified leader handler URL, and verifies that the document becomes searchable on the follower. Treat this behavior as pending runtime verification until the pinned Solr 8.11.4, 9.11.0, and 10.1.0 CI jobs pass. The test does not cover polling or abort of an in-progress transfer.
+- A regular standalone/security integration test creates disposable leader and follower cores, commits a unique leader document, triggers `fetchindex` on Solr 8/9/10 with the fully qualified leader handler URL, and verifies that the document becomes searchable on the follower. This behavior passed the pinned Solr 8.11.4, 9.11.0, and 10.1.0 standalone/security CI matrix (run #640). The test does not cover polling or abort of an in-progress transfer.
 - `abortfetch` on Solr 8/9/10, plus `enablepoll`/`disablepoll`, have request-serialization unit coverage; cancellation of a live transfer remains unverified. The disposable-core fixture unloads both cores in its `finally` cleanup. If a CI job is cancelled or the fetch does not settle, the ephemeral Solr container is discarded rather than reusing the cores.
 
 See the [Solr 8.11](https://solr.apache.org/__root/docs.solr.apache.org/guide/8_11/deployment-guide/user-managed-index-replication.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/deployment-guide/user-managed-index-replication.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/user-managed-index-replication.html) guides for server configuration and command semantics.
