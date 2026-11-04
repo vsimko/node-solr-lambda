@@ -25,7 +25,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   const documentId = createId("replication_lifecycle");
 
   const leaderConfig = await leader.config({
-    "update-requesthandler": {
+    "add-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
       customOptions: { leader: { replicateAfter: ["commit"] } }
@@ -37,7 +37,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   });
   assert.equal(selectConfig.responseHeader?.status, 0);
   const followerConfig = await follower.config({
-    "update-requesthandler": {
+    "add-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
       customOptions: { follower: { leaderUrl, ...(username && password ? { httpBasicAuthUser: username, httpBasicAuthPassword: password } : {}) } }
