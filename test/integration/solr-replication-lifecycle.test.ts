@@ -19,7 +19,9 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   });
   const leader = makeClient(leaderCore);
   const follower = makeClient(followerCore);
-  const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}/replication`;
+  const solrMajor = Number(process.env.SOLR_VERSION?.split(".")[0] ?? "0");
+  // Solr 8 expects the handler URL; Solr 9+ appends /replication internally.
+  const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}${solrMajor === 8 ? "/replication" : ""}`;
   const documentId = createId("replication_lifecycle");
 
   const leaderConfig = await leader.config({
