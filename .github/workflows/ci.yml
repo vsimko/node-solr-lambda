@@ -4,6 +4,13 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+    inputs:
+      enable_destructive_solrcloud_tests:
+        description: "Run opt-in SPLITSHARD and MIGRATE checks on the disposable two-node cluster"
+        required: false
+        default: false
+        type: boolean
 jobs:
   test:
     strategy:
@@ -158,6 +165,8 @@ jobs:
         run: docker logs solr-secure || true
 
   cloud-integration:
+    env:
+      SOLR_DESTRUCTIVE_OPT_IN: "${{ github.event_name == 'workflow_dispatch' && inputs.enable_destructive_solrcloud_tests == true && 'true' || 'false' }}"
     strategy:
       fail-fast: false
       matrix:
