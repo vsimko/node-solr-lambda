@@ -43,23 +43,23 @@ The `indexversion` response includes the current `generation` on newer Solr vers
 ## Control a follower
 
 ```ts
-// Solr 10 uses fetchindex/abortfetch. Solr 8 and 9 use the legacy snappull/abort names.
+// Use fetchindex/abortfetch across the pinned Solr 8, 9, and 10 versions.
 // leaderUrl may be omitted when configured on the follower.
 await client.replication("fetchindex", {
-  leaderUrl: "http://leader:8983/solr/catalog/replication",
+  leaderUrl: "http://leader:8983/solr/catalog",
   compression: "internal",
   httpConnTimeout: 5_000,
   httpReadTimeout: 10_000
 });
 
-// On Solr 8/9, use "snappull" to trigger a fetch and "abort" to stop it.
+// Use "fetchindex" to trigger a fetch and "abortfetch" to stop it.
 // Pause/resume automatic polling or abort an in-progress fetch.
 await client.replication("disablepoll");
 await client.replication("enablepoll");
 await client.replication("abortfetch");
 ```
 
-`fetchindex` accepts the documented follower connection and compression settings. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
+`fetchindex`/`abortfetch` are the canonical fetch and cancellation commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. `leaderUrl` is the leader core URL without the `/replication` suffix; Solr appends the handler path when fetching files. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings; do not put credentials into URLs or query parameters.
 
 ## Control a leader
 
@@ -97,10 +97,13 @@ Supported directory types are `file` (Lucene index files), `cf` (configuration f
 
 ## Scope and compatibility
 
-- Typed commands: `enablereplication`, `disablereplication`, `indexversion`, `fetchindex`/`abortfetch` (Solr 10), `snappull`/`abort` (Solr 8/9), `enablepoll`, `disablepoll`, `details`, `filelist`, `backup`, `restore`, `restorestatus`, and `deletebackup`.
+- Typed commands: `enablereplication`, `disablereplication`, `indexversion`, `fetchindex`/`abortfetch` (Solr 8/9/10), `enablepoll`, `disablepoll`, `details`, `filelist`, `backup`, `restore`, `restorestatus`, and `deletebackup`.
 - `filecontent` is exposed separately through `replicationFile()` because it returns a raw stream.
 - Core-level `backup`, `restore`, `restorestatus`, and `deletebackup` are exposed through `replication()`; see [backup and restore docs](backup-restore.md).
 - The client currently exposes the V1 handler path. Solr 10.1 also documents V2 equivalents for selected file and index-version operations; no dedicated V2 wrapper is provided.
 - The handler may not be configured for user-managed leader/follower replication on every core. The server must have the appropriate ReplicationHandler configuration before control commands can be used.
+
+- A regular standalone/security integration test creates disposable leader and follower cores, commits a unique leader document, triggers `fetchindex` on Solr 8/9/10 with the fully qualified leader handler URL, and verifies that the document becomes searchable on the follower. Treat this behavior as pending runtime verification until the pinned Solr 8.11.4, 9.11.0, and 10.1.0 CI jobs pass. The test does not cover polling or abort of an in-progress transfer.
+- `abortfetch` on Solr 8/9/10, plus `enablepoll`/`disablepoll`, have request-serialization unit coverage; cancellation of a live transfer remains unverified. The disposable-core fixture unloads both cores in its `finally` cleanup. If a CI job is cancelled or the fetch does not settle, the ephemeral Solr container is discarded rather than reusing the cores.
 
 See the [Solr 8.11](https://solr.apache.org/__root/docs.solr.apache.org/guide/8_11/deployment-guide/user-managed-index-replication.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/deployment-guide/user-managed-index-replication.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/user-managed-index-replication.html) guides for server configuration and command semantics.

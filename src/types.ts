@@ -1102,6 +1102,8 @@ export interface SolrConfigPlugin {
   customOptions?: Readonly<Record<string, SolrConfigValue>>;
 }
 export interface SolrRequestHandlerConfig extends SolrConfigPlugin {
+  /** Allow the handler to be selected through the legacy `qt` request parameter. */
+  handleSelect?: boolean;
   defaults?: SolrConfigRequestHandlerParams;
   appends?: SolrConfigRequestHandlerParams;
   invariants?: SolrConfigRequestHandlerParams;

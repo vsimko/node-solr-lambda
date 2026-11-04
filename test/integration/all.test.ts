@@ -1,4 +1,5 @@
 import "./solr-collections.test.js";
+import "./solrcloud-split-migrate-optin.test.js";
 import "./solr-config-security.test.js";
 import "./solr-config-operations.test.js";
 import "./solr-core-lifecycle.test.js";
@@ -15,6 +16,7 @@ import "./solr-cursor.test.js";
 import "./solr-schema.test.js";
 import "./solr-security.test.js";
 import "./solr-replication.test.js";
+import "./solr-replication-lifecycle.test.js";
 import "./solr-core-backup-restore.test.js";
 import "./solrcloud-backup-restore.test.js";
 import "./solr-smoke.test.js";

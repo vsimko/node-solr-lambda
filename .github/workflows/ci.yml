@@ -52,7 +52,7 @@ jobs:
             --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
-            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups -Dsolr.disable.shardsWhitelist=true -Dsolr.disable.allowUrls=true -Dsolr.security.allow.urls.enabled=false" \
             "solr:${{ matrix.solr-version }}" \
             solr-precreate integration
       - name: Wait for Solr and integration core
@@ -74,6 +74,7 @@ jobs:
         env:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CORE: integration
+          SOLR_VERSION: "${{ matrix.solr-version }}"
           SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print Solr logs
         if: always()
@@ -131,7 +132,7 @@ jobs:
             --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --publish 8983:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
-            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
+            --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups -Dsolr.disable.shardsWhitelist=true -Dsolr.disable.allowUrls=true -Dsolr.security.allow.urls.enabled=false" \
             --entrypoint /bin/bash \
             "solr:${{ matrix.solr-version }}" \
             -lc 'mkdir -p /var/solr/data && cp /tmp/security.json /var/solr/data/security.json && chmod 666 /var/solr/data/security.json && exec docker-entrypoint.sh solr-precreate integration'
@@ -156,6 +157,7 @@ jobs:
         env:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CORE: integration
+          SOLR_VERSION: "${{ matrix.solr-version }}"
           SOLR_SECURITY: "true"
           SOLR_USERNAME: integration-admin
           SOLR_PASSWORD: integration-password
@@ -165,6 +167,8 @@ jobs:
         run: docker logs solr-secure || true
 
   cloud-integration:
+    env:
+      SOLR_DESTRUCTIVE_OPT_IN: "${{ github.event_name == 'workflow_dispatch' && inputs.enable_destructive_solrcloud_tests == true && 'true' || 'false' }}"
     strategy:
       fail-fast: false
       matrix:
