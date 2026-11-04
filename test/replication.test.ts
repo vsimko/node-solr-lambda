@@ -14,7 +14,7 @@ test("ReplicationHandler commands use the configured core and JSON response form
 
   await client.replication("indexversion");
   await client.replication("fetchindex", {
-    leaderUrl: "http://leader:8983/solr/catalog",
+    leaderUrl: "http://leader:8983/solr/catalog/replication",
     compression: "internal",
     httpConnTimeout: 5000,
     customParams: { maxWriteMBPerSec: 20 }
@@ -27,7 +27,7 @@ test("ReplicationHandler commands use the configured core and JSON response form
   assert.equal(calls[0]!.url.searchParams.get("command"), "indexversion");
   assert.equal(calls[0]!.url.searchParams.get("wt"), "json");
   assert.equal(calls[1]!.url.searchParams.get("command"), "fetchindex");
-  assert.equal(calls[1]!.url.searchParams.get("leaderUrl"), "http://leader:8983/solr/catalog");
+  assert.equal(calls[1]!.url.searchParams.get("leaderUrl"), "http://leader:8983/solr/catalog/replication");
   assert.equal(calls[1]!.url.searchParams.get("compression"), "internal");
   assert.equal(calls[1]!.url.searchParams.get("httpConnTimeout"), "5000");
   assert.equal(calls[1]!.url.searchParams.get("maxWriteMBPerSec"), "20");
@@ -54,7 +54,7 @@ test("ReplicationHandler supports read, poll, and replication lifecycle commands
   await client.replication("enablepoll");
   await client.replication("disablepoll");
   await client.replication("abortfetch");
-  await client.replication("snappull", { leaderUrl: "http://leader:8983/solr/catalog" });
+  await client.replication("snappull", { leaderUrl: "http://leader:8983/solr/catalog/replication" });
   await client.replication("abort");
 
   assert.deepEqual(commands, [
