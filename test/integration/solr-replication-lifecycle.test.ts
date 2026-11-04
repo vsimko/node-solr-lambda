@@ -30,7 +30,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
     }
   });
   await follower.config({
-    "add-requesthandler": {
+    "update-requesthandler": {
       name: "/replication",
       class: "solr.ReplicationHandler",
       customOptions: { follower: { leaderUrl } }
