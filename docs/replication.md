@@ -46,7 +46,7 @@ The `indexversion` response includes the current `generation` on newer Solr vers
 // Solr 10 uses fetchindex/abortfetch. Solr 8 and 9 use the legacy snappull/abort names.
 // leaderUrl may be omitted when configured on the follower.
 await client.replication("fetchindex", {
-  leaderUrl: "http://leader:8983/solr/catalog",
+  leaderUrl: "http://leader:8983/solr/catalog/replication",
   compression: "internal",
   httpConnTimeout: 5_000,
   httpReadTimeout: 10_000
