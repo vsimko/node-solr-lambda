@@ -5,7 +5,8 @@ This page records the current client compatibility policy. It separates document
 ## Status terms
 
 - **Documented** means the endpoint or feature appears in the official reference guide for the listed Solr documentation baseline.
-- **Tested** means the exact behavior named in the runtime-test column passed against the pinned Docker image for that Solr line; it does not certify other parameters or actions.\n- **Unverified** means this repository has not run an integration test for that operation against that Solr server version.
+- **Tested** means the exact behavior named in the runtime-test column passed against the pinned Docker image for that Solr line; it does not certify other parameters or actions.
+- **Unverified** means this repository has not run an integration test for that operation against that Solr server version.
 - **Not covered** means the current typed client does not provide a dedicated method for that endpoint.
 
 Documentation evidence does not prove that every patch release behaves in the same way.
