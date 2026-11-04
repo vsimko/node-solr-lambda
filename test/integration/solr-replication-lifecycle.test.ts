@@ -52,7 +52,7 @@ integrationTest("ReplicationHandler fetches a committed leader index into an iso
   assert.ok(Number.isFinite(leaderGeneration) && leaderGeneration > 0, "leader must publish a replicable index");
 
   const fetchCommand = solrMajor >= 10 ? "fetchindex" : "snappull";
-  const fetchResponse = await follower.replication(fetchCommand, { leaderUrl });
+  const fetchResponse = await follower.replication(fetchCommand);
   assert.equal(fetchResponse.responseHeader?.status, 0, `${fetchCommand} should complete successfully`);
 
   // Replication copies Lucene index files asynchronously; assert the resulting
