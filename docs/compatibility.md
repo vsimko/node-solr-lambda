@@ -11,6 +11,10 @@ This page records the current client compatibility policy. It separates document
 
 Documentation evidence does not prove that every patch release behaves in the same way.
 
+## Interpreting unverified operations
+
+An exposed action or parameter is not runtime-certified merely because it has a TypeScript model or serialization test. The API coverage page records the current triage of deferred and intentionally out-of-scope gaps. In particular, destructive Core Admin actions and cluster-wide Collections policy mutations remain unverified until isolated runtime evidence is added; SPLITSHARD/MIGRATE require the opt-in workflow in [#232](https://github.com/vsimko/node-solr-lambda/issues/232). Export `includeStoredFields` and ReplicationHandler abort/async lifecycle have focused verification issues [#258](https://github.com/vsimko/node-solr-lambda/issues/258) and [#259](https://github.com/vsimko/node-solr-lambda/issues/259).
+
 ## Reference baselines
 
 | Solr line | Documentation baseline | Documentation |
