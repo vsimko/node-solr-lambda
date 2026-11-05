@@ -70,13 +70,13 @@ const markdownFiles = [join(root, "README.md"), ...walk(docsRoot).filter((path) 
 const docsIndexPath = join(docsRoot, "index.md");
 const docsIndex = readFileSync(docsIndexPath, "utf8");
 const indexedDocTargets = new Set(
-  [...docsIndex.matchAll(/!?\\[[^\\]]*\\]\\(([^)]+)\\)/g)]
+  [...docsIndex.matchAll(/!?\[[^\]]*\]\(([^)]+)\)/g)]
     .map((match) => match[1].trim().replace(/^<|>$/g, "").split("#", 2)[0])
     .filter(Boolean)
     .map((target) => resolve(docsRoot, decodeURIComponent(target)))
 );
 const readme = readFileSync(join(root, "README.md"), "utf8");
-for (const match of readme.matchAll(/!?\\[[^\\]]*\\]\\(([^)]+)\\)/g)) {
+for (const match of readme.matchAll(/!?\[[^\]]*\]\(([^)]+)\)/g)) {
   const rawTarget = match[1].trim().replace(/^<|>$/g, "");
   if (!rawTarget || /^(?:https?:|mailto:|tel:|data:|#)/i.test(rawTarget)) continue;
   const targetPath = rawTarget.split("#", 2)[0];
@@ -88,7 +88,7 @@ for (const match of readme.matchAll(/!?\\[[^\\]]*\\]\\(([^)]+)\\)/g)) {
 }
 assert.ok(indexedDocTargets.has(join(docsRoot, "update.md")),
   "docs/index.md must link to the canonical detailed Update API guide");
-assert.match(readFileSync(join(docsRoot, "documents.md"), "utf8"), /\\]\\(update\\.md\\)/,
+assert.match(readFileSync(join(docsRoot, "documents.md"), "utf8"), /\]\(update\.md\)/,
   "The concise Document API overview must link to the canonical Update API guide");
 
 let checkedLinks = 0;
