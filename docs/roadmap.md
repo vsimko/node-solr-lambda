@@ -25,14 +25,6 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 ## Active priorities
 
-### P0 — ReplicationHandler lifecycle evidence
-
-| Work | Tracking | Current status |
-| --- | --- | --- |
-| Verify the live abort lifecycle where it can be observed, and explicitly document versions where it cannot | [#259](https://github.com/vsimko/node-solr-lambda/issues/259), [PR #264](https://github.com/vsimko/node-solr-lambda/pull/264) | Complete: the bounded disposable-core abort test passes on Solr 9.11.0 and 10.1.0. Solr 8.11.4 is explicitly deferred because repeated runs did not expose `details.follower.isReplicating=true` during a throttled fetch; the test skips this version with a reason. The one-shot fetch/read-back remains verified on all three versions. CI runs #658 and #659 passed all 30 jobs. |
-
-The one-shot `fetchindex` and follower read-back behavior is already verified on Solr 8.11.4, 9.11.0, and 10.1.0 by merged PR #253. Do not conflate that evidence with abort/cancellation or polling lifecycle certification.
-
 ### P1 — SolrCloud operation evidence
 
 | Work | Tracking | Current status |
@@ -47,7 +39,6 @@ v4.0 stable publication remains a separate release-owner decision and must not b
 
 - Documentation reconciliation #255 and residual-gap triage #256 are complete through merged PR #257. The roadmap and API coverage now distinguish accepted work (#258 and #259), deferred items, and intentional non-goals.
 - Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 by merged PR #263, which closes #258. Do not extend that claim to Solr 8/9.
-- #259 is complete through PR #264: in-progress abort is tested on Solr 9.11.0 and 10.1.0; Solr 8.11.4 is explicitly deferred with rationale. Replication docs, compatibility docs, API inventory, and this roadmap record the same boundary. CI runs #658 and #659 passed all 30 jobs.
 - #232 is independent of #259. Its opt-in workflow must be run manually; results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
@@ -68,6 +59,7 @@ Closed issues are retained as historical evidence, not active priorities:
 - Roadmap/documentation reconciliation #255 and API-gap triage #256 are completed by PR #257.
 - Solr 10.1 Export `includeStoredFields=true` stored-only field read-back is verified by PR #263 (#258); Solr 8/9 behavior remains unclaimed.
 - PR #253 added the isolated opt-in SolrCloud test harness for SPLITSHARD/MIGRATE. Those actions remain runtime-unverified until the manual workflow has passed for each pinned Solr version.
+- ReplicationHandler abort/async lifecycle issue #259 was completed by PR #264: live abort/read-back is tested on Solr 9.11.0 and 10.1.0; Solr 8.11.4 remains explicitly unverified because no reliable active-fetch signal was observable. One-shot fetch/read-back remains verified on all three versions. CI runs #658 and #659 passed all 30 jobs.
 
 ## Workflow
 
