@@ -98,6 +98,7 @@ The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pi
 
 ## Documentation
 
+- [Complete documentation index](docs/index.md)
 - [Getting started](docs/getting-started.md)
 - [Configuration](docs/configuration.md)
 - [Query API](docs/query.md)
@@ -107,16 +108,22 @@ The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pi
 - [Core Admin and Collections](docs/administration.md)
 - [Replication API](docs/replication.md)
 - [Backup and restore](docs/backup-restore.md)
-- [Streaming and Export](docs/export.md)
+- [Streaming Expressions](docs/streaming.md)
+- [Export API](docs/export.md)
 - [Raw requests](docs/raw-requests.md)
 - [Error handling](docs/errors.md)
 - [Runtime validation](docs/validation.md)
 - [Public API reference](docs/api-reference.md)
 - [API coverage](docs/api-coverage.md)
+- [Collections action coverage](docs/collections-api-coverage.md)
 - [Solr endpoint inventory](docs/endpoint-inventory.md)
+- [Machine-readable API inventory](docs/api-inventory.json)
+- [Public API review](docs/public-api-review.md)
 - [Solr compatibility](docs/compatibility.md)
 - [Migration from v3 to v4](docs/migration-v3-to-v4.md)
+- [Client architecture](docs/architecture.md)
 - [Development roadmap](docs/roadmap.md)
+- [v4.0.0 release notes (draft)](docs/release-notes-v4.0.0.md)
 
 ## Development
 
