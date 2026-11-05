@@ -64,9 +64,10 @@ export interface SolrCloudIntegrationFixture {
  */
 export function integrationTest(
   name: string,
-  run: (fixture: SolrIntegrationFixture) => Promise<void>
+  run: (fixture: SolrIntegrationFixture) => Promise<void>,
+  timeoutMs?: number
 ): void {
-  test(name, { skip: !baseUrl || !core }, async () => {
+  test(name, { skip: !baseUrl || !core, ...(timeoutMs ? { timeout: timeoutMs } : {}) }, async () => {
     const username = process.env.SOLR_USERNAME;
     const password = process.env.SOLR_PASSWORD;
     const client = new SolrClient({
