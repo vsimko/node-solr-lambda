@@ -29,7 +29,7 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 | Work | Tracking | Current status |
 | --- | --- | --- |
-| Verify `abortfetch` and any observable asynchronous fetch lifecycle on disposable leader/follower cores; otherwise document the exact unverified boundary | [#259](https://github.com/vsimko/node-solr-lambda/issues/259), [PR #264](https://github.com/vsimko/node-solr-lambda/pull/264) | Implementation is in PR #264. The prior attempt exceeded the Solr 8.11.4 test window and left cores busy; the revised bounded fixture and cleanup need a green full Node/Solr CI matrix before merge. |
+| Verify `abortfetch` and any observable asynchronous fetch lifecycle on disposable leader/follower cores; otherwise document the exact unverified boundary | [#259](https://github.com/vsimko/node-solr-lambda/issues/259), [PR #264](https://github.com/vsimko/node-solr-lambda/pull/264) | PR #264 contains the bounded 2 MiB fixture, 120-second test timeout, and best-effort abort/poll cleanup. Its CI run #655 failed in the Solr 8.11.4 standalone and BasicAuth integration jobs; Solr 9.11.0 and 10.1.0 jobs passed. The PR remains open. Do not merge or claim full lifecycle verification until the revised test passes the complete Node/Solr matrix. |
 
 The one-shot `fetchindex` and follower read-back behavior is already verified on Solr 8.11.4, 9.11.0, and 10.1.0 by merged PR #253. Do not conflate that evidence with abort/cancellation or polling lifecycle certification.
 
@@ -47,7 +47,7 @@ v4.0 stable publication remains a separate release-owner decision and must not b
 
 - Documentation reconciliation #255 and residual-gap triage #256 are complete through merged PR #257. The roadmap and API coverage now distinguish accepted work (#258 and #259), deferred items, and intentional non-goals.
 - Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 by merged PR #263, which closes #258. Do not extend that claim to Solr 8/9.
-- #259 is the remaining ReplicationHandler abort/async lifecycle follow-up. PR #264 contains the revised bounded test fixture; merge only after the complete pinned-version CI matrix passes and the documentation/API inventory match the actual evidence.
+- #259 is the remaining ReplicationHandler abort/async lifecycle follow-up. PR #264's latest recorded CI run (#655) failed on Solr 8.11.4 standalone and BasicAuth jobs. Fix or explain those failures, rerun the full matrix, and reconcile replication docs, compatibility docs, and `api-inventory.json` before closing the issue.
 - #232 is independent of #259. Its opt-in workflow must be run manually; results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
