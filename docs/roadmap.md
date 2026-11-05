@@ -25,17 +25,19 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 ## Active priorities
 
-### P0 — Documentation and API-contract consistency
+### P0 — ReplicationHandler lifecycle evidence
 
-| Work | Tracking |
-| --- | --- |
-| Verify isolated ReplicationHandler abort/async lifecycle semantics, or explicitly retain unverified status | [#259](https://github.com/vsimko/node-solr-lambda/issues/259) |
+| Work | Tracking | Current status |
+| --- | --- | --- |
+| Verify `abortfetch` and any observable asynchronous fetch lifecycle on disposable leader/follower cores; otherwise document the exact unverified boundary | [#259](https://github.com/vsimko/node-solr-lambda/issues/259), [PR #264](https://github.com/vsimko/node-solr-lambda/pull/264) | Implementation is in PR #264. The prior attempt exceeded the Solr 8.11.4 test window and left cores busy; the revised bounded fixture and cleanup need a green full Node/Solr CI matrix before merge. |
+
+The one-shot `fetchindex` and follower read-back behavior is already verified on Solr 8.11.4, 9.11.0, and 10.1.0 by merged PR #253. Do not conflate that evidence with abort/cancellation or polling lifecycle certification.
 
 ### P1 — SolrCloud operation evidence
 
-| Work | Tracking |
-| --- | --- |
-| Execute the opt-in, loopback-only SPLITSHARD and MIGRATE verification workflow for each pinned Solr version; retain non-certification until evidence exists | [#232](https://github.com/vsimko/node-solr-lambda/issues/232) |
+| Work | Tracking | Current status |
+| --- | --- | --- |
+| Execute the opt-in, loopback-only SPLITSHARD and MIGRATE verification workflow for each pinned Solr version; retain non-certification until evidence exists | [#232](https://github.com/vsimko/node-solr-lambda/issues/232) | Test harness and manual `workflow_dispatch` workflow are merged in PR #253. A maintainer must manually run it with `enable_destructive_solrcloud_tests=true` and record successful evidence for Solr 8.11.4, 9.11.0, and 10.1.0. |
 
 ### Separate release gate
 
@@ -43,8 +45,10 @@ v4.0 stable publication remains a separate release-owner decision and must not b
 
 ## Dependencies and execution
 
-- #255 established the documentation baseline. The #256 gap triage is delivered by the merged roadmap/API-coverage update; #258 is verified by PR #261, while #259 remains the focused ReplicationHandler lifecycle follow-up. Keep operation status grounded in exact tests and pinned versions.
-- #232 is independent of the documentation cleanup, but its results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
+- Documentation reconciliation #255 and residual-gap triage #256 are complete through merged PR #257. The roadmap and API coverage now distinguish accepted work (#258 and #259), deferred items, and intentional non-goals.
+- Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 by merged PR #263, which closes #258. Do not extend that claim to Solr 8/9.
+- #259 is the remaining ReplicationHandler abort/async lifecycle follow-up. PR #264 contains the revised bounded test fixture; merge only after the complete pinned-version CI matrix passes and the documentation/API inventory match the actual evidence.
+- #232 is independent of #259. Its opt-in workflow must be run manually; results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
 
@@ -60,10 +64,10 @@ Closed issues are retained as historical evidence, not active priorities:
 - CoreAdmin and Collections implementation: [#77–#85](https://github.com/vsimko/node-solr-lambda/issues/77).
 - Security, System, Metrics, Streaming Expressions, and Export foundations: [#86–#94](https://github.com/vsimko/node-solr-lambda/issues/86).
 - Packaging, public API review, and operation inventory foundations: #104, #108, #184, and #185.
-- Feature and evidence follow-ups #228–#231 and #233–#238 are completed and merged. #238 (ReplicationHandler one-shot leader/follower fetch and read-back) was completed by merged PR #253.
-- The post-#253 documentation reconciliation is delivered by PR #257 (#255); it is not a continuing roadmap priority once merged.
-- Solr 10.1 Export `includeStoredFields=true` stored-only field read-back is verified by PR #261 (#258); Solr 8/9 behavior remains unclaimed.
-- PR #253 also added the isolated opt-in SolrCloud test harness for SPLITSHARD/MIGRATE. Those actions remain unverified until the manual workflow has actually passed.
+- Feature/evidence follow-ups #228–#231 and #233–#238 are completed and merged. In particular, #238 (one-shot ReplicationHandler leader/follower fetch and read-back) was completed by PR #253; abort/async lifecycle is tracked separately in #259.
+- Roadmap/documentation reconciliation #255 and API-gap triage #256 are completed by PR #257.
+- Solr 10.1 Export `includeStoredFields=true` stored-only field read-back is verified by PR #263 (#258); Solr 8/9 behavior remains unclaimed.
+- PR #253 added the isolated opt-in SolrCloud test harness for SPLITSHARD/MIGRATE. Those actions remain runtime-unverified until the manual workflow has passed for each pinned Solr version.
 
 ## Workflow
 
