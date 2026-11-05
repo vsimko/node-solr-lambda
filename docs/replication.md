@@ -43,7 +43,8 @@ The `indexversion` response includes the current `generation` on newer Solr vers
 ## Control a follower
 
 ```ts
-// Use fetchindex/abortfetch across the pinned Solr 8, 9, and 10 versions.
+// These commands are documented across Solr 8, 9, and 10; live abort lifecycle
+// verification is currently available only on Solr 9.11.0 and 10.1.0.
 // leaderUrl may be omitted when configured on the follower.
 await client.replication("fetchindex", {
   leaderUrl: "http://leader:8983/solr/catalog",
@@ -59,7 +60,7 @@ await client.replication("enablepoll");
 await client.replication("abortfetch");
 ```
 
-`fetchindex`/`abortfetch` are the canonical fetch and cancellation commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. `leaderUrl` is the leader core URL without the `/replication` suffix; Solr appends the handler path when fetching files. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings and pass `httpBasicAuthUser` / `httpBasicAuthPassword` as `customParams` on the `fetchindex` request when the server requires them. Do not put credentials into URLs or log them.
+`fetchindex`/`abortfetch` are documented commands across the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions. A bounded disposable-core test verifies an in-progress abort and follower read-back on Solr 9.11.0 and 10.1.0. On Solr 8.11.4, `details` did not expose `isReplicating=true` during the controlled transfer in CI; live cancellation therefore remains explicitly unverified on 8.11.4. The ordinary one-shot fetch/read-back remains verified on all three versions. `leaderUrl` is the leader core URL without the `/replication` suffix; Solr appends the handler path when fetching files. For Basic authentication between the follower and its leader, configure the ReplicationHandler's server-side follower settings and pass `httpBasicAuthUser` / `httpBasicAuthPassword` as `customParams` on the `fetchindex` request when the server requires them. Do not put credentials into URLs or log them.
 
 ## Control a leader
 
@@ -104,6 +105,6 @@ Supported directory types are `file` (Lucene index files), `cf` (configuration f
 - The handler may not be configured for user-managed leader/follower replication on every core. The server must have the appropriate ReplicationHandler configuration before control commands can be used.
 
 - A regular standalone/security integration test creates disposable leader and follower cores, commits a unique leader document, triggers `fetchindex` on Solr 8/9/10 with the fully qualified leader handler URL, and verifies that the document becomes searchable on the follower. This behavior passed the pinned Solr 8.11.4, 9.11.0, and 10.1.0 standalone/security CI matrix (run #640). The test does not cover polling or abort of an in-progress transfer.
-- `abortfetch` on Solr 8/9/10, plus `enablepoll`/`disablepoll`, have request-serialization unit coverage; cancellation of a live transfer remains unverified. The disposable-core fixture unloads both cores in its `finally` cleanup. If a CI job is cancelled or the fetch does not settle, the ephemeral Solr container is discarded rather than reusing the cores.
+- The isolated abort lifecycle test passes on Solr 9.11.0 and 10.1.0. Solr 8.11.4 is explicitly deferred: repeated CI runs did not observe `details.follower.isReplicating=true` during a throttled in-progress transfer, so the test is skipped for that version rather than claiming cancellation coverage. The documented command remains available, but live cancellation and its completion signal are not certified on 8.11.4. `enablepoll`/`disablepoll` retain request-serialization unit coverage only. The disposable-core fixture performs best-effort abort and bounded polling in `finally`; the ephemeral Solr container is discarded if cleanup cannot settle.
 
 See the [Solr 8.11](https://solr.apache.org/__root/docs.solr.apache.org/guide/8_11/deployment-guide/user-managed-index-replication.html), [Solr 9.11](https://solr.apache.org/guide/solr/9_11/deployment-guide/user-managed-index-replication.html), and [Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/user-managed-index-replication.html) guides for server configuration and command semantics.
