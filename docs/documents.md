@@ -1,4 +1,6 @@
-# Document API
+# Document API overview
+
+> This page is a concise introduction with examples. The canonical, detailed reference for document writes, atomic updates, update commands, and commit behavior is the [Update and Document API guide](update.md).
 
 Use `add()` to add one document or a list of documents. Use `update()` for full-document replacement. Use `atomicUpdate<TDocument>()` for field-specific partial updates with typed Solr modifiers.
 
