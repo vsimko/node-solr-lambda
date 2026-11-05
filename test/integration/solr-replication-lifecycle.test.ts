@@ -99,7 +99,7 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
   const leaderUrl = `${baseUrl.replace(/\/$/, "")}/${leaderCore}`;
   const documentId = createId("replication_abort");
   const storedField = createId("replication_payload");
-  const payload = randomBytes(12 * 1024 * 1024).toString("base64");
+  const payload = randomBytes(2 * 1024 * 1024).toString("base64");
 
   await leader.schema({ "add-field": { name: storedField, type: "string", stored: true, indexed: false, docValues: false } });
   await leader.add([{ id: documentId, [storedField]: payload }]);
@@ -112,7 +112,7 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
       customOptions: {
         leader: { replicateAfter: ["commit"] },
         // Throttle leader file streaming so the follower remains in a real in-progress fetch.
-        defaults: { maxWriteMBPerSec: 0.05 }
+        defaults: { maxWriteMBPerSec: 0.1 }
       }
     }
   });
@@ -136,6 +136,7 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
     return String(details?.follower?.isReplicating).toLowerCase() === "true";
   };
 
+  try {
   let observedActiveFetch = false;
   for (let attempt = 0; attempt < 200; attempt += 1) {
     if (await isReplicating()) {
@@ -165,4 +166,16 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
     limit: 1
   });
   assert.equal(result.response?.numFound ?? 0, 0, "an aborted fetch must not install the leader document");
-});
+  } finally {
+    // Do not let a failed assertion leave the asynchronous fetch holding either disposable core open.
+    await follower.replication("abortfetch").catch(() => undefined);
+    for (let attempt = 0; attempt < 200; attempt += 1) {
+      try {
+        if (!(await isReplicating())) break;
+      } catch {
+        // Continue bounded cleanup attempts while Solr is stopping the transfer.
+      }
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+  }
+}, 120_000);
