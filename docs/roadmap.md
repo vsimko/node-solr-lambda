@@ -30,7 +30,7 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 | Work | Tracking |
 | --- | --- |
 | Verify Solr 10.1 Export `includeStoredFields` behavior and record exact version evidence | [#258](https://github.com/vsimko/node-solr-lambda/issues/258) |
-| Verify isolated ReplicationHandler abort/async lifecycle semantics, or explicitly retain unverified status | [#259](https://github.com/vsimko/node-solr-lambda/issues/259) |
+| Verify in-progress abort on Solr 9.11.0/10.1.0; retain explicit Solr 8.11.4 deferral because details does not expose a reliable active-fetch signal (Issue #259) | [#259](https://github.com/vsimko/node-solr-lambda/issues/259) |
 
 ### P1 — SolrCloud operation evidence
 
