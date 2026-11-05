@@ -1,23 +1,46 @@
 # Documentation
 
+This is the canonical catalogue for the project's guides, API references, compatibility evidence, and release documentation.
+
+## Getting started and client fundamentals
+
 - [Getting started](getting-started.md)
 - [Configuration](configuration.md)
-- [Validation](validation.md)
+- [Runtime validation](validation.md)
+- [Error handling](errors.md)
+- [Client architecture](architecture.md)
+
+## API guides
+
 - [Query API](query.md)
-- [Export API](export.md)
-- [Document API](documents.md)
+- [Update and Document API — full guide](update.md)
+- [Document API overview — concise examples](documents.md)
 - [Schema API](schema.md)
 - [Config API](config.md)
-- [Administration](administration.md)
+- [Core Admin and Collections administration](administration.md)
 - [Replication API](replication.md)
-- [Backup and restore APIs](backup-restore.md)
-- [Error handling](errors.md)
+- [Backup and restore](backup-restore.md)
+- [Streaming Expressions](streaming.md)
+- [Export API](export.md)
 - [Raw requests](raw-requests.md)
+
+## API and compatibility references
+
+- [Public API reference](api-reference.md)
 - [API coverage](api-coverage.md)
+- [Collections action coverage matrix](collections-api-coverage.md)
 - [Solr endpoint inventory](endpoint-inventory.md)
-- [Client architecture](architecture.md)
-- [Solr server compatibility](compatibility.md)
-- [Development roadmap](roadmap.md)
+- [Machine-readable API inventory](api-inventory.json)
+- [Public API review](public-api-review.md)
+- [Solr server compatibility matrix](compatibility.md)
+
+## Migration, development, and release
+
 - [Migration from v3 to v4](migration-v3-to-v4.md)
+- [Development roadmap](roadmap.md)
 - [Release process](release-process.md)
 - [v4.0.0 release notes (draft)](release-notes-v4.0.0.md)
+
+## Canonical guide note
+
+The detailed [Update and Document API guide](update.md) is the canonical reference for document writes, atomic updates, update commands, and commit behavior. [Document API overview](documents.md) is intentionally retained as a short introduction with concise examples; it is not a separate or competing API specification.
