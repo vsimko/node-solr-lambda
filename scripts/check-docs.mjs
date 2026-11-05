@@ -67,6 +67,30 @@ for (const relativePath of [...declarationPaths, ...runtimePaths]) {
 assert.ok(declarationPaths.length >= 3, "Expected top-level, ESM, and CommonJS declaration entry points");
 
 const markdownFiles = [join(root, "README.md"), ...walk(docsRoot).filter((path) => extname(path) === ".md")];
+const docsIndexPath = join(docsRoot, "index.md");
+const docsIndex = readFileSync(docsIndexPath, "utf8");
+const indexedDocTargets = new Set(
+  [...docsIndex.matchAll(/!?\\[[^\\]]*\\]\\(([^)]+)\\)/g)]
+    .map((match) => match[1].trim().replace(/^<|>$/g, "").split("#", 2)[0])
+    .filter(Boolean)
+    .map((target) => resolve(docsRoot, decodeURIComponent(target)))
+);
+const readme = readFileSync(join(root, "README.md"), "utf8");
+for (const match of readme.matchAll(/!?\\[[^\\]]*\\]\\(([^)]+)\\)/g)) {
+  const rawTarget = match[1].trim().replace(/^<|>$/g, "");
+  if (!rawTarget || /^(?:https?:|mailto:|tel:|data:|#)/i.test(rawTarget)) continue;
+  const targetPath = rawTarget.split("#", 2)[0];
+  const destination = resolve(root, decodeURIComponent(targetPath));
+  if (destination.startsWith(docsRoot) && destination !== docsIndexPath) {
+    assert.ok(indexedDocTargets.has(destination),
+      `README documentation link is missing from docs/index.md: ${rawTarget}`);
+  }
+}
+assert.ok(indexedDocTargets.has(join(docsRoot, "update.md")),
+  "docs/index.md must link to the canonical detailed Update API guide");
+assert.match(readFileSync(join(docsRoot, "documents.md"), "utf8"), /\\]\\(update\\.md\\)/,
+  "The concise Document API overview must link to the canonical Update API guide");
+
 let checkedLinks = 0;
 let checkedExamples = 0;
 for (const markdownPath of markdownFiles) {
