@@ -33,12 +33,14 @@ The compatibility claim is per operation and tested behavior, not blanket certif
 
 Examples of intentionally unverified behavior include long-running/destructive shard split and migration actions, selected administrative actions that could disrupt shared CI state, and plugin- or deployment-specific behavior. Review the relevant API documentation before using those operations in production.
 
+ReplicationHandler one-shot `fetchindex` with follower read-back is verified on Solr 8.11.4, 9.11.0, and 10.1.0. In-progress `abortfetch` with bounded cleanup is verified on Solr 9.11.0 and 10.1.0; it remains explicitly unverified on Solr 8.11.4 because repeated CI runs did not expose a reliable active-fetch state through `details`. `enablepoll`/`disablepoll` have serialization coverage only. SPLITSHARD and MIGRATE have an opt-in isolated workflow, but remain runtime-unverified until a maintainer manually dispatches it and records per-version results.
+
 ## Release gates
 
 - [x] Package metadata, packed-tarball consumer checks, ESM/CommonJS imports, declarations, and optional-Zod behavior reviewed in PR #220.
 - [x] Public API surface and export decisions reviewed in PR #213 / Issue #108.
 - [x] Complete and merge the focused implementation work tracked by Issue #81 / PR #222.
-- [ ] Reconcile this draft and the changelog against all merged changes on the final release candidate.
+- [x] Reconcile this draft and the changelog against merged implementation/documentation PRs through PR #264. Re-run this reconciliation if additional changes land before the release candidate is cut.
 - [ ] Run the complete CI matrix on the exact release candidate commit: Node.js 20/22/24 and Solr 8.11.4/9.11.0/10.1.0.
 - [ ] Verify npm provenance/publication settings and the rollback procedure. The repository now has a manually dispatched OIDC trusted-publishing workflow (PR #225); npm Trusted Publisher account configuration and GitHub environment protection still require external verification.
 - [ ] Create the stable tag and publish only after every blocking gate is explicitly complete.
