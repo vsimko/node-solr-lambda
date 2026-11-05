@@ -178,4 +178,6 @@ integrationTest("ReplicationHandler aborts an in-progress fetch and reports its 
       await new Promise(resolve => setTimeout(resolve, 25));
     }
   }
-}, 120_000);
+}, 120_000, process.env.SOLR_VERSION === "8.11.4"
+  ? "Solr 8.11.4 does not expose a reliably observable in-progress ReplicationHandler fetch; abort lifecycle remains unverified on this version."
+  : undefined);
