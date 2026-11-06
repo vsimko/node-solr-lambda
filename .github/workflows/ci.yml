@@ -1,7 +1,7 @@
 name: CI
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  group: pr-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 on:
   push:
@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docs_only: ${{ steps.classify.outputs.docs_only }}
+      website_changed: ${{ steps.classify.outputs.website_changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,6 +38,7 @@ jobs:
         run: |
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "website_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -57,8 +59,20 @@ jobs:
           if [[ -z "$changed_files" ]]; then
             echo "No changed paths detected; running the full CI suite."
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "website_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          website_changed=false
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            case "$path" in
+              website/*|scripts/site/*|docs/*|README.md|CHANGELOG.md|package.json|package-lock.json|.github/workflows/ci.yml|.github/workflows/pages.yml|.github/workflows/pr-preview.yml|.github/workflows/website-preview.yml)
+                website_changed=true
+                ;;
+            esac
+          done <<< "$changed_files"
+          echo "website_changed=$website_changed" >> "$GITHUB_OUTPUT"
 
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
@@ -74,6 +88,17 @@ jobs:
 
           echo "Only Markdown documentation changed."
           echo "docs_only=true" >> "$GITHUB_OUTPUT"
+      - name: Record website preview decision
+        if: github.event_name == 'pull_request'
+        run: printf '%s\\n' '${{ steps.classify.outputs.website_changed }}' > preview-required.txt
+      - name: Upload website preview decision
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-preview-meta
+          path: preview-required.txt
+          if-no-files-found: error
+          retention-days: 1
 
   docs:
     name: Documentation checks
@@ -345,3 +370,44 @@ jobs:
         run: |
           docker logs solr-cloud || true
           docker logs solr-cloud-2 || true
+
+  website-preview-build:
+    name: Build website preview
+    needs: [changes, docs, test, integration, security-integration, cloud-integration]
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.website_changed == 'true' &&
+      !contains(fromJSON('["failure","cancelled"]'), needs.docs.result) &&
+      !contains(fromJSON('["failure","cancelled"]'), needs.test.result) &&
+      !contains(fromJSON('["failure","cancelled"]'), needs.integration.result) &&
+      !contains(fromJSON('["failure","cancelled"]'), needs.security-integration.result) &&
+      !contains(fromJSON('["failure","cancelled"]'), needs.cloud-integration.result)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: Check out the tested pull-request merge commit
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload website preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-preview-dist
+          path: dist-site/
+          if-no-files-found: error
+          retention-days: 1
