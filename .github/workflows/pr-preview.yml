@@ -3,6 +3,16 @@ name: Pull request website preview
 on:
   pull_request:
     types: [opened, reopened, synchronize, closed]
+    paths:
+      - "website/**"
+      - "scripts/site/**"
+      - "docs/**"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "package.json"
+      - "package-lock.json"
+      - "test/site-data-validator.test.mjs"
+      - "test/site-data-generator.test.mjs"
 
 permissions:
   actions: write
