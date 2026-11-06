@@ -77,7 +77,7 @@ function validateSiteData(data, rules) {
   if (!Array.isArray(data.sources)) errors.push({ id: "site-data-sources", severity: "error", path: "sources", message: "sources must be an array." });
   const sourceIds = new Set();
   for (const [index, source] of (Array.isArray(data.sources) ? data.sources : []).entries()) {
-    const path = `sources[\${index}]`;
+    const path = `sources[${index}]`;
     if (!isRecord(source) || typeof source.id !== "string" || !source.id ||
         !["repository", "github", "npm", "apache"].includes(source.kind) ||
         typeof source.url !== "string" || typeof source.retrievedAt !== "string" ||
@@ -85,7 +85,7 @@ function validateSiteData(data, rules) {
       errors.push({ id: "source-record", severity: "error", path, message: "Source requires unique id, allowed kind/status, URL, and valid retrievedAt." });
       continue;
     }
-    if (sourceIds.has(source.id)) errors.push({ id: "source-unique-id", severity: "error", path, message: `Duplicate source id: \${source.id}.` });
+    if (sourceIds.has(source.id)) errors.push({ id: "source-unique-id", severity: "error", path, message: `Duplicate source id: ${source.id}.` });
     sourceIds.add(source.id);
   }
   const requiredDomains = ["apiCoverage", "ci", "roadmap", "npm", "releases", "documentation"];
@@ -94,26 +94,26 @@ function validateSiteData(data, rules) {
     const path = domainName;
     if (!isRecord(domain) || !allowedStatuses.has(domain.status) ||
         !Array.isArray(domain.sourceIds) || !Array.isArray(domain.records)) {
-      errors.push({ id: `domain-\${domainName}`, severity: "error", path, message: "Domain requires an allowed status, sourceIds array, and records array." });
+      errors.push({ id: `domain-${domainName}`, severity: "error", path, message: "Domain requires an allowed status, sourceIds array, and records array." });
       continue;
     }
     for (const sourceId of domain.sourceIds) {
-      if (!sourceIds.has(sourceId)) errors.push({ id: `domain-source-\${domainName}`, severity: "error", path, message: `Unknown source reference: \${sourceId}.` });
+      if (!sourceIds.has(sourceId)) errors.push({ id: `domain-source-${domainName}`, severity: "error", path, message: `Unknown source reference: ${sourceId}.` });
     }
     if (domain.status === "unavailable" && domain.records.length > 0) {
-      errors.push({ id: `domain-unavailable-\${domainName}`, severity: "error", path, message: "Unavailable domains must not expose records." });
+      errors.push({ id: `domain-unavailable-${domainName}`, severity: "error", path, message: "Unavailable domains must not expose records." });
     }
     if (domain.status === "available" && domain.records.length === 0) {
-      errors.push({ id: `domain-empty-\${domainName}`, severity: "warning", path, message: "An available domain with no records must be explicitly reviewed; do not use it to represent an unavailable feed." });
+      errors.push({ id: `domain-empty-${domainName}`, severity: "warning", path, message: "An available domain with no records must be explicitly reviewed; do not use it to represent an unavailable feed." });
     }
     const seen = new Set();
     for (const [index, record] of domain.records.entries()) {
-      const recordPath = `\${domainName}.records[\${index}]`;
+      const recordPath = `${domainName}.records[${index}]`;
       if (!isRecord(record) || typeof record.id !== "string" || !record.id) {
-        errors.push({ id: `record-id-\${domainName}`, severity: "error", path: recordPath, message: "Each record requires a non-empty id." });
+        errors.push({ id: `record-id-${domainName}`, severity: "error", path: recordPath, message: "Each record requires a non-empty id." });
         continue;
       }
-      if (seen.has(record.id)) errors.push({ id: `record-unique-\${domainName}`, severity: "error", path: recordPath, message: `Duplicate record id: \${record.id}.` });
+      if (seen.has(record.id)) errors.push({ id: `record-unique-${domainName}`, severity: "error", path: recordPath, message: `Duplicate record id: ${record.id}.` });
       seen.add(record.id);
       validateDomainRecord(domainName, record, recordPath, errors);
     }
@@ -121,9 +121,9 @@ function validateSiteData(data, rules) {
   for (const [domainName, domain] of Object.entries(data)) {
     if (["upstreamSolr", "typescriptApi", "ciHistory"].includes(domainName) && domain !== undefined) {
       if (!isRecord(domain) || !allowedStatuses.has(domain.status) || !Array.isArray(domain.sourceIds) || !Array.isArray(domain.records)) {
-        errors.push({ id: `optional-domain-\${domainName}`, severity: "error", path: domainName, message: "Optional P2 domain must use the standard domain envelope." });
+        errors.push({ id: `optional-domain-${domainName}`, severity: "error", path: domainName, message: "Optional P2 domain must use the standard domain envelope." });
       } else {
-        for (const sourceId of domain.sourceIds) if (!sourceIds.has(sourceId)) errors.push({ id: `optional-source-\${domainName}`, severity: "error", path: domainName, message: `Unknown source reference: \${sourceId}.` });
+        for (const sourceId of domain.sourceIds) if (!sourceIds.has(sourceId)) errors.push({ id: `optional-source-${domainName}`, severity: "error", path: domainName, message: `Unknown source reference: ${sourceId}.` });
       }
     }
   }
@@ -133,12 +133,12 @@ function validateSiteData(data, rules) {
 function validateDomainRecord(domain, record, path, errors) {
   const requireString = (field) => {
     if (typeof record[field] !== "string" || record[field].length === 0) {
-      errors.push({ id: `record-\${domain}-\${field}`, severity: "error", path, message: `\${field} must be a non-empty string.` });
+      errors.push({ id: `record-${domain}-${field}`, severity: "error", path, message: `${field} must be a non-empty string.` });
     }
   };
   const validDate = (field) => {
     if (typeof record[field] !== "string" || !Number.isFinite(Date.parse(record[field]))) {
-      errors.push({ id: `record-\${domain}-\${field}`, severity: "error", path, message: `\${field} must be a valid date-time.` });
+      errors.push({ id: `record-${domain}-${field}`, severity: "error", path, message: `${field} must be a valid date-time.` });
     }
   };
   if (domain === "apiCoverage") {
@@ -188,14 +188,14 @@ function runRules(rules, dataPath) {
           errors.push(diagnostic(rule, rule.path, "JSON contract schema/version does not match the configured rule."));
         }
       } catch (error) {
-        errors.push(diagnostic(rule, rule.path, `Cannot read JSON contract: \${error.message}`));
+        errors.push(diagnostic(rule, rule.path, `Cannot read JSON contract: ${error.message}`));
       }
     } else if (rule.check === "site-data" && dataPath) {
       try {
         const data = readJson(dataPath);
         errors.push(...validateSiteData(data, rules));
       } catch (error) {
-        errors.push(diagnostic(rule, dataPath, `Cannot read site data: \${error.message}`));
+        errors.push(diagnostic(rule, dataPath, `Cannot read site data: ${error.message}`));
       }
     }
   }
@@ -207,21 +207,23 @@ function parseArgs(args) {
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--rules" && args[i + 1]) result.rules = resolve(root, args[++i]);
     else if (args[i] === "--data" && args[i + 1]) result.data = resolve(root, args[++i]);
-    else throw new Error(`Unknown or incomplete argument: \${args[i]}`);
+    else throw new Error(`Unknown or incomplete argument: ${args[i]}`);
   }
   return result;
 }
 
-const options = parseArgs(process.argv.slice(2));
-const rules = readJson(options.rules);
-const ruleErrors = validateRules(rules);
-const diagnostics = [...ruleErrors, ...runRules(rules, options.data)];
-diagnostics.sort((a, b) => a.id.localeCompare(b.id) || a.path.localeCompare(b.path) || a.message.localeCompare(b.message));
-for (const item of diagnostics) {
-  console.log(`[\${item.severity.toUpperCase()}] \${item.id} \${item.path}: \${item.message}`);
-}
-const failures = diagnostics.filter((item) => item.severity === "error");
-console.log(`Site data validation: \${failures.length} error(s), \${diagnostics.length - failures.length} warning(s).`);
-if (failures.length) process.exitCode = 1;
-
 export { validateRules, validateSiteData };
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  const options = parseArgs(process.argv.slice(2));
+  const rules = readJson(options.rules);
+  const ruleErrors = validateRules(rules);
+  const diagnostics = [...ruleErrors, ...runRules(rules, options.data)];
+  diagnostics.sort((a, b) => a.id.localeCompare(b.id) || a.path.localeCompare(b.path) || a.message.localeCompare(b.message));
+  for (const item of diagnostics) {
+    console.log(`[${item.severity.toUpperCase()}] ${item.id} ${item.path}: ${item.message}`);
+  }
+  const failures = diagnostics.filter((item) => item.severity === "error");
+  console.log(`Site data validation: ${failures.length} error(s), ${diagnostics.length - failures.length} warning(s).`);
+  if (failures.length) process.exitCode = 1;
+}
