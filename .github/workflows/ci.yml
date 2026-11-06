@@ -111,7 +111,7 @@ jobs:
       - run: npm run release:check
 
   integration:
-    needs: changes
+    needs: [changes, test]
     if: needs.changes.outputs.docs_only != 'true'
     strategy:
       fail-fast: true
