@@ -82,6 +82,16 @@ test("requires explicit CI identity and bounded npm download windows", () => {
   assert.ok(ids.includes("npm-window-range"));
 });
 
+test("accepts all documented non-completed GitHub Actions run states", () => {
+  for (const status of ["requested", "queued", "pending", "waiting", "in_progress"]) {
+    const data = structuredClone(base);
+    data.ci.records[0].status = status;
+    delete data.ci.records[0].conclusion;
+    delete data.ci.records[0].completedAt;
+    assert.deepEqual(validateSiteData(data, rules), [], status);
+  }
+});
+
 test("validates configured CI matrix provenance separately from observed runs", () => {
   const valid = structuredClone(base);
   valid.ci.configuredMatrix = [{ dimension: "node", values: [20, 22, 24], sourcePath: ".github/workflows/ci.yml" }];
