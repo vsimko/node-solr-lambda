@@ -160,7 +160,7 @@ function validateSiteData(data, rules) {
         if (operationIds.has(record.operationId)) errors.push({ id: "api-coverage-operation-unique", severity: "error", path: recordPath, message: "API operation IDs must be unique." });
         operationIds.add(record.operationId);
       }
-      validateDomainRecord(domainName, record, recordPath, errors);
+      validateDomainRecord(domainName, record, recordPath, errors, sourceIds);
     }
   }
   for (const [domainName, domain] of Object.entries(data)) {
@@ -203,7 +203,7 @@ let githubRunUrl = false;
   return errors;
 }
 
-function validateDomainRecord(domain, record, path, errors) {
+function validateDomainRecord(domain, record, path, errors, sourceIds) {
   const requireString = (field) => {
     if (typeof record[field] !== "string" || record[field].length === 0) {
       errors.push({ id: `record-${domain}-${field}`, severity: "error", path, message: `${field} must be a non-empty string.` });
