@@ -9,9 +9,9 @@ const base = {
   package: { name: "node-solr-lambda", version: "4.0.0-beta.0", repository: "https://github.com/vsimko/node-solr-lambda", source: "package.json" },
   sources: [source],
   apiCoverage: { status: "available", sourceIds: [source.id], records: [{ id: "select", operationId: "select", status: "verified", versions: ["8", "9", "10"], evidence: { sourceIds: [source.id], path: "README.md", description: "Canonical API inventory evidence" } }] },
-  ci: { status: "available", sourceIds: [source.id], records: [{ id: "run-1", status: "completed", conclusion: "success", runUrl: "https://github.com/example/project/actions/runs/1", commit: "abc123", ref: "refs/heads/main", startedAt: "2026-11-06T07:00:00Z", completedAt: "2026-11-06T07:01:00Z", observed: true }] },
+  ci: { status: "available", sourceIds: [source.id], records: [{ id: "run-1", runId: "1", workflow: "CI", event: "pull_request", status: "completed", conclusion: "success", runUrl: "https://github.com/example/project/actions/runs/1", commit: "abc123", ref: "refs/heads/main", startedAt: "2026-11-06T07:00:00Z", completedAt: "2026-11-06T07:01:00Z", observed: true }] },
   roadmap: { status: "available", sourceIds: [source.id], records: [{ id: "issue-1", number: 1, url: "https://github.com/example/project/issues/1", priority: "P1", state: "open" }] },
-  npm: { status: "available", sourceIds: [source.id], records: [{ id: "downloads-week", packageName: "node-solr-lambda", version: "4.0.0-beta.0", downloads: 0, window: "last-7-days", sourceUrl: "https://www.npmjs.com/package/node-solr-lambda", retrievedAt: "2026-11-06T08:00:00Z" }] },
+  npm: { status: "available", sourceIds: [source.id], records: [{ id: "downloads-week", packageName: "node-solr-lambda", version: "4.0.0-beta.0", downloads: 0, window: "last-7-days", windowStart: "2026-10-30T00:00:00Z", windowEnd: "2026-11-06T00:00:00Z", sourceUrl: "https://www.npmjs.com/package/node-solr-lambda", retrievedAt: "2026-11-06T08:00:00Z" }] },
   releases: { status: "available", sourceIds: [source.id], records: [{ id: "v4-beta", tag: "v4.0.0-beta.0", version: "4.0.0-beta.0", draft: false, publishedAt: "2026-11-01T08:00:00Z", url: "https://github.com/example/project/releases/tag/v4.0.0-beta.0", changelogUrl: "https://github.com/example/project/blob/main/CHANGELOG.md", displayAsPublished: true }] },
   documentation: { status: "available", sourceIds: [source.id], records: [{ id: "api-reference", path: "docs/api-reference.md", url: "https://github.com/example/project/blob/main/docs/api-reference.md", owner: "authored" }] }
 };
@@ -41,6 +41,24 @@ test("rejects duplicate IDs, unknown sources, and unavailable domains with recor
   invalid.apiCoverage.sourceIds = ["missing"];
   invalid.ci.status = "unavailable";
   assert.ok(validateSiteData(invalid, rules).length >= 3);
+});
+
+test("rejects missing API evidence provenance and incomplete package source metadata", () => {
+  const invalid = structuredClone(base);
+  invalid.apiCoverage.records[0].evidence.sourceIds = ["missing"];
+  invalid.package.source = "";
+  const ids = validateSiteData(invalid, rules).map((item) => item.id);
+  assert.ok(ids.includes("api-coverage-evidence-source"));
+  assert.ok(ids.includes("site-data-package"));
+});
+
+test("requires explicit CI identity and bounded npm download windows", () => {
+  const invalid = structuredClone(base);
+  delete invalid.ci.records[0].workflow;
+  invalid.npm.records[0].windowStart = "2026-11-07T00:00:00Z";
+  const ids = validateSiteData(invalid, rules).map((item) => item.id);
+  assert.ok(ids.includes("record-ci-workflow"));
+  assert.ok(ids.includes("npm-window-range"));
 });
 
 test("does not treat configured matrix dimensions as observed CI success", () => {
