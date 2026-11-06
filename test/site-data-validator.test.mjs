@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { validateRules, validateSiteData } from "../scripts/site/validate-data.mjs";
 
 const source = { id: "github-actions", kind: "github", url: "https://api.github.com/repos/example/project/actions", retrievedAt: "2026-11-06T08:00:00.000Z", status: "available" };
@@ -8,7 +9,7 @@ const base = {
   generatedAt: "2026-11-06T08:00:00.000Z",
   package: { name: "node-solr-lambda", version: "4.0.0-beta.0", repository: "https://github.com/vsimko/node-solr-lambda", source: "package.json" },
   sources: [source],
-  apiCoverage: { status: "available", sourceIds: [source.id], records: [{ id: "select", operationId: "select", status: "verified", versions: ["8", "9", "10"], evidence: { sourceIds: [source.id], path: "README.md", description: "Canonical API inventory evidence" } }] },
+  apiCoverage: { status: "available", sourceIds: [source.id], records: [{ id: "select", operationId: "select", status: "verified", versions: ["8", "9", "10"], typeCoverage: "complete", unitTests: "present", integrationTests: "tested", documentation: "docs/api-reference.md", testFiles: ["test/query.test.ts"], evidence: { sourceIds: [source.id], path: "README.md", description: "Canonical API inventory evidence" } }] },
   ci: { status: "available", sourceIds: [source.id], records: [{ id: "run-1", runId: "1", workflow: "CI", event: "pull_request", status: "completed", conclusion: "success", runUrl: "https://github.com/example/project/actions/runs/1", commit: "abc123", ref: "refs/heads/main", startedAt: "2026-11-06T07:00:00Z", completedAt: "2026-11-06T07:01:00Z", observed: true }] },
   roadmap: { status: "available", sourceIds: [source.id], records: [{ id: "issue-1", number: 1, url: "https://github.com/example/project/issues/1", priority: "P1", state: "open" }] },
   npm: { status: "available", sourceIds: [source.id], records: [{ id: "downloads-week", packageName: "node-solr-lambda", version: "4.0.0-beta.0", downloads: 0, window: "last-7-days", windowStart: "2026-10-30T00:00:00Z", windowEnd: "2026-11-06T00:00:00Z", sourceUrl: "https://www.npmjs.com/package/node-solr-lambda", retrievedAt: "2026-11-06T08:00:00Z" }] },
@@ -17,6 +18,12 @@ const base = {
 };
 
 const rules = { version: 1, rules: [{ id: "one", severity: "error", enabled: true, check: "file-exists", path: "README.md" }] };
+
+const projectRules = JSON.parse(readFileSync(new URL("../scripts/site/rules.json", import.meta.url), "utf8"));
+
+test("checked-in site rules use only supported validator checks", () => {
+  assert.deepEqual(validateRules(projectRules), []);
+});
 
 test("accepts a valid deterministic P1 data fixture, including a genuine zero metric", () => {
   assert.deepEqual(validateSiteData(base, rules), []);
