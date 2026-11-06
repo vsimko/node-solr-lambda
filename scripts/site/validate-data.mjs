@@ -7,7 +7,7 @@ const allowedSeverities = new Set(["error", "warning"]);
 const allowedChecks = new Set(["file-exists", "json-contract", "site-data", "local-links", "text-contains"]);
 const allowedStatuses = new Set(["available", "stale", "unavailable"]);
 const allowedPriorities = new Set(["P0", "P1", "P2", "P3"]);
-const allowedIssueStates = new Set(["open", "closed"]);
+const allowedIssueStates = new Set(["open", "in-progress", "closed", "unknown"]);
 const allowedReleaseStates = new Set(["published", "draft", "unreleased"]);
 const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
