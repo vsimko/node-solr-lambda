@@ -72,3 +72,7 @@ See [error handling](errors.md) for error properties and handling guidance.
 ## Compatibility
 
 The module structure does not certify server compatibility. See the [Solr compatibility matrix](compatibility.md) for documented endpoint availability and runtime test status.
+
+## GitHub Pages website
+
+The public project website architecture and generated-data ownership are recorded in [ADR 0001](adr/0001-github-pages-site.md). Its versioned model is defined by the [website data contract](site-data-contract.md) and [JSON Schema](site-data.schema.json). Website tooling is build-time only and does not add package runtime dependencies.
