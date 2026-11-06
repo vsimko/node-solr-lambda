@@ -154,7 +154,7 @@ jobs:
 
   test:
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true' && needs.changes.outputs.website_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
     strategy:
       fail-fast: true
       matrix:
