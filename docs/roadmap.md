@@ -25,6 +25,18 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 ## Active priorities
 
+### Next feature tranche — TypeScript-first API coverage
+
+This tranche is deliberately small and independent of the v4.0 release gate. It prioritizes common workflows where a named public contract materially improves discoverability and safe usage.
+
+| Priority / sequence | Feature | Tracking | User value and scope |
+| --- | --- | --- | --- |
+| P1 — first | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/issues/271) | Direct unique-key single/multi-document retrieval for read-after-write workflows, with generic document response types and exact request-option evidence. |
+| P2 — next | Typed SpellCheck query component | [#272](https://github.com/vsimko/node-solr-lambda/issues/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
+
+The two issues are independent of each other, #110, and #232. The sequence is a delivery preference, not a technical dependency. Each implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
+
+### P1 — SolrCloud operation evidence
 ### P1 — SolrCloud operation evidence
 
 | Work | Tracking | Current status |
@@ -35,12 +47,26 @@ The scope is balanced: cover major Solr API areas and production readiness witho
 
 v4.0 stable publication remains a separate release-owner decision and must not block feature development. Complete the exact release-candidate CI matrix, release notes/migration summary, npm trusted-publisher configuration and provenance verification, and clean npm consumer smoke test before publication. Tracking: [#110](https://github.com/vsimko/node-solr-lambda/issues/110). Do not create a stable tag or publish without explicit release-owner approval.
 
+## Residual-gap triage
+
+The residual opportunities in API coverage, endpoint inventory, and the machine-readable inventory were reviewed and grouped before selecting the next tranche:
+
+| Category | Decision | Rationale / tracking |
+| --- | --- | --- |
+| Feature | Accept RealTime Get and SpellCheck as the next focused additions | #271 and #272 improve common lookup and search-correction workflows with discoverable TypeScript contracts. |
+| Verification-only | Keep delete-option `_route_`/`commitWithin`, optimize-specific `openSearcher`, ReplicationHandler `enablepoll`/`disablepoll`, and the Solr 8.11.4 in-progress abort boundary explicitly unverified | These are narrower behavior-evidence gaps, not reasons to broaden the public API; retain exact compatibility notes until deterministic tests or server evidence exist. |
+| External/manual gates | Keep SPLITSHARD/MIGRATE execution (#232) and v4.0 publication (#110) separate | Both require maintainer/release-owner action; neither blocks the selected feature tranche. |
+| Maintenance | Finish the audit-driven API coverage, compatibility, endpoint inventory, and machine-readable inventory reconciliation | Tracked by the consolidated documentation PR #269; historical checklist hygiene is recorded in #228–#236 and #265. |
+| Deferred pending demand | Terms handler, Suggester handler, additional validation adapters, version-specific error payload variants, and advanced OAuth/mTLS credential lifecycle | No concrete consumer requirement or incompatible payload currently justifies adding these to the immediate tranche. Reassess when demand or reproducible evidence appears. |
+| Intentional non-goals | Blanket wrappers for every Solr endpoint/plugin and implicit V2 support from V1 contracts | Generic transport remains an escape hatch; V2 routes/payloads require a separately scoped API and tests. |
+
 ## Dependencies and execution
 
 - Documentation reconciliation #255 and residual-gap triage #256 are complete through merged PR #257. The roadmap and API coverage now distinguish accepted work (#258 and #259), deferred items, and intentional non-goals.
 - Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 by merged PR #263, which closes #258. Do not extend that claim to Solr 8/9.
 - #232 is independent of #259. Its opt-in workflow must be run manually; results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
+- The next TypeScript-first feature tranche is #271 (RealTime Get) followed by #272 (SpellCheck); both are independent of the #110 release and #232 destructive SolrCloud gates.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
 
 ## Completed foundation and historical work
