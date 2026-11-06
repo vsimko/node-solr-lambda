@@ -124,6 +124,29 @@ function validateSiteData(data, rules) {
         errors.push({ id: `optional-domain-${domainName}`, severity: "error", path: domainName, message: "Optional P2 domain must use the standard domain envelope." });
       } else {
         for (const sourceId of domain.sourceIds) if (!sourceIds.has(sourceId)) errors.push({ id: `optional-source-${domainName}`, severity: "error", path: domainName, message: `Unknown source reference: ${sourceId}.` });
+        const seen = new Set();
+        for (const [index, record] of domain.records.entries()) {
+          const path = `${domainName}.records[${index}]`;
+          if (!isRecord(record) || typeof record.id !== "string" || !record.id || seen.has(record.id)) {
+            errors.push({ id: `optional-record-id-${domainName}`, severity: "error", path, message: "Each optional record requires a unique non-empty id." });
+            continue;
+          }
+          seen.add(record.id);
+          if (domainName === "upstreamSolr") {
+            if (typeof record.version !== "string" || !/^\\d+\\.\\d+(?:\\.\\d+)?$/.test(record.version)) errors.push({ id: "solr-release-version", severity: "error", path, message: "Solr release requires a numeric version." });
+            if (typeof record.releaseDate !== "string" || !Number.isFinite(Date.parse(record.releaseDate))) errors.push({ id: "solr-release-date", severity: "error", path, message: "Solr release requires a valid release date." });
+            if (typeof record.sourceUrl !== "string" || !/^https:\\/\\/(?:solr\\.apache\\.org|archive\\.apache\\.org|downloads\\.apache\\.org)\\//.test(record.sourceUrl)) errors.push({ id: "solr-release-source", severity: "error", path, message: "Solr release source must use an official Apache Solr/Apache archive host." });
+          } else if (domainName === "typescriptApi") {
+            for (const field of ["path", "sourcePath", "exportName"]) if (typeof record[field] !== "string" || !record[field]) errors.push({ id: `typescript-api-${field}`, severity: "error", path, message: `${field} is required for generated API provenance.` });
+            if (record.visibility !== "public" && record.visibility !== "internal") errors.push({ id: "typescript-api-visibility", severity: "error", path, message: "API declaration visibility must be public or internal." });
+            if (record.visibility === "internal" && record.includedInPublicReference === true) errors.push({ id: "typescript-api-private-export", severity: "error", path, message: "Internal declarations must not appear in the public API reference." });
+          } else if (domainName === "ciHistory") {
+            if (typeof record.runId !== "string" || !record.runId) errors.push({ id: "ci-history-run-id", severity: "error", path, message: "Historical CI record requires a run ID." });
+            if (!Number.isFinite(record.durationSeconds) || record.durationSeconds < 0) errors.push({ id: "ci-history-duration", severity: "error", path, message: "CI duration must be a non-negative number of seconds." });
+            if (typeof record.url !== "string" || !/^https:\\/\\/github\\.com\\//.test(record.url)) errors.push({ id: "ci-history-url", severity: "error", path, message: "Historical CI record requires a GitHub run URL." });
+            if (typeof record.completedAt !== "string" || !Number.isFinite(Date.parse(record.completedAt))) errors.push({ id: "ci-history-date", severity: "error", path, message: "Historical CI record requires a valid completion timestamp." });
+          }
+        }
       }
     }
   }
