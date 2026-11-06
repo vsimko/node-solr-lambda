@@ -35,7 +35,7 @@
       "severity": "error",
       "enabled": true,
       "check": "site-data",
-      "dataPath": "website/data/site-data.json"
+      "dataPath": "build/site-data.json"
     },
     {
       "id": "documentation-index-links",
@@ -51,6 +51,35 @@
       "check": "text-contains",
       "path": "docs/site-data-contract.md",
       "text": "validators must not read the wall clock or access the network"
+    },
+    {
+      "id": "website-index-exists",
+      "severity": "error",
+      "enabled": true,
+      "check": "file-exists",
+      "path": "website/index.html"
+    },
+    {
+      "id": "website-index-links",
+      "severity": "error",
+      "enabled": true,
+      "check": "local-links",
+      "path": "website/index.html"
+    },
+    {
+      "id": "pages-workflow-exists",
+      "severity": "error",
+      "enabled": true,
+      "check": "file-exists",
+      "path": ".github/workflows/pages.yml"
+    },
+    {
+      "id": "website-base-path",
+      "severity": "error",
+      "enabled": true,
+      "check": "text-contains",
+      "path": "website/index.html",
+      "text": "<base href=\"./\">"
     }
   ]
 }

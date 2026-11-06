@@ -1,0 +1,70 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "website/**"
+      - "scripts/site/**"
+      - "docs/**"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/pages.yml"
+      - ".github/workflows/pr-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-production
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate, validate and build production site
+        run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Publish production site while preserving active PR previews
+        run: |
+          test -s dist-site/index.html
+          touch dist-site/.nojekyll
+          staging_dir="$(mktemp -d)"
+          cp -a dist-site/. "$staging_dir/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git checkout -B gh-pages origin/gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          rsync -a --delete --exclude='.git/' --exclude='pr-preview/' "$staging_dir/" ./
+          rm -rf "$staging_dir"
+          git add -f -A
+          if git diff --cached --quiet; then
+            echo "Production site is already up to date."
+            exit 0
+          fi
+          git commit -m "Deploy production site from ${GITHUB_SHA}"
+          git push origin gh-pages

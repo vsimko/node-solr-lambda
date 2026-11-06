@@ -100,3 +100,15 @@ Closed issues are retained as historical evidence, not active priorities:
 ## Definition of done
 
 A feature is not complete merely because it compiles. It needs useful TypeScript autocomplete, consumer compile tests, unit tests, documentation, and integration evidence for supported Solr versions—or an explicit unverified/unsupported status. Record evidence per operation and version; never generalize a passing family-level CI job to every action.
+
+## P1 — Public project website and status dashboard
+
+Deliver the static GitHub Pages experience as a product-discovery feature: TypeScript-first onboarding, operation-level API/compatibility evidence, observed CI, roadmap/tracked-work state, package/release information, and a canonical documentation catalogue. Keep generated facts traceable to repository or public-service sources; unknown, stale, and unavailable states must remain explicit.
+
+| Work | Tracking | Scope boundary |
+| --- | --- | --- |
+| Architecture and versioned site-data contract | [#274](https://github.com/vsimko/node-solr-lambda/issues/274) | Foundation recorded in ADR 0001 and the site-data schema; no runtime dependency or npm package-content change. |
+| Deterministic validation and consistency checks | [#275](https://github.com/vsimko/node-solr-lambda/issues/275) | Offline validation of normalized snapshots and P1 domains; optional P2 domains cannot gate P1 delivery. |
+| GitHub Pages site, generated data, and deployment workflow | [#276](https://github.com/vsimko/node-solr-lambda/issues/276) | Static build and PR validation without deployment; deployment only from the default branch. |
+
+The website is a discovery and evidence surface, not a second source of technical truth. README and `docs/` remain canonical; API inventory and compatibility evidence remain operation/version-specific. The website work does not change the TypeScript-first API feature priorities or release/manual SolrCloud gates.
