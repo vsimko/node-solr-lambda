@@ -35,7 +35,7 @@ jobs:
 
       - name: Build website
         if: github.event.action != 'closed'
-        run: npm run build:site
+        run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
