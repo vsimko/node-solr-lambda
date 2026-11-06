@@ -40,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Generate, validate and build production site
-        run: npm run build:site
+        run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
