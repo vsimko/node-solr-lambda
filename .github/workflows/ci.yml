@@ -154,7 +154,7 @@ jobs:
 
   test:
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true' && needs.changes.outputs.website_only != 'true'
     strategy:
       fail-fast: true
       matrix:
@@ -190,7 +190,7 @@ jobs:
 
   integration:
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
     strategy:
       fail-fast: true
       matrix:
@@ -258,7 +258,7 @@ jobs:
 
   security-integration:
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
     strategy:
       fail-fast: true
       matrix:
@@ -362,7 +362,7 @@ jobs:
 
   cloud-integration:
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
     env:
       SOLR_DESTRUCTIVE_OPT_IN: "${{ github.event_name == 'workflow_dispatch' && inputs.enable_destructive_solrcloud_tests == true && 'true' || 'false' }}"
     strategy:
