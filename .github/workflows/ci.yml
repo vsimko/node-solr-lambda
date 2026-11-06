@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docs_only: ${{ steps.classify.outputs.docs_only }}
+      website_only: ${{ steps.classify.outputs.website_only }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,23 +62,33 @@ jobs:
           if [[ -z "$changed_files" ]]; then
             echo "No changed paths detected; running the full CI suite."
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "website_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          docs_only=true
+          website_only=true
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
             case "$path" in
-              README.md|docs/*.md|docs/**/*.md) ;;
+              README.md|docs/*.md|docs/**/*.md)
+                website_only=false
+                ;;
+              website/*|website/**|scripts/site/*|scripts/site/**|test/site-data-validator.test.mjs|test/site-data-generator.test.mjs)
+                docs_only=false
+                ;;
               *)
-                echo "Non-documentation change detected: $path"
-                echo "docs_only=false" >> "$GITHUB_OUTPUT"
-                exit 0
+                docs_only=false
+                website_only=false
+                echo "Application or shared tooling change detected: $path"
+                break
                 ;;
             esac
           done <<< "$changed_files"
 
-          echo "Only Markdown documentation changed."
-          echo "docs_only=true" >> "$GITHUB_OUTPUT"
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+          echo "website_only=$website_only" >> "$GITHUB_OUTPUT"
+          echo "Change classification: docs_only=$docs_only website_only=$website_only"
       - name: Cancel all workflows for this pull request after failure
         if: failure() && github.event_name == 'pull_request'
         env:
@@ -126,9 +137,24 @@ jobs:
           echo "Cancelling this workflow run"
           gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
+  website:
+    name: Website build and structural checks
+    needs: changes
+    if: needs.changes.outputs.website_only == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build and validate website
+        run: npm run build:site
+
   test:
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
     strategy:
       fail-fast: true
       matrix:
