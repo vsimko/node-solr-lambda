@@ -34,7 +34,7 @@ Operation records retain stable inventory IDs and evidence at operation/version 
 
 ### GitHub Actions
 
-Configured matrix dimensions are sourced from workflow YAML and stored separately from observed runs. Run records include run ID, workflow, URL, event, ref, commit SHA, status/conclusion, and timestamps. In-progress, cancelled, skipped, failure, and unavailable are distinct. A configured matrix entry never implies a successful run.
+Configured matrix dimensions are sourced from workflow YAML and stored separately from observed runs in `ci.configuredMatrix`, each with a dimension, values, and source path. Run records include run ID, workflow, URL, event, ref, commit SHA, status/conclusion, and timestamps. In-progress, cancelled, skipped, failure, and unavailable are distinct. A configured matrix entry never implies a successful run.
 
 ### Roadmap and tracked work
 
@@ -46,7 +46,7 @@ Published version, dist-tags, publication metadata, and download counts come fro
 
 ### Releases
 
-Published release/tag and npm publication state are external published facts. `CHANGELOG.md` Unreleased remains unreleased. `docs/release-notes-v4.0.0.md` remains draft until a corresponding actual release is confirmed.
+Published release/tag and npm publication state are external published facts. The `releases.unreleased` object carries a separately sourced excerpt of the `CHANGELOG.md` Unreleased section; draft release notes remain explicitly labelled draft. `CHANGELOG.md` Unreleased remains unreleased. `docs/release-notes-v4.0.0.md` remains draft until a corresponding actual release is confirmed.
 
 ### Documentation
 
