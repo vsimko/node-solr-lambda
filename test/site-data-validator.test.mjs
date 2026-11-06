@@ -79,3 +79,29 @@ test("validates optional P2 domains without requiring their presence", () => {
   invalid.upstreamSolr = { status: "available", sourceIds: ["unknown"], records: [] };
   assert.ok(validateSiteData(invalid, rules).some((item) => item.id === "optional-source-upstreamSolr"));
 });
+
+test("accepts valid optional P2 Solr, TypeScript API, and CI history records", () => {
+  const valid = structuredClone(base);
+  valid.upstreamSolr = { status: "available", sourceIds: [source.id], records: [{ id: "solr-10.1", version: "10.1.0", releaseDate: "2026-01-01", sourceUrl: "https://solr.apache.org/downloads.html" }] };
+  valid.typescriptApi = { status: "available", sourceIds: [source.id], records: [{ id: "client-export", path: "api/SolrClient.html", sourcePath: "src/client.ts", exportName: "SolrClient", visibility: "public" }] };
+  valid.ciHistory = { status: "available", sourceIds: [source.id], records: [{ id: "run-history-1", runId: "123", durationSeconds: 62, url: "https://github.com/example/project/actions/runs/123", completedAt: "2026-11-06T08:00:00Z" }] };
+  assert.deepEqual(validateSiteData(valid, rules), []);
+});
+
+test("rejects non-official Solr sources, leaked internal API declarations, and invalid CI history", () => {
+  const invalid = structuredClone(base);
+  invalid.upstreamSolr = { status: "available", sourceIds: [source.id], records: [{ id: "solr-1", version: "latest", releaseDate: "yesterday", sourceUrl: "https://example.com/solr" }] };
+  invalid.typescriptApi = { status: "available", sourceIds: [source.id], records: [{ id: "private", path: "api/private.html", sourcePath: "src/private.ts", exportName: "Secret", visibility: "internal", includedInPublicReference: true }] };
+  invalid.ciHistory = { status: "available", sourceIds: [source.id], records: [{ id: "history", runId: "123", durationSeconds: -1, url: "https://example.com/run", completedAt: "bad-date" }] };
+  const ids = validateSiteData(invalid, rules).map((item) => item.id);
+  assert.ok(ids.includes("solr-release-source"));
+  assert.ok(ids.includes("typescript-api-private-export"));
+  assert.ok(ids.includes("ci-history-duration"));
+  assert.ok(ids.includes("ci-history-url"));
+  assert.ok(ids.includes("ci-history-date"));
+});
+
+test("accepts disabled declarative rules without executing or interpreting them", () => {
+  const result = validateRules({ version: 1, rules: [{ id: "disabled-check", severity: "warning", enabled: false, check: "file-exists", path: "README.md" }] });
+  assert.deepEqual(result, []);
+});
