@@ -6,6 +6,7 @@ The website data validator is deliberately small, deterministic, and dependency-
 
 - `npm run site:check` validates the rule inventory and the architecture/data-contract files.
 - `npm run test:site-data` runs the validator unit tests and fixture cases.
+- `npm run docs:check` runs the existing documentation checks followed by both site-data commands, so CI and release checks cannot silently omit them.
 - `node scripts/site/validate-data.mjs --data website/data/site-data.json` validates a generated data document when Issue #276 supplies it.
 - `node scripts/site/validate-data.mjs --rules scripts/site/rules.json --data path/to/fixture.json` selects explicit inputs.
 
