@@ -1,14 +1,43 @@
 const el=(id)=>document.getElementById(id);
-function makeCard(title,status,details,url){const node=document.createElement("article");node.className="card";const badge=document.createElement("span");badge.className="badge "+String(status||"").replace(/[^a-z_]/g,"");badge.textContent=String(status||"unknown");node.append(badge);const h=document.createElement("h3");if(url){const a=document.createElement("a");a.href=url;a.textContent=title;h.append(a)}else h.textContent=title;node.append(h);for(const detail of details.filter(Boolean)){const p=document.createElement("p");p.textContent=String(detail);node.append(p)}return node}
+function makeCard(title,status,details,url){
+  const node=document.createElement("article");node.className="card";
+  const badge=document.createElement("span");badge.className="badge "+String(status||"").replace(/[^a-z_]/g,"");badge.textContent=String(status||"unknown");node.append(badge);
+  const h=document.createElement("h3");
+  if(url){const a=document.createElement("a");a.href=url;a.textContent=title;h.append(a)}else h.textContent=title;
+  node.append(h);
+  for(const detail of details.filter(Boolean)){const p=document.createElement("p");p.textContent=String(detail);node.append(p)}
+  return node;
+}
 function render(id,items,fn){const target=el(id);target.replaceChildren();for(const item of items)target.append(fn(item))}
-async function main(){try{const response=await fetch("data/site-data.json");if(!response.ok)throw new Error("HTTP "+response.status);const data=await response.json();el("package-version").textContent=data.package.version;
-const api=data.apiCoverage.records||[];el("api-summary").textContent=api.length+" inventory operations. A verified label is limited to the operation evidence shown.";const draw=()=>{const query=el("api-search").value.toLowerCase();const version=el("version-filter").value;render("api-list",api.filter(x=>(x.area+" "+x.method+" "+x.operationId).toLowerCase().includes(query)&&(!version||(x.versions||[]).includes(version))).slice(0,80),x=>{const node=makeCard(x.area+": "+x.method,x.status,["Types: "+x.typeCoverage,"Unit tests: "+x.unitTests,"Integration: "+x.integrationTests,"Solr versions: "+(x.versions||[]).join(", "),"Per-version evidence: "+Object.entries(x.versionEvidence||{}).map(([version,state])=>version+": "+state).join(", ")],x.documentation?"https://github.com/vsimko/node-solr-lambda/blob/master/"+x.documentation:null);for(const path of x.testFiles||[]){const p=document.createElement("p");const a=document.createElement("a");a.href="https://github.com/vsimko/node-solr-lambda/blob/master/"+path;a.textContent="Test: "+path;p.append(a);node.append(p)}return node})};draw();el("api-search").addEventListener("input",draw);el("version-filter").addEventListener("change",draw);
-const ci=data.ci.records||[];const matrix=(data.ci.configuredMatrix||[]).map(x=>x.dimension+": "+x.values.join(", ")).join("; ");el("ci-summary").textContent="Configured matrix: "+(matrix||"unavailable")+". Observed workflow runs: "+ci.length+". Feed: "+data.ci.status+"; configuration is not execution evidence.";render("ci-list",ci.slice(0,12),x=>makeCard(x.workflow,x.conclusion||x.status,[x.event,x.ref,x.commit&&x.commit.slice(0,12),x.startedAt],x.runUrl));
-const roadmap=data.roadmap.records||[];el("roadmap-summary").textContent="Tracked GitHub items: "+roadmap.length+". Live-state feed: "+data.roadmap.status;render("roadmap-list",roadmap.slice(0,30),x=>makeCard("#"+x.number+" "+x.title,x.state,[x.priority,x.roadmapContext,(x.labels||[]).join(", "),x.milestone],x.url));
-if(!data.npm.records?.length)el("npm-list").textContent="npm registry/download data unavailable; no zero value is inferred.";render("npm-list",data.npm.records||[],x=>makeCard(x.packageName,data.npm.status,["Published version: "+x.version,"Dist-tags: "+JSON.stringify(x.distTags||{}),"Published at: "+(x.publishedAt||"unknown"),"Downloads ("+x.window+"): "+x.downloads,"Window: "+x.windowStart+" – "+x.windowEnd],x.sourceUrl));
-if(!data.releases.records?.length)el("release-list").textContent="Release/tag feed unavailable.";render("release-list",data.releases.records||[],x=>makeCard(x.tag,x.tagOnly?"tag only":x.draft?"draft":x.publishedAt?"published":"unreleased",["Feed: "+data.releases.status,"Version: "+x.version,"GitHub published: "+(x.publishedAt||"no"),"npm published: "+(x.npmPublished?"yes":"no")],x.url));
-const docs=data.documentation.records||[];const drawDocs=()=>render("docs-list",docs.filter(x=>(x.title+" "+x.path).toLowerCase().includes(el("docs-search").value.toLowerCase())),x=>makeCard(x.title,"available",[x.path],x.url));drawDocs();el("docs-search").addEventListener("input",drawDocs);
-const changelog=data.releases.unreleased;if(changelog?.content){const excerpt=changelog.content.length>2400?changelog.content.slice(0,2400)+"…":changelog.content;el("release-list").append(makeCard("CHANGELOG.md — Unreleased","unreleased",[excerpt],changelog.url))}
-const sourceTimes=(data.sources||[]).map(source=>source.id+": "+source.status+" at "+source.retrievedAt).join("; ");el("freshness").textContent="Model generated at "+data.generatedAt+". Source retrieval timestamps: "+sourceTimes;
-}catch(error){for(const id of ["api-summary","ci-summary","roadmap-summary"])el(id).textContent="Project data unavailable: "+error.message+". Use the canonical documentation and GitHub links above."}}
+async function main(){
+  try{
+    const response=await fetch("data/site-data.json");
+    if(!response.ok)throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    el("package-version").textContent=data.package.version;
+    const api=data.apiCoverage.records||[];
+    el("api-summary").textContent=api.length+" documented operations · operation-level implementation and compatibility evidence";
+    const drawApi=()=>{
+      const query=el("api-search").value.toLowerCase(),version=el("version-filter").value;
+      const filtered=api.filter(x=>(x.area+" "+x.method+" "+x.operationId).toLowerCase().includes(query)&&(!version||(x.versions||[]).includes(version)));
+      render("api-list",filtered.slice(0,90),x=>{
+        const node=makeCard(x.area+": "+x.method,x.status,["Types: "+x.typeCoverage,"Unit tests: "+x.unitTests,"Integration: "+x.integrationTests,"Solr versions: "+(x.versions||[]).join(", "),"Evidence: "+Object.entries(x.versionEvidence||{}).map(([v,state])=>v+": "+state).join(", ")],x.documentation?"https://github.com/vsimko/node-solr-lambda/blob/master/"+x.documentation:null);
+        for(const path of x.testFiles||[]){const p=document.createElement("p"),a=document.createElement("a");a.href="https://github.com/vsimko/node-solr-lambda/blob/master/"+path;a.textContent="Test: "+path;p.append(a);node.append(p)}
+        return node;
+      });
+    };
+    drawApi();el("api-search").addEventListener("input",drawApi);el("version-filter").addEventListener("change",drawApi);
+    const docs=data.documentation.records||[];
+    const drawDocs=()=>render("docs-list",docs.filter(x=>(x.title+" "+x.path).toLowerCase().includes(el("docs-search").value.toLowerCase())),x=>makeCard(x.title,"guide",[x.path],x.url));
+    drawDocs();el("docs-search").addEventListener("input",drawDocs);
+    const npm=data.npm.records?.[0];
+    if(npm){el("npm-version").textContent=npm.version;const p=document.createElement("p");p.textContent=(Number.isFinite(npm.downloads)?npm.downloads.toLocaleString()+" downloads in the last 7 days":"Download count unavailable")+" · published package";el("npm-version").after(p)}
+    else el("npm-version").textContent="node-solr-lambda";
+    const copy=el("copy-install");
+    copy?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText("npm install node-solr-lambda");copy.textContent="Copied"}catch{copy.textContent="Copy unavailable"}});
+  }catch(error){
+    el("api-summary").textContent="API inventory unavailable: "+error.message;
+    el("docs-list").textContent="Documentation catalogue unavailable. Use the repository documentation link.";
+  }
+}
 main();
