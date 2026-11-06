@@ -244,7 +244,7 @@ function validateDomainRecord(domain, record, path, errors, sourceIds) {
     if (!isHttpUrl(record.runUrl)) errors.push({ id: "ci-run-url", severity: "error", path, message: "CI runUrl must be an HTTP(S) URL." });
     validDate("startedAt");
     if (record.status === "completed") validDate("completedAt");
-    if (!["queued", "in_progress", "completed"].includes(record.status)) errors.push({ id: "ci-status", severity: "error", path, message: "CI status must describe an observed run state." });
+    if (!["requested", "queued", "pending", "waiting", "in_progress", "completed"].includes(record.status)) errors.push({ id: "ci-status", severity: "error", path, message: "CI status must describe an observed GitHub Actions run state." });
     if (record.status === "completed" && !["success", "failure", "cancelled", "timed_out", "action_required", "neutral", "skipped", "stale", "startup_failure"].includes(record.conclusion)) errors.push({ id: "ci-conclusion", severity: "error", path, message: "Completed CI runs require a recognized conclusion." });
     if (record.matrixConfigured === true && record.observed === false && record.conclusion === "success") errors.push({ id: "ci-configured-not-observed", severity: "error", path, message: "Configured matrix dimensions cannot be represented as observed successes." });
   } else if (domain === "roadmap") {
