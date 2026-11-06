@@ -150,7 +150,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build and validate website
-        run: npm run build:site
+        run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
 
   test:
     needs: changes
