@@ -52,7 +52,9 @@
     "release:publish": "node scripts/publish.mjs",
     "test:consumer:no-zod": "node test/no-zod-consumer.mjs",
     "test:api-inventory": "node test/api-inventory.mjs",
-    "docs:check": "node scripts/check-docs.mjs"
+    "docs:check": "node scripts/check-docs.mjs",
+    "site:check": "node scripts/site/validate-data.mjs",
+    "test:site-data": "node --test test/site-data-validator.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
