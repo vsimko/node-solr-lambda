@@ -147,6 +147,7 @@ function validateSiteData(data, rules) {
       }
     }
     const seen = new Set();
+    const operationIds = new Set();
     for (const [index, record] of domain.records.entries()) {
       const recordPath = `${domainName}.records[${index}]`;
       if (!isRecord(record) || typeof record.id !== "string" || !record.id) {
@@ -155,6 +156,10 @@ function validateSiteData(data, rules) {
       }
       if (seen.has(record.id)) errors.push({ id: `record-unique-${domainName}`, severity: "error", path: recordPath, message: `Duplicate record id: ${record.id}.` });
       seen.add(record.id);
+      if (domainName === "apiCoverage" && typeof record.operationId === "string") {
+        if (operationIds.has(record.operationId)) errors.push({ id: "api-coverage-operation-unique", severity: "error", path: recordPath, message: "API operation IDs must be unique." });
+        operationIds.add(record.operationId);
+      }
       validateDomainRecord(domainName, record, recordPath, errors);
     }
   }
@@ -210,7 +215,12 @@ function validateDomainRecord(domain, record, path, errors) {
   if (domain === "apiCoverage") {
     requireString("operationId");
     if (!["verified", "partial", "unverified", "unsupported", "unknown"].includes(record.status)) errors.push({ id: "api-coverage-status", severity: "error", path, message: "Unsupported API coverage status." });
-    if (!Array.isArray(record.versions) || record.versions.some((v) => !["8", "9", "10"].includes(String(v)))) errors.push({ id: "api-coverage-versions", severity: "error", path, message: "versions must contain supported Solr major keys 8, 9, or 10." });
+    if (!Array.isArray(record.versions) || record.versions.some((v) => !["8", "9", "10"].includes(String(v))) || new Set(record.versions.map(String)).size !== record.versions.length) errors.push({ id: "api-coverage-versions", severity: "error", path, message: "versions must contain unique supported Solr major keys 8, 9, or 10." });
+    if (!["complete", "partial", "generic-by-design"].includes(record.typeCoverage)) errors.push({ id: "api-coverage-type", severity: "error", path, message: "Unsupported API type-coverage state." });
+    if (record.unitTests !== "present") errors.push({ id: "api-coverage-unit-tests", severity: "error", path, message: "unitTests must describe observed test presence." });
+    if (!["tested", "partial", "not-run"].includes(record.integrationTests)) errors.push({ id: "api-coverage-integration-tests", severity: "error", path, message: "Unsupported integration-test state." });
+    if (record.documentation && (!safeRepositoryPath(record.documentation) || !statSync(resolve(root, record.documentation), { throwIfNoEntry: false })?.isFile())) errors.push({ id: "api-coverage-documentation", severity: "error", path, message: "API documentation reference must resolve to an existing repository file." });
+    if (record.testFiles !== undefined && (!Array.isArray(record.testFiles) || record.testFiles.some((testPath) => !safeRepositoryPath(testPath) || !statSync(resolve(root, testPath), { throwIfNoEntry: false })?.isFile()))) errors.push({ id: "api-coverage-tests", severity: "error", path, message: "API test references must resolve to existing repository files." });
     if (!isRecord(record.evidence) || !Array.isArray(record.evidence.sourceIds) ||
         record.evidence.sourceIds.length === 0 || typeof record.evidence.description !== "string" ||
         record.evidence.description.length === 0) {
