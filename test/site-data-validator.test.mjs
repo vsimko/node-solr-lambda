@@ -25,7 +25,8 @@ test("accepts a valid deterministic P1 data fixture, including a genuine zero me
 test("rejects malformed rules, duplicate IDs, unsupported checks, and invalid severity", () => {
   const result = validateRules({ version: 1, rules: [
     { id: "same", severity: "error", enabled: true, check: "file-exists", path: "README.md" },
-    { id: "same", severity: "fatal", enabled: "yes", check: "eval", path: "../outside" }
+    { id: "same", severity: "fatal", enabled: "yes", check: "file-exists", path: "../outside" },
+    { id: "bad-check", severity: "warning", enabled: true, check: "eval", path: "README.md" }
   ] });
   assert.ok(result.some((item) => item.message.includes("duplicated")));
   assert.ok(result.some((item) => item.message.includes("Severity")));
