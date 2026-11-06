@@ -41,6 +41,12 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Release process](release-process.md)
 - [v4.0.0 release notes (draft)](release-notes-v4.0.0.md)
 
+## Website architecture
+
+- [GitHub Pages architecture decision (ADR 0001)](adr/0001-github-pages-site.md)
+- [Website data contract](site-data-contract.md)
+- [Website data JSON Schema](site-data.schema.json)
+
 ## Canonical guide note
 
 The detailed [Update and Document API guide](update.md) is the canonical reference for document writes, atomic updates, update commands, and commit behavior. [Document API overview](documents.md) is intentionally retained as a short introduction with concise examples; it is not a separate or competing API specification.

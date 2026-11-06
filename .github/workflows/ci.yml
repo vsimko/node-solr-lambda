@@ -3,7 +3,7 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
+    branches: [master, docs/github-pages-architecture]
   workflow_dispatch:
     inputs:
       enable_destructive_solrcloud_tests:

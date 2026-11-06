@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vsimko/node-solr-lambda/blob/master/docs/site-data.schema.json",
+  "title": "node-solr-lambda website data",
+  "description": "Versioned, provenance-aware data model for the static GitHub Pages site.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "package",
+    "sources",
+    "apiCoverage",
+    "ci",
+    "roadmap",
+    "npm",
+    "releases",
+    "documentation"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "repository",
+        "version",
+        "source"
+      ],
+      "properties": {
+        "name": {
+          "const": "node-solr-lambda"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "version": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "apiCoverage": {
+      "$ref": "#/$defs/domain"
+    },
+    "ci": {
+      "$ref": "#/$defs/domain"
+    },
+    "roadmap": {
+      "$ref": "#/$defs/domain"
+    },
+    "npm": {
+      "$ref": "#/$defs/domain"
+    },
+    "releases": {
+      "$ref": "#/$defs/domain"
+    },
+    "documentation": {
+      "$ref": "#/$defs/domain"
+    },
+    "upstreamSolr": {
+      "$ref": "#/$defs/optionalDomain"
+    },
+    "typescriptApi": {
+      "$ref": "#/$defs/optionalDomain"
+    },
+    "ciHistory": {
+      "$ref": "#/$defs/optionalDomain"
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "url",
+        "retrievedAt",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "repository",
+            "github",
+            "npm",
+            "apache"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "stale",
+            "unavailable"
+          ]
+        },
+        "revision": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceIds",
+        "description"
+      ],
+      "properties": {
+        "sourceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "path": {
+          "type": "string"
+        },
+        "pointer": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "sourceIds",
+        "records"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "available",
+            "stale",
+            "unavailable"
+          ]
+        },
+        "sourceIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "optionalDomain": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/domain"
+        }
+      ]
+    }
+  }
+}
