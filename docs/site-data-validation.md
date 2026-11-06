@@ -7,10 +7,12 @@ The website data validator is deliberately small, deterministic, and dependency-
 - `npm run site:check` validates the rule inventory and the architecture/data-contract files.
 - `npm run test:site-data` runs the validator unit tests and fixture cases.
 - `npm run docs:check` runs the existing documentation checks followed by both site-data commands, so CI and release checks cannot silently omit them.
-- `node scripts/site/validate-data.mjs --data website/data/site-data.json` validates a generated data document when Issue #276 supplies it.
+- `npm run build:site` generates the versioned model, validates it, runs deterministic generator/validator tests, and assembles `dist-site/`.
+- `npm run site:preview` serves the built site on `http://127.0.0.1:4173`; set `SITE_PORT` to change the port.
+- `node scripts/site/validate-data.mjs --data build/site-data.json` validates the generated model independently.
 - `node scripts/site/validate-data.mjs --rules scripts/site/rules.json --data path/to/fixture.json` selects explicit inputs.
 
-Until the website data producer exists, omitting `--data` is intentional: the command validates the rule inventory and contract prerequisites without pretending that live/generated data is present.
+When `--data` is omitted, the command validates the rule inventory and contract prerequisites without pretending that live/generated data is present.
 
 ## Rule inventory
 

@@ -1,0 +1,50 @@
+name: Pull request website preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    # Never grant write-enabled preview deployment to untrusted fork code.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Node.js
+        if: github.event.action != 'closed'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: github.event.action != 'closed'
+        run: npm ci
+
+      - name: Build website
+        if: github.event.action != 'closed'
+        run: npm run build:site
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Publish or remove pull-request preview
+        uses: rossjrw/pr-preview-action@873417d2df72380da1f3978378fb58560bcde976
+        with:
+          source-dir: dist-site/
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          wait-for-pages-deployment: false
+          comment: true
+          qr-code: false

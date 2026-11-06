@@ -65,7 +65,7 @@ Catalogue entries originate from `docs/index.md` and link to canonical Markdown/
 - Sort records and diagnostics by stable keys.
 - Treat all external and repository text as untrusted data; escape it in HTML and never execute it.
 - Never include secrets, credentials, environment values, or unredacted logs.
-- External API failures/rate limits must produce stale/unavailable states and a visible last-updated/source note.
+- External API failures/rate limits must produce stale/unavailable states and a visible last-updated/source note. The build restores a bounded Actions cache of normalized public source responses; stale snapshots retain their original retrieval timestamp and exact download window. Secrets are never serialized.
 - P2 domains are optional and must not gate P1 generation, validation, or deployment.
 
 ## Change policy

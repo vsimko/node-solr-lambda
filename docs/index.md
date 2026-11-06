@@ -43,6 +43,8 @@ This is the canonical catalogue for the project's guides, API references, compat
 
 ## Website architecture
 
+- [Public project website](../website/index.html)
+
 - [GitHub Pages architecture decision (ADR 0001)](adr/0001-github-pages-site.md)
 - [Website data contract](site-data-contract.md)
 - [Website data JSON Schema](site-data.schema.json)
