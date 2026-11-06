@@ -1,4 +1,12 @@
 name: CI
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ci-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [master]
@@ -70,6 +78,22 @@ jobs:
 
           echo "Only Markdown documentation changed."
           echo "docs_only=true" >> "$GITHUB_OUTPUT"
+      - name: Cancel all workflows for this pull request after failure
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set +e
+          run_ids="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?event=pull_request&per_page=100" --jq '.workflow_runs[] | select(.id != (env.GITHUB_RUN_ID | tonumber)) | select(any(.pull_requests[]?; .number == (env.PR_NUMBER | tonumber) and .head.sha == env.PR_HEAD_SHA)) | select(.status == "queued" or .status == "in_progress") | .id')"
+          for run_id in $run_ids; do
+            echo "Cancelling sibling workflow run $run_id"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/cancel" || true
+          done
+          echo "Cancelling this workflow run"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
   docs:
     name: Documentation checks
@@ -85,12 +109,28 @@ jobs:
       - run: npm run build
       - run: npm run docs:check
       - run: npm run test:api-inventory
+      - name: Cancel all workflows for this pull request after failure
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set +e
+          run_ids="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?event=pull_request&per_page=100" --jq '.workflow_runs[] | select(.id != (env.GITHUB_RUN_ID | tonumber)) | select(any(.pull_requests[]?; .number == (env.PR_NUMBER | tonumber) and .head.sha == env.PR_HEAD_SHA)) | select(.status == "queued" or .status == "in_progress") | .id')"
+          for run_id in $run_ids; do
+            echo "Cancelling sibling workflow run $run_id"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/cancel" || true
+          done
+          echo "Cancelling this workflow run"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
   test:
     needs: changes
     if: needs.changes.outputs.docs_only != 'true'
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         node: [20, 22, 24]
     runs-on: ubuntu-latest
@@ -105,12 +145,28 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run release:check
+      - name: Cancel all workflows for this pull request after failure
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set +e
+          run_ids="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?event=pull_request&per_page=100" --jq '.workflow_runs[] | select(.id != (env.GITHUB_RUN_ID | tonumber)) | select(any(.pull_requests[]?; .number == (env.PR_NUMBER | tonumber) and .head.sha == env.PR_HEAD_SHA)) | select(.status == "queued" or .status == "in_progress") | .id')"
+          for run_id in $run_ids; do
+            echo "Cancelling sibling workflow run $run_id"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/cancel" || true
+          done
+          echo "Cancelling this workflow run"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
   integration:
     needs: changes
     if: needs.changes.outputs.docs_only != 'true'
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
         node: [20, 22, 24]
@@ -157,12 +213,28 @@ jobs:
       - name: Print Solr logs
         if: always()
         run: docker logs solr || true
+      - name: Cancel all workflows for this pull request after failure
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set +e
+          run_ids="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?event=pull_request&per_page=100" --jq '.workflow_runs[] | select(.id != (env.GITHUB_RUN_ID | tonumber)) | select(any(.pull_requests[]?; .number == (env.PR_NUMBER | tonumber) and .head.sha == env.PR_HEAD_SHA)) | select(.status == "queued" or .status == "in_progress") | .id')"
+          for run_id in $run_ids; do
+            echo "Cancelling sibling workflow run $run_id"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/cancel" || true
+          done
+          echo "Cancelling this workflow run"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
   security-integration:
     needs: changes
     if: needs.changes.outputs.docs_only != 'true'
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
         node: [20, 22, 24]
@@ -245,6 +317,22 @@ jobs:
       - name: Print secure Solr logs
         if: always()
         run: docker logs solr-secure || true
+      - name: Cancel all workflows for this pull request after failure
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set +e
+          run_ids="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?event=pull_request&per_page=100" --jq '.workflow_runs[] | select(.id != (env.GITHUB_RUN_ID | tonumber)) | select(any(.pull_requests[]?; .number == (env.PR_NUMBER | tonumber) and .head.sha == env.PR_HEAD_SHA)) | select(.status == "queued" or .status == "in_progress") | .id')"
+          for run_id in $run_ids; do
+            echo "Cancelling sibling workflow run $run_id"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/cancel" || true
+          done
+          echo "Cancelling this workflow run"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
   cloud-integration:
     needs: changes
@@ -252,7 +340,7 @@ jobs:
     env:
       SOLR_DESTRUCTIVE_OPT_IN: "${{ github.event_name == 'workflow_dispatch' && inputs.enable_destructive_solrcloud_tests == true && 'true' || 'false' }}"
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
         node: [20, 22, 24]
@@ -341,3 +429,19 @@ jobs:
         run: |
           docker logs solr-cloud || true
           docker logs solr-cloud-2 || true
+      - name: Cancel all workflows for this pull request after failure
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set +e
+          run_ids="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?event=pull_request&per_page=100" --jq '.workflow_runs[] | select(.id != (env.GITHUB_RUN_ID | tonumber)) | select(any(.pull_requests[]?; .number == (env.PR_NUMBER | tonumber) and .head.sha == env.PR_HEAD_SHA)) | select(.status == "queued" or .status == "in_progress") | .id')"
+          for run_id in $run_ids; do
+            echo "Cancelling sibling workflow run $run_id"
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/cancel" || true
+          done
+          echo "Cancelling this workflow run"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
