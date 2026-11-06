@@ -1,0 +1,100 @@
+name: Publish website preview
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.workflow_run.pull_requests[0].number || github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.pull_requests[0].number != null
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Check out the default branch for deployment actions
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download website preview decision
+        uses: actions/download-artifact@v4
+        with:
+          name: website-preview-meta
+          path: preview-meta
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Read website preview decision
+        id: decision
+        run: echo "required=$(cat preview-meta/preview-required.txt)" >> "$GITHUB_OUTPUT"
+      - name: Download built website
+        if: steps.decision.outputs.required == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: website-preview-dist
+          path: dist-site
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Publish website preview
+        id: deploy
+        if: steps.decision.outputs.required == 'true'
+        uses: rossjrw/pr-preview-action@873417d2df72380da1f3978378fb58560bcde976
+        with:
+          source-dir: dist-site/
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          pr-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          action: deploy
+          wait-for-pages-deployment: false
+          comment: false
+          qr-code: false
+      - name: Comment with website preview URL
+        if: steps.deploy.outcome == 'success'
+        uses: marocchino/sticky-pull-request-comment@67d0dec7b07ed060a405f9b2a64b8ab319fdd7db
+        with:
+          number_force: ${{ github.event.workflow_run.pull_requests[0].number }}
+          header: pr-preview
+          message: |
+            Website preview: ${{ steps.deploy.outputs.preview-url }}
+
+  cleanup:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Check out the default branch for deployment actions
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Remove website preview
+        uses: rossjrw/pr-preview-action@873417d2df72380da1f3978378fb58560bcde976
+        with:
+          source-dir: dist-site/
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          pr-number: ${{ github.event.pull_request.number }}
+          action: remove
+          comment: false
+          qr-code: false
