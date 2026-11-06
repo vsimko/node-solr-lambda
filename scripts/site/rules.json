@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "contract-schema",
+      "severity": "error",
+      "enabled": true,
+      "check": "file-exists",
+      "path": "docs/site-data.schema.json"
+    },
+    {
+      "id": "contract-documentation",
+      "severity": "error",
+      "enabled": true,
+      "check": "file-exists",
+      "path": "docs/site-data-contract.md"
+    },
+    {
+      "id": "architecture-decision",
+      "severity": "error",
+      "enabled": true,
+      "check": "file-exists",
+      "path": "docs/adr/0001-github-pages-site.md"
+    },
+    {
+      "id": "contract-version",
+      "severity": "error",
+      "enabled": true,
+      "check": "json-contract",
+      "path": "docs/site-data.schema.json",
+      "schemaVersion": 1
+    },
+    {
+      "id": "site-data-domains",
+      "severity": "error",
+      "enabled": true,
+      "check": "site-data",
+      "dataPath": "website/data/site-data.json"
+    }
+  ]
+}
