@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const allowedSeverities = new Set(["error", "warning"]);
-const allowedChecks = new Set(["file-exists", "json-contract", "site-data"]);
+const allowedChecks = new Set(["file-exists", "json-contract", "site-data", "local-links", "text-contains"]);
 const allowedStatuses = new Set(["available", "stale", "unavailable"]);
 const allowedPriorities = new Set(["P0", "P1", "P2", "P3"]);
 const allowedIssueStates = new Set(["open", "closed"]);
@@ -67,6 +67,12 @@ function validateRules(rules) {
     }
     if (rule.check === "site-data" && (typeof rule.dataPath !== "string" || !safeRepositoryPath(rule.dataPath))) {
       errors.push(ruleDefinitionError(rule, path, "site-data requires a dataPath."));
+    }
+    if (["local-links", "text-contains"].includes(rule.check) && !safeRepositoryPath(rule.path)) {
+      errors.push(ruleDefinitionError(rule, path, "This check requires a safe repository-relative file path."));
+    }
+    if (rule.check === "text-contains" && (typeof rule.text !== "string" || rule.text.length === 0)) {
+      errors.push(ruleDefinitionError(rule, path, "text-contains requires a non-empty text value."));
     }
   }
   return errors;
@@ -243,6 +249,36 @@ function runRules(rules, dataPath) {
     if (rule.check === "file-exists") {
       const target = resolve(root, rule.path);
       if (!statSync(target, { throwIfNoEntry: false })?.isFile()) errors.push(diagnostic(rule, rule.path, "Required repository file does not exist."));
+    } else if (rule.check === "text-contains") {
+      try {
+        const content = readFileSync(resolve(root, rule.path), "utf8");
+        if (!content.includes(rule.text)) errors.push(diagnostic(rule, rule.path, "Required text was not found: " + rule.text));
+      } catch (error) {
+        errors.push(diagnostic(rule, rule.path, "Cannot read file for text check: " + error.message));
+      }
+    } else if (rule.check === "local-links") {
+      try {
+        const filePath = resolve(root, rule.path);
+        const content = readFileSync(filePath, "utf8");
+        const targets = [
+          ...[...content.matchAll(/!?\\[[^\\]]*\\]\\(([^)\\s]+)(?:\\s+[^)]*)?\\)/g)].map((match) => match[1]),
+          ...[...content.matchAll(/\\b(?:href|src)=["']([^"']+)["']/gi)].map((match) => match[1])
+        ];
+        for (const target of targets) {
+          if (/^(?:[a-z][a-z0-9+.-]*:|#|\\/\\/)/i.test(target)) continue;
+          const localTarget = target.split(/[?#]/, 1)[0];
+          if (!localTarget) continue;
+          const resolved = resolve(dirname(filePath), localTarget);
+          if (resolved !== root && !resolved.startsWith(root + "/")) {
+            errors.push(diagnostic(rule, rule.path, "Local link escapes the repository: " + target));
+            continue;
+          }
+          const stat = statSync(resolved, { throwIfNoEntry: false });
+          if (!stat?.isFile() && !stat?.isDirectory()) errors.push(diagnostic(rule, rule.path, "Local link target does not exist: " + target));
+        }
+      } catch (error) {
+        errors.push(diagnostic(rule, rule.path, "Cannot read file for local-link check: " + error.message));
+      }
     } else if (rule.check === "json-contract") {
       try {
         const parsed = readJson(resolve(root, rule.path));
