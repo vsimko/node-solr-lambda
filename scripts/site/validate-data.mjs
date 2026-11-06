@@ -300,11 +300,11 @@ function runRules(rules, dataPath) {
         const filePath = resolve(root, rule.path);
         const content = readFileSync(filePath, "utf8");
         const targets = [
-          ...[...content.matchAll(/!?\\[[^\\]]*\\]\\(([^)\\s]+)(?:\\s+[^)]*)?\\)/g)].map((match) => match[1]),
-          ...[...content.matchAll(/\\b(?:href|src)=["']([^"']+)["']/gi)].map((match) => match[1])
+          ...[...content.matchAll(/!?\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)/g)].map((match) => match[1]),
+          ...[...content.matchAll(/\b(?:href|src)=["']([^"']+)["']/gi)].map((match) => match[1])
         ];
         for (const target of targets) {
-          if (/^(?:[a-z][a-z0-9+.-]*:|#|\\/\\/)/i.test(target)) continue;
+          if (/^(?:[a-z][a-z0-9+.-]*:|#|\/\/)/i.test(target)) continue;
           const localTarget = target.split(/[?#]/, 1)[0];
           if (!localTarget) continue;
           const resolved = resolve(dirname(filePath), localTarget);
