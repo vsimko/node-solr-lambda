@@ -133,9 +133,9 @@ function validateSiteData(data, rules) {
           }
           seen.add(record.id);
           if (domainName === "upstreamSolr") {
-            if (typeof record.version !== "string" || !/^\\d+\\.\\d+(?:\\.\\d+)?$/.test(record.version)) errors.push({ id: "solr-release-version", severity: "error", path, message: "Solr release requires a numeric version." });
+            if (typeof record.version !== "string" || !/^\d+\.\d+(?:\.\d+)?$/.test(record.version)) errors.push({ id: "solr-release-version", severity: "error", path, message: "Solr release requires a numeric version." });
             if (typeof record.releaseDate !== "string" || !Number.isFinite(Date.parse(record.releaseDate))) errors.push({ id: "solr-release-date", severity: "error", path, message: "Solr release requires a valid release date." });
-            if (typeof record.sourceUrl !== "string" || !/^https:\\/\\/(?:solr\\.apache\\.org|archive\\.apache\\.org|downloads\\.apache\\.org)\\//.test(record.sourceUrl)) errors.push({ id: "solr-release-source", severity: "error", path, message: "Solr release source must use an official Apache Solr/Apache archive host." });
+            if (typeof record.sourceUrl !== "string" || !/^https:\/\/(?:solr\.apache\.org|archive\.apache\.org|downloads\.apache\.org)\//.test(record.sourceUrl)) errors.push({ id: "solr-release-source", severity: "error", path, message: "Solr release source must use an official Apache Solr/Apache archive host." });
           } else if (domainName === "typescriptApi") {
             for (const field of ["path", "sourcePath", "exportName"]) if (typeof record[field] !== "string" || !record[field]) errors.push({ id: `typescript-api-${field}`, severity: "error", path, message: `${field} is required for generated API provenance.` });
             if (record.visibility !== "public" && record.visibility !== "internal") errors.push({ id: "typescript-api-visibility", severity: "error", path, message: "API declaration visibility must be public or internal." });
