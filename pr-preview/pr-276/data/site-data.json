@@ -1245,6 +1245,20 @@
     ],
     "records": [
       {
+        "id": "42203088555",
+        "runId": "42203088555",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42203088555",
+        "commit": "1da469207c8412a102754b87070ca6153ad3e3da",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-06T10:29:43Z",
+        "completedAt": "2026-11-06T10:30:49Z",
+        "observed": true
+      },
+      {
         "id": "42202580037",
         "runId": "42202580037",
         "workflow": "CI",
@@ -1265,7 +1279,7 @@
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42202579958",
         "commit": "788cd1c1b886217bb682f55ad119fd1f124e09b9",
         "ref": "refs/heads/website/github-pages-p1",
-        "startedAt": "2026-11-06T10:25:38Z",
+        "startedAt": "2026-11-06T10:30:58Z",
         "observed": true
       },
       {
@@ -1273,7 +1287,7 @@
         "runId": "42202561729",
         "workflow": "CI",
         "event": "pull_request",
-        "status": "queued",
+        "status": "in_progress",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42202561729",
         "commit": "79f6cfcd936e21dd52f6934700e4362aca9386e9",
         "ref": "refs/heads/ci/fail-fast-resource-saving",
@@ -1297,7 +1311,7 @@
         "runId": "42202388504",
         "workflow": "CI",
         "event": "pull_request",
-        "status": "in_progress",
+        "status": "queued",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42202388504",
         "commit": "b828a1c3a4f022f8ce55abccdd738c02d1ff1c33",
         "ref": "refs/heads/ci/fail-fast-resource-saving",
@@ -1309,7 +1323,7 @@
         "runId": "42202068175",
         "workflow": "CI",
         "event": "pull_request",
-        "status": "queued",
+        "status": "in_progress",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42202068175",
         "commit": "c81994a4b8a3a5e7ccfcce872655b23c516ac338",
         "ref": "refs/heads/ci/fail-fast-resource-saving",
@@ -1443,11 +1457,13 @@
         "runId": "42197096032",
         "workflow": "CI",
         "event": "pull_request",
-        "status": "in_progress",
+        "status": "completed",
+        "conclusion": "success",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42197096032",
         "commit": "1c02843bed1ff0c5d1f023bf80c785f7d5e78495",
         "ref": "refs/heads/website/github-pages-p1",
         "startedAt": "2026-11-06T09:42:52Z",
+        "completedAt": "2026-11-06T10:26:57Z",
         "observed": true
       },
       {
@@ -1469,11 +1485,13 @@
         "runId": "42196950319",
         "workflow": "CI",
         "event": "pull_request",
-        "status": "queued",
+        "status": "completed",
+        "conclusion": "success",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42196950319",
         "commit": "9de88768428bc8c516a4d9d9aacfd6fc152f8e30",
         "ref": "refs/heads/website/github-pages-p1",
         "startedAt": "2026-11-06T09:41:47Z",
+        "completedAt": "2026-11-06T10:30:29Z",
         "observed": true
       },
       {
@@ -1481,25 +1499,13 @@
         "runId": "42196414831",
         "workflow": "CI",
         "event": "pull_request",
-        "status": "queued",
+        "status": "completed",
+        "conclusion": "success",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42196414831",
         "commit": "d4d895d41beb4c70df0f0a8bb41cdef04eefb51e",
         "ref": "refs/heads/website/github-pages-p1",
         "startedAt": "2026-11-06T09:37:03Z",
-        "observed": true
-      },
-      {
-        "id": "42196414732",
-        "runId": "42196414732",
-        "workflow": "Pull request website preview",
-        "event": "pull_request",
-        "status": "completed",
-        "conclusion": "cancelled",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/42196414732",
-        "commit": "d4d895d41beb4c70df0f0a8bb41cdef04eefb51e",
-        "ref": "refs/heads/website/github-pages-p1",
-        "startedAt": "2026-11-06T09:37:03Z",
-        "completedAt": "2026-11-06T09:41:48Z",
+        "completedAt": "2026-11-06T10:27:13Z",
         "observed": true
       }
     ]
