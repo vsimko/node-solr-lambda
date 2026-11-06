@@ -75,6 +75,24 @@ test("requires explicit CI identity and bounded npm download windows", () => {
   assert.ok(ids.includes("npm-window-range"));
 });
 
+test("validates configured CI matrix provenance separately from observed runs", () => {
+  const valid = structuredClone(base);
+  valid.ci.configuredMatrix = [{ dimension: "node", values: [20, 22, 24], sourcePath: ".github/workflows/ci.yml" }];
+  assert.deepEqual(validateSiteData(valid, rules), []);
+  const invalid = structuredClone(base);
+  invalid.ci.configuredMatrix = [{ dimension: "node", values: [], sourcePath: "../outside.yml" }];
+  assert.ok(validateSiteData(invalid, rules).some((item) => item.id === "ci-configured-matrix-entry"));
+});
+
+test("validates the unreleased changelog as separate provenance-bearing content", () => {
+  const valid = structuredClone(base);
+  valid.releases.unreleased = { sourceId: source.id, path: "CHANGELOG.md", url: "https://github.com/example/project/blob/main/CHANGELOG.md", content: "Unreleased notes", observedAt: "2026-11-06T08:00:00Z" };
+  assert.deepEqual(validateSiteData(valid, rules), []);
+  const invalid = structuredClone(valid);
+  invalid.releases.unreleased.sourceId = "missing";
+  assert.ok(validateSiteData(invalid, rules).some((item) => item.id === "release-unreleased-changelog"));
+});
+
 test("does not treat configured matrix dimensions as observed CI success", () => {
   const invalid = structuredClone(base);
   invalid.ci.records[0].matrixConfigured = true;
