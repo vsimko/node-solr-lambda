@@ -1,4 +1,8 @@
 name: CI
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [master]
@@ -90,7 +94,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.docs_only != 'true'
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         node: [20, 22, 24]
     runs-on: ubuntu-latest
@@ -159,7 +163,7 @@ jobs:
         run: docker logs solr || true
 
   security-integration:
-    needs: changes
+    needs: [changes, test, integration]
     if: needs.changes.outputs.docs_only != 'true'
     strategy:
       fail-fast: false
@@ -247,7 +251,7 @@ jobs:
         run: docker logs solr-secure || true
 
   cloud-integration:
-    needs: changes
+    needs: [changes, test, integration, security-integration]
     if: needs.changes.outputs.docs_only != 'true'
     env:
       SOLR_DESTRUCTIVE_OPT_IN: "${{ github.event_name == 'workflow_dispatch' && inputs.enable_destructive_solrcloud_tests == true && 'true' || 'false' }}"
