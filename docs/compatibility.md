@@ -13,7 +13,7 @@ Documentation evidence does not prove that every patch release behaves in the sa
 
 ## Interpreting unverified operations
 
-An exposed action or parameter is not runtime-certified merely because it has a TypeScript model or serialization test. The API coverage page records the current triage of deferred and intentionally out-of-scope gaps. In particular, destructive Core Admin actions and cluster-wide Collections policy mutations remain unverified until isolated runtime evidence is added; SPLITSHARD/MIGRATE require the opt-in workflow in [#232](https://github.com/vsimko/node-solr-lambda/issues/232). Export `includeStoredFields` and ReplicationHandler abort/async lifecycle have focused verification issues [#258](https://github.com/vsimko/node-solr-lambda/issues/258) and [#259](https://github.com/vsimko/node-solr-lambda/issues/259).
+An exposed action or parameter is not runtime-certified merely because it has a TypeScript model or serialization test. The API coverage page records the current triage of deferred and intentionally out-of-scope gaps. Destructive Core Admin actions and cluster-wide Collections policy mutations remain unverified until isolated runtime evidence is added; SPLITSHARD/MIGRATE still require the opt-in workflow in [#232](https://github.com/vsimko/node-solr-lambda/issues/232). Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 (PR [#263](https://github.com/vsimko/node-solr-lambda/pull/263)); ReplicationHandler in-progress abort is verified on Solr 9.11.0 and 10.1.0 only, with Solr 8.11.4 explicitly unverified (PR [#264](https://github.com/vsimko/node-solr-lambda/pull/264)). Issues #258 and #259 are closed; they are historical evidence, not outstanding verification tasks.
 
 ## Reference baselines
 
@@ -116,7 +116,7 @@ The endpoint families listed in the matrix have representative integration evide
 - Delete-option `_route_` and `commitWithin` runtime effects; add/update routing and commitWithin visibility are covered separately by the SolrCloud integration suite.
 - The optimize-specific runtime effect of `openSearcher`; the option is serialized but has no isolated server-side assertion.
 - Generic `request()` and `requestRaw()` against arbitrary endpoint families. These are transport escape hatches, not blanket compatibility certification; each custom endpoint requires its own test.
-- Collections snapshot/backup operations and response models, plus cluster-state response models.
+- Distinct Collections snapshot semantics beyond the tested BACKUP/LISTBACKUP/RESTORE/DELETEBACKUP flows, and unobserved cluster-state response fields. The tested backup/restore flows are documented in the per-action matrix; do not generalize that evidence to every snapshot operation or response field.
 - Function grouping and distributed collapse behavior beyond the documented Solr semantics and the specific standalone cases tested.
 
 The machine-readable inventory is authoritative for operation-level status. Keep `integrationTests: not-run` / `versions: unverified` for generic transport methods, and record these narrower gaps in the operation notes rather than promoting the whole API family to tested.
