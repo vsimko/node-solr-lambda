@@ -74,7 +74,7 @@ jobs:
               README.md|docs/*.md|docs/**/*.md)
                 website_only=false
                 ;;
-              website/*|website/**|scripts/site/*|scripts/site/**|test/site-data-validator.test.mjs|test/site-data-generator.test.mjs)
+              website/*|website/**|scripts/site/*|scripts/site/**|test/site-data-validator.test.mjs|test/site-data-generator.test.mjs|.github/workflows/ci.yml|.github/workflows/pr-preview.yml|.github/workflows/pages.yml)
                 docs_only=false
                 ;;
               *)
