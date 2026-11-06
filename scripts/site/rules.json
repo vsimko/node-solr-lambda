@@ -36,6 +36,21 @@
       "enabled": true,
       "check": "site-data",
       "dataPath": "website/data/site-data.json"
+    },
+    {
+      "id": "documentation-index-links",
+      "severity": "error",
+      "enabled": true,
+      "check": "local-links",
+      "path": "docs/index.md"
+    },
+    {
+      "id": "site-contract-determinism",
+      "severity": "error",
+      "enabled": true,
+      "check": "text-contains",
+      "path": "docs/site-data-contract.md",
+      "text": "validators must not read the wall clock or access the network"
     }
   ]
 }
