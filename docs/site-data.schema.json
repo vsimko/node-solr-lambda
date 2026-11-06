@@ -197,6 +197,69 @@
         },
         "message": {
           "type": "string"
+        },
+        "configuredMatrix": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dimension",
+              "values",
+              "sourcePath"
+            ],
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "minLength": 1
+              },
+              "values": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                }
+              },
+              "sourcePath": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "unreleased": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceId",
+            "path",
+            "url",
+            "content"
+          ],
+          "properties": {
+            "sourceId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "content": {
+              "type": "string"
+            },
+            "observedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
         }
       }
     },
