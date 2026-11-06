@@ -191,7 +191,9 @@ function validateSiteData(data, rules) {
           } else if (domainName === "ciHistory") {
             if (typeof record.runId !== "string" || !record.runId) errors.push({ id: "ci-history-run-id", severity: "error", path, message: "Historical CI record requires a run ID." });
             if (!Number.isFinite(record.durationSeconds) || record.durationSeconds < 0) errors.push({ id: "ci-history-duration", severity: "error", path, message: "CI duration must be a non-negative number of seconds." });
-            if (typeof record.url !== "string" || !/^https:\\/\\/github\\.com\\//.test(record.url)) errors.push({ id: "ci-history-url", severity: "error", path, message: "Historical CI record requires a GitHub run URL." });
+let githubRunUrl = false;
+            try { const url = new URL(record.url); githubRunUrl = url.protocol === "https:" && url.hostname === "github.com" && url.pathname.startsWith("/"); } catch {}
+            if (!githubRunUrl) errors.push({ id: "ci-history-url", severity: "error", path, message: "Historical CI record requires a GitHub run URL." });
             if (typeof record.completedAt !== "string" || !Number.isFinite(Date.parse(record.completedAt))) errors.push({ id: "ci-history-date", severity: "error", path, message: "Historical CI record requires a valid completion timestamp." });
           }
         }
