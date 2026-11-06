@@ -37,7 +37,6 @@ This tranche is deliberately small and independent of the v4.0 release gate. It 
 The two issues are independent of each other, #110, and #232. The sequence is a delivery preference, not a technical dependency. Each implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
 
 ### P1 — SolrCloud operation evidence
-### P1 — SolrCloud operation evidence
 
 | Work | Tracking | Current status |
 | --- | --- | --- |
