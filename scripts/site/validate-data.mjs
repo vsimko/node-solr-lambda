@@ -139,6 +139,9 @@ function validateSiteData(data, rules) {
       if (!isRecord(domain) || !allowedStatuses.has(domain.status) || !Array.isArray(domain.sourceIds) || !Array.isArray(domain.records)) {
         errors.push({ id: `optional-domain-${domainName}`, severity: "error", path: domainName, message: "Optional P2 domain must use the standard domain envelope." });
       } else {
+        if (domain.status === "unavailable" && domain.records.length > 0) errors.push({ id: `optional-unavailable-${domainName}`, severity: "error", path: domainName, message: "Unavailable optional domains must not expose records." });
+        if (domain.status === "available" && domain.records.length === 0) errors.push({ id: `optional-empty-${domainName}`, severity: "warning", path: domainName, message: "An available optional domain with no records must be reviewed." });
+        if (new Set(domain.sourceIds).size !== domain.sourceIds.length) errors.push({ id: `optional-source-unique-${domainName}`, severity: "error", path: domainName, message: "Optional domain sourceIds must be unique." });
         for (const sourceId of domain.sourceIds) if (!sourceIds.has(sourceId)) errors.push({ id: `optional-source-${domainName}`, severity: "error", path: domainName, message: `Unknown source reference: ${sourceId}.` });
         const seen = new Set();
         for (const [index, record] of domain.records.entries()) {
