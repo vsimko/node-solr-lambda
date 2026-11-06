@@ -4,18 +4,18 @@ The website data validator is deliberately small, deterministic, and dependency-
 
 ## Commands
 
-- \`npm run site:check\` validates the rule inventory and the architecture/data-contract files.
-- \`npm run test:site-data\` runs the validator unit tests and fixture cases.
-- \`node scripts/site/validate-data.mjs --data website/data/site-data.json\` validates a generated data document when Issue #276 supplies it.
-- \`node scripts/site/validate-data.mjs --rules scripts/site/rules.json --data path/to/fixture.json\` selects explicit inputs.
+- `npm run site:check` validates the rule inventory and the architecture/data-contract files.
+- `npm run test:site-data` runs the validator unit tests and fixture cases.
+- `node scripts/site/validate-data.mjs --data website/data/site-data.json` validates a generated data document when Issue #276 supplies it.
+- `node scripts/site/validate-data.mjs --rules scripts/site/rules.json --data path/to/fixture.json` selects explicit inputs.
 
-Until the website data producer exists, omitting \`--data\` is intentional: the command validates the rule inventory and contract prerequisites without pretending that live/generated data is present.
+Until the website data producer exists, omitting `--data` is intentional: the command validates the rule inventory and contract prerequisites without pretending that live/generated data is present.
 
 ## Rule inventory
 
-Rules live in \`scripts/site/rules.json\`, separately from the validator implementation. Each rule has a unique kebab-case \`id\`, \`severity\` (\`error\` or \`warning\`), boolean \`enabled\`, and a supported declarative \`check\` type. Paths must be repository-relative and cannot escape the repository. Unsupported checks and malformed rules fail validation; disabled rules are skipped.
+Rules live in `scripts/site/rules.json`, separately from the validator implementation. Each rule has a unique kebab-case `id`, `severity` (`error` or `warning`), boolean `enabled`, and a supported declarative `check` type. Paths must be repository-relative and cannot escape the repository. Unsupported checks and malformed rules fail validation; disabled rules are skipped.
 
-The initial inventory checks that the ADR, data contract, and JSON Schema exist and that the schema declares version 1. The \`site-data\` rule activates data validation when a data file is supplied.
+The initial inventory checks that the ADR, data contract, and JSON Schema exist and that the schema declares version 1. The `site-data` rule activates data validation when a data file is supplied.
 
 ## Data semantics
 
@@ -33,10 +33,10 @@ External responses must be normalized into committed or generated fixtures befor
 
 ## Adding and debugging a rule
 
-1. Add a declarative rule to \`scripts/site/rules.json\` with a unique ID, severity, enabled flag, and supported check type.
+1. Add a declarative rule to `scripts/site/rules.json` with a unique ID, severity, enabled flag, and supported check type.
 2. Keep paths repository-relative. Never add executable JavaScript, shell commands, expressions, or imports to rule data.
-3. Add positive and negative fixtures to \`test/site-data-validator.test.mjs\` for any new data invariant.
-4. Run \`npm run site:check\` and \`npm run test:site-data\`. Diagnostics are sorted by rule ID, path, and message and include severity, ID, and affected path.
+3. Add positive and negative fixtures to `test/site-data-validator.test.mjs` for any new data invariant.
+4. Run `npm run site:check` and `npm run test:site-data`. Diagnostics are sorted by rule ID, path, and message and include severity, ID, and affected path.
 5. Prefer a focused validator check over a generic plugin/rule-engine abstraction. Do not duplicate authoritative API/compatibility truth in this rules file.
 
 The validator's supported checks are intentionally allowlisted in code. Adding a new check requires code, tests, and documentation changes; data files cannot introduce executable behavior.
