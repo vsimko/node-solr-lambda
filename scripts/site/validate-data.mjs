@@ -122,6 +122,30 @@ function validateSiteData(data, rules) {
     if (domain.status === "available" && domain.records.length === 0) {
       errors.push({ id: `domain-empty-${domainName}`, severity: "warning", path, message: "An available domain with no records must be explicitly reviewed; do not use it to represent an unavailable feed." });
     }
+    if (domainName === "ci" && domain.configuredMatrix !== undefined) {
+      if (!Array.isArray(domain.configuredMatrix)) {
+        errors.push({ id: "ci-configured-matrix", severity: "error", path, message: "configuredMatrix must be an array separate from observed run records." });
+      } else {
+        for (const [index, matrix] of domain.configuredMatrix.entries()) {
+          const matrixPath = `ci.configuredMatrix[${index}]`;
+          if (!isRecord(matrix) || typeof matrix.dimension !== "string" || !matrix.dimension ||
+              !Array.isArray(matrix.values) || matrix.values.length === 0 ||
+              typeof matrix.sourcePath !== "string" || !safeRepositoryPath(matrix.sourcePath) ||
+              !statSync(resolve(root, matrix.sourcePath), { throwIfNoEntry: false })?.isFile()) {
+            errors.push({ id: "ci-configured-matrix-entry", severity: "error", path: matrixPath, message: "Configured matrix entries require a dimension, non-empty values, and an existing repository sourcePath." });
+          }
+        }
+      }
+    }
+    if (domainName === "releases" && domain.unreleased !== undefined) {
+      const item = domain.unreleased;
+      if (!isRecord(item) || typeof item.sourceId !== "string" || !sourceIds.has(item.sourceId) ||
+          typeof item.path !== "string" || !safeRepositoryPath(item.path) ||
+          !statSync(resolve(root, item.path), { throwIfNoEntry: false })?.isFile() ||
+          typeof item.url !== "string" || !isHttpUrl(item.url) || typeof item.content !== "string") {
+        errors.push({ id: "release-unreleased-changelog", severity: "error", path: "releases.unreleased", message: "Unreleased changelog requires a known source, existing repository path, HTTP(S) URL, and content." });
+      }
+    }
     const seen = new Set();
     for (const [index, record] of domain.records.entries()) {
       const recordPath = `${domainName}.records[${index}]`;
