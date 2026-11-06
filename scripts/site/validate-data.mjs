@@ -195,7 +195,8 @@ function validateDomainRecord(domain, record, path, errors) {
       }
     }
   } else if (domain === "ci") {
-    for (const field of ["runUrl", "commit", "ref"]) requireString(field);
+    for (const field of ["runId", "workflow", "event", "runUrl", "commit", "ref"]) requireString(field);
+    if (!isHttpUrl(record.runUrl)) errors.push({ id: "ci-run-url", severity: "error", path, message: "CI runUrl must be an HTTP(S) URL." });
     validDate("startedAt");
     if (record.status === "completed") validDate("completedAt");
     if (!["queued", "in_progress", "completed"].includes(record.status)) errors.push({ id: "ci-status", severity: "error", path, message: "CI status must describe an observed run state." });
@@ -203,11 +204,14 @@ function validateDomainRecord(domain, record, path, errors) {
     if (record.matrixConfigured === true && record.observed === false && record.conclusion === "success") errors.push({ id: "ci-configured-not-observed", severity: "error", path, message: "Configured matrix dimensions cannot be represented as observed successes." });
   } else if (domain === "roadmap") {
     requireString("url");
+    if (typeof record.url !== "string" || !/^https:\/\/github\.com\/[^/]+\/[^/]+\/(?:issues|pull)\/\d+$/.test(record.url)) errors.push({ id: "roadmap-url", severity: "error", path, message: "Roadmap URL must identify a GitHub issue or pull request." });
     if (!Number.isInteger(record.number) || record.number < 1) errors.push({ id: "roadmap-number", severity: "error", path, message: "Roadmap item requires a positive GitHub issue/PR number." });
     if (!allowedPriorities.has(record.priority)) errors.push({ id: "roadmap-priority", severity: "error", path, message: "Unsupported roadmap priority." });
     if (!allowedIssueStates.has(record.state) && !["merged", "missing"].includes(record.state)) errors.push({ id: "roadmap-state", severity: "error", path, message: "Roadmap state must be open, closed, merged, or missing." });
   } else if (domain === "npm") {
     requireString("packageName"); requireString("version"); requireString("window"); requireString("sourceUrl");
+    validDate("windowStart"); validDate("windowEnd");
+    if (typeof record.windowStart === "string" && typeof record.windowEnd === "string" && Date.parse(record.windowStart) > Date.parse(record.windowEnd)) errors.push({ id: "npm-window-range", severity: "error", path, message: "Download window start must not be after its end." });
     if (typeof record.version !== "string" || !semverPattern.test(record.version)) errors.push({ id: "npm-version", severity: "error", path, message: "npm version must be valid semver." });
     if (!isHttpUrl(record.sourceUrl)) errors.push({ id: "npm-source-url", severity: "error", path, message: "npm sourceUrl must be an HTTP(S) URL." });
     if (!Number.isFinite(record.downloads) || record.downloads < 0) errors.push({ id: "npm-downloads", severity: "error", path, message: "Downloads must be a non-negative observed number." });
@@ -223,6 +227,7 @@ function validateDomainRecord(domain, record, path, errors) {
   } else if (domain === "documentation") {
     requireString("path"); requireString("url"); requireString("owner");
     if (!safeRepositoryPath(record.path) || !statSync(resolve(root, record.path), { throwIfNoEntry: false })?.isFile()) errors.push({ id: "docs-path", severity: "error", path, message: "Documentation path must resolve to an existing repository file." });
+    if (!isHttpUrl(record.url)) errors.push({ id: "docs-url", severity: "error", path, message: "Documentation URL must be an HTTP(S) URL." });
     if (!["generated", "authored"].includes(record.owner)) errors.push({ id: "docs-owner", severity: "error", path, message: "Documentation owner must be generated or authored." });
     if (record.owner === "generated") {
       requireString("sourcePath");
