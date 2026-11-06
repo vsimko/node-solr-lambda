@@ -113,6 +113,12 @@ test("validates optional P2 domains without requiring their presence", () => {
   assert.ok(validateSiteData(invalid, rules).some((item) => item.id === "optional-source-upstreamSolr"));
 });
 
+test("rejects records exposed by an unavailable optional P2 domain", () => {
+  const invalid = structuredClone(base);
+  invalid.upstreamSolr = { status: "unavailable", sourceIds: [source.id], records: [{ id: "solr-10.1" }] };
+  assert.ok(validateSiteData(invalid, rules).some((item) => item.id === "optional-unavailable-upstreamSolr"));
+});
+
 test("accepts valid optional P2 Solr, TypeScript API, and CI history records", () => {
   const valid = structuredClone(base);
   valid.upstreamSolr = { status: "available", sourceIds: [source.id], records: [{ id: "solr-10.1", version: "10.1.0", releaseDate: "2026-01-01", sourceUrl: "https://solr.apache.org/downloads.html" }] };
