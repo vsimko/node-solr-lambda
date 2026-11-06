@@ -22,6 +22,20 @@ test("accepts a valid deterministic P1 data fixture, including a genuine zero me
   assert.deepEqual(validateSiteData(base, rules), []);
 });
 
+test("validates local-link and required-text rule definitions", () => {
+  const valid = validateRules({ version: 1, rules: [
+    { id: "links", severity: "error", enabled: true, check: "local-links", path: "docs/index.md" },
+    { id: "text", severity: "warning", enabled: true, check: "text-contains", path: "README.md", text: "# node-solr-lambda" }
+  ] });
+  assert.deepEqual(valid, []);
+  const invalid = validateRules({ version: 1, rules: [
+    { id: "links", severity: "error", enabled: true, check: "local-links", path: "../outside.md" },
+    { id: "text", severity: "warning", enabled: true, check: "text-contains", path: "README.md" }
+  ] });
+  assert.ok(invalid.some((item) => item.message.includes("repository-relative")));
+  assert.ok(invalid.some((item) => item.message.includes("text-contains")));
+});
+
 test("rejects malformed rules, duplicate IDs, unsupported checks, and invalid severity", () => {
   const result = validateRules({ version: 1, rules: [
     { id: "same", severity: "error", enabled: true, check: "file-exists", path: "README.md" },
