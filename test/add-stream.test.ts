@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { Readable } from "node:stream";
 import { z } from "zod";
 import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
 
@@ -129,6 +130,24 @@ test("addStream handles a slow async producer without changing JSON-array framin
     { id: "slow-producer-0" },
     { id: "slow-producer-1" },
     { id: "slow-producer-2" }
+  ]);
+});
+
+test("addStream accepts a Node.js Readable through its async iterator", async () => {
+  let requestBody = "";
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      requestBody = await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  await client.addStream(Readable.from([{ id: "node-readable-1" }, { id: "node-readable-2" }]));
+  assert.deepEqual(JSON.parse(requestBody), [
+    { id: "node-readable-1" },
+    { id: "node-readable-2" }
   ]);
 });
 
@@ -330,10 +349,15 @@ test("addStream timeout closes the source iterator and reports SolrTimeoutError"
       await reader.read();
       return await new Promise<Response>((_resolve, reject) => {
         const signal = init?.signal;
-        signal?.addEventListener("abort", async () => {
+        const cancel = async () => {
           await reader.cancel();
-          reject(signal.reason);
-        }, { once: true });
+          reject(signal?.reason);
+        };
+        if (signal?.aborted) {
+          void cancel();
+        } else {
+          signal?.addEventListener("abort", () => { void cancel(); }, { once: true });
+        }
       });
     }
   });
