@@ -4,14 +4,34 @@ This roadmap tracks the single active development line on `master`. Work is deli
 
 ## Product direction
 
-**node-solr-lambda is a modern, lightweight, TypeScript-first Apache Solr client whose public API makes Solr parameters discoverable through IDE autocomplete.**
+**North-star: make node-solr-lambda the best-in-class Apache Solr client for JavaScript, TypeScript, and Node.js.** The goal is leadership through demonstrable quality—not a marketing claim or feature-count contest. See [strategic goal #310](https://github.com/vsimko/node-solr-lambda/issues/310).
 
-- Supported Solr options use named exported interfaces, literal/discriminated unions, and nested models where useful.
-- Query and response generics let consumers type their own Solr documents.
-- Less common and newly introduced Solr features remain accessible through explicit custom-parameter/raw-request escape hatches.
-- Version-specific behavior is documented rather than hidden behind broad types.
+We optimize for five mutually reinforcing pillars:
 
-The scope is balanced: cover major Solr API areas and production readiness without attempting to wrap every historical or plugin-specific endpoint. Feature work is not blocked on the v4.0 stable release.
+1. **Feature completeness:** the broadest practical, well-designed coverage of Solr's maintained and widely used APIs, handlers, parameters, response models, administration, security, and SolrCloud workflows. Keep explicit escape hatches for new, uncommon, and plugin-specific server capabilities.
+2. **Correctness and testing:** layered unit, serialization/contract, consumer TypeScript, integration, security, SolrCloud, regression, and fault/lifecycle testing. A passing test count or line-coverage percentage alone is not proof of correctness.
+3. **Compatibility:** the widest responsibly supportable Solr and Node.js version matrix, with operation-specific evidence across standalone, authenticated, and SolrCloud deployments. Distinguish tested, partially tested, documented-only, and unverified behavior.
+4. **Performance and efficiency:** competitive latency and throughput with bounded memory, efficient serialization, streaming/backpressure, and predictable concurrency. Measure before optimizing and publish reproducible comparisons.
+5. **Developer and operator experience:** first-class JavaScript and TypeScript APIs, precise types, ergonomic ESM/CommonJS packaging, clear documentation, stable contracts, actionable errors, cancellation, security, and reliable releases.
+
+### Engineering principles
+
+- Prefer meaningful, typed, composable APIs over shallow endpoint wrappers; do not claim complete API parity without evidence.
+- Keep JavaScript first-class; TypeScript is a strength, not a runtime or adoption requirement.
+- Treat correctness, security, and backward compatibility as constraints on performance and feature expansion.
+- Benchmark against direct HTTP and relevant maintained clients using equivalent workloads; publish methodology, p50/p95/p99 latency, throughput, CPU, and memory.
+- Expand Solr and Node.js support deliberately, with explicit support windows and reproducible compatibility evidence.
+- Use a versioned API inventory and a public quality/compatibility scorecard to make gaps visible and prioritize work.
+- Feature work is not blocked on the v4.0 stable release, but release and publication gates remain separate and require their existing approvals.
+
+### Strategic execution tracks
+
+- API surface and feature-gap inventory (#310)
+- Solr/Node.js support policy and compatibility automation (#310)
+- Testing strategy, fault injection, security, and SolrCloud evidence (#310)
+- Reproducible performance and memory benchmark suite (#310)
+- Competitor/ecosystem comparison and public quality scorecard (#310)
+- High-value feature tranche issues derived from the inventory (#310)
 
 ## Current baseline
 
