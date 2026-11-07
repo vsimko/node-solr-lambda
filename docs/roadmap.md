@@ -112,3 +112,10 @@ Deliver the static GitHub Pages experience as a product-discovery feature: TypeS
 | GitHub Pages site, generated data, and deployment workflow | [#276](https://github.com/vsimko/node-solr-lambda/issues/276) | Static build and PR validation without deployment; deployment only from the default branch. |
 
 The website is a discovery and evidence surface, not a second source of technical truth. README and `docs/` remain canonical; API inventory and compatibility evidence remain operation/version-specific. The website work does not change the TypeScript-first API feature priorities or release/manual SolrCloud gates.
+
+## Implementation status (2026-11-06)
+
+- **RealTime Get (#271):** implementation PR #271 is open with the public API, request/response types, unit/type fixtures, documentation, and isolated integration coverage. Node.js 20/22/24 and Solr 8.11.4/9.11.0/10.1.0 CI is pending; do not mark the feature complete until the latest run is green.
+- **SpellCheck (#272):** implementation PR #272 is open with typed common request options, extensible NamedList response models, unit/type fixtures, documentation, and isolated integration coverage using the configured default handler. Its pinned CI matrix is pending.
+
+These feature PRs do not alter the separate stable-release approval gate (#110) or the manually dispatched destructive SolrCloud verification gate (#232).

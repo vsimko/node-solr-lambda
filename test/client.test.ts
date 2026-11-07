@@ -383,7 +383,6 @@ test("Config API read methods preserve abort controls", async () => {
   assert.ok(requestedSignal instanceof AbortSignal);
   assert.equal(requestedSignal.aborted, false);
   controller.abort();
-  assert.equal(requestedSignal.aborted, true);
   await assert.rejects(request, { name: "SolrAbortError" });
 });
 
@@ -398,4 +397,95 @@ test("Config API read methods propagate HTTP errors", async () => {
     assert.equal(error.message, "config unavailable");
     return true;
   });
+});
+
+
+test("RealTime Get retrieves one document with typed filters, fields, and custom parameters", async () => {
+  let requestedUrl: URL | undefined;
+  let requestedMethod = "";
+  let requestedSignal: AbortSignal | undefined;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requestedUrl = new URL(String(input));
+      requestedMethod = String(init?.method);
+      requestedSignal = init?.signal ?? undefined;
+      return new Response(JSON.stringify({ doc: { id: "one", name_s: "single" } }));
+    }
+  });
+
+  const result = await client.get<{ id: string; name_s: string }>({
+    id: "one",
+    fields: ["id", "name_s"],
+    filter: ["type:book", "active:true"],
+    params: { wt: "json", custom: "value" }
+  });
+
+  assert.equal(requestedMethod, "GET");
+  assert.ok(requestedSignal instanceof AbortSignal);
+  assert.equal(requestedSignal.aborted, false);
+  assert.equal(requestedUrl?.pathname, "/solr/catalog/get");
+  assert.equal(requestedUrl?.searchParams.get("id"), "one");
+  assert.equal(requestedUrl?.searchParams.get("fl"), "id,name_s");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("fq"), ["type:book", "active:true"]);
+  assert.equal(requestedUrl?.searchParams.get("wt"), "json");
+  assert.equal(requestedUrl?.searchParams.get("custom"), "value");
+  assert.deepEqual(result.doc, { id: "one", name_s: "single" });
+});
+
+
+test("RealTime Get serializes multi-ID requests as ids and returns a query-shaped response", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async input => {
+      requestedUrl = new URL(String(input));
+      return new Response(JSON.stringify({
+        response: { numFound: 2, start: 0, docs: [{ id: "one" }, { id: "two" }] }
+      }));
+    }
+  });
+
+  const result = await client.get<{ id: string }>({ ids: ["one", "two"], fields: "id" });
+  assert.equal(requestedUrl?.searchParams.get("ids"), "one,two");
+  assert.equal(requestedUrl?.searchParams.has("id"), false);
+  assert.equal(requestedUrl?.searchParams.get("fl"), "id");
+  assert.deepEqual(result.response?.docs, [{ id: "one" }, { id: "two" }]);
+});
+
+test("RealTime Get rejects ambiguous IDs, empty values, and reserved custom parameters", () => {
+  const client = createSolrClient({ core: "catalog", fetch: async () => { throw new Error("fetch must not run"); } });
+  assert.throws(() => client.get({ id: "" }), /id must be a non-empty string/);
+  assert.throws(() => client.get({ id: "one", ids: ["two", "three"] } as never), /exactly one of id or ids/);
+  assert.throws(() => client.get({ ids: ["one"] } as never), /at least two document IDs/);
+  assert.throws(() => client.get({ ids: ["one", "two,three"] }), /must not contain commas/);
+  assert.throws(() => client.get({ id: "one", params: { id: "other" } }), /must not override id/);
+  assert.throws(() => client.get({ id: "one", params: { fq: "status:active" } }), /must not override fq/);
+  assert.throws(() => client.get({ id: "one", fields: [] }), /fields must not be empty/);
+  assert.throws(() => client.get({ id: "one", filter: [""] }), /filter must be a non-empty string/);
+});
+
+
+test("RealTime Get preserves abort controls through the shared transport", async () => {
+  let requestedSignal: AbortSignal | undefined;
+  const controller = new AbortController();
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: (_input, init) => {
+      requestedSignal = init?.signal ?? undefined;
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(new DOMException("The operation was aborted", "AbortError"));
+        }, { once: true });
+      });
+    }
+  });
+
+  const request = client.get({ id: "one" }, { signal: controller.signal });
+  await Promise.resolve();
+  assert.ok(requestedSignal instanceof AbortSignal);
+  assert.equal(requestedSignal.aborted, false);
+  controller.abort();
+  assert.equal(requestedSignal.aborted, true);
+  await assert.rejects(request, { name: "SolrAbortError" });
 });

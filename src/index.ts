@@ -5,6 +5,7 @@ export { solrExcludeTags, solrFieldAlias, solrFields, solrFilter, solrFunction, 
 export type { SolrFieldListEntry, SolrFunctionArgument, SolrLocalParamValue, SolrSortClause, SolrSortDirection, SolrSortInput, SolrSpatialFilterOptions } from "./query-helpers.js";
 export type { SolrExportFieldType, SolrExportSortClause, SolrExportSort, SolrExportParams, SolrMetricsParams, SolrMetricValue, SolrMetricsRegistry, SolrMetricsJsonResponse, SolrMetricsResponse, SolrStreamingExpressionTuple, SolrStreamingExpressionErrorTuple, SolrStreamingExpressionResultSet, SolrStreamingExpressionResponse } from "./types.js";
 export type { SolrStatsFieldOptions, SolrStatsOptions } from "./types.js";
+export type { SolrGetOptions, SolrGetSingleRequest, SolrGetMultipleRequest, SolrGetRequest, SolrGetSingleResponse, SolrGetMultipleResponse } from "./types.js";
 export type { SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemThreadInfo, SolrSystemLoggingResponse } from "./types.js";
 export type { SolrCollectionShardOperationResponse } from "./types.js";
 export type { SolrClusterReplica, SolrClusterShard, SolrClusterCollection, SolrClusterStatus, SolrClusterStatusResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse } from "./types.js";

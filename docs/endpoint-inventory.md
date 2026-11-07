@@ -7,6 +7,7 @@ This inventory defines the boundary of the typed client API after review against
 | Endpoint / API family | Client entry point | Scope and evidence |
 | --- | --- | --- |
 | Search handler `/select` | `query()` | Typed query options and response models for documented query features; representative integration evidence and per-version status are in the [API coverage](api-coverage.md) and [machine-readable API inventory](api-inventory.json). |
+| RealTime Get handler `/get` | `get()` | Typed mutually exclusive single-ID and multi-ID requests, generic response shapes, fields, filter queries, and custom parameters. Runtime status is tracked separately for each pinned Solr version. |
 | JSON Request API `/query` | `queryJson()` | Typed JSON query and JSON Facet API models; representative integration coverage on Solr 8.11.4, 9.11.0, and 10.1.0. |
 | Update handlers `/update`, `/update/json`, `/update/json/docs` | `add()`, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, `rollback()` | Typed document and command APIs. Exact tested command shapes and unverified request-option effects are recorded in the compatibility matrix. |
 | Schema API `/schema` | `schema()` | Typed schema command models; integration coverage includes field, field-type, dynamic-field, copy-field, and schema read operations. |
