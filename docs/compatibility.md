@@ -11,6 +11,25 @@ This page records the current client compatibility policy. It separates document
 
 Documentation evidence does not prove that every patch release behaves in the same way.
 
+## Upstream support policy (2026-11-07)
+
+### Apache Solr
+
+- **Current feature-release line:** Solr 10.x; 10.1.0 is the latest release at the time of this policy review.
+- **Previous maintenance line:** Solr 9.11.x; 9.11.0 is the final 9.x release and may receive occasional critical security or bug-fix releases.
+- **Legacy compatibility only:** Solr 8.11.4 remains in the CI matrix to detect regressions for existing users, but upstream classifies versions older than 9.11 as EOL. Passing the 8.11.4 client test matrix is compatibility evidence, not an upstream security-support claim or a recommendation for new deployments.
+- **EOL:** Solr versions below 9.11 are no longer updated by Apache Solr. The client does not promise active feature qualification or upstream security fixes for those lines.
+
+Source: [Apache Solr downloads and version-support policy](https://solr.apache.org/downloads).
+
+### Node.js
+
+- **Actively maintained LTS:** Node.js 22.x and 24.x are in Maintenance LTS; 26.x is in Active LTS.
+- **Legacy compatibility only:** Node.js 20.x reached EOL on 2026-04-30. It remains in the v4 engine range and CI temporarily for compatibility, but is not recommended for new production deployments and receives no upstream security fixes.
+- The next major release should revisit removing Node 20 from the package engine range; this policy does not make that breaking change in v4.
+
+Sources: [Node.js Release schedule](https://github.com/nodejs/Release#release-schedule) · [Node.js previous releases](https://nodejs.org/en/about/previous-releases).
+
 ## Interpreting unverified operations
 
 An exposed action or parameter is not runtime-certified merely because it has a TypeScript model or serialization test. The API coverage page records the current triage of deferred and intentionally out-of-scope gaps. Destructive Core Admin actions and cluster-wide Collections policy mutations remain unverified until isolated runtime evidence is added; SPLITSHARD/MIGRATE still require the opt-in workflow in [#232](https://github.com/vsimko/node-solr-lambda/issues/232). Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 (PR [#263](https://github.com/vsimko/node-solr-lambda/pull/263)); ReplicationHandler in-progress abort is verified on Solr 9.11.0 and 10.1.0 only, with Solr 8.11.4 explicitly unverified (PR [#264](https://github.com/vsimko/node-solr-lambda/pull/264)). Issues #258 and #259 are closed; they are historical evidence, not outstanding verification tasks.
@@ -27,7 +46,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Man
 
 ## Node.js runtime matrix
 
-The package engine range is `^20.0.0 || ^22.0.0 || ^24.0.0`. The CI workflow defines Node.js 20, 22, and 24 jobs for type checking, consumer type fixtures, unit tests, builds, and release/documentation checks. Its standalone Solr, authenticated Solr, and SolrCloud integration jobs also combine each of those Node versions with Solr 8.11.4, 9.11.0, and 10.1.0 (a 3 × 3 matrix per job).
+The package engine range is `^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0`. The CI workflow is configured for Node.js 20, 22, 24, and 26 in type checking, consumer type fixtures, unit tests, builds, and release/documentation checks. Node 20 is the legacy compatibility lane; Node 22/24/26 are the actively maintained LTS targets. The standalone Solr, authenticated Solr, and SolrCloud integration jobs combine all four Node versions with Solr 8.11.4, 9.11.0, and 10.1.0 (a 4 × 3 matrix per integration suite). PR #329 adds Node 26; its full 40-job matrix is the qualification run for that runtime.
 
 Streaming ingestion was delivered in #300, hardened in #317, and completed with independent test coverage in #321. The final lifecycle matrix in CI run [#42392182590](https://github.com/vsimko/node-solr-lambda/actions/runs/42392182590) passed 30/30 jobs across Node.js 20/22/24 and pinned Solr 8.11.4/9.11.0/10.1.0 standalone, security-enabled, and SolrCloud matrices; the 250-document `addStream()` fixture was read back with exact count/order on all three Solr versions. The consumer/test follow-up run [#42392800998](https://github.com/vsimko/node-solr-lambda/actions/runs/42392800998) also passed 30/30. Documentation reconciliation in #325 passed the dedicated docs/API-inventory checks. This certifies the tested JSON-array ingestion behavior on those pinned images; it does not certify atomicity or behavior on other Solr releases.
 
@@ -101,7 +120,7 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. The integration workflows run on Node.js 20, 22, and 24, covering all nine Node.js/Solr-version combinations in each of the three integration suites (27 integration jobs total), in addition to the three Node.js unit/build jobs. This full matrix was added in PR #226; its CI run #522 passed all 30 jobs. Earlier runs such as CI #162 and #177 provide historical evidence for the individual integration behaviors, but should not be read as evidence that the full Node.js/Solr matrix was already enabled at that time. The passing SolrCloud coverage includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection on both authentication and authorization handlers, authenticated reads, authentication property mutation/read-back, malformed JSON rejection, and that negative response bodies do not echo configured credentials. Unit tests also assert request Authorization headers are not copied into client HTTP error properties.
+CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. The current workflow configuration combines four Node versions (20/22/24/26) with three Solr images in each of the three integration suites: 12 jobs per suite, 36 integration jobs total, plus four Node unit/build jobs (40 jobs total). PR #329 introduces the Node 26 lane; its CI run is the qualification evidence for that runtime. The historical 30-job matrix in PR #226 covered Node 20/22/24 only. Earlier runs such as CI #162 and #177 provide historical evidence for individual integration behaviors, but should not be read as evidence that the full matrix was already enabled at that time. The passing SolrCloud coverage includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection on both authentication and authorization handlers, authenticated reads, authentication property mutation/read-back, malformed JSON rejection, and that negative response bodies do not echo configured credentials. Unit tests also assert request Authorization headers are not copied into client HTTP error properties.
 
 | Solr line | Pinned Docker image |
 | --- | --- |
