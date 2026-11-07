@@ -25,6 +25,7 @@ Build and run:
 
 ```sh
 npm ci
+npm run build
 SOLR_BASE_URL=http://127.0.0.1:8983/solr \
 SOLR_COLLECTION=benchmark \
 SOLR_VERSION=10.1.0 \
