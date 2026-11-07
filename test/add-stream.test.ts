@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createSolrClient, SolrHttpError, SolrNetworkError } from "../src/index.js";
+import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
   assert.ok(body && typeof body === "object" && "getReader" in body);
@@ -156,4 +156,37 @@ test("addStream serializes each document with the configured JSON codec", async 
 
   await client.addStream(documents());
   assert.match(requestBody, /"_version_":9007199254740993/);
+});
+
+
+test("addStream cancellation closes the source async iterator", async () => {
+  const abort = new AbortController();
+  let finalized = false;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read();
+      abort.abort("stop streaming");
+      await new Promise<never>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", async () => {
+          await reader.cancel();
+          reject(new DOMException("Aborted", "AbortError"));
+        }, { once: true });
+      });
+    }
+  });
+
+  async function* documents() {
+    try {
+      let index = 0;
+      while (true) yield { id: `cancel-${index++}` };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  await assert.rejects(client.addStream(documents(), {}, { signal: abort.signal }), SolrAbortError);
+  assert.equal(finalized, true);
 });
