@@ -28,7 +28,7 @@ The stream uses the existing `/update` endpoint and reuses update parameters, au
 
 ## Consequences
 
-- The client buffers at most a bounded number of chunks plus the largest serialized document, not the full iterable.
+- The Web stream queue has a high-water mark of one chunk. Memory is bounded by that queued chunk, at most one in-flight pull/serialization, and the largest individual document; the full iterable is never materialized. A single unusually large document can still require substantial memory.
 - Producer exceptions, aborts, timeouts, and consumer cancellation terminate the stream and call the iterator's `return()` cleanup path.
 - A failure after some chunks have been sent may leave earlier documents accepted by Solr. The operation is not atomic and does not roll back automatically.
 - The final Solr response is available only after the request body completes and the server responds.
@@ -36,4 +36,4 @@ The stream uses the existing `/update` endpoint and reuses update parameters, au
 
 ## Verification
 
-Unit tests cover JSON-array framing, lazy production/backpressure, empty input, producer failure and iterator cleanup, cancellation, configured JSON codec use, and no retry for consumed streaming POST bodies. An isolated integration test streams a deterministic 250-document fixture and verifies count/order read-back on Solr 8.11.4, 9.11.0, and 10.1.0.
+Unit tests cover JSON-array framing, slow-consumer backpressure, slow producers, empty input, producer and validation failures, HTTP errors, timeout and caller/consumer cancellation, iterator cleanup, configured JSON codec use, shared auth/headers/request defaults, and no retry for consumed streaming POST bodies. The CI workflow defines Node.js 20/22/24 jobs and a 3 × 3 Node/Solr integration matrix for Solr 8.11.4, 9.11.0, and 10.1.0. The PR run observed during this audit was cancelled, so these matrix results are not yet evidence of a pass. The isolated integration test streams a deterministic 250-document fixture and verifies count/order read-back on each pinned Solr image when the matrix runs.
