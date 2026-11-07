@@ -63,7 +63,7 @@
     "site:preview": "node scripts/site/preview.mjs",
     "test:site-assets": "node --test test/site-assets.test.mjs",
     "test:bench": "node --test test/benchmark.test.mjs",
-    "bench": "npm run build && node bench/run.mjs"
+    "bench": "node bench/run.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
