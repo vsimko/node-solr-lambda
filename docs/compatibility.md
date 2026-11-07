@@ -25,6 +25,12 @@ An exposed action or parameter is not runtime-certified merely because it has a 
 
 The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Management Commands sections document ADDREPLICA, MOVEREPLICA, and DELETEREPLICA. These baselines are references for review. They do not define a minimum supported patch release.
 
+## Node.js runtime matrix
+
+The package engine range is `^20.0.0 || ^22.0.0 || ^24.0.0`. The CI workflow defines Node.js 20, 22, and 24 jobs for type checking, consumer type fixtures, unit tests, builds, and release/documentation checks. Its standalone Solr, authenticated Solr, and SolrCloud integration jobs also combine each of those Node versions with Solr 8.11.4, 9.11.0, and 10.1.0 (a 3 × 3 matrix per job).
+
+For PR #300, the observed CI workflow run was cancelled rather than completed. Therefore the configured matrix is coverage intent, not a passing compatibility result. Do not mark `addStream()` as runtime-tested for any Node/Solr combination until a fresh run completes successfully. The API inventory keeps `integrationTests: not-run` and Solr version statuses `unverified` in the meantime.
+
 ## Endpoint matrix
 
 | Client operation | Solr 8.11 docs | Solr 9.11 docs | Solr 10.1 docs | Runtime test |
