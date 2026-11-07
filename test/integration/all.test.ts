@@ -28,3 +28,5 @@ import "./solr-update.test.js";
 import "./solr-update-cloud.test.js";
 import "./solr-v3-migration.test.js";
 import "./solr-morelikethis.test.js";
+
+import "./solr-spellcheck.test.js";

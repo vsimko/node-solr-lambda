@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { SolrClient } from "../src/index.js";
-import type { SolrJsonQueryRequest, SolrQuery, SolrResponse } from "../src/index.js";
+import type { SolrJsonQueryRequest, SolrQuery, SolrResponse, SolrQueryResponse, SolrSpellcheckTermResult } from "../src/index.js";
 
 const createClient = (capture: (url: URL) => void) => new SolrClient({
   baseUrl: "http://localhost:8983/solr",
@@ -628,4 +628,136 @@ test("MoreLikeThis rejects invalid numeric thresholds", () => {
     () => client.query({ query: "*:*", moreLikeThis: { count: -1 } }),
     /count must be a non-negative integer/
   );
+});
+
+
+test("query serializes typed SpellCheck options and collate parameters", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    spellcheck: {
+      enabled: true,
+      query: "solr clent",
+      queryAnalyzerFieldType: "text_general",
+      count: 5,
+      onlyMorePopular: true,
+      extendedResults: true,
+      collate: true,
+      maxCollations: 2,
+      maxCollationTries: 4,
+      maxCollationEvaluations: 100,
+      collateExtendedResults: true,
+      collateMaxCollectDocs: 25,
+      maxResultsForSuggest: 5,
+      alternativeTermCount: 3,
+      accuracy: 0.5,
+      dictionary: ["default", "wordbreak"],
+      collateParams: { "q.op": "AND", mm: "100%" }
+    },
+    params: { "spellcheck.build": false }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("spellcheck"), "true");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.q"), "solr clent");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.queryAnalyzerFieldType"), "text_general");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.count"), "5");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.onlyMorePopular"), "true");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.extendedResults"), "true");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.collate"), "true");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.maxCollations"), "2");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.maxCollationTries"), "4");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.maxCollationEvaluations"), "100");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.collateExtendedResults"), "true");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.collateMaxCollectDocs"), "25");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.maxResultsForSuggest"), "5");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.alternativeTermCount"), "3");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.accuracy"), "0.5");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("spellcheck.dictionary"), ["default", "wordbreak"]);
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.collateParam.q.op"), "AND");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.collateParam.mm"), "100%");
+  assert.equal(requestedUrl?.searchParams.get("spellcheck.build"), "false");
+});
+
+test("query can disable SpellCheck without serializing dependent options", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    spellcheck: { enabled: false, query: "solr clent", count: 5, collate: true }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("spellcheck"), "false");
+  assert.equal(requestedUrl?.searchParams.has("spellcheck.q"), false);
+  assert.equal(requestedUrl?.searchParams.has("spellcheck.count"), false);
+  assert.equal(requestedUrl?.searchParams.has("spellcheck.collate"), false);
+});
+
+test("SpellCheck rejects invalid stable option values before making a request", () => {
+  const client = createClient(() => { throw new Error("fetch must not run"); });
+  assert.throws(() => client.query({ spellcheck: { query: " " } }), /query must be a non-empty string/);
+  assert.throws(() => client.query({ spellcheck: { count: 0 } }), /count must be a positive integer/);
+  assert.throws(() => client.query({ spellcheck: { maxCollations: -1 } }), /maxCollations must be a non-negative integer/);
+  assert.throws(() => client.query({ spellcheck: { accuracy: 1.1 } }), /accuracy must be between 0 and 1/);
+  assert.throws(() => client.query({ spellcheck: { dictionary: [] } }), /dictionary must not be empty/);
+  assert.throws(() => client.query({ spellcheck: { dictionary: [""] } }), /dictionary names must be non-empty strings/);
+  assert.throws(() => client.query({ spellcheck: { collateParams: { " ": "AND" } } }), /collateParams requires non-empty names/);
+});
+
+test("query parses the typed SpellCheck suggestions and collation response envelope", async () => {
+  const payload = {
+    spellcheck: {
+      suggestions: {
+        clent: {
+          numFound: 1,
+          startOffset: 5,
+          endOffset: 10,
+          origFreq: 0,
+          suggestion: [["client", 3], { word: "customer", freq: 1 }]
+        }
+      },
+      correctlySpelled: false,
+      collations: {
+        collation: { collationQuery: "solr client", hits: 3, misspellingsAndCorrections: { clent: "client" } }
+      }
+    }
+  };
+  const client = new SolrClient({
+    baseUrl: "http://localhost:8983/solr",
+    core: "testcore",
+    fetch: async () => new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    })
+  });
+  const response = await client.query<SolrQueryResponse<{ id: string }>>({
+    query: "*:*",
+    spellcheck: { enabled: true, extendedResults: true, collate: true, collateExtendedResults: true }
+  });
+
+  assert.equal(response.spellcheck?.correctlySpelled, false);
+  const suggestions = response.spellcheck?.suggestions;
+  assert.ok(suggestions && !Array.isArray(suggestions));
+  const termValue = (suggestions as Readonly<Record<string, unknown>>)["clent"];
+  assert.ok(termValue && typeof termValue === "object" && "suggestion" in termValue);
+  const term = termValue as SolrSpellcheckTermResult;
+  assert.equal(term.origFreq, 0);
+  const firstAlternative = term.suggestion?.[0];
+  const firstWord = typeof firstAlternative === "string"
+    ? firstAlternative
+    : Array.isArray(firstAlternative)
+      ? firstAlternative[0]
+      : (firstAlternative as { word: string } | undefined)?.word;
+  assert.equal(firstWord, "client");
+  assert.deepEqual(firstAlternative, ["client", 3]);
+  const secondAlternative = term.suggestion?.[1];
+  assert.equal(typeof secondAlternative === "object" && !Array.isArray(secondAlternative)
+    ? (secondAlternative as { word: string }).word
+    : undefined, "customer");
+  const collations = response.spellcheck?.collations;
+  assert.ok(collations && !Array.isArray(collations));
+  const collationValue = (collations as Readonly<Record<string, unknown>>)["collation"];
+  assert.equal(typeof collationValue === "object" && collationValue !== null && "collationQuery" in collationValue ? collationValue.collationQuery : undefined, "solr client");
 });

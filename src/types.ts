@@ -1564,6 +1564,44 @@ export interface SolrSpatialQueryOptions {
   cost?: number;
 }
 
+/** Typed options for Solr's SpellCheck search component. */
+export interface SolrSpellcheckOptions {
+  /** Enable or disable spelling suggestions. Defaults to true when this object is supplied. */
+  enabled?: boolean;
+  /** Explicit text to spellcheck; defaults to the original q parameter. */
+  query?: string;
+  /** Maximum suggestions per term. */
+  count?: number;
+  /** Return only suggestions that produce more hits than the original term. */
+  onlyMorePopular?: boolean;
+  /** Include original and suggestion term frequencies. */
+  extendedResults?: boolean;
+  /** Return query collations built from the best suggestions. */
+  collate?: boolean;
+  /** Maximum number of collations to return. */
+  maxCollations?: number;
+  /** Number of collation possibilities Solr should test. */
+  maxCollationTries?: number;
+  /** Maximum correction combinations evaluated before collation testing. */
+  maxCollationEvaluations?: number;
+  /** Return expanded collation details including hits and corrections. */
+  collateExtendedResults?: boolean;
+  /** Maximum number of documents collected while testing collations; zero means all. */
+  collateMaxCollectDocs?: number;
+  /** Offer suggestions when the original query returns this many hits or fewer. */
+  maxResultsForSuggest?: number;
+  /** Number of alternatives to return for terms already present in the dictionary. */
+  alternativeTermCount?: number;
+  /** Minimum accuracy threshold for a suggestion, from 0 to 1. */
+  accuracy?: number;
+  /** One or more configured spellchecker dictionary names. */
+  dictionary?: string | readonly string[];
+  /** Field type whose query analyzer tokenizes the spellcheck query. */
+  queryAnalyzerFieldType?: string;
+  /** Parameters applied when Solr validates candidate collations. */
+  collateParams?: Readonly<Record<string, SolrQueryParamValue>>;
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -1597,6 +1635,8 @@ export interface SolrStandardQueryOptions {
   stats?: SolrStatsOptions;
   /** Typed options for the MoreLikeThis search component. */
   moreLikeThis?: SolrMoreLikeThisOptions;
+  /** Typed options for Solr spellcheck suggestions and collations. */
+  spellcheck?: SolrSpellcheckOptions;
   /** Typed options for Result Grouping. */
   grouping?: SolrGroupingOptions;
   /** Collapse duplicate results using the Collapsing Query Parser. */
@@ -1883,6 +1923,8 @@ export type SolrGetMultipleResponse<TDocument = unknown> = SolrResponse<TDocumen
 export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   responseHeader?: SolrResponseHeader;
   response?: SolrQueryResult<TDocument>;
+  /** Spellcheck suggestions, term frequencies, and optional collations. */
+  spellcheck?: SolrSpellcheckResponse;
   /** Classic Facet API response; present when classic faceting is enabled. */
   facet_counts?: SolrFacetCounts;
   /** JSON Facet API response; the caller can provide its expected facet shape. */
@@ -2001,6 +2043,49 @@ export interface SolrDebugInfo {
   explain?: Readonly<Record<string, SolrExplanation>>;
   explainOther?: Readonly<Record<string, SolrExplanation>>;
   timing?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+/** One spellcheck alternative, with frequency fields when extended results are enabled. */
+export interface SolrSpellcheckAlternativeObject {
+  word: string;
+  freq?: number;
+  frequency?: number;
+  [key: string]: unknown;
+}
+
+/** Solr can return alternatives as strings, word/frequency tuples, or extended objects. */
+export type SolrSpellcheckAlternative =
+  | string
+  | readonly [word: string, frequency: number]
+  | SolrSpellcheckAlternativeObject;
+
+/** Suggestions and frequency metadata for one original query term. */
+export interface SolrSpellcheckTermResult {
+  numFound?: number;
+  startOffset?: number;
+  endOffset?: number;
+  origFreq?: number;
+  suggestion?: readonly (string | SolrSpellcheckAlternative)[];
+  [key: string]: unknown;
+}
+
+/** A query collation returned by spellcheck.collate. */
+export interface SolrSpellcheckCollation {
+  collationQuery: string;
+  hits?: number;
+  collationInternalRank?: number;
+  misspellingsAndCorrections?: Readonly<Record<string, string>>;
+  [key: string]: unknown;
+}
+
+/** JSON response shape for the SpellCheck component's NamedList data. */
+export interface SolrSpellcheckResponse {
+  suggestions?: Readonly<Record<string, SolrSpellcheckTermResult | SolrSpellcheckCollation | string>> |
+    readonly (string | SolrSpellcheckTermResult | SolrSpellcheckCollation)[];
+  correctlySpelled?: boolean;
+  collations?: Readonly<Record<string, string | SolrSpellcheckCollation>> |
+    readonly (string | SolrSpellcheckCollation)[];
   [key: string]: unknown;
 }
 

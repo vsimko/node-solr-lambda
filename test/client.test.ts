@@ -433,7 +433,6 @@ test("RealTime Get retrieves one document with typed filters, fields, and custom
   assert.deepEqual(result.doc, { id: "one", name_s: "single" });
 });
 
-
 test("RealTime Get serializes multi-ID requests as ids and returns a query-shaped response", async () => {
   let requestedUrl: URL | undefined;
   const client = createSolrClient({

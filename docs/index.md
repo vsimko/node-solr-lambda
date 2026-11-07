@@ -14,6 +14,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 
 - [Query API](query.md)
 - [RealTime Get API](realtime-get.md)
+- [SpellCheck API](spellcheck.md)
 - [Update and Document API — full guide](update.md)
 - [Document API overview — concise examples](documents.md)
 - [Schema API](schema.md)

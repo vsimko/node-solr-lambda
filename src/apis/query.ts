@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrDebugOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrDebugOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue, SolrSpellcheckOptions } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -169,6 +169,74 @@ function applyMoreLikeThis(params: Record<string, unknown>, options: SolrMoreLik
   if (options.interestingTerms !== undefined) params["mlt.interestingTerms"] = options.interestingTerms;
 }
 
+function applySpellcheck(params: Record<string, unknown>, options: SolrSpellcheckOptions): void {
+  params.spellcheck = options.enabled ?? true;
+  if (options.enabled === false) return;
+
+  if (options.query !== undefined) {
+    if (options.query.trim() === "") throw new TypeError("spellcheck query must be a non-empty string");
+    params["spellcheck.q"] = options.query;
+  }
+  if (options.queryAnalyzerFieldType !== undefined) {
+    if (options.queryAnalyzerFieldType.trim() === "") throw new TypeError("spellcheck queryAnalyzerFieldType must be a non-empty string");
+    params["spellcheck.queryAnalyzerFieldType"] = options.queryAnalyzerFieldType;
+  }
+  if (options.count !== undefined) {
+    if (!Number.isInteger(options.count) || options.count < 1) throw new TypeError("spellcheck count must be a positive integer");
+    params["spellcheck.count"] = options.count;
+  }
+  if (options.maxCollations !== undefined) {
+    if (!Number.isInteger(options.maxCollations) || options.maxCollations < 0) throw new TypeError("spellcheck maxCollations must be a non-negative integer");
+    params["spellcheck.maxCollations"] = options.maxCollations;
+  }
+  if (options.maxCollationTries !== undefined) {
+    if (!Number.isInteger(options.maxCollationTries) || options.maxCollationTries < 0) throw new TypeError("spellcheck maxCollationTries must be a non-negative integer");
+    params["spellcheck.maxCollationTries"] = options.maxCollationTries;
+  }
+  if (options.maxCollationEvaluations !== undefined) {
+    if (!Number.isInteger(options.maxCollationEvaluations) || options.maxCollationEvaluations < 0) throw new TypeError("spellcheck maxCollationEvaluations must be a non-negative integer");
+    params["spellcheck.maxCollationEvaluations"] = options.maxCollationEvaluations;
+  }
+  if (options.collateMaxCollectDocs !== undefined) {
+    if (!Number.isInteger(options.collateMaxCollectDocs) || options.collateMaxCollectDocs < 0) throw new TypeError("spellcheck collateMaxCollectDocs must be a non-negative integer");
+    params["spellcheck.collateMaxCollectDocs"] = options.collateMaxCollectDocs;
+  }
+  if (options.maxResultsForSuggest !== undefined) {
+    if (!Number.isInteger(options.maxResultsForSuggest) || options.maxResultsForSuggest < 0) throw new TypeError("spellcheck maxResultsForSuggest must be a non-negative integer");
+    params["spellcheck.maxResultsForSuggest"] = options.maxResultsForSuggest;
+  }
+  if (options.alternativeTermCount !== undefined) {
+    if (!Number.isInteger(options.alternativeTermCount) || options.alternativeTermCount < 0) throw new TypeError("spellcheck alternativeTermCount must be a non-negative integer");
+    params["spellcheck.alternativeTermCount"] = options.alternativeTermCount;
+  }
+  if (options.accuracy !== undefined) {
+    if (!Number.isFinite(options.accuracy) || options.accuracy < 0 || options.accuracy > 1) {
+      throw new TypeError("spellcheck accuracy must be between 0 and 1");
+    }
+    params["spellcheck.accuracy"] = options.accuracy;
+  }
+  if (options.onlyMorePopular !== undefined) params["spellcheck.onlyMorePopular"] = options.onlyMorePopular;
+  if (options.extendedResults !== undefined) params["spellcheck.extendedResults"] = options.extendedResults;
+  if (options.collate !== undefined) params["spellcheck.collate"] = options.collate;
+  if (options.collateExtendedResults !== undefined) params["spellcheck.collateExtendedResults"] = options.collateExtendedResults;
+  if (options.dictionary !== undefined) {
+    const dictionaries = typeof options.dictionary === "string" ? [options.dictionary] : options.dictionary;
+    if (dictionaries.length === 0) throw new TypeError("spellcheck dictionary must not be empty");
+    for (const dictionary of dictionaries) {
+      if (dictionary.trim() === "") throw new TypeError("spellcheck dictionary names must be non-empty strings");
+    }
+    params["spellcheck.dictionary"] = dictionaries;
+  }
+  if (options.collateParams !== undefined) {
+    for (const [name, value] of Object.entries(options.collateParams)) {
+      if (name.trim() === "" || !isQueryParamValue(value)) {
+        throw new TypeError("spellcheck collateParams requires non-empty names and valid Solr parameter values");
+      }
+      params[`spellcheck.collateParam.${name}`] = value;
+    }
+  }
+}
+
 function applyGrouping(params: Record<string, unknown>, grouping: SolrGroupingOptions): void {
   params.group = grouping.enabled ?? true;
   if (grouping.enabled === false) return;
@@ -298,6 +366,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.grouping !== undefined) applyGrouping(params, query.grouping);
   if (query.stats !== undefined) applyStats(params, query.stats);
   if (query.moreLikeThis !== undefined) applyMoreLikeThis(params, query.moreLikeThis);
+  if (query.spellcheck !== undefined) applySpellcheck(params, query.spellcheck);
   if (query.expand !== undefined) applyExpand(params, query.expand);
   if (query.debug !== undefined) applyDebug(params, query.debug);
   if (query.spatial !== undefined) {
