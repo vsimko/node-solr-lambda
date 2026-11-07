@@ -458,7 +458,17 @@ export class SolrTransport {
         const abortError = signalContext.classify();
         if (abortError) throw abortError;
         if (isStreamingJsonArrayBody(body) && body.failed) throw body.failure;
-        if (isStreamingJsonArrayBody(body) && !body.completed) body.stop?.();
+        if (isStreamingJsonArrayBody(body) && !body.completed) {
+          body.stop?.();
+          if (response.ok) {
+            body.failed = true;
+            body.failure = new SolrNetworkError(
+              endpoint,
+              new Error("Solr returned a successful response before the streaming request body completed")
+            );
+            throw body.failure;
+          }
+        }
         if (attempt < maxAttempts && retryMethods.includes(method) && retryStatuses.includes(response.status)) {
           try { await response.body?.cancel(); }
           finally { signalContext.cleanup(); }
