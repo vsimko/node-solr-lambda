@@ -58,8 +58,9 @@
     "site:generate": "node scripts/site/generate-data.mjs",
     "site:build": "node scripts/site/build-site.mjs",
     "test:site-generator": "node --test test/site-data-generator.test.mjs",
-    "build:site": "npm run site:generate && npm run site:check -- --data build/site-data.json && npm run test:site-data && npm run test:site-generator && npm run site:build",
-    "site:preview": "node scripts/site/preview.mjs"
+    "build:site": "npm run site:generate && npm run site:check -- --data build/site-data.json && npm run test:site-data && npm run test:site-generator && npm run site:build && npm run test:site-assets",
+    "site:preview": "node scripts/site/preview.mjs",
+    "test:site-assets": "node --test test/site-assets.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

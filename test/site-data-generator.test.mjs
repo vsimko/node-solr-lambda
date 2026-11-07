@@ -87,3 +87,26 @@ test("uses timestamped public snapshots as stale data when sources are rate-limi
     else fs.writeFileSync(cachePath, previous);
   }
 });
+
+
+test("summarizes implementation progress without conflating implementation, types, runtime evidence, and roadmap state", async () => {
+  const { summarizeProgress } = await import("../website/assets/progress.js");
+  const api = [
+    { implementation: "implemented", typeCoverage: "complete", status: "verified" },
+    { implementation: "implemented", typeCoverage: "partial", status: "partial" },
+    { implementation: "not-covered", typeCoverage: "none", status: "unsupported" }
+  ];
+  const roadmap = [
+    { state: "closed" },
+    { state: "merged" },
+    { state: "open" },
+    { state: "in-progress" }
+  ];
+  assert.deepEqual(summarizeProgress(api, roadmap), [
+    { id: "implemented", label: "API operations implemented", value: 2, total: 3, detail: "Public operations present in the client" },
+    { id: "typed", label: "Complete TypeScript contracts", value: 1, total: 3, detail: "Operations with complete type coverage" },
+    { id: "verified", label: "Runtime verified", value: 1, total: 3, detail: "Verified on every pinned Solr version listed" },
+    { id: "roadmap", label: "Roadmap work completed", value: 2, total: 4, detail: "Closed issues and merged pull requests" }
+  ]);
+  assert.equal(summarizeProgress([], [])[0].total, 0);
+});
