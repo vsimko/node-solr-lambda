@@ -24,12 +24,14 @@ integrationTest("Suggester returns deterministic indexed terms from a configured
       "add-searchcomponent": {
         name: "suggest",
         class: "solr.SuggestComponent",
-        suggester: [{
-          name: "products",
-          lookupImpl: "FSTLookupFactory",
-          dictionaryImpl: "DocumentDictionaryFactory",
-          field: "name_s"
-        }]
+        customOptions: {
+          suggester: [{
+            name: "products",
+            lookupImpl: "FSTLookupFactory",
+            dictionaryImpl: "DocumentDictionaryFactory",
+            field: "name_s"
+          }]
+        }
       }
     });
     await client.config({
