@@ -94,6 +94,28 @@ function isReadableStreamBody(value: unknown): value is ReadableStream<Uint8Arra
     typeof (value as { getReader?: unknown }).getReader === "function";
 }
 
+const STREAMING_JSON_ARRAY_BODY = Symbol("streaming-json-array-body");
+
+interface StreamingJsonArrayBody {
+  readonly [STREAMING_JSON_ARRAY_BODY]: true;
+  readonly documents: AsyncIterable<unknown>;
+  readonly operation: string;
+}
+
+/** @internal Create a transport-owned streamed JSON-array body for an AsyncIterable. */
+export function createStreamingJsonArrayBody(
+  documents: AsyncIterable<unknown>,
+  operation: string
+): StreamingJsonArrayBody {
+  return { [STREAMING_JSON_ARRAY_BODY]: true, documents, operation };
+}
+
+function isStreamingJsonArrayBody(value: unknown): value is StreamingJsonArrayBody {
+  return value !== null &&
+    typeof value === "object" &&
+    (value as StreamingJsonArrayBody)[STREAMING_JSON_ARRAY_BODY] === true;
+}
+
 function isTimeoutError(error: unknown): boolean {
   return error instanceof SolrTimeoutError ||
     (error instanceof Error && error.name === "TimeoutError");
@@ -246,14 +268,47 @@ export class SolrTransport {
     return timeoutMs;
   }
 
-  /** Validate one streamed document using the configured operation input schema. */
-  validateInput(operation: string, value: unknown): Promise<unknown> {
-    return this.validate(operation, "inputs", value);
-  }
+  private createJsonArrayStream(body: StreamingJsonArrayBody): ReadableStream<Uint8Array> {
+    const thisTransport = this;
+    const iterator = body.documents[Symbol.asyncIterator]();
+    const encoder = new TextEncoder();
+    let started = false;
+    let firstDocument = true;
+    let completed = false;
 
-  /** Serialize one JSON value with the configured codec or the native JSON serializer. */
-  serializeJson(value: unknown): string | undefined {
-    return stringifyBody(value, this.#clientConfig.jsonCodec);
+    return new ReadableStream<Uint8Array>({
+      async pull(controller) {
+        try {
+          if (!started) {
+            started = true;
+            controller.enqueue(encoder.encode("["));
+            return;
+          }
+
+          const next = await iterator.next();
+          if (next.done) {
+            completed = true;
+            controller.enqueue(encoder.encode("]"));
+            controller.close();
+            return;
+          }
+
+          const document = await thisTransport.validate(body.operation, "inputs", next.value);
+          const serialized = stringifyBody(document, thisTransport.#clientConfig.jsonCodec);
+          if (typeof serialized !== "string") {
+            throw new TypeError("The JSON codec must serialize every streamed document to a string");
+          }
+          controller.enqueue(encoder.encode(`${firstDocument ? "" : ","}${serialized}`));
+          firstDocument = false;
+        } catch (error) {
+          try { await iterator.return?.(); } catch { /* preserve the original producer/serialization error */ }
+          controller.error(error);
+        }
+      },
+      async cancel() {
+        if (!completed) await iterator.return?.();
+      }
+    }, { highWaterMark: 1 });
   }
 
   private async validate(operation: string, direction: "inputs" | "outputs", value: unknown): Promise<unknown> {
@@ -340,12 +395,16 @@ export class SolrTransport {
     const method = options.method ?? "GET";
     const operation = options.operation ?? method;
     const query = withDefaultParams(this.#clientConfig.requestDefaults?.params, options.query);
-    const streamingBody = isReadableStreamBody(options.body);
-    const input = streamingBody
-      ? options.body
-      : this.#clientConfig.validation
-        ? await this.validate(operation, "inputs", options.body ?? query)
-        : (options.body ?? query);
+    const streamingArrayBody = isStreamingJsonArrayBody(options.body);
+    const rawStreamBody = isReadableStreamBody(options.body);
+    const streamingBody = streamingArrayBody || rawStreamBody;
+    const input = streamingArrayBody
+      ? this.createJsonArrayStream(options.body)
+      : rawStreamBody
+        ? options.body
+        : this.#clientConfig.validation
+          ? await this.validate(operation, "inputs", options.body ?? query)
+          : (options.body ?? query);
     const url = resolveUrl(path, this.#clientConfig.baseUrl ?? DEFAULT_BASE_URL);
     appendSearchParams(url.searchParams, options.body === undefined ? input as RequestOptions["query"] : query);
     const headers: Record<string, string> = {
