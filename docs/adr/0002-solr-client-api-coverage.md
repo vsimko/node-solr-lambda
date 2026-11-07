@@ -16,7 +16,7 @@ This project targets Node.js 20/22/24 and Solr 8/9/10, uses a shared Fetch trans
 
 Adopt the following product and implementation decisions:
 
-1. **Cover common Solr workflows as typed APIs when they materially improve discoverability and safety.** RealTime Get was merged in PR #271; SpellCheck remains in PR #272. Suggester is accepted as follow-on work (#293).
+1. **Cover common Solr workflows as typed APIs when they materially improve discoverability and safety.** RealTime Get was merged in PR #271 and SpellCheck in PR #272. Suggester is accepted as follow-on work (#293).
 2. **Keep feature families semantically distinct.** SpellCheck, Suggester, and Terms are not interchangeable. Terms remains deferred pending a concrete consumer requirement; generic request methods remain the escape hatch.
 3. **Do not silently trade numeric precision.** Investigate an opt-in BigInt-safe JSON policy (#292). Preserve native JSON behavior by default unless an explicit, reviewed compatibility decision says otherwise. Do not introduce an unconditional runtime dependency or silently turn ordinary numbers into strings/BigInt.
 4. **Prefer bounded-memory streaming ingestion built on the shared transport.** Investigate an AsyncIterable/Web Streams or Node Writable API (#295), with real backpressure, cancellation, timeout, error, and partial-ingestion semantics. Do not copy the reference Duplex implementation, which pipes JSONStream into the legacy `request` module outside the shared transport.
