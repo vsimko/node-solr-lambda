@@ -23,6 +23,7 @@ export async function runConcurrent(count, concurrency, task) {
   if (!Number.isInteger(concurrency) || concurrency < 1) throw new RangeError("concurrency must be a positive integer");
   const results = new Array(count);
   const latenciesMs = new Array(count);
+  const started = performance.now();
   let nextIndex = 0;
 
   async function worker() {
@@ -36,7 +37,7 @@ export async function runConcurrent(count, concurrency, task) {
   }
 
   await Promise.all(Array.from({ length: Math.min(count, concurrency) }, () => worker()));
-  return { results, latenciesMs };
+  return { results, latenciesMs, elapsedMs: performance.now() - started };
 }
 
 export function createJsonArrayStream(iterable) {
