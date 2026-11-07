@@ -18,7 +18,7 @@ This is an API/code review, not a claim that the old package is currently mainta
 | Capability | Reference client | This project | Decision |
 | --- | --- | --- | --- |
 | RealTime Get | `realTimeGet(ids, query)` against `/get` | Typed RealTime Get API merged in [PR #271](https://github.com/vsimko/node-solr-lambda/pull/271); full pinned CI passed | Keep as P1; merge only after current CI and integration matrix pass. |
-| SpellCheck | `spell(query)` against `/spell` | Typed query component work in open [PR #272](https://github.com/vsimko/node-solr-lambda/pull/272), rebased onto current master | Keep as P2; PR #272 is stacked on #271. |
+| SpellCheck | `spell(query)` against `/spell` | Typed query component work merged in [PR #272](https://github.com/vsimko/node-solr-lambda/pull/272); full pinned CI passed | Keep as P2; PR #272 is stacked on #271. |
 | Suggester | No equivalent dedicated helper found in reviewed client source | No dedicated typed API | Accepted for follow-up in [#293](https://github.com/vsimko/node-solr-lambda/issues/293). |
 | BigInt-safe JSON | Optional `bigint` flag selects `json-bigint` parser/stringifier | No equivalent precision mode documented | Investigate opt-in precision policy in [#292](https://github.com/vsimko/node-solr-lambda/issues/292). |
 | Streaming document ingestion | `createAddStream()` returns a Duplex that serializes document objects | Buffered `add()` API; streaming export exists | Design a bounded-memory API using shared transport in [#295](https://github.com/vsimko/node-solr-lambda/issues/295). |
@@ -85,7 +85,7 @@ The reference query builder offers many chainable methods but also falls back to
 ## Follow-up tracking
 
 - [#271 — RealTime Get PR (merged)](https://github.com/vsimko/node-solr-lambda/pull/271)
-- [#272 — SpellCheck PR](https://github.com/vsimko/node-solr-lambda/pull/272)
+- [#272 — SpellCheck PR (merged)](https://github.com/vsimko/node-solr-lambda/pull/272)
 - [#292 — BigInt-safe JSON](https://github.com/vsimko/node-solr-lambda/issues/292)
 - [#293 — Suggester API](https://github.com/vsimko/node-solr-lambda/issues/293)
 - [#294 — Prepare commit audit (closed as not planned)](https://github.com/vsimko/node-solr-lambda/issues/294)
