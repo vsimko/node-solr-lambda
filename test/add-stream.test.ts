@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError } from "../src/index.js";
+import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
   assert.ok(body && typeof body === "object" && "getReader" in body);
@@ -30,8 +30,8 @@ test("addStream emits a JSON array incrementally and reuses update parameters", 
       const decoder = new TextDecoder();
       const first = await reader.read();
       assert.equal(decoder.decode(first.value), "[");
-      assert.ok(produced < 20, "the producer must not eagerly materialize the entire input");
       await new Promise(resolve => setTimeout(resolve, 5));
+      assert.equal(produced, 1, "only one document may be queued while the consumer is paused");
       requestBody = "[" + decoder.decode((await reader.read()).value);
       while (true) {
         const next = await reader.read();
@@ -102,8 +102,8 @@ test("addStream propagates producer failures and closes the iterator", async () 
   }
 
   await assert.rejects(client.addStream(documents()), (error: unknown) => {
-    assert.ok(error instanceof SolrNetworkError);
-    assert.equal((error.cause as Error).message, "producer failed");
+    assert.ok(error instanceof Error);
+    assert.equal(error.message, "producer failed");
     return true;
   });
   assert.equal(finalized, true);
@@ -168,7 +168,8 @@ test("addStream cancellation closes the source async iterator", async () => {
     core: "catalog",
     fetch: async (_input, init) => {
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
-      await reader.read();
+      await reader.read(); // opening JSON array delimiter
+      await reader.read(); // ensure the async generator has started and yielded a document
       return await new Promise<Response>((_resolve, reject) => {
         init?.signal?.addEventListener("abort", async () => {
           await reader.cancel();
@@ -190,4 +191,217 @@ test("addStream cancellation closes the source async iterator", async () => {
 
   await assert.rejects(client.addStream(documents(), {}, { signal: abort.signal }), SolrAbortError);
   assert.equal(finalized, true);
+});
+
+
+test("addStream does not acquire the iterator when Fetch returns before consuming the body", async () => {
+  let iteratorAcquired = false;
+  const source: AsyncIterable<{ [key: string]: unknown; id: string }> = {
+    [Symbol.asyncIterator]() {
+      iteratorAcquired = true;
+      return {
+        async next() { return { done: true as const, value: undefined }; }
+      };
+    }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async () => new Response('{"responseHeader":{"status":0}}')
+  });
+
+  // A successful early response is rejected, but the lazy source must remain untouched.
+  await assert.rejects(client.addStream(source), SolrNetworkError);
+  assert.equal(iteratorAcquired, false);
+});
+
+test("addStream preserves per-document validation errors instead of wrapping them as network errors", async () => {
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    validation: {
+      inputs: {
+        addStream: {
+          async safeParseAsync() {
+            return { success: false as const, error: { issues: [{ path: ["id"], message: "required" }] } };
+          }
+        }
+      }
+    },
+    fetch: async (_input, init) => {
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    yield { id: "invalid" };
+  }
+
+  await assert.rejects(client.addStream(documents()), error => {
+    assert.ok(error instanceof SolrValidationError);
+    return true;
+  });
+});
+
+test("addStream timeout interrupts a pending iterator.next() and settles the request", async () => {
+  let release!: () => void;
+  let finalized = false;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    timeoutMs: 20,
+    fetch: async (_input, init) => {
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    try {
+      await new Promise<void>(resolve => { release = resolve; });
+      yield { id: "after-timeout" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  await assert.rejects(client.addStream(documents()), SolrTimeoutError);
+  release();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(finalized, true);
+});
+
+
+test("addStream consumer cancellation interrupts validation and preserves the HTTP response", async () => {
+  let releaseValidation!: () => void;
+  let validationStarted = false;
+  let finalized = false;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    validation: {
+      inputs: {
+        addStream: {
+          async safeParseAsync(value) {
+            validationStarted = true;
+            await new Promise<void>(resolve => { releaseValidation = resolve; });
+            return { success: true as const, data: value };
+          }
+        }
+      }
+    },
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      const pendingDocument = reader.read();
+      await new Promise(resolve => setImmediate(resolve));
+      assert.equal(validationStarted, true);
+      await reader.cancel("consumer stopped reading");
+      void pendingDocument;
+      return new Response('{"error":{"msg":"request body cancelled"}}', {
+        status: 400,
+        statusText: "Bad Request"
+      });
+    }
+  });
+
+  async function* documents() {
+    try {
+      yield { id: "cancel-during-validation" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  await assert.rejects(client.addStream(documents()), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.equal(error.status, 400);
+    return true;
+  });
+  assert.equal(finalized, true);
+  releaseValidation();
+});
+
+
+test("addStream rejects an early success response and never retries the incomplete upload", async () => {
+  let iteratorReturned = false;
+  let fetchCalls = 0;
+  let nextCalls = 0;
+  const source: AsyncIterable<{ id: string }> = {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          nextCalls++;
+          return { done: false as const, value: { id: `early-${nextCalls}` } };
+        },
+        async return() {
+          iteratorReturned = true;
+          return { done: true as const, value: undefined };
+        }
+      };
+    }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    retry: { maxAttempts: 3, methods: ["POST"] },
+    fetch: async (_input, init) => {
+      fetchCalls++;
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      await reader.read(); // one document; leave the stream incomplete
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  await assert.rejects(client.addStream(source), SolrNetworkError);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(iteratorReturned, true);
+  assert.equal(fetchCalls, 1, "an incomplete streaming POST must not be retried");
+});
+
+
+test("addStream preserves an early non-success HTTP response", async () => {
+  let iteratorReturned = false;
+  let calls = 0;
+  let nextCalls = 0;
+  const source: AsyncIterable<{ id: string }> = {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          nextCalls++;
+          return { done: false as const, value: { id: `early-error-${nextCalls}` } };
+        },
+        async return() {
+          iteratorReturned = true;
+          return { done: true as const, value: undefined };
+        }
+      };
+    }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    retry: { maxAttempts: 3, methods: ["POST"] },
+    fetch: async (_input, init) => {
+      calls++;
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      await reader.read(); // one document; leave the stream incomplete
+      return new Response('{"error":{"msg":"rejected early"}}', {
+        status: 400,
+        statusText: "Bad Request"
+      });
+    }
+  });
+
+  await assert.rejects(client.addStream(source), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.equal(error.status, 400);
+    return true;
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(calls, 1, "streaming POST must not be retried");
+  assert.equal(iteratorReturned, true);
 });
