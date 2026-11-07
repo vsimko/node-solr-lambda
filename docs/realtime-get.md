@@ -56,3 +56,7 @@ This client models the documented single-ID and multi-ID response shapes separat
 - [Solr 8.11 Reference Guide](https://solr.apache.org/guide/8_11/index.html) — Configuration Guide, RealTime Get.
 - [Solr 9.11 Reference Guide](https://solr.apache.org/guide/solr/9_11/index.html) — Configuration Guide, RealTime Get.
 - [Solr 10.1 RealTime Get](https://solr.apache.org/guide/solr/10_1/configuration-guide/realtime-get.html).
+
+## Verification
+
+The isolated integration test in `test/integration/solr-get.test.ts` inserts unique disposable documents without an immediate searcher reopen, confirms that `query()` cannot see the single-ID fixture yet, then verifies direct single-ID and multi-ID read-back through `get()`. This test runs in the pinned Solr 8.11.4, 9.11.0, and 10.1.0 integration matrix; compatibility claims remain limited to the operations and parameters asserted by that test.
