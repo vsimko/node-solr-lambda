@@ -1,6 +1,6 @@
 # node-solr-lambda
 
-A TypeScript-first Apache Solr client for Node.js. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable TypeScript request models, and a shared transport for query, update, administration, and raw requests.
+A modern Apache Solr client for JavaScript and TypeScript on Node.js, with TypeScript-first contracts and a first-class JavaScript experience. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable request models, and a shared transport for query, update, administration, and raw requests.
 
 - **Node.js:** 20, 22, and 24
 - **Solr:** 8.x, 9.x, and 10.x; compatibility is recorded per operation in the [compatibility matrix](docs/compatibility.md)
