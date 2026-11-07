@@ -1,3 +1,4 @@
+import { createStreamingJsonArrayBody } from "../transport.js";
 import type { SolrTransport } from "../transport.js";
 import type { RequestControlOptions, SolrCommitOptions, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrSoftCommitOptions, SolrUpdateOptions, SolrUpdateResponse } from "../types.js";
 
@@ -88,6 +89,27 @@ function sendDocuments<T = SolrUpdateResponse>(
     body: documents,
     query: updateParams(options),
     operation
+  });
+}
+
+
+export function addStream<T = SolrUpdateResponse>(
+  client: SolrTransport,
+  path: string,
+  documents: AsyncIterable<SolrDocument>,
+  options: SolrUpdateOptions = {},
+  requestOptions: RequestControlOptions = {}
+): Promise<T> {
+  if (!documents || typeof documents[Symbol.asyncIterator] !== "function") {
+    throw new TypeError("addStream requires an AsyncIterable of Solr documents");
+  }
+  const body = createStreamingJsonArrayBody(documents, "addStream");
+  return client.request<T>(path, {
+    ...requestOptions,
+    method: "POST",
+    body,
+    query: updateParams(options),
+    operation: "addStream"
   });
 }
 

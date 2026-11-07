@@ -54,6 +54,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Cross-client regression test strategy (ADR 0003)](adr/0003-cross-client-test-strategy.md)
 - [Suggester query-component decision (ADR 0004)](adr/0004-suggester-query-component.md)
 - [Injectable lossless JSON codec (ADR 0005)](adr/0005-lossless-json-codec.md)
+- [Backpressure-aware streaming ingestion (ADR 0006)](adr/0006-streaming-document-ingestion.md)
 - [Website data contract](site-data-contract.md)
 - [Website data JSON Schema](site-data.schema.json)
 - [Website data validation rules and commands](site-data-validation.md)

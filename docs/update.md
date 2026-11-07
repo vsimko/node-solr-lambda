@@ -82,6 +82,41 @@ await solr.updateCommands({
 
 Solr documents these three JSON forms (single object, document array, and command map) and the `/update/json/docs` and `/update/json` convenience paths in the [Solr 8.x indexing guide (8.11 draft)](https://nightlies.apache.org/solr/draft-guides/solr-reference-guide-8.x/indexing-guide/indexing-and-basic-data-operations.html), [Solr 9.4 Update Handlers guide](https://solr.apache.org/guide/solr/9_4/indexing-guide/indexing-with-update-handlers.html), and [Solr 10.1 Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html). The public methods are integration-tested against Solr 8.11.4, 9.11.0, and 10.1.0. The archived 8.11 reference material is published as a draft guide; the pinned Solr 8.11.4 integration job is the compatibility evidence for that version. The JSON command-map variants are also exercised independently: delete by ID and query assert persisted deletion, optimize preserves a committed document, rollback discards a pending add, and commit options are used for searcher visibility.
 
+## Backpressure-aware streaming ingestion
+
+Use `addStream()` when the document source is too large to materialize as an array. It accepts an `AsyncIterable<SolrDocument>`; Node.js `Readable` streams work directly because they implement the async-iterator protocol.
+
+```ts
+async function* readProducts() {
+  for await (const product of source) {
+    yield {
+      id: product.id,
+      title_s: product.title,
+      price_d: product.price
+    };
+  }
+}
+
+const response = await solr.addStream(
+  readProducts(),
+  { commitWithin: 5_000, route: "catalog-shard" },
+  { timeoutMs: 120_000, signal: abortController.signal }
+);
+```
+
+The client serializes one document at a time and sends a valid top-level JSON array to `/update`. A backpressure-aware Fetch request stream prevents the client from buffering the complete iterable. The configured `jsonCodec` is used for each document; validation is applied per document when an `addStream` input schema is configured.
+
+Important semantics:
+
+- The source is consumed once. Streaming POST requests are not retried, even if the client's retry policy includes POST.
+- Abort, timeout, producer errors, and consumer cancellation terminate the stream and close the source iterator.
+- If the source or connection fails after some chunks have been sent, Solr may already have accepted a prefix of the documents. The operation is not atomic and the client does not roll back accepted documents.
+- The final update response is returned only after the stream completes and Solr responds.
+- `addStream()` does not commit automatically. Search visibility follows the same hard/soft commit policy as other update methods.
+- Memory use is bounded by stream buffering plus the largest individual serialized document; a single unusually large document can still require substantial memory.
+
+The isolated integration test streams a deterministic 250-document fixture and verifies count/order read-back on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Unit tests cover lazy production/backpressure, empty input, cancellation, producer failure, and no-retry behavior.
+
 ## Atomic and partial document updates
 
 Use `atomicUpdate<TDocument>()` when changing only selected fields. The unique-key field (by default `id`) remains a plain value; every changed field must use exactly one Solr modifier.
