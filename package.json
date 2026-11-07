@@ -47,7 +47,7 @@
     "test": "tsx --test test/*.test.ts",
     "test:integration": "tsx --test test/integration/all.test.ts",
     "test:types": "tsc --noEmit -p test/tsconfig.json",
-    "release:check": "npm run test:api-inventory && npm run docs:check && npm run test:consumer:no-zod && npm pack --dry-run",
+    "release:check": "npm run test:api-inventory && npm run docs:check && npm run test:consumer:no-zod && npm run test:bench && npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",
     "release:publish": "node scripts/publish.mjs",
     "test:consumer:no-zod": "node test/no-zod-consumer.mjs",
@@ -60,7 +60,9 @@
     "test:site-generator": "node --test test/site-data-generator.test.mjs",
     "build:site": "npm run site:generate && npm run site:check -- --data build/site-data.json && npm run test:site-data && npm run test:site-generator && npm run site:build && npm run test:site-assets",
     "site:preview": "node scripts/site/preview.mjs",
-    "test:site-assets": "node --test test/site-assets.test.mjs"
+    "test:site-assets": "node --test test/site-assets.test.mjs",
+    "test:bench": "node --test test/benchmark.test.mjs",
+    "bench": "npm run build && node bench/run.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
