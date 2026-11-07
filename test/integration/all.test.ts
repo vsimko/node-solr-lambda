@@ -31,3 +31,4 @@ import "./solr-v3-migration.test.js";
 import "./solr-morelikethis.test.js";
 
 import "./solr-spellcheck.test.js";
+import "./solr-suggester.test.js";

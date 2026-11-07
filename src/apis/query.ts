@@ -1,6 +1,6 @@
 import type { SolrTransport } from "../transport.js";
 import { solrFilter } from "../query-helpers.js";
-import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrDebugOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue, SolrSpellcheckOptions } from "../types.js";
+import type { RequestControlOptions, SolrClassicFacetOptions, SolrCollapseOptions, SolrDebugOptions, SolrExpandOptions, SolrFacetFieldOptions, SolrFacetRangeOptions, SolrFieldHighlightOptions, SolrHighlightingOptions, SolrGroupingOptions, SolrStatsFieldOptions, SolrStatsOptions, SolrMoreLikeThisOptions, SolrFilter, SolrQuery, SolrQueryParamValue, SolrSpellcheckOptions, SolrSuggesterOptions } from "../types.js";
 
 function serializeFilter(filter: SolrFilter): string {
   return typeof filter === "string" ? filter : solrFilter(filter.query, filter);
@@ -237,6 +237,40 @@ function applySpellcheck(params: Record<string, unknown>, options: SolrSpellchec
   }
 }
 
+function applySuggester(params: Record<string, unknown>, options: SolrSuggesterOptions): void {
+  params.suggest = options.enabled ?? true;
+  if (options.enabled === false) return;
+
+  if (options.dictionary !== undefined) {
+    const dictionaries = typeof options.dictionary === "string" ? [options.dictionary] : options.dictionary;
+    if (dictionaries.length === 0) throw new TypeError("suggest dictionary must not be empty");
+    for (const dictionary of dictionaries) {
+      if (dictionary.trim() === "") throw new TypeError("suggest dictionary names must be non-empty strings");
+    }
+    params["suggest.dictionary"] = dictionaries;
+  }
+  if (options.query !== undefined) {
+    if (options.query.trim() === "") throw new TypeError("suggest query must be a non-empty string");
+    params["suggest.q"] = options.query;
+  }
+  if (options.count !== undefined) {
+    if (!Number.isInteger(options.count) || options.count < 1) {
+      throw new TypeError("suggest count must be a positive integer");
+    }
+    params["suggest.count"] = options.count;
+  }
+  if (options.contextFilterQuery !== undefined) {
+    if (options.contextFilterQuery.trim() === "") {
+      throw new TypeError("suggest contextFilterQuery must be a non-empty string");
+    }
+    params["suggest.cfq"] = options.contextFilterQuery;
+  }
+  if (options.build !== undefined) params["suggest.build"] = options.build;
+  if (options.reload !== undefined) params["suggest.reload"] = options.reload;
+  if (options.buildAll !== undefined) params["suggest.buildAll"] = options.buildAll;
+  if (options.reloadAll !== undefined) params["suggest.reloadAll"] = options.reloadAll;
+}
+
 function applyGrouping(params: Record<string, unknown>, grouping: SolrGroupingOptions): void {
   params.group = grouping.enabled ?? true;
   if (grouping.enabled === false) return;
@@ -367,6 +401,7 @@ export function query<T>(client: SolrTransport, path: string, query: SolrQuery, 
   if (query.stats !== undefined) applyStats(params, query.stats);
   if (query.moreLikeThis !== undefined) applyMoreLikeThis(params, query.moreLikeThis);
   if (query.spellcheck !== undefined) applySpellcheck(params, query.spellcheck);
+  if (query.suggest !== undefined) applySuggester(params, query.suggest);
   if (query.expand !== undefined) applyExpand(params, query.expand);
   if (query.debug !== undefined) applyDebug(params, query.debug);
   if (query.spatial !== undefined) {

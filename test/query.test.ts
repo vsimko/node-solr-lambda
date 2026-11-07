@@ -761,3 +761,93 @@ test("query parses the typed SpellCheck suggestions and collation response envel
   const collationValue = (collations as Readonly<Record<string, unknown>>)["collation"];
   assert.equal(typeof collationValue === "object" && collationValue !== null && "collationQuery" in collationValue ? collationValue.collationQuery : undefined, "solr client");
 });
+
+
+test("query serializes typed Suggester options and repeatable dictionary parameters", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    suggest: {
+      enabled: true,
+      dictionary: ["products", "brands"],
+      query: "lap",
+      count: 5,
+      contextFilterQuery: "category:electronics",
+      build: true,
+      reload: false,
+      buildAll: false,
+      reloadAll: true
+    }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("suggest"), "true");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("suggest.dictionary"), ["products", "brands"]);
+  assert.equal(requestedUrl?.searchParams.get("suggest.q"), "lap");
+  assert.equal(requestedUrl?.searchParams.get("suggest.count"), "5");
+  assert.equal(requestedUrl?.searchParams.get("suggest.cfq"), "category:electronics");
+  assert.equal(requestedUrl?.searchParams.get("suggest.build"), "true");
+  assert.equal(requestedUrl?.searchParams.get("suggest.reload"), "false");
+  assert.equal(requestedUrl?.searchParams.get("suggest.buildAll"), "false");
+  assert.equal(requestedUrl?.searchParams.get("suggest.reloadAll"), "true");
+});
+
+test("query can disable Suggester without serializing dependent options", async () => {
+  let requestedUrl: URL | undefined;
+  const client = createClient(url => { requestedUrl = url; });
+
+  await client.query({
+    query: "*:*",
+    suggest: { enabled: false, dictionary: "products", query: "lap", count: 5, build: true }
+  });
+
+  assert.equal(requestedUrl?.searchParams.get("suggest"), "false");
+  assert.equal(requestedUrl?.searchParams.has("suggest.dictionary"), false);
+  assert.equal(requestedUrl?.searchParams.has("suggest.q"), false);
+  assert.equal(requestedUrl?.searchParams.has("suggest.count"), false);
+  assert.equal(requestedUrl?.searchParams.has("suggest.build"), false);
+});
+
+test("Suggester rejects invalid stable option values before making a request", () => {
+  const client = createClient(() => { throw new Error("fetch must not run"); });
+  assert.throws(() => client.query({ suggest: { query: " " } }), /suggest query must be a non-empty string/);
+  assert.throws(() => client.query({ suggest: { count: 0 } }), /suggest count must be a positive integer/);
+  assert.throws(() => client.query({ suggest: { dictionary: [] } }), /suggest dictionary must not be empty/);
+  assert.throws(() => client.query({ suggest: { dictionary: [""] } }), /suggest dictionary names must be non-empty strings/);
+  assert.throws(() => client.query({ suggest: { contextFilterQuery: " " } }), /suggest contextFilterQuery must be a non-empty string/);
+});
+
+test("query parses the typed Suggester response keyed by dictionary and lookup text", async () => {
+  const payload = {
+    suggest: {
+      products: {
+        lap: {
+          numFound: 2,
+          suggestions: [
+            { term: "laptop", weight: 12, payload: "electronics" },
+            { term: "laptop stand", weight: 7 }
+          ]
+        }
+      }
+    }
+  };
+  const client = new SolrClient({
+    baseUrl: "http://localhost:8983/solr",
+    core: "testcore",
+    fetch: async () => new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    })
+  });
+  const response = await client.query<SolrQueryResponse<{ id: string }>>({
+    query: "*:*",
+    suggest: { dictionary: "products", query: "lap", count: 5 }
+  });
+
+  const result = response.suggest?.products?.lap;
+  assert.equal(result?.numFound, 2);
+  assert.equal(result?.suggestions?.[0]?.term, "laptop");
+  assert.equal(result?.suggestions?.[0]?.weight, 12);
+  assert.equal(result?.suggestions?.[0]?.payload, "electronics");
+});
