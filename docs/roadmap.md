@@ -68,15 +68,15 @@ This tranche is deliberately small and independent of the v4.0 release gate. It 
 
 | Priority / sequence | Feature | Tracking | User value and scope |
 | --- | --- | --- | --- |
-| P1 — first | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/pull/271) | Direct unique-key single/multi-document retrieval for read-after-write workflows, with generic document response types and exact request-option evidence. |
+| P1 — complete | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/pull/271) | Direct unique-key single/multi-document retrieval; uncommitted read-after-write integration passed on pinned Solr 8.11.4/9.11.0/10.1.0. |
 | P2 — complete | Typed SpellCheck query component | [#272](https://github.com/vsimko/node-solr-lambda/pull/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
 | P2 — complete | BigInt-safe JSON codec | [PR #299](https://github.com/vsimko/node-solr-lambda/pull/299) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |
 | P2 — complete | Typed Suggester query component | [PR #298](https://github.com/vsimko/node-solr-lambda/pull/298) | Typed autocomplete dictionary selection, query/count/context controls, lifecycle flags, and extensible suggestion response contracts on the existing query API. |
-| P2 — active | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/node-solr-lambda/pull/300) | Add bounded-memory ingestion through the shared transport, with cancellation and explicit partial-failure semantics. |
+| P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/node-solr-lambda/pull/300), [#317](https://github.com/vsimko/node-solr-lambda/pull/317), [#321](https://github.com/vsimko/node-solr-lambda/pull/321), [#325](https://github.com/vsimko/node-solr-lambda/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |
 
 | P2 | Cross-client regression test audit | [#297](https://github.com/vsimko/node-solr-lambda/issues/297) | Add only missing high-value cases from Solarium/pysolr/SolrJ: nested documents, Unicode round-trip, long request boundary, custom handler response extensibility, and test-topology clarity. |
 
-The cross-client regression test audit (#297) is implemented in PR #296 with ADR 0003 and synchronized test/inventory documentation; #297 is closed after the full pinned CI matrix passed. RealTime Get (#271) is merged. SpellCheck (#272) is merged after its fresh post-rebase CI matrix passed all 30 jobs. BigInt-safe JSON (#292) is merged in PR #299. Suggester (#293) is merged in PR #298 as a typed component on `query()`, not as a fixed `/suggest` handler method. Streaming ingestion (#295) is being implemented in PR #300 with JSON-array framing and a backpressure-aware Fetch body. Issue #294 was closed after an API audit: prepare-commit is not documented as a supported public option in the pinned Solr guides, so no typed wrapper or compatibility claim is planned unless authoritative documentation and reproducible lifecycle tests become available. All feature work remains independent of #110 and #232. Each implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
+The cross-client regression test audit (#297) is implemented in PR #296 with ADR 0003 and synchronized test/inventory documentation; #297 is closed after the full pinned CI matrix passed. RealTime Get (#271), SpellCheck (#272), Suggester (#293), BigInt-safe JSON (#292), and streaming ingestion (#295) are all implemented and merged. RealTime Get, SpellCheck, Suggester, nested-document/Unicode fidelity, and streaming-ingestion runtime tests passed on the pinned Solr 8.11.4/9.11.0/10.1.0 matrix in CI run #42392182590. BigInt codec tests passed in run #42361470308. Issue #294 remains closed after the API audit: prepare-commit is not documented as a supported public option in the pinned Solr guides, so no typed wrapper or compatibility claim is planned unless authoritative documentation and reproducible lifecycle tests become available. These features remain independent of #110 and #232. Each future implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
 
 ### P1 — SolrCloud operation evidence
 
@@ -94,7 +94,7 @@ The residual opportunities in API coverage, endpoint inventory, and the machine-
 
 | Category | Decision | Rationale / tracking |
 | --- | --- | --- |
-| Feature | Accept RealTime Get, SpellCheck, BigInt-safe JSON, Suggester, and streaming ingestion; reject a typed prepare-commit wrapper pending a supported contract | #271/#272 cover common lookup and correction; #292, #293, and #295 capture precision, autocomplete, and ingestion gaps. #294 was closed after the public API audit found insufficient documented cross-version support. |
+| Feature | Complete RealTime Get, SpellCheck, BigInt-safe JSON, Suggester, and streaming ingestion; defer a typed prepare-commit wrapper pending a supported contract | #271/#272/#298/#299/#300/#317/#321/#325 deliver the typed features and evidence. #294 was closed after the public API audit found insufficient documented cross-version support. |
 | Verification-only | Keep delete-option `_route_`/`commitWithin`, optimize-specific `openSearcher`, ReplicationHandler `enablepoll`/`disablepoll`, and the Solr 8.11.4 in-progress abort boundary explicitly unverified | These are narrower behavior-evidence gaps, not reasons to broaden the public API; retain exact compatibility notes until deterministic tests or server evidence exist. |
 | External/manual gates | Keep SPLITSHARD/MIGRATE execution (#232) and v4.0 publication (#110) separate | Both require maintainer/release-owner action; neither blocks the selected feature tranche. |
 | Maintenance | Finish the audit-driven API coverage, compatibility, endpoint inventory, and machine-readable inventory reconciliation | Tracked by the consolidated documentation PR #269; historical checklist hygiene is recorded in #228–#236 and #265. |
@@ -107,7 +107,7 @@ The residual opportunities in API coverage, endpoint inventory, and the machine-
 - Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 by merged PR #263, which closes #258. Do not extend that claim to Solr 8/9.
 - #232 is independent of #259. Its opt-in workflow must be run manually; results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
-- RealTime Get (#271), SpellCheck (#272), Suggester (#293), and BigInt-safe JSON (#292) are complete and merged. Streaming ingestion (#295) is in PR #300. #294 is closed as not planned after the prepare-commit API audit. #297 (cross-client regression test audit) was completed by PR #296 with nested-document, Unicode, long-query, and custom-handler regression tests. All remain independent of the #110 release and #232 destructive SolrCloud gates.
+- RealTime Get (#271), SpellCheck (#272), Suggester (#293), BigInt-safe JSON (#292), streaming ingestion (#295), and cross-client regression tests (#297) are complete and merged. #294 is closed as not planned after the prepare-commit API audit. Nested-document, Unicode, long-query, and custom-handler regression tests are covered; nested-document and Unicode read-back passed on all three pinned Solr versions. All remain independent of the #110 release and #232 destructive SolrCloud gates.
 - ADR 0002 and [the solr-client comparison](solr-client-comparison.md) record what was learned from `lbdremy/solr-node-client`; ADR 0003 records cross-client regression-test selection and transport boundaries. Reuse use cases and test cases, not legacy implementation patterns.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
 
@@ -156,11 +156,13 @@ Deliver the static GitHub Pages experience as a product-discovery feature: TypeS
 
 The website is a discovery and evidence surface, not a second source of technical truth. README and `docs/` remain canonical; API inventory and compatibility evidence remain operation/version-specific. The website work does not change the TypeScript-first API feature priorities or release/manual SolrCloud gates.
 
-## Implementation status (2026-11-06)
+## Implementation status (2026-11-07)
 
-- **RealTime Get (#271):** implementation PR #271 is open with the public API, request/response types, unit/type fixtures, documentation, and isolated integration coverage. Node.js 20/22/24 and Solr 8.11.4/9.11.0/10.1.0 CI is pending; do not mark the feature complete until the latest run is green.
-- **SpellCheck (#272):** merged after its post-rebase CI matrix passed all 30 jobs, including configured-handler integration coverage on pinned Solr 8.11.4, 9.11.0, and 10.1.0.
-- **Suggester (#293):** merged in PR #298 as an optional component on `query()`; server-side dictionary configuration remains outside the client.
-- **BigInt-safe JSON (#292):** implementation is underway in PR #299 using an opt-in `SolrJsonCodec`; native JSON behavior remains the default.
+- **RealTime Get (#271):** merged; single-ID and multi-ID uncommitted read-after-write integration passed on Solr 8.11.4, 9.11.0, and 10.1.0.
+- **SpellCheck (#272):** merged; configured-handler integration verified suggestions, frequencies, and collation on all three pinned Solr versions.
+- **Suggester (#293):** merged as an optional `query()` component; the disposable configured-handler integration verified indexed terms and weights on all three pinned Solr versions.
+- **BigInt-safe JSON (#292):** merged through the injectable `SolrJsonCodec`; native JSON remains the default and callers may provide a lossless BigInt-aware codec.
+- **Streaming ingestion (#295):** merged; bounded-memory `addStream()` lifecycle and 250-document read-back passed the pinned matrix, with independent consumer/type tests and synchronized docs.
+- **Cross-client regression audit (#297):** merged; nested-document and Unicode read-back passed on all three pinned Solr versions.
 
-These feature PRs do not alter the separate stable-release approval gate (#110) or the manually dispatched destructive SolrCloud verification gate (#232).
+The feature work is independent of the stable-release approval gate (#110) and the manually dispatched destructive SolrCloud verification gate (#232).
