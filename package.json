@@ -63,7 +63,8 @@
     "site:preview": "node scripts/site/preview.mjs",
     "test:site-assets": "node --test test/site-assets.test.mjs",
     "test:bench": "node --test test/benchmark.test.mjs",
-    "bench": "node bench/run.mjs"
+    "bench": "node bench/run.mjs",
+    "test:coverage": "node --experimental-test-coverage --import tsx --test test/*.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
