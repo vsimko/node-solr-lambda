@@ -1,6 +1,6 @@
 # Getting started
 
-Use Node.js 20, 22, or 24. The client targets Solr 8.x, 9.x, and 10.x. Integration evidence is operation-specific and is recorded in the [API coverage matrix](api-coverage.md) and [compatibility policy](compatibility.md); do not infer support for every Solr endpoint from the target version range.
+Use Node.js 22, 24, or 26 for actively maintained LTS runtimes. Node 20 remains a legacy v4 compatibility target but is upstream EOL. The client actively targets Solr 10.x and 9.11.x; Solr 8.11.4 remains a legacy compatibility baseline only. Integration evidence is operation-specific and is recorded in the [API coverage matrix](api-coverage.md) and [compatibility policy](compatibility.md); do not infer support for every Solr endpoint from the target version range.
 
 Install the package:
 
