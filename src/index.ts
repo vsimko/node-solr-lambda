@@ -25,3 +25,4 @@ import type { SolrClientConfig } from "./types.js";
 export function createSolrClient(config:SolrClientConfig={}):SolrClient { return new SolrClient(config); }
 
 export type { SolrSpellcheckOptions, SolrSpellcheckAlternative, SolrSpellcheckAlternativeObject, SolrSpellcheckTermResult, SolrSpellcheckCollation, SolrSpellcheckResponse } from "./types.js";
+export type { SolrSuggesterOptions, SolrSuggesterSuggestion, SolrSuggesterQueryResult, SolrSuggesterResponse } from "./types.js";

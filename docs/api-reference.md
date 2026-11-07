@@ -10,7 +10,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 | Method | Purpose | Detailed guide |
 | --- | --- | --- |
-| `SolrClient.query()` | Execute a typed Select query | [Query API](query.md) |
+| `SolrClient.query()` | Execute a typed Select query with optional SpellCheck and Suggester components | [Query API](query.md), [SpellCheck](spellcheck.md), [Suggester](suggester.md) |
 | `SolrClient.queryJson()` | Execute the JSON Request API | [Query API](query.md) |
 | `SolrClient.get()` | Retrieve the latest document version by unique key | [RealTime Get API](realtime-get.md) |
 | `SolrClient.add()` | Add documents | [Update API](update.md) |
@@ -45,7 +45,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
 
 Use named imports from the package root:
 

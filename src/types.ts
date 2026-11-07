@@ -1602,6 +1602,28 @@ export interface SolrSpellcheckOptions {
   collateParams?: Readonly<Record<string, SolrQueryParamValue>>;
 }
 
+/** Typed options for Solr's optional Suggester search component. */
+export interface SolrSuggesterOptions {
+  /** Enable or disable suggestions. Defaults to true when this object is supplied. */
+  enabled?: boolean;
+  /** One or more dictionary names configured on the server. */
+  dictionary?: string | readonly string[];
+  /** Explicit lookup text; defaults to the original q parameter. */
+  query?: string;
+  /** Maximum suggestions returned per dictionary/query pair. */
+  count?: number;
+  /** Context filter query; only supported by selected lookup/dictionary implementations. */
+  contextFilterQuery?: string;
+  /** Build the selected suggester dictionary before lookup. */
+  build?: boolean;
+  /** Reload the selected suggester dictionary. */
+  reload?: boolean;
+  /** Build all dictionaries configured in the component. */
+  buildAll?: boolean;
+  /** Reload all dictionaries configured in the component. */
+  reloadAll?: boolean;
+}
+
 /**
  * Options for the standard /select query handler.
  *
@@ -1637,6 +1659,8 @@ export interface SolrStandardQueryOptions {
   moreLikeThis?: SolrMoreLikeThisOptions;
   /** Typed options for Solr spellcheck suggestions and collations. */
   spellcheck?: SolrSpellcheckOptions;
+  /** Typed options for Solr's configured Suggester search component. */
+  suggest?: SolrSuggesterOptions;
   /** Typed options for Result Grouping. */
   grouping?: SolrGroupingOptions;
   /** Collapse duplicate results using the Collapsing Query Parser. */
@@ -1925,6 +1949,8 @@ export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   response?: SolrQueryResult<TDocument>;
   /** Spellcheck suggestions, term frequencies, and optional collations. */
   spellcheck?: SolrSpellcheckResponse;
+  /** Suggester results keyed by configured dictionary name and lookup query. */
+  suggest?: SolrSuggesterResponse;
   /** Classic Facet API response; present when classic faceting is enabled. */
   facet_counts?: SolrFacetCounts;
   /** JSON Facet API response; the caller can provide its expected facet shape. */
@@ -2088,6 +2114,26 @@ export interface SolrSpellcheckResponse {
     readonly (string | SolrSpellcheckCollation)[];
   [key: string]: unknown;
 }
+
+/** One suggestion returned by a configured Solr Suggester dictionary. */
+export interface SolrSuggesterSuggestion {
+  term: string;
+  weight?: number;
+  payload?: string;
+  [key: string]: unknown;
+}
+
+/** Results for one lookup query in one configured dictionary. */
+export interface SolrSuggesterQueryResult {
+  numFound?: number;
+  suggestions?: readonly SolrSuggesterSuggestion[];
+  [key: string]: unknown;
+}
+
+/** Suggester response keyed first by dictionary name, then by lookup query text. */
+export type SolrSuggesterResponse = Readonly<Record<string, Readonly<Record<string, SolrSuggesterQueryResult>>>> & {
+  [key: string]: unknown;
+};
 
 /** Typed response for the standard Solr query handler. */
 export interface SolrQueryResponse<TDocument = unknown, TJsonFacet = unknown> extends SolrResponse<TDocument, TJsonFacet> {
