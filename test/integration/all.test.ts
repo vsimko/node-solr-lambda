@@ -32,3 +32,4 @@ import "./solr-morelikethis.test.js";
 
 import "./solr-spellcheck.test.js";
 import "./solr-suggester.test.js";
+import "./solr-add-stream.test.js";
