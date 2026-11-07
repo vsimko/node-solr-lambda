@@ -91,6 +91,72 @@ function sendDocuments<T = SolrUpdateResponse>(
   });
 }
 
+
+function createJsonArrayStream(
+  client: SolrTransport,
+  documents: AsyncIterable<SolrDocument>
+): ReadableStream<Uint8Array> {
+  const iterator = documents[Symbol.asyncIterator]();
+  const encoder = new TextEncoder();
+  let started = false;
+  let firstDocument = true;
+  let completed = false;
+
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        if (!started) {
+          started = true;
+          controller.enqueue(encoder.encode("["));
+          return;
+        }
+
+        const next = await iterator.next();
+        if (next.done) {
+          completed = true;
+          controller.enqueue(encoder.encode("]"));
+          controller.close();
+          return;
+        }
+
+        const document = await client.validateInput("addStream", next.value);
+        const serialized = client.serializeJson(document);
+        if (typeof serialized !== "string") {
+          throw new TypeError("The JSON codec must serialize every streamed document to a string");
+        }
+        controller.enqueue(encoder.encode(`${firstDocument ? "" : ","}${serialized}`));
+        firstDocument = false;
+      } catch (error) {
+        try { await iterator.return?.(); } catch { /* preserve the original producer/serialization error */ }
+        controller.error(error);
+      }
+    },
+    async cancel() {
+      if (!completed) await iterator.return?.();
+    }
+  }, { highWaterMark: 1 });
+}
+
+export function addStream<T = SolrUpdateResponse>(
+  client: SolrTransport,
+  path: string,
+  documents: AsyncIterable<SolrDocument>,
+  options: SolrUpdateOptions = {},
+  requestOptions: RequestControlOptions = {}
+): Promise<T> {
+  if (!documents || typeof documents[Symbol.asyncIterator] !== "function") {
+    throw new TypeError("addStream requires an AsyncIterable of Solr documents");
+  }
+  const body = createJsonArrayStream(client, documents);
+  return client.request<T>(path, {
+    ...requestOptions,
+    method: "POST",
+    body,
+    query: updateParams(options),
+    operation: "addStream"
+  });
+}
+
 export function add<T = SolrUpdateResponse>(client: SolrTransport, path: string, documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
   return sendDocuments<T>(client, path, documents, options, requestOptions, "add");
 }
