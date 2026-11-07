@@ -23,3 +23,5 @@ export type { AddReplicaParams, AddReplicaPropertyParams, BalanceShardUniquePara
 import { SolrClient } from "./client.js";
 import type { SolrClientConfig } from "./types.js";
 export function createSolrClient(config:SolrClientConfig={}):SolrClient { return new SolrClient(config); }
+
+export type { SolrSpellcheckOptions, SolrSpellcheckAlternative, SolrSpellcheckAlternativeObject, SolrSpellcheckTermResult, SolrSpellcheckCollation, SolrSpellcheckResponse } from "./types.js";

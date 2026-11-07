@@ -512,3 +512,7 @@ const categoryBuckets = result.facets?.categories.buckets;
 - The response's `facets` section is caller-typed through the second `SolrJsonQueryResponse` generic. The library does not infer a response shape from the requested facet tree at runtime.
 
 The JSON Facet API is documented in the [Solr Reference Guide](https://solr.apache.org/guide/solr/9_8/query-guide/json-facet-api.html). Check the version-specific guide when using advanced facet options or domain transformations.
+
+## SpellCheck
+
+The standard query API supports the optional SpellCheck Search Component through typed request and response models. See the [SpellCheck guide](spellcheck.md) for supported options, response shapes, server-side configuration boundaries, and examples.
