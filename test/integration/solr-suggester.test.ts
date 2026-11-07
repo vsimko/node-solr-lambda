@@ -49,7 +49,7 @@ integrationTest("Suggester returns deterministic indexed terms from a configured
     ]);
     await client.commit({ waitSearcher: true });
 
-    const path = `${baseUrl.replace(/\\/+$/, "")}/${core}${handlerPath}`;
+    const path = `${baseUrl.replace(/\/+$/, "")}/${core}${handlerPath}`;
     const response = await executeQuery<SolrQueryResponse<{ id: string }>>(client, path, {
       query: "*:*",
       suggest: {
