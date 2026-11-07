@@ -17,11 +17,11 @@ This is an API/code review, not a claim that the old package is currently mainta
 
 | Capability | Reference client | This project | Decision |
 | --- | --- | --- | --- |
-| RealTime Get | `realTimeGet(ids, query)` against `/get` | Typed RealTime Get API merged in [PR #271](https://github.com/vsimko/node-solr-lambda/pull/271); full pinned CI passed | Keep as P1; merge only after current CI and integration matrix pass. |
-| SpellCheck | `spell(query)` against `/spell` | Typed query component work merged in [PR #272](https://github.com/vsimko/node-solr-lambda/pull/272); full pinned CI passed | Keep as P2; PR #272 is stacked on #271. |
-| Suggester | No equivalent dedicated helper found in reviewed client source | No dedicated typed API | Accepted for follow-up in [#293](https://github.com/vsimko/node-solr-lambda/issues/293). |
-| BigInt-safe JSON | Optional `bigint` flag selects `json-bigint` parser/stringifier | No equivalent precision mode documented | Investigate opt-in precision policy in [#292](https://github.com/vsimko/node-solr-lambda/issues/292). |
-| Streaming document ingestion | `createAddStream()` returns a Duplex that serializes document objects | Buffered `add()` API; streaming export exists | Design a bounded-memory API using shared transport in [#295](https://github.com/vsimko/node-solr-lambda/issues/295). |
+| RealTime Get | `realTimeGet(ids, query)` against `/get` | Typed `get()` API merged in [PR #271](https://github.com/vsimko/node-solr-lambda/pull/271); single/multi-ID uncommitted read-after-write integration passed on pinned Solr 8.11.4/9.11.0/10.1.0 | Complete; retain the explicit distinction from ordinary search. |
+| SpellCheck | `spell(query)` against `/spell` | Typed optional query-component contracts merged in [PR #272](https://github.com/vsimko/node-solr-lambda/pull/272); configured-handler integration verifies suggestions, frequencies, and collations on pinned Solr 8.11.4/9.11.0/10.1.0 | Complete; component/dictionary configuration remains server-owned. |
+| Suggester | No equivalent dedicated helper found in reviewed client source | Typed optional query component merged in [PR #298](https://github.com/vsimko/node-solr-lambda/pull/298); disposable configured-handler integration verifies terms and weights on pinned Solr 8.11.4/9.11.0/10.1.0 | Complete; use the configured SearchHandler path rather than assuming a fixed `/suggest` endpoint. |
+| BigInt-safe JSON | Optional `bigint` flag selects `json-bigint` parser/stringifier | Injectable `SolrJsonCodec` merged in [PR #299](https://github.com/vsimko/node-solr-lambda/pull/299); callers may provide a lossless BigInt-aware codec while native JSON remains the default | Complete as an opt-in codec hook; no mandatory parser dependency or global numeric conversion. |
+| Streaming document ingestion | `createAddStream()` returns a Duplex that serializes document objects | Bounded-memory `addStream(AsyncIterable)` uses a backpressure-aware Web ReadableStream and shared Fetch transport; 250-document read-back passed on pinned Solr 8.11.4/9.11.0/10.1.0 | Complete; preserve partial-ingestion/no-retry semantics and avoid a Node-specific Duplex abstraction. |
 | Prepare commit | `prepareCommit()` sends `prepareCommit=true` to Update Handler | No dedicated convenience method; generic `request()` can carry caller-owned parameters | Audited in [#294](https://github.com/vsimko/node-solr-lambda/issues/294): not promoted to a typed API because the pinned public Solr guides do not document it as a supported option and cross-version lifecycle evidence is absent. |
 | Terms handler | `termsSearch()` | No dedicated typed API | Deferred pending demand; raw request remains available. |
 | Search features | Query builder includes facets, grouping, joins, MLT and other query helpers | Broad typed query surface including facets, grouping, MLT, geospatial, JSON facets, highlighting, stats and cursor pagination | Do not duplicate; compare only for specific gaps. |
@@ -33,7 +33,7 @@ This is an API/code review, not a claim that the old package is currently mainta
 
 The reference implementation normalizes a string ID to an array, places IDs into the `ids` parameter, and dispatches to the `get` handler. Its integration test also verifies that a document can be read before the searcher view reflects it.
 
-**Reusable lesson:** test the semantic difference between RealTime Get and ordinary search. Include single and multiple IDs, field selection, missing IDs, generic document typing, and read-after-write behavior.
+**Implementation and evidence:** `get()` has distinct single-ID and multi-ID contracts. The integration test proves that both forms can read uncommitted documents before the ordinary searcher view is updated on pinned Solr 8.11.4/9.11.0/10.1.0.
 
 **Do not copy:** mutation of caller-owned query objects or the generic `SearchResponse` shape without checking the exact Solr response contract.
 
@@ -41,13 +41,13 @@ The reference implementation normalizes a string ID to an array, places IDs into
 
 The reference client simply routes an existing query builder to the `spell` handler and returns an untyped JSON result.
 
-**Reusable lesson:** the handler path and search correction workflow are valuable, but a modern client should provide named request and extensible response types. The current #272 work models SpellCheck as a query component and must document how it differs from configuring dictionaries/handlers on the Solr server.
+**Implementation and evidence:** SpellCheck is modelled as an optional query component with named options and extensible response contracts. The configured-handler integration test verifies suggestions, frequencies, and collation on all three pinned Solr versions. The client does not create or mutate server dictionaries/handlers.
 
 ### 3. BigInt-safe JSON
 
 The reference client chooses between native `JSON` and `json-bigint` for parsing and serialization based on a client option. Its test deliberately uses `9007199254740993`, checks the value through RealTime Get, and exercises optimistic concurrency with `_version_`.
 
-**Reusable lesson:** JavaScript's safe integer boundary is a real Solr client concern. A robust acceptance test must prove exact preservation through request serialization, response parsing, and a read/update cycle.
+**Implementation and evidence:** PR #299 added the injectable `SolrJsonCodec` and ADR 0005. Native JSON remains the default; callers can supply a lossless parser/stringifier and type `_version_` as `bigint`. This avoids a mandatory dependency or silent global numeric conversion.
 
 **Risks to address in our design:** parser output type, caller ergonomics, Zod/schema validation, error body parsing, performance, optional dependency policy, and whether raw Fetch responses remain untouched. Never imply that a TypeScript `number` can exactly represent every Solr long.
 
@@ -55,7 +55,7 @@ The reference client chooses between native `JSON` and `json-bigint` for parsing
 
 The reference `createAddStream()` creates `JSONStream.stringify()`, pipes it to the legacy `request` module, and exposes a Duplex via `duplexer`.
 
-**Reusable lesson:** producers should be able to send documents incrementally and receive backpressure rather than building a giant array in memory.
+**Implementation and evidence:** `addStream()` accepts an `AsyncIterable`, streams a top-level JSON array through the shared Fetch transport with bounded backpressure, and disables retries for the non-replayable POST. The 250-document fixture passed count/order read-back on all three pinned Solr versions. A source/network failure can still leave a prefix ingested; the operation is not atomic.
 
 **Risks to address in our design:** the current implementation bypasses the client's shared transport, request cancellation/timeout/error policy, and common response handling. Before choosing a Node Writable, Web WritableStream, or AsyncIterable API, verify the exact Solr update wire framing and how the final HTTP response and partial ingestion errors are surfaced. A chunked JSON array must not be assumed valid without protocol evidence.
 
@@ -86,10 +86,10 @@ The reference query builder offers many chainable methods but also falls back to
 
 - [#271 — RealTime Get PR (merged)](https://github.com/vsimko/node-solr-lambda/pull/271)
 - [#272 — SpellCheck PR (merged)](https://github.com/vsimko/node-solr-lambda/pull/272)
-- [#292 — BigInt-safe JSON](https://github.com/vsimko/node-solr-lambda/issues/292)
-- [#293 — Suggester API](https://github.com/vsimko/node-solr-lambda/issues/293)
+- [#292 — BigInt-safe JSON (completed via PR #299)](https://github.com/vsimko/node-solr-lambda/issues/292)
+- [#293 — Suggester API (completed via PR #298)](https://github.com/vsimko/node-solr-lambda/issues/293)
 - [#294 — Prepare commit audit (closed as not planned)](https://github.com/vsimko/node-solr-lambda/issues/294)
-- [#295 — Streaming ingestion](https://github.com/vsimko/node-solr-lambda/issues/295)
+- [#295 — Streaming ingestion (completed via PRs #300, #317, #321, and #325)](https://github.com/vsimko/node-solr-lambda/issues/295)
 
 ## References
 
@@ -106,7 +106,7 @@ A second review focused on test suites and official client behavior rather than 
 
 [Solarium](https://github.com/solariumphp/solarium) is a mature, actively maintained PHP client with a large test suite. Useful patterns observed:
 
-- Dedicated response-parser fixtures for Suggester and SpellCheck, including no-data responses, multiple dictionaries, word offsets, collations, and correction maps. This is a strong model for the planned typed Suggester API (#293).
+- Dedicated response-parser fixtures for Suggester and SpellCheck, including no-data responses, multiple dictionaries, word offsets, collations, and correction maps, remain useful design references. This project now has typed optional query components and configured-handler integration tests for both.
 - Separate standalone and SolrCloud integration test classes, with Docker fixtures spanning Solr 7/8/9/10. This makes topology assumptions explicit instead of treating Cloud as a flag on an otherwise identical test.
 - Small reusable timeout contract tests and explicit HTTP response metadata tests (status, reason, headers, body, missing status). Our current timeout/error tests already cover much of the behavior; avoid duplication.
 - The parser tests are valuable for wire-format edge cases, but our client intentionally returns extensible JSON response objects rather than parsing every response into domain objects.
@@ -121,7 +121,7 @@ A second review focused on test suites and official client behavior rather than 
 - Both JSON and XML response format tests, plus error extraction from JSON, HTML/Jetty-style `<pre>`, and XML/Coyote-style bodies.
 - SolrCloud tests with two nodes and ZooKeeper host mapping; this is infrastructure-specific and should not be copied unless the client explicitly supports node discovery/routing.
 
-Some of these were already covered here: cursor pagination, request parameter encoding, raw XML request-body pass-through, JSON/text/malformed/empty HTTP errors, retry policy, timeout and cancellation, SolrCloud shard routing, and the pinned standalone/security/Cloud matrix. The gap audit has now added nested-document and Unicode document round-trip integration tests, a long-query transport test, and a custom-handler extensibility test on the implementation branch for PR #296. The nested-document test also captures an important Solr wire-format constraint: `/update/json/docs` flattens complex JSON by default, so the array form of `add()` is required to route nested documents through `/update`. Runtime assertions remain pending pinned CI execution.
+Some of these were already covered here: cursor pagination, request parameter encoding, raw XML request-body pass-through, JSON/text/malformed/empty HTTP errors, retry policy, timeout and cancellation, SolrCloud shard routing, and the pinned standalone/security/Cloud matrix. The gap audit in PR #296 added nested-document and Unicode document round-trip integration tests, a long-query transport test, and a custom-handler extensibility test. Nested-document and Unicode read-back passed on pinned Solr 8.11.4/9.11.0/10.1.0 in CI run #42392182590; long-query and custom-handler behavior is covered by transport unit tests. The nested-document test also captures an important Solr wire-format constraint: `/update/json/docs` flattens complex JSON by default, so the array form of `add()` is required to route nested documents through `/update`.
 
 ### Apache SolrJ (official Java client)
 
