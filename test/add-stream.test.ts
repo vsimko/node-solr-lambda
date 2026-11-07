@@ -168,7 +168,8 @@ test("addStream cancellation closes the source async iterator", async () => {
     core: "catalog",
     fetch: async (_input, init) => {
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
-      await reader.read();
+      await reader.read(); // opening JSON array delimiter
+      await reader.read(); // ensure the async generator has started and yielded a document
       return await new Promise<Response>((_resolve, reject) => {
         init?.signal?.addEventListener("abort", async () => {
           await reader.cancel();
