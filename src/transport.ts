@@ -297,7 +297,15 @@ export class SolrTransport {
     };
     const nextWithAbort = async (): Promise<IteratorResult<unknown>> => {
       if (signal.aborted || stopController.signal.aborted) throw abortError();
-      const pending = Promise.resolve().then(() => iterator!.next());
+      let pending: Promise<IteratorResult<unknown>>;
+      try {
+        // Start next() synchronously before exposing the abort listener. Deferring it
+        // to a microtask lets an abort call return() on a not-yet-started generator,
+        // after which the queued next() can accidentally start it again.
+        pending = Promise.resolve(iterator!.next());
+      } catch (error) {
+        pending = Promise.reject(error);
+      }
       let onAbort: (() => void) | undefined;
       const aborted = new Promise<never>((_resolve, reject) => {
         onAbort = () => {
@@ -363,6 +371,12 @@ export class SolrTransport {
         }
       },
       async cancel() {
+        if (signal.aborted || stopController.signal.aborted) {
+          // A stalled next() can queue iterator.return() behind itself. Do not make
+          // request cancellation wait for an uncooperative producer to settle.
+          void closeIterator().catch(() => undefined);
+          return;
+        }
         await closeIterator();
       }
     }, { highWaterMark: 1 });
