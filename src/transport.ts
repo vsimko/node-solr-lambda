@@ -277,6 +277,7 @@ export class SolrTransport {
     const encoder = new TextEncoder();
     const stopController = new AbortController();
     let iterator: AsyncIterator<unknown> | undefined;
+    let iteratorNextPending = false;
     let returnPromise: Promise<void> | undefined;
     let started = false;
     let firstDocument = true;
@@ -295,20 +296,8 @@ export class SolrTransport {
       const reason = stopController.signal.reason ?? signal.reason;
       return reason instanceof Error ? reason : new DOMException("Streaming request aborted", "AbortError");
     };
-    const nextWithAbort = async (): Promise<IteratorResult<unknown>> => {
+    const awaitWithAbort = async <T>(pending: Promise<T>): Promise<T> => {
       if (signal.aborted || stopController.signal.aborted) throw abortError();
-      // Acquire only after checking abort, and start next() in the same turn. An
-      // unstarted async generator's return() does not run its finally block.
-      if (!iterator) iterator = body.documents[Symbol.asyncIterator]();
-      let pending: Promise<IteratorResult<unknown>>;
-      try {
-        // Start next() synchronously before exposing the abort listener. Deferring it
-        // to a microtask lets an abort call return() on a not-yet-started generator,
-        // after which the queued next() can accidentally start it again.
-        pending = Promise.resolve(iterator!.next());
-      } catch (error) {
-        pending = Promise.reject(error);
-      }
       let onAbort: (() => void) | undefined;
       const aborted = new Promise<never>((_resolve, reject) => {
         onAbort = () => {
@@ -326,6 +315,25 @@ export class SolrTransport {
           stopController.signal.removeEventListener("abort", onAbort);
         }
       }
+    };
+
+    const nextWithAbort = async (): Promise<IteratorResult<unknown>> => {
+      if (signal.aborted || stopController.signal.aborted) throw abortError();
+      // Acquire only after checking abort, and start next() in the same turn. An
+      // unstarted async generator's return() does not execute its finally block.
+      if (!iterator) iterator = body.documents[Symbol.asyncIterator]();
+      let pending: Promise<IteratorResult<unknown>>;
+      try {
+        pending = Promise.resolve(iterator.next());
+      } catch (error) {
+        pending = Promise.reject(error);
+      }
+      iteratorNextPending = true;
+      void pending.then(
+        () => { iteratorNextPending = false; },
+        () => { iteratorNextPending = false; }
+      );
+      return await awaitWithAbort(pending);
     };
 
     body.stop = () => {
@@ -352,7 +360,7 @@ export class SolrTransport {
             return;
           }
 
-          const document = await thisTransport.validate(body.operation, "inputs", next.value);
+          const document = await awaitWithAbort(thisTransport.validate(body.operation, "inputs", next.value));
           const serialized = stringifyBody(document, thisTransport.#clientConfig.jsonCodec);
           if (typeof serialized !== "string") {
             throw new TypeError("The JSON codec must serialize every streamed document to a string");
@@ -373,7 +381,10 @@ export class SolrTransport {
         }
       },
       async cancel() {
-        if (signal.aborted || stopController.signal.aborted) {
+        if (!stopController.signal.aborted) {
+          stopController.abort(new DOMException("Streaming request body cancelled", "AbortError"));
+        }
+        if (signal.aborted || iteratorNextPending) {
           // A stalled next() can queue iterator.return() behind itself. Do not make
           // request cancellation wait for an uncooperative producer to settle.
           void closeIterator().catch(() => undefined);
