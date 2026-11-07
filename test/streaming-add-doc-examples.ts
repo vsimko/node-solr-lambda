@@ -1,6 +1,7 @@
 import type { SolrClient, SolrDocument } from "../src/index.js";
 
 interface Product {
+  [key: string]: unknown;
   id: string;
   title_s: string;
   price_d: number;
