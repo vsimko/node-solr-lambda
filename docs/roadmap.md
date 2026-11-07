@@ -13,6 +13,23 @@ This roadmap tracks the single active development line on `master`. Work is deli
 
 The scope is balanced: cover major Solr API areas and production readiness without attempting to wrap every historical or plugin-specific endpoint. Feature work is not blocked on the v4.0 stable release.
 
+## North-star objective: best-in-class Solr client
+
+The primary product goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js. This means more than a broad method list: every important capability should have a correct typed contract, clear documentation, relevant tests, and explicit version evidence.
+
+The objective is tracked by [#311](https://github.com/vsimko/node-solr-lambda/issues/311) and has four measurable engineering workstreams:
+
+| Workstream | Tracking | Required evidence |
+| --- | --- | --- |
+| API breadth and feature correctness | [#312](https://github.com/vsimko/node-solr-lambda/issues/312) | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |
+| Solr and Node.js compatibility | [#313](https://github.com/vsimko/node-solr-lambda/issues/313) | Explicit support policy and evidence-backed version/deployment matrix |
+| Performance and efficiency | [#314](https://github.com/vsimko/node-solr-lambda/issues/314) | Reproducible comparisons, latency percentiles, throughput, CPU and memory measurements, regression budgets |
+| Test depth and reliability | [#315](https://github.com/vsimko/node-solr-lambda/issues/315) | API-to-test traceability, failure-mode coverage, consumer type tests, mutation/coverage trends, reliable CI evidence |
+
+Developer experience remains a cross-cutting requirement: excellent TypeScript inference, ESM/CommonJS behavior, actionable errors, discoverable documentation, and safe migration paths.
+
+**Quality rule:** do not inflate API counts with shallow wrappers; do not claim compatibility from configured-but-unrun jobs; do not optimize without measurements; and do not claim performance leadership without fair, reproducible baselines. Prioritize correctness, security, and maintainability over microbenchmark wins.
+
 ## Current baseline
 
 - Package manager: npm; use `npm ci` and commit `package-lock.json`.
