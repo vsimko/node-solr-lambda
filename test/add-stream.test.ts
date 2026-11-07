@@ -270,3 +270,48 @@ test("addStream timeout interrupts a pending iterator.next() and settles the req
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(finalized, true);
 });
+
+
+test("addStream consumer cancellation interrupts pending per-document validation", async () => {
+  let releaseValidation!: () => void;
+  let validationStarted = false;
+  let finalized = false;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    validation: {
+      inputs: {
+        addStream: {
+          async safeParseAsync(value) {
+            validationStarted = true;
+            await new Promise<void>(resolve => { releaseValidation = resolve; });
+            return { success: true as const, data: value };
+          }
+        }
+      }
+    },
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      const pendingDocument = reader.read();
+      await new Promise(resolve => setImmediate(resolve));
+      assert.equal(validationStarted, true);
+      await reader.cancel("consumer stopped reading");
+      void pendingDocument;
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    try {
+      yield { id: "cancel-during-validation" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  const response = await client.addStream(documents());
+  assert.equal(response.responseHeader?.status, 0);
+  assert.equal(finalized, true);
+  releaseValidation();
+});
