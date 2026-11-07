@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createSolrClient, SolrAbortError, SolrHttpError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
+import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
   assert.ok(body && typeof body === "object" && "getReader" in body);
@@ -314,4 +314,38 @@ test("addStream consumer cancellation interrupts pending per-document validation
   assert.equal(response.responseHeader?.status, 0);
   assert.equal(finalized, true);
   releaseValidation();
+});
+
+
+test("addStream rejects a successful response received before upload completion", async () => {
+  let iteratorReturned = false;
+  let nextCalls = 0;
+  const source: AsyncIterable<{ id: string }> = {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          nextCalls++;
+          return { done: false as const, value: { id: `early-${nextCalls}` } };
+        },
+        async return() {
+          iteratorReturned = true;
+          return { done: true as const, value: undefined };
+        }
+      };
+    }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      await reader.read(); // one document; leave the stream incomplete
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  await assert.rejects(client.addStream(source), SolrNetworkError);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(iteratorReturned, true);
 });
