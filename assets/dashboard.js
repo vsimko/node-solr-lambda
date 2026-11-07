@@ -1,3 +1,4 @@
+import { summarizeProgress } from "./progress.js";
 const el=(id)=>document.getElementById(id);
 function makeCard(title,status,details,url){
   const node=document.createElement("article");node.className="card";
@@ -9,12 +10,32 @@ function makeCard(title,status,details,url){
   return node;
 }
 function render(id,items,fn){const target=el(id);target.replaceChildren();for(const item of items)target.append(fn(item))}
+function renderProgress(data){
+  const target=el("implementation-progress");
+  target.replaceChildren();
+  const api=data.apiCoverage?.records||[];
+  const metrics=summarizeProgress(api,data.roadmap?.records||[]);
+  for(const metric of metrics){
+    const article=document.createElement("article");article.className="progress-card";
+    const top=document.createElement("div");top.className="progress-card-top";
+    const title=document.createElement("h3");title.textContent=metric.label;
+    const count=document.createElement("strong");count.textContent=metric.total?metric.value+" / "+metric.total:"—";
+    top.append(title,count);article.append(top);
+    const bar=document.createElement("progress");bar.max=metric.total||1;bar.value=metric.value;bar.setAttribute("aria-label",metric.label+": "+metric.value+" of "+metric.total);
+    article.append(bar);
+    const detail=document.createElement("p");detail.textContent=metric.total?metric.detail+" · "+Math.round(metric.value/metric.total*100)+"%": "No current source data";article.append(detail);
+    target.append(article);
+  }
+  const updated=el("progress-updated");
+  updated.textContent="Inventory snapshot · "+new Date(data.generatedAt).toLocaleString();
+}
 async function main(){
   try{
     const response=await fetch("data/site-data.json");
     if(!response.ok)throw new Error("HTTP "+response.status);
     const data=await response.json();
     el("package-version").textContent=data.package.version;
+    renderProgress(data);
     const api=data.apiCoverage.records||[];
     el("api-summary").textContent=api.length+" documented operations · operation-level implementation and compatibility evidence";
     const drawApi=()=>{
