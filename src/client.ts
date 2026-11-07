@@ -44,6 +44,14 @@ export class SolrClient extends SolrTransport {
     return updateApi.add<T>(this, this.endpoint("/update"), documents, options, requestOptions);
   }
 
+  addStream<T = SolrUpdateResponse>(
+    documents: AsyncIterable<SolrDocument>,
+    options: SolrUpdateOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<T> {
+    return updateApi.addStream<T>(this, this.endpoint("/update"), documents, options, requestOptions);
+  }
+
   update<T = SolrUpdateResponse>(documents: SolrDocument | readonly SolrDocument[], options: SolrUpdateOptions = {}, requestOptions: RequestControlOptions = {}): Promise<T> {
     return updateApi.update<T>(this, this.endpoint("/update"), documents, options, requestOptions);
   }
