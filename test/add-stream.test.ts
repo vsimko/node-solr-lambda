@@ -252,7 +252,7 @@ test("addStream applies input validation to each document before serialization",
   assert.deepEqual(JSON.parse(requestBody), [{ id: "validated", title_s: "LOWERCASE" }]);
 });
 
-test("addStream rejects an invalid document and closes the source iterator", async () => {
+test("addStream wraps per-document validation failures and closes the source iterator", async () => {
   let finalized = false;
   let fetchCalls = 0;
   const client = createSolrClient({
@@ -275,7 +275,11 @@ test("addStream rejects an invalid document and closes the source iterator", asy
     }
   }
 
-  await assert.rejects(client.addStream(documents()), SolrValidationError);
+  await assert.rejects(client.addStream(documents()), (error: unknown) => {
+    assert.ok(error instanceof SolrNetworkError);
+    assert.ok(error.cause instanceof SolrValidationError);
+    return true;
+  });
   assert.equal(finalized, true);
   assert.equal(fetchCalls, 1);
 });
