@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError } from "../src/index.js";
+import { createSolrClient, SolrAbortError, SolrHttpError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
   assert.ok(body && typeof body === "object" && "getReader" in body);
@@ -30,8 +30,8 @@ test("addStream emits a JSON array incrementally and reuses update parameters", 
       const decoder = new TextDecoder();
       const first = await reader.read();
       assert.equal(decoder.decode(first.value), "[");
-      assert.ok(produced < 20, "the producer must not eagerly materialize the entire input");
       await new Promise(resolve => setTimeout(resolve, 5));
+      assert.equal(produced, 1, "only one document may be queued while the consumer is paused");
       requestBody = "[" + decoder.decode((await reader.read()).value);
       while (true) {
         const next = await reader.read();
@@ -102,8 +102,8 @@ test("addStream propagates producer failures and closes the iterator", async () 
   }
 
   await assert.rejects(client.addStream(documents()), (error: unknown) => {
-    assert.ok(error instanceof SolrNetworkError);
-    assert.equal((error.cause as Error).message, "producer failed");
+    assert.ok(error instanceof Error);
+    assert.equal(error.message, "producer failed");
     return true;
   });
   assert.equal(finalized, true);
@@ -189,5 +189,83 @@ test("addStream cancellation closes the source async iterator", async () => {
   }
 
   await assert.rejects(client.addStream(documents(), {}, { signal: abort.signal }), SolrAbortError);
+  assert.equal(finalized, true);
+});
+
+
+test("addStream does not acquire the iterator when Fetch never consumes the body", async () => {
+  let iteratorAcquired = false;
+  const source: AsyncIterable<{ [key: string]: unknown; id: string }> = {
+    [Symbol.asyncIterator]() {
+      iteratorAcquired = true;
+      return {
+        async next() { return { done: true as const, value: undefined }; }
+      };
+    }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async () => new Response('{"responseHeader":{"status":0}}')
+  });
+
+  await client.addStream(source);
+  assert.equal(iteratorAcquired, false);
+});
+
+test("addStream preserves per-document validation errors instead of wrapping them as network errors", async () => {
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    validation: {
+      inputs: {
+        addStream: {
+          async safeParseAsync() {
+            return { success: false as const, error: { issues: [{ path: ["id"], message: "required" }] } };
+          }
+        }
+      }
+    },
+    fetch: async (_input, init) => {
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    yield { id: "invalid" };
+  }
+
+  await assert.rejects(client.addStream(documents()), error => {
+    assert.ok(error instanceof SolrValidationError);
+    return true;
+  });
+});
+
+test("addStream timeout interrupts a pending iterator.next() and settles the request", async () => {
+  let release!: () => void;
+  let finalized = false;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    timeoutMs: 20,
+    fetch: async (_input, init) => {
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    try {
+      await new Promise<void>(resolve => { release = resolve; });
+      yield { id: "after-timeout" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  await assert.rejects(client.addStream(documents()), SolrTimeoutError);
+  release();
+  await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(finalized, true);
 });

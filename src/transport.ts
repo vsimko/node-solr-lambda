@@ -100,6 +100,10 @@ interface StreamingJsonArrayBody {
   readonly [STREAMING_JSON_ARRAY_BODY]: true;
   readonly documents: AsyncIterable<unknown>;
   readonly operation: string;
+  failed?: boolean;
+  failure?: unknown;
+  completed?: boolean;
+  stop?: () => void;
 }
 
 /** @internal Create a transport-owned streamed JSON-array body for an AsyncIterable. */
@@ -268,13 +272,56 @@ export class SolrTransport {
     return timeoutMs;
   }
 
-  private createJsonArrayStream(body: StreamingJsonArrayBody): ReadableStream<Uint8Array> {
+  private createJsonArrayStream(body: StreamingJsonArrayBody, signal: AbortSignal): ReadableStream<Uint8Array> {
     const thisTransport = this;
-    const iterator = body.documents[Symbol.asyncIterator]();
     const encoder = new TextEncoder();
+    const stopController = new AbortController();
+    let iterator: AsyncIterator<unknown> | undefined;
+    let returnPromise: Promise<void> | undefined;
     let started = false;
     let firstDocument = true;
     let completed = false;
+    let stopped = false;
+
+    const closeIterator = (): Promise<void> => {
+      stopped = true;
+      if (!iterator?.return) return Promise.resolve();
+      if (!returnPromise) {
+        returnPromise = Promise.resolve(iterator.return()).then(() => undefined);
+      }
+      return returnPromise;
+    };
+    const abortError = (): Error => {
+      const reason = stopController.signal.reason ?? signal.reason;
+      return reason instanceof Error ? reason : new DOMException("Streaming request aborted", "AbortError");
+    };
+    const nextWithAbort = async (): Promise<IteratorResult<unknown>> => {
+      if (signal.aborted || stopController.signal.aborted) throw abortError();
+      const pending = Promise.resolve().then(() => iterator!.next());
+      let onAbort: (() => void) | undefined;
+      const aborted = new Promise<never>((_resolve, reject) => {
+        onAbort = () => {
+          void closeIterator().catch(() => undefined);
+          reject(abortError());
+        };
+        signal.addEventListener("abort", onAbort, { once: true });
+        stopController.signal.addEventListener("abort", onAbort, { once: true });
+      });
+      try {
+        return await Promise.race([pending, aborted]);
+      } finally {
+        if (onAbort) {
+          signal.removeEventListener("abort", onAbort);
+          stopController.signal.removeEventListener("abort", onAbort);
+        }
+      }
+    };
+
+    body.stop = () => {
+      if (completed || stopped) return;
+      stopController.abort(new DOMException("Streaming request no longer needed", "AbortError"));
+      void closeIterator().catch(() => undefined);
+    };
 
     return new ReadableStream<Uint8Array>({
       async pull(controller) {
@@ -285,9 +332,11 @@ export class SolrTransport {
             return;
           }
 
-          const next = await iterator.next();
+          if (!iterator) iterator = body.documents[Symbol.asyncIterator]();
+          const next = await nextWithAbort();
           if (next.done) {
             completed = true;
+            body.completed = true;
             controller.enqueue(encoder.encode("]"));
             controller.close();
             return;
@@ -301,12 +350,20 @@ export class SolrTransport {
           controller.enqueue(encoder.encode(`${firstDocument ? "" : ","}${serialized}`));
           firstDocument = false;
         } catch (error) {
-          try { await iterator.return?.(); } catch { /* preserve the original producer/serialization error */ }
-          controller.error(error);
+          if (!signal.aborted && !stopController.signal.aborted) {
+            body.failed = true;
+            body.failure = error;
+          }
+          if (signal.aborted || stopController.signal.aborted) {
+            void closeIterator().catch(() => undefined);
+          } else {
+            try { await closeIterator(); } catch { /* preserve the original producer/serialization error */ }
+          }
+          try { controller.error(error); } catch { /* stream may already be cancelled */ }
         }
       },
       async cancel() {
-        if (!completed) await iterator.return?.();
+        await closeIterator();
       }
     }, { highWaterMark: 1 });
   }
@@ -341,7 +398,7 @@ export class SolrTransport {
     url: URL,
     method: SolrHttpMethod,
     headers: Record<string, string>,
-    body: BodyInit | undefined,
+    body: BodyInit | StreamingJsonArrayBody | undefined,
     callerSignal: AbortSignal | undefined,
     timeoutMs: number,
     streamingBody = false
@@ -359,16 +416,21 @@ export class SolrTransport {
       if (callerSignal?.aborted) throw new SolrAbortError(endpoint, callerSignal.reason);
       const signalContext = createRequestSignal(callerSignal, timeoutMs, endpoint);
       try {
+        const requestBody = isStreamingJsonArrayBody(body)
+          ? this.createJsonArrayStream(body, signalContext.signal)
+          : body;
         const init = {
           method,
           headers,
-          ...(body === undefined ? {} : { body }),
+          ...(requestBody === undefined ? {} : { body: requestBody }),
           signal: signalContext.signal,
           ...(streamingBody ? { duplex: "half" as const } : {})
         } as RequestInit & { duplex?: "half" };
         const response = await this.requestFetch(url, init);
         const abortError = signalContext.classify();
         if (abortError) throw abortError;
+        if (isStreamingJsonArrayBody(body) && body.failed) throw body.failure;
+        if (isStreamingJsonArrayBody(body) && !body.completed) body.stop?.();
         if (attempt < maxAttempts && retryMethods.includes(method) && retryStatuses.includes(response.status)) {
           try { await response.body?.cancel(); }
           finally { signalContext.cleanup(); }
@@ -380,11 +442,12 @@ export class SolrTransport {
         const classified = signalContext.classify(error);
         signalContext.cleanup();
         if (classified instanceof SolrAbortError) throw classified;
+        if (classified instanceof SolrTimeoutError) throw classified;
+        if (isStreamingJsonArrayBody(body) && body.failed) throw body.failure;
         if (attempt < maxAttempts && retryMethods.includes(method) && retryNetworkErrors) {
           await wait(Math.min(maxDelayMs, baseDelayMs * (2 ** (attempt - 1))));
           continue;
         }
-        if (classified instanceof SolrTimeoutError) throw classified;
         throw new SolrNetworkError(endpoint, error);
       }
     }
@@ -399,7 +462,7 @@ export class SolrTransport {
     const rawStreamBody = isReadableStreamBody(options.body);
     const streamingBody = streamingArrayBody !== undefined || rawStreamBody;
     const input = streamingArrayBody !== undefined
-      ? this.createJsonArrayStream(streamingArrayBody)
+      ? streamingArrayBody
       : rawStreamBody
         ? options.body
         : this.#clientConfig.validation
@@ -416,7 +479,7 @@ export class SolrTransport {
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : streamingBody ? input as ReadableStream<Uint8Array> : stringifyBody(input, this.#clientConfig.jsonCodec), options.signal, this.requestTimeout(options), streamingBody
+      url, method, headers, options.body === undefined ? undefined : streamingBody ? input as ReadableStream<Uint8Array> | StreamingJsonArrayBody : stringifyBody(input, this.#clientConfig.jsonCodec), options.signal, this.requestTimeout(options), streamingBody
     );
     try {
       let body: string;
