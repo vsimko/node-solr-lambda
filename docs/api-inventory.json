@@ -367,9 +367,9 @@
       "unitTests": "present",
       "integrationTests": "not-run",
       "versions": {
-        "8": "not-run",
-        "9": "not-run",
-        "10": "not-run"
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
       },
       "documentation": "docs/realtime-get.md",
       "testFiles": [
@@ -377,7 +377,7 @@
         "test/get-doc-examples.ts",
         "test/integration/solr-get.test.ts"
       ],
-      "notes": "Typed single-ID and multi-ID requests use distinct generic response shapes. The API supports field selection, repeated filter queries, custom Solr parameters, and shared request controls. Unit tests cover URL/query serialization, cancellation propagation, reserved-parameter protection, and invalid ID/filter/field values; consumer type fixtures cover valid and invalid request forms. Integration coverage is added for uncommitted single- and multi-ID read-back; per-version runtime evidence remains not-run until the pinned Solr matrix passes."
+      "notes": "Typed single-ID and multi-ID requests use distinct generic response shapes. The API supports field selection, repeated filter queries, custom Solr parameters, and shared request controls. Unit tests cover URL/query serialization, cancellation propagation, reserved-parameter protection, and invalid ID/filter/field values; consumer type fixtures cover valid and invalid request forms. Integration coverage is added for uncommitted single- and multi-ID read-back; per-version runtime evidence remains unverified until the pinned Solr matrix passes."
     },
     {
       "id": "query.json",
