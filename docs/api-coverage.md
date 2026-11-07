@@ -10,6 +10,8 @@ See [Client architecture](architecture.md) for module boundaries, type-model gui
 
 See the [machine-readable API inventory](api-inventory.json) for each operation, request path, type coverage, unit-test status, and per-version integration status. The [Collections action coverage matrix](collections-api-coverage.md) maps each exposed Collections action to its input type, response contract, tests, and pinned Solr evidence.
 
+The [testing and quality strategy](testing-strategy.md) defines the required evidence for each test layer, API-to-test traceability, failure-mode coverage, coverage reporting, and flaky-test policy.
+
 A generic request method does not mean that every endpoint has a typed wrapper, useful IDE autocomplete, or tested version support. For supported features, the primary public API should expose named TypeScript properties and nested models that IDEs can complete and validate. Custom parameters remain available through an explicit escape hatch.
 
 | API area | Current public surface | Remaining work |

@@ -38,6 +38,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Public API review](public-api-review.md)
 - [Solr server compatibility matrix](compatibility.md)
 - [Performance benchmarking](benchmarking.md)
+- [Testing and quality strategy](testing-strategy.md)
 
 ## Product strategy
 

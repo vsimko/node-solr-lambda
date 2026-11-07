@@ -177,6 +177,9 @@ jobs:
       - run: npm run typecheck
       - run: npm run test:types
       - run: npm test
+      - name: Publish unit coverage summary (Node 26)
+        if: matrix.node == 26
+        run: npm run test:coverage >> "$GITHUB_STEP_SUMMARY"
       - run: npm run build
       - run: npm run release:check
       - name: Cancel all workflows for this pull request after failure
