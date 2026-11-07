@@ -55,7 +55,7 @@ Developer experience remains a cross-cutting requirement: excellent TypeScript i
 - Package manager: npm; use `npm ci` and commit `package-lock.json`.
 - Runtime targets: Node.js 22, 24, and 26 (active/maintenance LTS); Node.js 20 remains a legacy v4 compatibility target only.
 - Transport: Node.js Fetch API; optional runtime validation: Zod.
-- Target Solr lines: 8.x, 9.x, and 10.x.
+- Target Solr lines: 10.x current, 9.11.x previous maintenance, and 8.11.4 legacy compatibility only.
 - Pinned integration images: Solr 8.11.4, 9.11.0, and 10.1.0. Compatibility is operation-specific; a green matrix does not certify every action. See [compatibility](compatibility.md) and [api-inventory.json](api-inventory.json).
 - Package metadata identifies the current package line as 4.0.0-beta.0; this does not imply a separate development branch.
 - `master` is the only active development line.
