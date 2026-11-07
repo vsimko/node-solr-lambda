@@ -291,10 +291,18 @@ test("addStream timeout closes the source iterator and reports SolrTimeoutError"
     baseUrl: "https://solr.example.test",
     core: "catalog",
     timeoutMs: 10,
-    fetch: async (_input, init) => new Promise<Response>((_resolve, reject) => {
-      const signal = init?.signal;
-      signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
-    })
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read();
+      await reader.read();
+      return await new Promise<Response>((_resolve, reject) => {
+        const signal = init?.signal;
+        signal?.addEventListener("abort", async () => {
+          await reader.cancel();
+          reject(signal.reason);
+        }, { once: true });
+      });
+    }
   });
 
   async function* documents() {
