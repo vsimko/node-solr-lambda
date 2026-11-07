@@ -70,7 +70,7 @@ This tranche is deliberately small and independent of the v4.0 release gate. It 
 | --- | --- | --- | --- |
 | P1 — first | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/pull/271) | Direct unique-key single/multi-document retrieval for read-after-write workflows, with generic document response types and exact request-option evidence. |
 | P2 — complete | Typed SpellCheck query component | [#272](https://github.com/vsimko/node-solr-lambda/pull/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
-| P2 — active | BigInt-safe JSON codec | [PR #299](https://github.com/vsimko/node-solr-lambda/pull/299) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |
+| P2 — complete | BigInt-safe JSON codec | [PR #299](https://github.com/vsimko/node-solr-lambda/pull/299) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |
 | P2 — complete | Typed Suggester query component | [PR #298](https://github.com/vsimko/node-solr-lambda/pull/298) | Typed autocomplete dictionary selection, query/count/context controls, lifecycle flags, and extensible suggestion response contracts on the existing query API. |
 | P2 — active | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/node-solr-lambda/pull/300) | Add bounded-memory ingestion through the shared transport, with cancellation and explicit partial-failure semantics. |
 
