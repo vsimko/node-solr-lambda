@@ -1,7 +1,7 @@
 export type SolrVersion = "8" | "9" | "10";
 export type SolrHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type CoreAdminAction = "STATUS" | "CREATE" | "RELOAD" | "UNLOAD" | "RENAME" | "SWAP" | "MERGEINDEXES" | "SPLIT" | "REQUESTSTATUS" | "REQUESTRECOVERY";
-export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "MIGRATE" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
+export type CollectionAdminAction = "LIST" | "CREATE" | "DELETE" | "RELOAD" | "MODIFYCOLLECTION" | "MIGRATE" | "CREATEALIAS" | "DELETEALIAS" | "LISTALIASES" | "CLUSTERSTATUS" | "ADDREPLICA" | "DELETEREPLICA" | "MOVEREPLICA" | "BALANCESHARDUNIQUE" | "REBALANCELEADERS" | "ADDREPLICAPROP" | "DELETEREPLICAPROP" | "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "FORCELEADER" | "ADDROLE" | "REMOVEROLE" | "BACKUP" | "RESTORE" | "LISTBACKUP" | "DELETEBACKUP" | "REQUESTSTATUS" | "DELETESTATUS";
 /** Field types supported by the Solr Export Handler field list. */
 export type SolrExportFieldType = "int" | "long" | "float" | "double" | "string" | "date" | "boolean";
 /** One field-based Export sort criterion. Sort fields must be single-valued and have docValues. */
@@ -880,6 +880,12 @@ export interface SolrCollectionShardOperationResponse {
   success?: Readonly<Record<string, unknown>>;
   [key: string]: unknown;
 }
+/** Parameters for the V1 Collections API FORCELEADER action. This expert operation can promote a stale replica and lose acknowledged updates. */
+export interface ForceLeaderParams {
+  collection: string;
+  shard: string;
+  customParams?: SolrAdminCustomParams;
+}
 export interface CollectionRoleParams extends CollectionRequestBase { node: string; role: string }
 
 /** Parameters for Collections API ADDREPLICA. */
@@ -950,6 +956,7 @@ export type CollectionAdminParams<A extends CollectionAdminAction> =
   A extends "CREATESHARD" ? CreateShardParams :
   A extends "DELETESHARD" ? DeleteShardParams :
   A extends "SPLITSHARD" ? SplitShardParams :
+  A extends "FORCELEADER" ? ForceLeaderParams :
   A extends "BACKUP" ? CollectionBackupParams :
   A extends "RESTORE" ? CollectionRestoreParams :
   A extends "LISTBACKUP" ? CollectionListBackupParams :
@@ -967,7 +974,7 @@ export type CollectionAdminResponse<A extends CollectionAdminAction> =
   A extends "LISTALIASES" ? SolrCollectionAliasesResponse :
   A extends "CLUSTERSTATUS" ? SolrClusterStatusResponse :
   A extends "CREATEALIAS" | "DELETEALIAS" ? SolrCollectionAliasResponse :
-  A extends "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "MIGRATE" ? SolrCollectionShardOperationResponse :
+  A extends "CREATESHARD" | "DELETESHARD" | "SPLITSHARD" | "MIGRATE" | "FORCELEADER" ? SolrCollectionShardOperationResponse :
   A extends "BACKUP" | "RESTORE" ? SolrCollectionBackupResponse :
   A extends "LISTBACKUP" ? SolrCollectionBackupListResponse :
   A extends "DELETEBACKUP" ? SolrCollectionBackupDeleteResponse :

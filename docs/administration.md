@@ -176,3 +176,24 @@ Run it from the GitHub Actions **CI** workflow using **Run workflow** and enable
 The tests use asynchronous request IDs and poll `REQUESTSTATUS` for up to 180 seconds, then remove completed status records. They verify active child-shard state and post-split document visibility, and verify that every routed document is searchable in the migration target. They do not claim to test concurrent writes, rollback of a partially completed operation, or recovery after a cluster/node failure.
 
 If a request times out or fails, do not rerun against a reused cluster. Preserve the CI job logs, inspect `CLUSTERSTATUS` and `REQUESTSTATUS`, and discard the ephemeral cluster. Fixture cleanup deletes only the collections it created; if Solr still has an operation in flight and refuses deletion, destroy the ephemeral cluster rather than attempting cleanup against a shared server. The suite is an opt-in verification harness, not permission to point these destructive actions at a user-owned cluster. A workflow that is skipped or has not been manually dispatched is not runtime evidence; record successful Solr versions individually before updating compatibility status. Keep the workflow run URL and tested Solr version alongside the compatibility record.
+
+
+## FORCELEADER: expert-only shard recovery
+
+The V1 Collections API exposes `collections("FORCELEADER", { collection, shard })`. It uses `GET /solr/admin/collections?action=FORCELEADER` with the required `collection` and `shard` parameters and returns a `SolrCollectionShardOperationResponse` envelope.
+
+```ts
+const result = await client.collections("FORCELEADER", {
+  collection: "catalog",
+  shard: "shard1"
+});
+if (result.responseHeader?.status !== 0) {
+  throw new Error("Solr did not accept the force-leader request");
+}
+```
+
+> **Warning:** FORCELEADER is an expert-level recovery action. Use it only when regular leader election is not working and after reviewing replica freshness. Solr warns that promoting a stale replica can lose updates that were acknowledged by the previous leader. Do not run it against a shared or production cluster as an experiment. The client does not infer safety, select a replica, retry the action, or protect acknowledged updates.
+
+Official reference guides: [Solr 8.11 Collections API](https://solr.apache.org/guide/8_11/collections-api.html), [Solr 9.11 shard management](https://solr.apache.org/guide/solr/9_11/deployment-guide/shard-management.html), and [Solr 10.1 shard management](https://solr.apache.org/guide/solr/10_1/deployment-guide/shard-management.html).
+
+The action has unit serialization and consumer TypeScript coverage. It remains runtime-unverified on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 baselines until an isolated stale-replica fault-injection test can demonstrate actual leader reassignment and cleanup in the manual opt-in SolrCloud workflow. A successful HTTP response alone is not sufficient evidence.

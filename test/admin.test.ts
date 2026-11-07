@@ -73,6 +73,25 @@ test("Collections RELOAD, MODIFYCOLLECTION, and role actions serialize action-sp
   }
 });
 
+test("Collections FORCELEADER serializes its required V1 parameters", async () => {
+  let requested = "";
+  const client = createSolrClient({
+    fetch: async input => {
+      requested = String(input);
+      return new Response(JSON.stringify({ responseHeader: { status: 0, QTime: 4 } }));
+    }
+  });
+
+  const result = await client.collections("FORCELEADER", { collection: "books", shard: "shard1" });
+  const url = new URL(requested);
+  assert.equal(url.pathname, "/solr/admin/collections");
+  assert.equal(url.searchParams.get("action"), "FORCELEADER");
+  assert.equal(url.searchParams.get("collection"), "books");
+  assert.equal(url.searchParams.get("shard"), "shard1");
+  assert.equal(url.searchParams.has("async"), false);
+  assert.equal(result.responseHeader?.status, 0);
+});
+
 test("Collections action responses retain their named default envelopes", async () => {
   const payloads = [
     { responseHeader: { status: 0, QTime: 1 }, collections: ["books", "catalog"] },

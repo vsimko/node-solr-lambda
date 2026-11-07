@@ -2,7 +2,9 @@ import type {
   AddReplicaParams,
   CollectionAdminParams,
   CollectionReplicaType,
-  DeleteReplicaParams
+  DeleteReplicaParams,
+  ForceLeaderParams,
+  SolrCollectionShardOperationResponse
 } from "../src/index.js";
 import type { SolrClient } from "../src/client.js";
 
@@ -83,7 +85,7 @@ const rebalanceParams = {
 } satisfies import("../src/index.js").RebalanceLeadersParams;
 void moveClient.collections("REBALANCELEADERS", rebalanceParams);
 
-import type { MigrateCollectionParams, SplitShardParams, SolrCollectionShardOperationResponse } from "../src/index.js";
+import type { MigrateCollectionParams, SplitShardParams } from "../src/index.js";
 const splitByShard: SplitShardParams = { collection: "books", shard: "shard1", ranges: "0-7fffffff,80000000-ffffffff", splitMethod: "rewrite", async: "split-1" };
 const splitByRouteKey: SplitShardParams = { collection: "books", "split.key": "tenant!", numSubShards: 2, async: "split-2" };
 const migrate: MigrateCollectionParams = { collection: "source", "split.key": "tenant!", "target.collection": "target", "forward.timeout": 60, async: "migrate-1" };
@@ -100,3 +102,14 @@ void [invalidSplit, invalidSplitAlias, invalidMigrate];
 void client.collections("CREATESHARD", { collection: "books", shard: "shard2" });
 void client.collections("DELETESHARD", { collection: "books", shard: "shard2" });
 void client.collections("MIGRATE", migrate);
+
+const forceLeaderParams = {
+  collection: "books",
+  shard: "shard1"
+} satisfies ForceLeaderParams;
+const forceLeaderResponse: Promise<SolrCollectionShardOperationResponse> = client.collections("FORCELEADER", forceLeaderParams);
+void forceLeaderResponse;
+
+// @ts-expect-error FORCELEADER requires a shard name.
+const invalidForceLeader: ForceLeaderParams = { collection: "books" };
+void invalidForceLeader;
