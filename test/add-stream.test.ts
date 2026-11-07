@@ -211,7 +211,7 @@ test("addStream does not acquire the iterator when Fetch never consumes the body
     fetch: async () => new Response('{"responseHeader":{"status":0}}')
   });
 
-  await client.addStream(source);
+  await assert.rejects(client.addStream(source), SolrNetworkError);
   assert.equal(iteratorAcquired, false);
 });
 
@@ -311,8 +311,7 @@ test("addStream consumer cancellation interrupts pending per-document validation
     }
   }
 
-  const response = await client.addStream(documents());
-  assert.equal(response.responseHeader?.status, 0);
+  await assert.rejects(client.addStream(documents()), SolrNetworkError);
   assert.equal(finalized, true);
   releaseValidation();
 });
