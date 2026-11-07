@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createSolrClient, SolrHttpError } from "../src/index.js";
+import { createSolrClient, SolrHttpError, SolrNetworkError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
   assert.ok(body && typeof body === "object" && "getReader" in body);
@@ -100,7 +100,11 @@ test("addStream propagates producer failures and closes the iterator", async () 
     }
   }
 
-  await assert.rejects(client.addStream(documents()), /producer failed/);
+  await assert.rejects(client.addStream(documents()), (error: unknown) => {
+    assert.ok(error instanceof SolrNetworkError);
+    assert.equal((error.cause as Error).message, "producer failed");
+    return true;
+  });
   assert.equal(finalized, true);
 });
 
