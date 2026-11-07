@@ -798,11 +798,11 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/update.md",
       "testFiles": [
@@ -810,7 +810,7 @@
         "test/streaming-add-doc-examples.ts",
         "test/integration/solr-add-stream.test.ts"
       ],
-      "notes": "Consumes an AsyncIterable<SolrDocument> and emits a valid top-level JSON array through a backpressure-aware Web ReadableStream. Serializes and validates one document at a time, reuses the configured JSON codec and shared request controls, propagates cancellation/producer errors, and disables retries for the non-replayable POST body. Unit tests cover lazy production, framing, empty input, cancellation, producer failure, JSON codec use, and no-retry semantics. A deterministic 250-document pinned Solr integration test has been added; runtime evidence remains pending the fresh CI matrix. Partial ingestion is possible if the source or connection fails after the server has accepted a prefix; the operation is not atomic and does not auto-commit."
+      "notes": "Consumes an AsyncIterable<SolrDocument> and emits a valid top-level JSON array through a Web ReadableStream with highWaterMark 1. Serializes and validates one document at a time, reuses the configured JSON codec and shared request controls, propagates producer/validation errors, HTTP failures, timeout and caller/consumer cancellation, closes the iterator, and disables retries for the non-replayable POST body. Consumer type fixtures assert default/custom response generics and reject synchronous iterables plus invalid numeric option types. Unit tests explicitly cover slow producers, a slow consumer with bounded pull-ahead, framing, empty input, per-document validation, shared auth/headers/request defaults, HTTP errors, timeout/cancellation cleanup, codec use, and no retries. A deterministic 250-document pinned Solr integration test verifies count/order read-back on Solr 8.11.4, 9.11.0, and 10.1.0. Full combined CI run #42376175065 passed 30/30 jobs across Node.js 20/22/24 and standalone, authenticated, and SolrCloud matrices; the standalone job logs confirm 250-document read-back on each pinned image. Partial ingestion is possible if the source or connection fails after the server has accepted a prefix; the operation is not atomic and does not auto-commit."
     }
   ]
 }
