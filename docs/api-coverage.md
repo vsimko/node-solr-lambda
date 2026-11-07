@@ -42,8 +42,19 @@ The following gaps were reviewed for the TypeScript-first, balanced product scop
 - **Export `includeStoredFields`** — verified on Solr 10.1.0 by [PR #261](https://github.com/vsimko/node-solr-lambda/pull/261) using stored-only field read-back. Solr 8/9 behavior remains unclaimed.
 - **ReplicationHandler abort/async lifecycle** — one-shot `fetchindex` and follower read-back are verified, but abort/polling semantics are not; tracked by [#259](https://github.com/vsimko/node-solr-lambda/issues/259).
 
+### Accepted feature/design work
+
+- **RealTime Get (`/get`)** — typed single/multi-ID retrieval is in [PR #271](https://github.com/vsimko/node-solr-lambda/pull/271); treat it as in progress until merge and pinned CI pass.
+- **SpellCheck** — typed standard-query component contracts are in [PR #272](https://github.com/vsimko/node-solr-lambda/pull/272), stacked on #271; merge #271 first.
+- **BigInt-safe JSON precision** — [#292](https://github.com/vsimko/node-solr-lambda/issues/292) evaluates opt-in exact parsing/serialization for values above JavaScript's safe integer range. No current precision guarantee is implied.
+- **Suggester** — [#293](https://github.com/vsimko/node-solr-lambda/issues/293) adds typed autocomplete contracts, distinct from SpellCheck and Terms.
+- **Cross-client regression test audit** — [#297](https://github.com/vsimko/node-solr-lambda/issues/297) adds nested-document/Unicode integration cases and long-query/custom-handler transport tests; pending pinned CI evidence.
+- **Streaming document ingestion** — [#295](https://github.com/vsimko/node-solr-lambda/issues/295) investigates bounded-memory, backpressure-aware document writes through the shared transport.
+- **Prepare-commit lifecycle** — [#294](https://github.com/vsimko/node-solr-lambda/issues/294) first audits existing typed update commands, then decides whether a dedicated method is justified.
+
 ### Deferred pending a concrete consumer requirement
 
+- **Terms handler (`/terms`)** — deferred pending a concrete consumer requirement; this is distinct from Suggester and SpellCheck. Generic `request()` remains available.
 - **Solr-version-specific error payload variants** — error envelopes preserve unknown fields and expose the typed common shape. Add version-specific models only when a concrete incompatible payload is identified and can be tested.
 - **Advanced authentication (for example OAuth or mTLS)** — deployment-specific credential acquisition and certificate lifecycle are outside the built-in Basic/Bearer transport contract. The custom Fetch/headers extension points remain available.
 - **Retry telemetry** — retry policy is opt-in; logging/metrics integration belongs to caller observability policy. The transport deliberately avoids logging credentials or server-controlled bodies.
@@ -74,3 +85,14 @@ An API feature is complete when it has:
 6. A recorded compatibility result in [compatibility.md](compatibility.md).
 
 Test every target endpoint against Solr 8.x, 9.x, and 10.x. Do not infer server support from a successful TypeScript build.
+
+
+## Cross-client regression coverage
+
+The cross-client audit identified and added focused coverage without broadening the public API:
+
+- `add()` and `query()`: nested parent/child/grandchild document round-trip and exact Unicode/multi-valued field round-trip, in `test/integration/solr-document-fidelity.test.ts`.
+- `query()`: long query parameter preservation on GET, without implicit GET-to-POST switching, in `test/transport-serialization.test.ts`.
+- `request()`: custom handler path, repeated query parameters, and unknown/plugin-defined response fields in `test/raw-request.test.ts`.
+
+The nested/Unicode integration tests are part of the normal standalone integration suite. Their source is added, but pinned Solr CI execution is still required before extending runtime compatibility evidence. Existing cursorMark, retry, cancellation, timeout, HTTP error, raw XML body, and SolrCloud shard-routing tests are retained rather than duplicated. See [ADR 0003](adr/0003-cross-client-test-strategy.md) and [issue #297](https://github.com/vsimko/node-solr-lambda/issues/297).

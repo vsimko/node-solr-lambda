@@ -14,6 +14,7 @@ import "./solr-stats.test.js";
 import "./solr-json-facets.test.js";
 import "./solr-optimize.test.js";
 import "./solr-cursor.test.js";
+import "./solr-document-fidelity.test.js";
 import "./solr-schema.test.js";
 import "./solr-security.test.js";
 import "./solr-replication.test.js";

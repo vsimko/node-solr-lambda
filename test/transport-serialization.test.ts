@@ -99,3 +99,26 @@ test("invalid dates fail before a network request is sent", async () => {
   );
   assert.equal(fetchCalled, false);
 });
+
+
+test("long query parameters are transmitted intact without implicit GET-to-POST switching", async () => {
+  let requestedUrl = "";
+  let requestedMethod = "";
+  const longQuery = `title:${"solr-client-".repeat(4_000)}`;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    collection: "catalog",
+    fetch: async (input, init) => {
+      requestedUrl = String(input);
+      requestedMethod = String(init?.method);
+      return new Response(JSON.stringify({ response: { numFound: 0, docs: [] } }));
+    }
+  });
+
+  await client.query({ query: longQuery });
+
+  const url = new URL(requestedUrl);
+  assert.equal(requestedMethod, "GET");
+  assert.equal(url.pathname, "/solr/catalog/select");
+  assert.equal(url.searchParams.get("q"), longQuery);
+});

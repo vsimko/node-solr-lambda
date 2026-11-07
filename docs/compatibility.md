@@ -128,3 +128,12 @@ The machine-readable inventory is authoritative for operation-level status. Keep
 - [Solr 9.11.1 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) record V2 API additions and changes in the 9.11 line.
 - [Solr 10.1 upgrade notes](https://solr.apache.org/guide/solr/10_1/upgrade-notes/major-changes-in-solr-10.html) describe the V2 API, PKI authentication, and JWT default changes.
 - [Solr 10.1 release notes](https://solr.apache.org/docs/10_1_0/changes/Changes.html) record release-specific changes.
+
+
+## Cross-client regression test additions
+
+The normal standalone integration suite now includes tests for nested parent/child/grandchild document round-trip and exact Unicode/multi-valued field read-back in `test/integration/solr-document-fidelity.test.ts`. The nested test uses `add([document])` deliberately: Solr's `/update/json/docs` convenience path flattens nested JSON by default, while the array form routes through `/update`. These tests are scheduled by the existing Solr 8.11.4, 9.11.0, and 10.1.0 standalone integration matrix; their successful execution must be confirmed in CI before they are counted as new runtime evidence.
+
+Unit tests additionally verify that a long `query()` parameter remains intact on the existing GET contract and that generic `request()` preserves repeated parameters and unknown custom-handler response fields. These are transport contract tests and do not certify that arbitrarily long URLs will be accepted by every reverse proxy or Solr deployment.
+
+Topology remains explicit: the fidelity integration tests require standalone Solr only; security-enabled standalone tests exercise authentication configuration; SolrCloud tests use disposable collections; tests requiring multiple live Cloud nodes must declare and opt into that requirement. This project does not claim ZooKeeper discovery or SolrJ-style replica routing. See [ADR 0003](adr/0003-cross-client-test-strategy.md).

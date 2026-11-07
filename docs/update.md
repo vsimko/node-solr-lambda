@@ -178,3 +178,47 @@ The base add, full-document update, delete-by-ID, hard/soft commit, expungeDelet
 
 The request shapes follow the official [Solr 10.1 Indexing with Update Handlers guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-with-update-handlers.html). The guide documents JSON add/delete commands, `overwrite`, `commitWithin`, and commit/optimize behavior. SolrCloud routing uses the documented `_route_` request parameter.
 
+
+## Nested documents
+
+Solr supports nested parent/child documents through named pseudo-fields. The pseudo-field names are structural JSON properties, not schema fields:
+
+```ts
+const product = {
+  id: "product-1",
+  name_s: "Product",
+  skus: [
+    {
+      id: "product-1!sku-1",
+      color_s: "red",
+      manuals: [{ id: "product-1!manual-1", name_s: "Manual" }]
+    }
+  ]
+};
+
+// Pass an array so the client uses POST /update (not /update/json/docs).
+await client.add([product]);
+await client.commit();
+
+const result = await client.query<{
+  response?: {
+    docs?: Array<{
+      id: string;
+      skus?: Array<{
+        id: string;
+        manuals?: Array<{ id: string; name_s: string }>;
+      }>;
+    }>;
+  };
+}>({
+  query: "id:product-1",
+  fields: "*,[child]",
+  limit: 1
+});
+```
+
+**Important transport distinction:** `add(document)` for one object uses Solr's `/update/json/docs` convenience path. That path flattens complex JSON documents by default. To index nested documents, use the array form `add([document])`, which uses `/update` and preserves Solr's nested pseudo-field structure. The client does not automatically rewrite the request because these are distinct Solr update formats.
+
+Structured named nesting requires `_root_` and `_nest_path_` support in the Solr schema. The `_default` configset provides these fields; custom schemas must configure them as described in the [Solr nested-document guide](https://solr.apache.org/guide/solr/10_1/indexing-guide/indexing-nested-documents.html). The `[child]` transformer returns descendants and reconstructs named relationships when `_nest_path_` is available. Every nested document needs a globally unique ID. Deleting the root document deletes its nested tree.
+
+The integration suite verifies parent/child/grandchild read-back and cleanup in `test/integration/solr-document-fidelity.test.ts`. Runtime evidence remains subject to the pinned Solr CI matrix.

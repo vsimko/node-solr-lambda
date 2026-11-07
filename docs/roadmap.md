@@ -31,10 +31,15 @@ This tranche is deliberately small and independent of the v4.0 release gate. It 
 
 | Priority / sequence | Feature | Tracking | User value and scope |
 | --- | --- | --- | --- |
-| P1 — first | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/issues/271) | Direct unique-key single/multi-document retrieval for read-after-write workflows, with generic document response types and exact request-option evidence. |
-| P2 — next | Typed SpellCheck query component | [#272](https://github.com/vsimko/node-solr-lambda/issues/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
+| P1 — first | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/pull/271) | Direct unique-key single/multi-document retrieval for read-after-write workflows, with generic document response types and exact request-option evidence. |
+| P2 — next | Typed SpellCheck query component | [#272](https://github.com/vsimko/node-solr-lambda/pull/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
+| P2 | BigInt-safe JSON precision policy | [#292](https://github.com/vsimko/node-solr-lambda/issues/292) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |
+| P2 | Typed Suggester API | [#293](https://github.com/vsimko/node-solr-lambda/issues/293) | Add autocomplete/suggestion contracts distinct from SpellCheck and Terms. |
+| P2 | Backpressure-aware document ingestion | [#295](https://github.com/vsimko/node-solr-lambda/issues/295) | Add bounded-memory ingestion through the shared transport, with cancellation and explicit partial-failure semantics. |
 
-The two issues are independent of each other, #110, and #232. The sequence is a delivery preference, not a technical dependency. Each implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
+| P2 | Cross-client regression test audit | [#297](https://github.com/vsimko/node-solr-lambda/issues/297) | Add only missing high-value cases from Solarium/pysolr/SolrJ: nested documents, Unicode round-trip, long request boundary, custom handler response extensibility, and test-topology clarity. |
+
+The cross-client regression test audit (#297) is implemented in PR #296 with ADR 0003 and synchronized test/inventory documentation; #297 is closed after the full pinned CI matrix passed. RealTime Get (#271) is merged. SpellCheck (#272) is merged after its fresh post-rebase CI matrix passed all 30 jobs. The follow-on items #292, #293, and #295 are independent design/feature issues; their order is a delivery preference except that Suggester follows the current query-component work. Issue #294 was closed after an API audit: prepare-commit is not documented as a supported public option in the pinned Solr guides, so no typed wrapper or compatibility claim is planned unless authoritative documentation and reproducible lifecycle tests become available. All feature work remains independent of #110 and #232. Each implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
 
 ### P1 — SolrCloud operation evidence
 
@@ -52,11 +57,11 @@ The residual opportunities in API coverage, endpoint inventory, and the machine-
 
 | Category | Decision | Rationale / tracking |
 | --- | --- | --- |
-| Feature | Accept RealTime Get and SpellCheck as the next focused additions | #271 and #272 improve common lookup and search-correction workflows with discoverable TypeScript contracts. |
+| Feature | Accept RealTime Get, SpellCheck, BigInt-safe JSON, Suggester, and streaming ingestion; reject a typed prepare-commit wrapper pending a supported contract | #271/#272 cover common lookup and correction; #292, #293, and #295 capture precision, autocomplete, and ingestion gaps. #294 was closed after the public API audit found insufficient documented cross-version support. |
 | Verification-only | Keep delete-option `_route_`/`commitWithin`, optimize-specific `openSearcher`, ReplicationHandler `enablepoll`/`disablepoll`, and the Solr 8.11.4 in-progress abort boundary explicitly unverified | These are narrower behavior-evidence gaps, not reasons to broaden the public API; retain exact compatibility notes until deterministic tests or server evidence exist. |
 | External/manual gates | Keep SPLITSHARD/MIGRATE execution (#232) and v4.0 publication (#110) separate | Both require maintainer/release-owner action; neither blocks the selected feature tranche. |
 | Maintenance | Finish the audit-driven API coverage, compatibility, endpoint inventory, and machine-readable inventory reconciliation | Tracked by the consolidated documentation PR #269; historical checklist hygiene is recorded in #228–#236 and #265. |
-| Deferred pending demand | Terms handler, Suggester handler, additional validation adapters, version-specific error payload variants, and advanced OAuth/mTLS credential lifecycle | No concrete consumer requirement or incompatible payload currently justifies adding these to the immediate tranche. Reassess when demand or reproducible evidence appears. |
+| Deferred pending demand | Terms handler, additional validation adapters, version-specific error payload variants, and advanced OAuth/mTLS credential lifecycle | Terms remains deferred because Suggester is a distinct higher-level autocomplete workflow and the generic request escape hatch remains available. Reassess Terms when a concrete consumer requirement appears. |
 | Intentional non-goals | Blanket wrappers for every Solr endpoint/plugin and implicit V2 support from V1 contracts | Generic transport remains an escape hatch; V2 routes/payloads require a separately scoped API and tests. |
 
 ## Dependencies and execution
@@ -65,7 +70,8 @@ The residual opportunities in API coverage, endpoint inventory, and the machine-
 - Export `includeStoredFields=true` is verified specifically on Solr 10.1.0 by merged PR #263, which closes #258. Do not extend that claim to Solr 8/9.
 - #232 is independent of #259. Its opt-in workflow must be run manually; results must be reflected in the Collections action matrix and API inventory before any compatibility claim changes.
 - #110 remains separate from feature implementation and depends on final documentation, release-candidate CI, external npm/GitHub trusted-publishing configuration, and release-owner approval.
-- The next TypeScript-first feature tranche is #271 (RealTime Get) followed by #272 (SpellCheck); both are independent of the #110 release and #232 destructive SolrCloud gates.
+- RealTime Get (#271) is complete and merged. SpellCheck (#272) is complete and merged. Follow-on comparison-derived work is #292 (BigInt precision), #293 (Suggester), and #295 (streaming ingestion); #294 is closed as not planned after the prepare-commit API audit. #297 (cross-client regression test audit) was completed by PR #296 with nested-document, Unicode, long-query, and custom-handler regression tests. All remain independent of the #110 release and #232 destructive SolrCloud gates.
+- ADR 0002 and [the solr-client comparison](solr-client-comparison.md) record what was learned from `lbdremy/solr-node-client`; ADR 0003 records cross-client regression-test selection and transport boundaries. Reuse use cases and test cases, not legacy implementation patterns.
 - Every implementation PR updates relevant API docs, compatibility evidence, and `api-inventory.json`; do not infer runtime support from type or serialization tests.
 
 ## Completed foundation and historical work
