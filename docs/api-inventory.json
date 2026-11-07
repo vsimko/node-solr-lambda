@@ -815,7 +815,7 @@
     {
       "id": "admin.collections.forceleader",
       "area": "Collections",
-      "clientMethod": "collections(\"FORCELEADER\")",
+      "clientMethod": "collections",
       "httpMethod": "GET",
       "path": "/solr/admin/collections?action=FORCELEADER&collection={collection}&shard={shard}",
       "methodImplemented": true,
