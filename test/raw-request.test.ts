@@ -153,3 +153,45 @@ test("custom handlers preserve repeated query parameters and unknown JSON respon
   assert.deepEqual(result, payload);
   assert.deepEqual(result.futurePluginField, { enabled: true });
 });
+
+
+test("requestRaw uses the configured codec for JSON bodies and structured HTTP errors", async () => {
+  let stringifyCalls = 0;
+  let parseCalls = 0;
+  let requestBody = "";
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    jsonCodec: {
+      parse(text) {
+        parseCalls++;
+        return JSON.parse(text);
+      },
+      stringify(value) {
+        stringifyCalls++;
+        return JSON.stringify(value);
+      }
+    },
+    fetch: async (_input, init) => {
+      requestBody = String(init?.body);
+      return new Response('{"error":{"code":400,"msg":"bad request"}}', {
+        status: 400,
+        statusText: "Bad Request",
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  await assert.rejects(
+    client.requestRaw("/solr/catalog/update", { method: "POST", body: { add: [{ doc: { id: "one" } }] } }),
+    (error: unknown) => {
+      assert.ok(error instanceof SolrHttpError);
+      assert.equal(error.errorResponse?.error && typeof error.errorResponse.error === "object"
+        ? error.errorResponse.error.msg
+        : error.errorResponse?.error, "bad request");
+      return true;
+    }
+  );
+  assert.equal(stringifyCalls, 1);
+  assert.equal(parseCalls, 1);
+  assert.equal(requestBody, '{"add":[{"doc":{"id":"one"}}]}');
+});

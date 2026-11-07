@@ -69,6 +69,26 @@ const solr = createSolrClient({
 
 A request can override a default parameter. For example, `wt=xml` in the request takes precedence over the default `wt=json`.
 
+## Lossless JSON parsing and serialization
+
+By default, the transport uses native `JSON.parse()` and `JSON.stringify()`. This preserves the existing JavaScript behavior, including the precision limit for integers above `Number.MAX_SAFE_INTEGER`.
+
+Supply `jsonCodec` when your application needs lossless numeric handling, such as Solr's 64-bit `_version_` values:
+
+```ts
+const solr = createSolrClient({
+  collection: "catalog",
+  jsonCodec: {
+    parse: text => losslessJson.parse(text),
+    stringify: value => losslessJson.stringify(value)
+  }
+});
+```
+
+`SolrJsonCodec.parse()` handles successful JSON responses and structured HTTP error payloads. `stringify()` handles JSON request bodies sent by both `request()` and `requestRaw()`. A codec can preserve large integers as `bigint`; type your document and response fields accordingly. The library does not add a JSON codec dependency or change numeric behavior by default.
+
+Explicit string bodies passed to `requestRaw()` are sent unchanged. Successful `requestRaw()` responses remain raw Fetch `Response` objects and are not parsed by the codec. Empty and malformed JSON responses retain the existing `undefined` and raw-text fallback behavior.
+
 ## Retry policy
 
 Retries are disabled by default. When enabled, the client retries `GET` requests by default. It does not retry update `POST` requests unless you add `POST` to `methods`.

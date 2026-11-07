@@ -1208,6 +1208,14 @@ export interface ValidationConfig {
   outputs?: Readonly<Record<string, ValidationSchema>>;
   onError?: "throw" | "ignore";
 }
+/** Optional JSON codec for lossless or application-specific Solr JSON handling. */
+export interface SolrJsonCodec {
+  /** Parse a JSON response body into caller-defined values (for example, BigInt). */
+  parse(text: string): unknown;
+  /** Serialize a request body; return undefined only when the input has no JSON representation. */
+  stringify(value: unknown): string | undefined;
+}
+
 export interface SolrClientConfig {
   /** Solr origin or reverse-proxy prefix. Do not include a core or collection name. */
   baseUrl?: string;
@@ -1221,6 +1229,8 @@ export interface SolrClientConfig {
   username?: string;
   password?: string;
   fetch?: typeof fetch;
+  /** Optional lossless JSON parser/serializer. Native JSON behavior remains the default. */
+  jsonCodec?: SolrJsonCodec;
   retry?: SolrRetryPolicy | false;
   requestDefaults?: SolrRequestDefaults;
   validation?: ValidationConfig;
