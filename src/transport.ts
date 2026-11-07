@@ -287,7 +287,7 @@ export class SolrTransport {
       stopped = true;
       if (!iterator?.return) return Promise.resolve();
       if (!returnPromise) {
-        returnPromise = Promise.resolve(iterator.return()).then(() => undefined);
+        returnPromise = Promise.resolve().then(() => iterator!.return!()).then(() => undefined);
       }
       return returnPromise;
     };
