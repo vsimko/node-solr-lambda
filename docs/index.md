@@ -53,6 +53,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Solr client API coverage and implementation principles (ADR 0002)](adr/0002-solr-client-api-coverage.md)
 - [Cross-client regression test strategy (ADR 0003)](adr/0003-cross-client-test-strategy.md)
 - [Suggester query-component decision (ADR 0004)](adr/0004-suggester-query-component.md)
+- [Injectable lossless JSON codec (ADR 0005)](adr/0005-lossless-json-codec.md)
 - [Website data contract](site-data-contract.md)
 - [Website data JSON Schema](site-data.schema.json)
 - [Website data validation rules and commands](site-data-validation.md)

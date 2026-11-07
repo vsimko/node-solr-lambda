@@ -45,7 +45,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration and request controls; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, and request controls; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
 
 Use named imports from the package root:
 

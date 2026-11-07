@@ -80,6 +80,10 @@ The client does not yet provide dedicated typed wrappers for the V2 API.
 
 See the [machine-readable API inventory](api-inventory.json) for operation-level test and version status.
 
+## Client-side JSON codec
+
+`SolrClientConfig.jsonCodec` is a client-side parser/serializer extension point, not a Solr server feature. It is independent of Solr 8/9/10 compatibility and does not change the native JSON behavior used when no codec is supplied. The caller owns the codec's correctness and the types returned by its parser. The transport applies it to structured success/error payloads and JSON request bodies, while raw string bodies and successful raw response streams remain untouched.
+
 ## Current support policy
 
 - Target Solr server lines are 8.x, 9.x, and 10.x.

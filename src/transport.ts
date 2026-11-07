@@ -77,10 +77,14 @@ function endpointFor(url: URL): string {
   return `${url.origin}${url.pathname}`;
 }
 
-function parseBody(text: string): unknown {
+function parseBody(text: string, codec?: SolrClientConfig["jsonCodec"]): unknown {
   if (!text) return undefined;
-  try { return JSON.parse(text) as unknown; }
+  try { return codec ? codec.parse(text) : JSON.parse(text) as unknown; }
   catch { return text; }
+}
+
+function stringifyBody(value: unknown, codec?: SolrClientConfig["jsonCodec"]): string | undefined {
+  return codec ? codec.stringify(value) : JSON.stringify(value);
 }
 
 function isTimeoutError(error: unknown): boolean {
@@ -184,6 +188,13 @@ export class SolrTransport {
     }
     if (baseUrl.username || baseUrl.password) {
       throw new TypeError("Solr baseUrl must not include embedded credentials");
+    }
+    if (config.jsonCodec !== undefined && (
+      !config.jsonCodec ||
+      typeof config.jsonCodec.parse !== "function" ||
+      typeof config.jsonCodec.stringify !== "function"
+    )) {
+      throw new TypeError("jsonCodec must provide parse() and stringify() functions");
     }
     if (config.timeoutMs !== undefined && (!Number.isFinite(config.timeoutMs) || config.timeoutMs <= 0)) {
       throw new RangeError("timeoutMs must be a positive number");
@@ -323,7 +334,7 @@ export class SolrTransport {
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : JSON.stringify(input), options.signal, this.requestTimeout(options)
+      url, method, headers, options.body === undefined ? undefined : stringifyBody(input, this.#clientConfig.jsonCodec), options.signal, this.requestTimeout(options)
     );
     try {
       let body: string;
@@ -334,7 +345,7 @@ export class SolrTransport {
       }
       const abortError = signalContext.classify();
       if (abortError) throw abortError;
-      const payload = parseBody(body);
+      const payload = parseBody(body, this.#clientConfig.jsonCodec);
       if (!response.ok) {
         throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, payload);
       }
@@ -374,14 +385,14 @@ export class SolrTransport {
       ...options.headers
     };
     const { response, signalContext } = await this.fetchWithRetry(
-      url, method, headers, options.body === undefined ? undefined : rawStringBody ? input as string : JSON.stringify(input), options.signal, this.requestTimeout(options)
+      url, method, headers, options.body === undefined ? undefined : rawStringBody ? input as string : stringifyBody(input, this.#clientConfig.jsonCodec), options.signal, this.requestTimeout(options)
     );
     if (!response.ok) {
       try {
         const body = await response.text();
         const abortError = signalContext.classify();
         if (abortError) throw abortError;
-        throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, parseBody(body));
+        throw new SolrHttpError(response.status, response.statusText, endpointFor(url), body, parseBody(body, this.#clientConfig.jsonCodec));
       } catch (error) {
         const classified = signalContext.classify(error);
         if (classified) throw classified;
