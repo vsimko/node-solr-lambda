@@ -1,3 +1,4 @@
+import { summarizeProgress } from "./progress.js";
 const el=(id)=>document.getElementById(id);
 function makeCard(title,status,details,url){
   const node=document.createElement("article");node.className="card";
@@ -13,17 +14,7 @@ function renderProgress(data){
   const target=el("implementation-progress");
   target.replaceChildren();
   const api=data.apiCoverage?.records||[];
-  const implemented=api.filter(x=>x.implementation==="implemented").length;
-  const typed=api.filter(x=>x.typeCoverage==="complete").length;
-  const verified=api.filter(x=>x.status==="verified").length;
-  const done=(data.roadmap?.records||[]).filter(x=>x.state==="closed"||x.state==="merged").length;
-  const tracked=(data.roadmap?.records||[]).length;
-  const metrics=[
-    {label:"API operations implemented",value:implemented,total:api.length,detail:"Public operations present in the client"},
-    {label:"Complete TypeScript contracts",value:typed,total:api.length,detail:"Operations with complete type coverage"},
-    {label:"Runtime verified",value:verified,total:api.length,detail:"Verified on every pinned Solr version listed"},
-    {label:"Roadmap work completed",value:done,total:tracked,detail:"Closed issues and merged pull requests"}
-  ];
+  const metrics=summarizeProgress(api,data.roadmap?.records||[]);
   for(const metric of metrics){
     const article=document.createElement("article");article.className="progress-card";
     const top=document.createElement("div");top.className="progress-card-top";
