@@ -27,7 +27,7 @@ We optimize for five mutually reinforcing pillars:
 ### Strategic execution tracks
 
 - API surface and feature-gap inventory (#310)
-- Solr/Node.js support policy and compatibility automation (#313; Node.js 26 qualification #329)
+- Solr/Node.js support policy and compatibility automation (#313; Node.js 26 qualification #329; Solr 8.x EOL policy documented)
 - Testing strategy, fault injection, security, and SolrCloud evidence (#310)
 - Reproducible performance and memory benchmark suite (#310)
 - Competitor/ecosystem comparison and public quality scorecard (#310)
@@ -37,7 +37,7 @@ We optimize for five mutually reinforcing pillars:
 
 The primary product goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js. This means more than a broad method list: every important capability should have a correct typed contract, clear documentation, relevant tests, and explicit version evidence.
 
-The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams:
+The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams. The V2 API audit is complete (#327); implementation is tracked by #332–#334. SolrCloud FORCELEADER work is tracked by #328.
 
 | Workstream | Tracking | Required evidence |
 | --- | --- | --- |
@@ -55,8 +55,8 @@ Developer experience remains a cross-cutting requirement: excellent TypeScript i
 - Package manager: npm; use `npm ci` and commit `package-lock.json`.
 - Runtime targets: Node.js 26 (Active LTS), 24 and 22 (Maintenance LTS); Node.js 20 remains an EOL legacy compatibility target for v4 only.
 - Transport: Node.js Fetch API; optional runtime validation: Zod.
-- Target Solr lines: 8.x, 9.x, and 10.x.
-- Pinned integration images: Solr 8.11.4, 9.11.0, and 10.1.0. Compatibility is operation-specific; a green matrix does not certify every action. See [compatibility](compatibility.md) and [api-inventory.json](api-inventory.json).
+- Current Solr targets: 10.1.0 (primary) and 9.11.0 (compatibility); 8.11.4 remains a legacy regression target because upstream Solr 8.x is EOL.
+- Pinned integration images: Solr 8.11.4, 9.11.0, and 10.1.0. No blanket patch-level compatibility is implied; every operation is evidence-scoped. See [compatibility](compatibility.md) and [api-inventory.json](api-inventory.json).
 - Package metadata identifies the current package line as 4.0.0-beta.0; this does not imply a separate development branch.
 - `master` is the only active development line.
 

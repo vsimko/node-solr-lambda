@@ -2,6 +2,55 @@
 
 This page records the current client compatibility policy. It separates documentation evidence from runtime test evidence.
 
+## Project support policy
+
+The client publishes an evidence policy, not an upstream support guarantee. A compatibility claim applies only to the exact pinned server version and operation whose tests passed.
+
+### Apache Solr
+
+| Client tier | Exact server baseline | Policy |
+| --- | --- | --- |
+| Current primary target | Solr 10.1.0 | Newest official Solr release as of 2026-11-07; prioritize new-version qualification and feature verification here. |
+| Current compatibility target | Solr 9.11.0 | Final release in the 9.x series; retain as a first-class tested compatibility baseline. |
+| Legacy compatibility only | Solr 8.11.4 | Final 8.x release. The Solr PMC designated the 8.x line End of Life on 2024-10-25. Keep the pinned image as a v4 regression target, but do not recommend it for new production deployments or imply upstream security maintenance. |
+
+The project does **not** claim blanket support for every patch in 8.x, 9.x, or 10.x. The exact runtime baselines are 8.11.4, 9.11.0, and 10.1.0; every operation has its own evidence status. Solr 8.11.4 being tested by this client does not reverse its upstream EOL status. Solr 9.11.0 and 10.1.0 being client compatibility targets does not create an Apache Solr support-window guarantee.
+
+Official release sources: the [Solr PMC board minutes](https://apache.org/foundation/board/minutes/Solr.html) record the 8.x EOL designation; the [official Solr downloads page](https://solr.apache.org/downloads.html) identifies 10.1.0 as the latest release and 9.11.0 as the final 9.x release. Solr releases are not scheduled in advance; the project publishes them when maintainers judge there are sufficient changes.
+
+### Node.js
+
+- **Active production targets:** Node.js 26.x (Active LTS), 24.x and 22.x (Maintenance LTS).
+- **Legacy v4 compatibility:** Node.js 20.x remains in `engines` and CI for existing consumers, but reached EOL on 2026-04-30 and is not recommended for new production deployments.
+- Removing Node.js 20 from the engine range is a future major-version decision; it is not done in v4.
+- The exact engine range is `^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0`. No broad `>=20` compatibility claim is made.
+
+The [Node.js Release Working Group schedule](https://github.com/nodejs/Release#release-schedule) is authoritative for LTS/EOL status and dates. Reassess the Node matrix when a supported LTS line changes lifecycle phase or reaches EOL.
+
+### Evidence levels
+
+- **Current tested baseline:** exact pinned release, with completed unit/type, standalone integration, security-enabled integration, and SolrCloud jobs where applicable.
+- **Legacy tested baseline:** exact pinned release retained for regression coverage after upstream EOL; this is not a security-maintenance recommendation.
+- **Documented only:** present in an official reference guide, but the exact behavior has not passed the relevant integration test.
+- **Unverified:** no exact runtime evidence exists for that operation/version.
+- **Not covered:** no dedicated typed client method exists.
+
+A configured CI matrix is not a passed matrix. The public website and compatibility records must derive runtime status from completed workflow runs, while showing configured-but-pending combinations separately.
+
+### New-release qualification procedure
+
+For every new Solr release selected for support:
+
+1. Pin the exact Docker image and record its official release notes and reference-guide baseline.
+2. Add it to standalone, security-enabled, and SolrCloud CI matrices; keep existing pinned baselines until a deliberate deprecation decision.
+3. Run unit, consumer TypeScript, serialization/contract, standalone, authentication/authorization, and SolrCloud suites. Run destructive SPLITSHARD/MIGRATE checks only through the loopback-only opt-in workflow.
+4. Review changed/deprecated V1 and V2 routes, request bodies, response shapes, auth permissions, Java/runtime requirements, and plugin changes.
+5. Update `docs/compatibility.md`, `docs/api-inventory.json`, API coverage, endpoint inventory, release notes, and generated website data from completed evidence.
+6. Mark each operation as tested only after its exact behavior passes. Record unsupported or partially tested cases instead of inferring support from a green matrix.
+7. Revisit legacy baselines at the next major client release and document a deprecation window before removing them.
+
+The current matrix is intentionally pinned rather than dynamically claiming compatibility with all releases. Scheduled upstream-release discovery and automated matrix expansion are tracked separately in [Issue #335](https://github.com/vsimko/node-solr-lambda/issues/335).
+
 ## Status terms
 
 - **Documented** means the endpoint or feature appears in the official reference guide for the listed Solr documentation baseline.
@@ -17,19 +66,19 @@ An exposed action or parameter is not runtime-certified merely because it has a 
 
 ## Reference baselines
 
-| Solr line | Documentation baseline | Documentation |
-| --- | --- | --- |
-| 8.x | 8.11 | [Solr 8.11 Reference Guide](https://solr.apache.org/guide/8_11/index.html) |
-| 9.x | 9.11 | [Solr 9.11 Reference Guide](https://solr.apache.org/guide/solr/9_11/index.html) |
-| 10.x | 10.1 | [Solr 10.1 Reference Guide](https://solr.apache.org/guide/solr/10_1/) |
+| Solr line | Documentation baseline | Pinned runtime baseline | Client tier | Documentation |
+| --- | --- | --- | --- | --- |
+| 8.x (upstream EOL) | 8.11 | 8.11.4 | Legacy compatibility only | [Solr 8.11 Reference Guide](https://solr.apache.org/guide/8_11/index.html) |
+| 9.x | 9.11 | 9.11.0 | Current compatibility target | [Solr 9.11 Reference Guide](https://solr.apache.org/guide/solr/9_11/index.html) |
+| 10.x | 10.1 | 10.1.0 | Current primary target | [Solr 10.1 Reference Guide](https://solr.apache.org/guide/solr/10_1/) |
 
-The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Management Commands sections document ADDREPLICA, MOVEREPLICA, and DELETEREPLICA. These baselines are references for review. They do not define a minimum supported patch release.
+The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Management Commands sections document ADDREPLICA, MOVEREPLICA, and DELETEREPLICA. These are documentation and runtime baselines, not blanket claims for every patch release.
 
 ## Node.js runtime matrix
 
-The package engine range is `^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0`. Node.js 26 is Active LTS; Node.js 24 and 22 are Maintenance LTS. Node.js 20 reached end-of-life on 2026-04-30 and is retained only as a legacy v4 compatibility target; it is not recommended for new production deployments. The project does not remove Node 20 from the v4 engine range in this change; that decision belongs to a future major release. See the [official Node.js release schedule](https://github.com/nodejs/Release#release-schedule). The CI workflow defines Node.js 20 (legacy), 22, 24, and 26 jobs for type checking, consumer type fixtures, unit tests, builds, and release/documentation checks. Its standalone Solr, authenticated Solr, and SolrCloud integration jobs combine each of those four Node versions with Solr 8.11.4, 9.11.0, and 10.1.0 (a 4 × 3 matrix per job).
+The package engine range is `^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0`. Node.js 26 is Active LTS; Node.js 24 and 22 are Maintenance LTS. Node.js 20 reached end-of-life on 2026-04-30 and is retained only as a legacy v4 compatibility target; it is not recommended for new production deployments. The project does not remove Node 20 from the v4 engine range in this change; that decision belongs to a future major release. See the [official Node.js release schedule](https://github.com/nodejs/Release#release-schedule). The CI workflow defines Node.js 20 (legacy), 22, 24, and 26 jobs for type checking, consumer type fixtures, unit tests, builds, and release/documentation checks. Each standalone Solr, authenticated Solr, and SolrCloud integration suite uses the Cartesian product of those four Node versions and the three exact pinned Solr baselines.
 
-Streaming ingestion was delivered in #300, hardened in #317, and completed with independent test coverage in #321. The final lifecycle matrix in CI run [#42392182590](https://github.com/vsimko/node-solr-lambda/actions/runs/42392182590) passed 30/30 jobs across Node.js 20/22/24 and pinned Solr 8.11.4/9.11.0/10.1.0 standalone, security-enabled, and SolrCloud matrices; the 250-document `addStream()` fixture was read back with exact count/order on all three Solr versions. The consumer/test follow-up run [#42392800998](https://github.com/vsimko/node-solr-lambda/actions/runs/42392800998) also passed 30/30. Documentation reconciliation in #325 passed the dedicated docs/API-inventory checks. This certifies the tested JSON-array ingestion behavior on those pinned images; it does not certify atomicity or behavior on other Solr releases.
+Streaming ingestion was delivered in #300, hardened in #317, and completed with independent test coverage in #321. The final lifecycle matrix in CI run [#42392182590](https://github.com/vsimko/node-solr-lambda/actions/runs/42392182590) passed the previous 30-job matrix across Node.js 20/22/24 and pinned Solr 8.11.4/9.11.0/10.1.0 standalone, security-enabled, and SolrCloud suites; the 250-document `addStream()` fixture was read back with exact count/order on all three Solr versions. The consumer/test follow-up run [#42392800998](https://github.com/vsimko/node-solr-lambda/actions/runs/42392800998) also passed 30/30. Documentation reconciliation in #325 passed the dedicated docs/API-inventory checks. This certifies the tested JSON-array ingestion behavior on those pinned images; it does not certify atomicity or behavior on other Solr releases.
 
 ## Endpoint matrix
 
@@ -92,22 +141,17 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Current support policy
 
-- Target Solr server lines are 8.x, 9.x, and 10.x.
-- The minimum supported patch release for each line is **not established**.
-- The selected endpoint behaviors listed as Tested have passed against the pinned patch images; this does not certify every endpoint or all patch releases in a major line.
-- Treat only the explicitly listed operations as **Tested**; other actions, options, and response models remain unverified.
-- A successful TypeScript build, unit test, or documentation lookup is not server compatibility evidence.
-- If an endpoint differs by version, record the difference here and add a focused test before changing its status.
+The current tiers and lifecycle rules are defined in [Project support policy](#project-support-policy) above. Runtime certification remains operation-specific; a successful TypeScript build, unit test, or documentation lookup is not server compatibility evidence. If an endpoint differs by version, record the difference here and add a focused test before changing its status.
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. The integration workflows run on Node.js 20, 22, and 24, covering all nine Node.js/Solr-version combinations in each of the three integration suites (27 integration jobs total), in addition to the three Node.js unit/build jobs. This full matrix was added in PR #226; its CI run #522 passed all 30 jobs. Earlier runs such as CI #162 and #177 provide historical evidence for the individual integration behaviors, but should not be read as evidence that the full Node.js/Solr matrix was already enabled at that time. The passing SolrCloud coverage includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection on both authentication and authorization handlers, authenticated reads, authentication property mutation/read-back, malformed JSON rejection, and that negative response bodies do not echo configured credentials. Unit tests also assert request Authorization headers are not copied into client HTTP error properties.
+CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. Each integration suite covers Node.js 20 (legacy), 22, 24, and 26 across all three pinned Solr images: a 4 × 3 Cartesian product per suite (36 integration combinations across the three suites), in addition to the four Node.js unit/type/build/release jobs and documentation checks. The expanded matrix passed in CI run [#42398855690](https://github.com/vsimko/node-solr-lambda/actions/runs/42398855690). Earlier runs such as CI #162, #177, and #522 provide historical evidence for individual behaviors or the former three-Node matrix; they should not be read as evidence that Node.js 26 was tested in those runs. The passing SolrCloud coverage includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection on both authentication and authorization handlers, authenticated reads, authentication property mutation/read-back, malformed JSON rejection, and that negative response bodies do not echo configured credentials. Unit tests also assert request Authorization headers are not copied into client HTTP error properties.
 
-| Solr line | Pinned Docker image |
-| --- | --- |
-| 8.x | `solr:8.11.4` |
-| 9.x | `solr:9.11.0` |
-| 10.x | `solr:10.1.0` |
+| Solr line | Pinned Docker image | Client tier |
+| --- | --- | --- |
+| 8.x (upstream EOL) | `solr:8.11.4` | Legacy compatibility only |
+| 9.x | `solr:9.11.0` | Current compatibility target |
+| 10.x | `solr:10.1.0` | Current primary target |
 
 Run the same suite locally after starting a Solr container and creating an isolated core:
 
