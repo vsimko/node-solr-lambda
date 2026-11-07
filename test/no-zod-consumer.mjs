@@ -54,7 +54,7 @@ try {
   assert.equal(packedManifest.types, "./dist/types/index.d.ts");
   assert.equal(packedManifest.version, packageInfo.version);
   assert.equal(packedManifest.license, "MIT");
-  assert.equal(packedManifest.engines?.node, "^20.0.0 || ^22.0.0 || ^24.0.0");
+  assert.equal(packedManifest.engines?.node, "^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0");
   assert.equal(packedManifest.peerDependenciesMeta?.zod?.optional, true);
   assert.equal(packedManifest.exports?.["."]?.import?.default, "./dist/esm/index.js");
   assert.equal(packedManifest.exports?.["."]?.require?.default, "./dist/cjs/index.js");
