@@ -788,29 +788,6 @@
         "test/admin-api-types.ts"
       ],
       "notes": "Read-only logger configuration and level information. This client method does not mutate logger levels; integration tests verify a representative response on pinned Solr 8.11.4, 9.11.0, and 10.1.0."
-    },
-    {
-      "id": "query.suggester",
-      "area": "Suggester",
-      "clientMethod": "query",
-      "httpMethod": "GET",
-      "path": "/solr/{core-or-collection}/{configured-handler}",
-      "methodImplemented": true,
-      "typeCoverage": "complete",
-      "unitTests": "present",
-      "integrationTests": "not-run",
-      "versions": {
-        "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
-      },
-      "documentation": "docs/suggester.md",
-      "testFiles": [
-        "test/query.test.ts",
-        "test/suggester-doc-examples.ts",
-        "test/integration/solr-suggester.test.ts"
-      ],
-      "notes": "Optional SuggestComponent request options on the existing query() API. The server must attach solr.SuggestComponent and configure one or more dictionaries on the selected SearchHandler; the client does not assume a /suggest path or manage dictionary configuration. Runtime evidence pending fresh CI."
     }
   ]
 }
