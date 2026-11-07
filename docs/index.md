@@ -37,7 +37,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Public API review](public-api-review.md)
 - [Solr server compatibility matrix](compatibility.md)
 
-## Migration, development, and release
+## Product strategy\n\n- [North-star objective and development roadmap](roadmap.md#north-star-objective-best-in-class-solr-client)\n\n## Migration, development, and release
 
 - [Migration from v3 to v4](migration-v3-to-v4.md)
 - [Development roadmap](roadmap.md)
