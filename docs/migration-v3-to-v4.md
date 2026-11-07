@@ -174,4 +174,4 @@ This workflow is exercised as an integration test against the pinned Solr 8.11.4
 
 ## Compatibility notes
 
-The v4 client targets Solr 8.x, 9.x, and 10.x, but compatibility is certified per operation and exact tested behavior. Check the [compatibility matrix](compatibility.md) and [endpoint inventory](endpoint-inventory.md); do not infer support for arbitrary handlers or parameters from the raw request methods.
+The v4 client is tested against exact pinned Solr baselines: 10.1.0 (current primary), 9.11.0 (current compatibility), and 8.11.4 (legacy only; upstream Solr 8.x is EOL). Compatibility is certified per operation and exact tested behavior, not for every patch in a major line. Check the [support policy and compatibility matrix](compatibility.md) and [endpoint inventory](endpoint-inventory.md); do not infer support for arbitrary handlers or parameters from raw request methods.
