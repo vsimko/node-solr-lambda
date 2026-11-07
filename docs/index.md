@@ -29,6 +29,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 
 ## API and compatibility references
 
+- [Solr V2 API compatibility and typed-client strategy](solr-v2-api-strategy.md)
 - [Public API reference](api-reference.md)
 - [API coverage](api-coverage.md)
 - [Collections action coverage matrix](collections-api-coverage.md)
