@@ -27,7 +27,7 @@ We optimize for five mutually reinforcing pillars:
 ### Strategic execution tracks
 
 - API surface and feature-gap inventory (#310)
-- Solr/Node.js support policy and compatibility automation (#310)
+- Solr/Node.js support policy and compatibility automation (#313; Node.js 26 qualification #329)
 - Testing strategy, fault injection, security, and SolrCloud evidence (#310)
 - Reproducible performance and memory benchmark suite (#310)
 - Competitor/ecosystem comparison and public quality scorecard (#310)
@@ -53,7 +53,7 @@ Developer experience remains a cross-cutting requirement: excellent TypeScript i
 ## Current baseline
 
 - Package manager: npm; use `npm ci` and commit `package-lock.json`.
-- Runtime targets: Node.js 20, 22, and 24.
+- Runtime targets: Node.js 26 (Active LTS), 24 and 22 (Maintenance LTS); Node.js 20 remains an EOL legacy compatibility target for v4 only.
 - Transport: Node.js Fetch API; optional runtime validation: Zod.
 - Target Solr lines: 8.x, 9.x, and 10.x.
 - Pinned integration images: Solr 8.11.4, 9.11.0, and 10.1.0. Compatibility is operation-specific; a green matrix does not certify every action. See [compatibility](compatibility.md) and [api-inventory.json](api-inventory.json).
@@ -135,7 +135,7 @@ Closed issues are retained as historical evidence, not active priorities:
 2. Create a short-lived branch from current `master`.
 3. Implement with unit tests, consumer type tests, documentation, and operation-specific integration evidence.
 4. Open a pull request targeting `master` and link the issue.
-5. Require review and passing CI on Node.js 20, 22, and 24; use pinned Solr integration jobs for behavior claims.
+5. Require review and passing CI on Node.js 20 (legacy), 22, 24, and 26; use pinned Solr integration jobs for behavior claims.
    - The documentation-only CI path builds the package before `docs:check`, because export-target validation inspects generated `dist/` files.
 6. Merge the PR into `master`.
 7. Update this roadmap and API coverage/compatibility documents when scope or status changes.

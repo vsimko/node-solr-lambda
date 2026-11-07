@@ -159,13 +159,14 @@ jobs:
       - name: Build and validate website
         run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
 
+  # Node 20 is retained for legacy v4 compatibility; 22/24/26 are the supported LTS targets.
   test:
     needs: changes
     if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
     strategy:
       fail-fast: true
       matrix:
-        node: [20, 22, 24]
+        node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -202,7 +203,7 @@ jobs:
       fail-fast: true
       matrix:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
-        node: [20, 22, 24]
+        node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -270,7 +271,7 @@ jobs:
       fail-fast: true
       matrix:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
-        node: [20, 22, 24]
+        node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
     env:
       SOLR_USERNAME: integration-admin
@@ -376,7 +377,7 @@ jobs:
       fail-fast: true
       matrix:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
-        node: [20, 22, 24]
+        node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

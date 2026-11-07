@@ -43,6 +43,7 @@ try {
   );
 
   const packedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "node-solr-lambda", "package.json"), "utf8"));
+  const sourceManifest = JSON.parse(readFileSync(join(repositoryRoot, "package.json"), "utf8"));
   assert.equal(packedManifest.name, packageInfo.name);
   assert.equal(packedManifest.scripts?.["release:publish"], "node scripts/publish.mjs");
   assert.equal(packedManifest.repository?.url, "https://github.com/vsimko/node-solr-lambda.git");
@@ -54,7 +55,7 @@ try {
   assert.equal(packedManifest.types, "./dist/types/index.d.ts");
   assert.equal(packedManifest.version, packageInfo.version);
   assert.equal(packedManifest.license, "MIT");
-  assert.equal(packedManifest.engines?.node, "^20.0.0 || ^22.0.0 || ^24.0.0");
+  assert.equal(packedManifest.engines?.node, sourceManifest.engines?.node);
   assert.equal(packedManifest.peerDependenciesMeta?.zod?.optional, true);
   assert.equal(packedManifest.exports?.["."]?.import?.default, "./dist/esm/index.js");
   assert.equal(packedManifest.exports?.["."]?.require?.default, "./dist/cjs/index.js");
