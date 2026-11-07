@@ -105,6 +105,8 @@ async function run() {
   if (parsedBaseUrl.username || parsedBaseUrl.password) throw new Error("Do not put Solr credentials in SOLR_BASE_URL; use environment variables.");
   const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
   const collection = process.env.SOLR_COLLECTION || "benchmark";
+  const timeoutMs = Number(process.env.SOLR_TIMEOUT_MS || 120000);
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new RangeError("SOLR_TIMEOUT_MS must be a positive number");
   const auth = makeAuth();
   const headers = { accept: "application/json", ...(auth.header ? { authorization: auth.header } : {}) };
   const updateUrl = new URL(`${encodeURIComponent(collection)}/update`, normalizedBaseUrl);
@@ -113,7 +115,7 @@ async function run() {
     baseUrl,
     collection,
     retry: false,
-    timeoutMs: Number(process.env.SOLR_TIMEOUT_MS || 120000),
+    timeoutMs,
     ...(auth.client ? { auth: auth.client } : {})
   });
   const payload = "x".repeat(options.payloadBytes);
@@ -125,7 +127,8 @@ async function run() {
   async function sendBulk(mode, docs) {
     if (mode === "client") return client.add(docs);
     return readJsonResponse(await fetch(updateUrl, {
-      method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify(docs)
+      method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify(docs),
+      signal: AbortSignal.timeout(timeoutMs)
     }), "direct Fetch bulk update");
   }
 
@@ -133,7 +136,7 @@ async function run() {
     if (mode === "client") return client.commit({ waitSearcher: true });
     return readJsonResponse(await fetch(updateUrl, {
       method: "POST", headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify({ commit: { waitSearcher: true } })
+      body: JSON.stringify({ commit: { waitSearcher: true } }), signal: AbortSignal.timeout(timeoutMs)
     }), "direct Fetch commit");
   }
 
@@ -143,7 +146,7 @@ async function run() {
     url.searchParams.set("q", "*:*");
     url.searchParams.set("rows", String(options.rows));
     url.searchParams.set("wt", "json");
-    return readJsonResponse(await fetch(url, { headers }), "direct Fetch query");
+    return readJsonResponse(await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) }), "direct Fetch query");
   }
 
   for (const workload of workloads) {
@@ -187,7 +190,8 @@ async function run() {
               method: "POST",
               headers: { ...headers, "content-type": "application/json" },
               body,
-              duplex: "half"
+              duplex: "half",
+              signal: AbortSignal.timeout(timeoutMs)
             }), "direct Fetch streaming update");
           }
           const ingestionMs = performance.now() - started;
