@@ -2,7 +2,7 @@
 
 A modern Apache Solr client for JavaScript and TypeScript on Node.js, with TypeScript-first contracts and a first-class JavaScript experience. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable request models, and a shared transport for query, update, administration, and raw requests.
 
-- **Node.js:** 20, 22, and 24
+- **Node.js:** 26 (Active LTS), 24 and 22 (Maintenance LTS), plus 20 for legacy compatibility only (EOL since 2026-04-30; not recommended for new deployments). See the [official Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
 - **Solr:** 8.x, 9.x, and 10.x; compatibility is recorded per operation in the [compatibility matrix](docs/compatibility.md)
 - **Modules:** ESM and CommonJS
 - **Runtime dependencies:** none; [Zod](https://zod.dev/) is an optional peer dependency for runtime validation
@@ -96,7 +96,11 @@ Runtime input/output validation is opt-in and uses an application-supplied schem
 
 The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pinned images Solr 8.11.4, 9.11.0, and 10.1.0. Evidence is operation-specific: a tested query or admin action does not certify every option or every handler on that Solr major. Unverified and excluded behavior is called out in the [compatibility matrix](docs/compatibility.md) and [endpoint inventory](docs/endpoint-inventory.md).
 
-## Product direction\n\nThe primary goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js, with measurable leadership in API coverage, correctness, compatibility, testing, performance, and developer experience. See the [north-star strategy and roadmap](docs/roadmap.md#north-star-objective-best-in-class-solr-client) and tracking issue [#311](https://github.com/vsimko/node-solr-lambda/issues/310).\n\n## Documentation
+## Product direction
+
+The primary goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js, with measurable leadership in API coverage, correctness, compatibility, testing, performance, and developer experience. See the [north-star strategy and roadmap](docs/roadmap.md#north-star-objective-best-in-class-solr-client) and tracking issue [#310](https://github.com/vsimko/node-solr-lambda/issues/310).
+
+## Documentation
 
 - [Complete documentation index](docs/index.md)
 - [Getting started](docs/getting-started.md)
@@ -138,7 +142,7 @@ npm run build
 npm run release:check
 ```
 
-Create a short-lived branch from `master`, link changes to a GitHub issue, and open a pull request targeting `master`. CI validates Node.js 20, 22, and 24 and the configured Solr integration matrix. Pull-request merges do not publish the package; releases are published manually after review.
+Create a short-lived branch from `master`, link changes to a GitHub issue, and open a pull request targeting `master`. CI validates Node.js 20 (legacy), 22, 24, and 26 across the configured Solr integration matrix. Pull-request merges do not publish the package; releases are published manually after review.
 
 ## Release process
 
