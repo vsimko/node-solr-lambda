@@ -26,23 +26,23 @@ We optimize for five mutually reinforcing pillars:
 
 ### Strategic execution tracks
 
-- API surface and feature-gap inventory (#310)
-- Solr/Node.js support policy and compatibility automation (#313; Node.js 26 qualification #329; Solr 8.x EOL policy documented)
-- Testing strategy, fault injection, security, and SolrCloud evidence (#310)
-- Reproducible performance and memory benchmark suite (#310)
+- API surface and feature-gap inventory (audit #312 complete; V2 route strategy #327 complete; implementation #332–#334)
+- Solr/Node.js support policy (completed in #313; Node.js 26 qualification #329 merged); scheduled release discovery/matrix expansion remains #335
+- Testing strategy, fault injection, security, and SolrCloud evidence (#315)
+- Reproducible performance and memory benchmark suite (#314)
 - Competitor/ecosystem comparison and public quality scorecard (#310)
-- High-value feature tranche issues derived from the inventory (#310)
+- High-value feature work: SolrCloud FORCELEADER #328 and V2 implementation #332–#334
 
 ## North-star objective: best-in-class Solr client
 
 The primary product goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js. This means more than a broad method list: every important capability should have a correct typed contract, clear documentation, relevant tests, and explicit version evidence.
 
-The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams. The V2 API audit is complete (#327); implementation is tracked by #332–#334. SolrCloud FORCELEADER work is tracked by #328.
+The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams. The API breadth audit (#312), V2 API audit (#327), and support policy (#313) are complete. The Node.js 26 qualification (#329) is merged. Remaining execution is tracked by #314, #315, #328, #332–#335.
 
 | Workstream | Tracking | Required evidence |
 | --- | --- | --- |
-| API breadth and feature correctness | [#312](https://github.com/vsimko/node-solr-lambda/issues/312) | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |
-| Solr and Node.js compatibility | [#313](https://github.com/vsimko/node-solr-lambda/issues/313) | Explicit support policy and evidence-backed version/deployment matrix |
+| API breadth and feature correctness | [#312](https://github.com/vsimko/node-solr-lambda/issues/312) (audit complete); V2 implementation #332–#334 | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |
+| Solr and Node.js compatibility | [#313](https://github.com/vsimko/node-solr-lambda/issues/313) (policy complete); release discovery #335 | Explicit support policy and evidence-backed version/deployment matrix |
 | Performance and efficiency | [#314](https://github.com/vsimko/node-solr-lambda/issues/314) | Reproducible comparisons, latency percentiles, throughput, CPU and memory measurements, regression budgets |
 | Test depth and reliability | [#315](https://github.com/vsimko/node-solr-lambda/issues/315) | API-to-test traceability, failure-mode coverage, consumer type tests, mutation/coverage trends, reliable CI evidence |
 
