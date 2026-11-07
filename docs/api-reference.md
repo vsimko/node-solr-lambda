@@ -13,7 +13,8 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | `SolrClient.query()` | Execute a typed Select query with optional SpellCheck and Suggester components | [Query API](query.md), [SpellCheck](spellcheck.md), [Suggester](suggester.md) |
 | `SolrClient.queryJson()` | Execute the JSON Request API | [Query API](query.md) |
 | `SolrClient.get()` | Retrieve the latest document version by unique key | [RealTime Get API](realtime-get.md) |
-| `SolrClient.add()` | Add documents | [Update API](update.md) |
+| `SolrClient.add()` | Add documents from one document or a buffered array | [Update API](update.md) |
+| `SolrClient.addStream()` | Stream documents from an `AsyncIterable` with backpressure | [Update API](update.md) |
 | `SolrClient.update()` | Replace documents | [Update API](update.md) |
 | `SolrClient.updateCommands()` | Submit typed JSON update commands | [Update API](update.md) |
 | `SolrClient.atomicUpdate()` | Apply typed atomic field modifiers | [Update API](update.md) |
