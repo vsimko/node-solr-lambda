@@ -103,6 +103,35 @@ async function readRemaining(reader: ReadableStreamDefaultReader<Uint8Array>): P
   }
 }
 
+test("addStream handles a slow async producer without changing JSON-array framing", async () => {
+  let requestBody = "";
+  let produced = 0;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      requestBody = await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    for (let index = 0; index < 3; index++) {
+      await new Promise(resolve => setImmediate(resolve));
+      produced++;
+      yield { id: `slow-producer-${index}` };
+    }
+  }
+
+  await client.addStream(documents());
+  assert.equal(produced, 3);
+  assert.deepEqual(JSON.parse(requestBody), [
+    { id: "slow-producer-0" },
+    { id: "slow-producer-1" },
+    { id: "slow-producer-2" }
+  ]);
+});
+
 test("addStream sends an empty iterable as a valid empty JSON array", async () => {
   let requestBody = "";
   const client = createSolrClient({
