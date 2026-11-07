@@ -77,7 +77,7 @@ The transport supports Basic or Bearer authentication, custom headers and Fetch 
 The public client exposes typed methods for the main Solr API families:
 
 - **Query:** `query()` and `queryJson()`, including typed parser options, filters, facets, highlighting, grouping, stats, cursor pagination, and response models.
-- **Documents:** `add()`, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
+- **Documents:** `add()`, backpressure-aware `addStream()` for `AsyncIterable` sources, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
 - **Schema and Config:** `schema()` and `config()` with typed command models.
 - **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`.
 - **Replication and backups:** `replication()`, `replicationFile()`, and the SolrCloud backup/restore actions exposed through `collections()`.
