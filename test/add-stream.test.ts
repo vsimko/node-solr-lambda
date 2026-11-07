@@ -326,6 +326,7 @@ test("addStream consumer cancellation interrupts validation and preserves the HT
 
 test("addStream rejects a successful response received before upload completion", async () => {
   let iteratorReturned = false;
+  let fetchCalls = 0;
   let nextCalls = 0;
   const source: AsyncIterable<{ id: string }> = {
     [Symbol.asyncIterator]() {
@@ -344,7 +345,9 @@ test("addStream rejects a successful response received before upload completion"
   const client = createSolrClient({
     baseUrl: "https://solr.example.test",
     core: "catalog",
+    retry: { maxAttempts: 3, methods: ["POST"] },
     fetch: async (_input, init) => {
+      fetchCalls++;
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
       await reader.read(); // opening JSON array delimiter
       await reader.read(); // one document; leave the stream incomplete
@@ -355,6 +358,7 @@ test("addStream rejects a successful response received before upload completion"
   await assert.rejects(client.addStream(source), SolrNetworkError);
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(iteratorReturned, true);
+  assert.equal(fetchCalls, 1, "an incomplete streaming POST must not be retried");
 });
 
 
