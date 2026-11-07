@@ -27,7 +27,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "docs"
+    "docs",
+    "bench"
   ],
   "engines": {
     "node": "^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0"
