@@ -194,7 +194,7 @@ test("addStream cancellation closes the source async iterator", async () => {
 });
 
 
-test("addStream does not acquire the iterator when Fetch never consumes the body", async () => {
+test("addStream does not acquire the iterator when Fetch returns before consuming the body", async () => {
   let iteratorAcquired = false;
   const source: AsyncIterable<{ [key: string]: unknown; id: string }> = {
     [Symbol.asyncIterator]() {
@@ -272,7 +272,7 @@ test("addStream timeout interrupts a pending iterator.next() and settles the req
 });
 
 
-test("addStream consumer cancellation interrupts pending per-document validation", async () => {
+test("addStream consumer cancellation interrupts validation and preserves the HTTP response", async () => {
   let releaseValidation!: () => void;
   let validationStarted = false;
   let finalized = false;
