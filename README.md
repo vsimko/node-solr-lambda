@@ -3,7 +3,7 @@
 A modern Apache Solr client for JavaScript and TypeScript on Node.js, with TypeScript-first contracts and a first-class JavaScript experience. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable request models, and a shared transport for query, update, administration, and raw requests.
 
 - **Node.js:** 26 (Active LTS), 24 and 22 (Maintenance LTS), plus 20 for legacy compatibility only (EOL since 2026-04-30; not recommended for new deployments). See the [official Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
-- **Solr:** 8.x, 9.x, and 10.x; compatibility is recorded per operation in the [compatibility matrix](docs/compatibility.md)
+- **Solr:** 10.1.0 (current primary), 9.11.0 (current compatibility), and 8.11.4 (legacy-only; upstream 8.x is EOL). Claims are pinned-version and operation-specific; see the [support policy and compatibility matrix](docs/compatibility.md)
 - **Modules:** ESM and CommonJS
 - **Runtime dependencies:** none; [Zod](https://zod.dev/) is an optional peer dependency for runtime validation
 
@@ -94,7 +94,7 @@ Runtime input/output validation is opt-in and uses an application-supplied schem
 
 ## Solr compatibility
 
-The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pinned images Solr 8.11.4, 9.11.0, and 10.1.0. Evidence is operation-specific: a tested query or admin action does not certify every option or every handler on that Solr major. Unverified and excluded behavior is called out in the [compatibility matrix](docs/compatibility.md) and [endpoint inventory](docs/endpoint-inventory.md).
+The project tests exact pinned baselines: Solr 10.1.0 (current primary target), 9.11.0 (current compatibility target), and 8.11.4 (legacy compatibility only; the upstream 8.x line is EOL). It does not claim blanket compatibility with every 8.x, 9.x, or 10.x patch. Evidence is operation-specific: a tested query or admin action does not certify every option or handler on that Solr major. See the [support policy and compatibility matrix](docs/compatibility.md) and [endpoint inventory](docs/endpoint-inventory.md).
 
 ## Product direction
 
