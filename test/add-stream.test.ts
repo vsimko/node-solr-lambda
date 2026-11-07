@@ -137,8 +137,8 @@ test("addStream serializes each document with the configured JSON codec", async 
     jsonCodec: {
       parse: text => JSON.parse(text),
       stringify: value => JSON.stringify(value, (_key, item: unknown) =>
-        typeof item === "bigint" ? Number(item) : item
-      )
+        typeof item === "bigint" ? `__BIGINT__${item}` : item
+      )?.replace(/"__BIGINT__(\\d+)"/g, "$1")
     },
     fetch: async (_input, init) => {
       requestBody = await readBody(init?.body);
@@ -151,5 +151,5 @@ test("addStream serializes each document with the configured JSON codec", async 
   }
 
   await client.addStream(documents());
-  assert.match(requestBody, /"_version_":9007199254740992/);
+  assert.match(requestBody, /"_version_":9007199254740993/);
 });
