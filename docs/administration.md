@@ -183,7 +183,7 @@ If a request times out or fails, do not rerun against a reused cluster. Preserve
 The V1 Collections API exposes `collections("FORCELEADER", { collection, shard })`. It uses `GET /solr/admin/collections?action=FORCELEADER` with the required `collection` and `shard` parameters and returns a `SolrCollectionShardOperationResponse` envelope.
 
 ```ts
-const result = await admin.collections("FORCELEADER", {
+const result = await client.collections("FORCELEADER", {
   collection: "catalog",
   shard: "shard1"
 });
@@ -192,8 +192,6 @@ if (result.responseHeader?.status !== 0) {
 }
 ```
 
-<warning>
-FORCELEADER is an expert-level recovery action. Use it only when regular leader election is not working and after reviewing replica freshness. Solr warns that promoting a stale replica can lose updates that were acknowledged by the previous leader. Do not run it against a shared or production cluster as an experiment. The client does not infer safety, select a replica, retry the action, or protect acknowledged updates.
-</warning>
+> **Warning:** FORCELEADER is an expert-level recovery action. Use it only when regular leader election is not working and after reviewing replica freshness. Solr warns that promoting a stale replica can lose updates that were acknowledged by the previous leader. Do not run it against a shared or production cluster as an experiment. The client does not infer safety, select a replica, retry the action, or protect acknowledged updates.
 
 The action has unit serialization and consumer TypeScript coverage. It remains runtime-unverified on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 baselines until an isolated stale-replica fault-injection test can demonstrate actual leader reassignment and cleanup in the manual opt-in SolrCloud workflow. A successful HTTP response alone is not sufficient evidence.
