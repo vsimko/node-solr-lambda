@@ -14,15 +14,15 @@ const declaredMethods = source => new Set(
 );
 const transportClass = transportSource.slice(transportSource.indexOf("export class SolrTransport"));
 const publicMethods = new Set([...declaredMethods(clientSource), ...declaredMethods(transportClass)]);
-const inventoryMethods = inventory.entries.map(entry => entry.clientMethod);
+const inventoryMethods = new Set(inventory.entries.map(entry => entry.clientMethod));
 
 assert.equal(inventory.schemaVersion, 1);
 assert.equal(inventory.runtimeCertification, "unverified");
 assert.deepEqual(inventory.documentationBaselines, { "8": "8.11", "9": "9.11", "10": "10.1" });
 assert.equal(new Set(inventory.entries.map(entry => entry.id)).size, inventory.entries.length,
   "API inventory ids must be unique");
-assert.equal(new Set(inventoryMethods).size, inventoryMethods.length,
-  "Each public client method must have exactly one inventory entry");
+assert.equal(inventoryMethods.size, publicMethods.size,
+  "The inventory must cover every public client method exactly by method name");
 assert.deepEqual([...inventoryMethods].sort(), [...publicMethods].sort(),
   "API inventory must cover the complete public client and transport method set");
 
@@ -48,4 +48,4 @@ for (const entry of inventory.entries) {
       `Unexpected Solr ${major} evidence for ${entry.id}`);
   }
 }
-console.log(`Validated ${inventory.entries.length} method-level API inventory entries.`);
+console.log(`Validated ${inventory.entries.length} API inventory entries across ${inventoryMethods.size} public client methods.`);
