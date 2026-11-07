@@ -210,6 +210,7 @@ test("addStream does not acquire the iterator when Fetch returns before consumin
     fetch: async () => new Response('{"responseHeader":{"status":0}}')
   });
 
+  // A successful early response is rejected, but the lazy source must remain untouched.
   await assert.rejects(client.addStream(source), SolrNetworkError);
   assert.equal(iteratorAcquired, false);
 });
