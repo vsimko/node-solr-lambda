@@ -395,11 +395,11 @@ export class SolrTransport {
     const method = options.method ?? "GET";
     const operation = options.operation ?? method;
     const query = withDefaultParams(this.#clientConfig.requestDefaults?.params, options.query);
-    const streamingArrayBody = isStreamingJsonArrayBody(options.body);
+    const streamingArrayBody = isStreamingJsonArrayBody(options.body) ? options.body : undefined;
     const rawStreamBody = isReadableStreamBody(options.body);
-    const streamingBody = streamingArrayBody || rawStreamBody;
-    const input = streamingArrayBody
-      ? this.createJsonArrayStream(options.body)
+    const streamingBody = streamingArrayBody !== undefined || rawStreamBody;
+    const input = streamingArrayBody !== undefined
+      ? this.createJsonArrayStream(streamingArrayBody)
       : rawStreamBody
         ? options.body
         : this.#clientConfig.validation
