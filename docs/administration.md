@@ -194,4 +194,6 @@ if (result.responseHeader?.status !== 0) {
 
 > **Warning:** FORCELEADER is an expert-level recovery action. Use it only when regular leader election is not working and after reviewing replica freshness. Solr warns that promoting a stale replica can lose updates that were acknowledged by the previous leader. Do not run it against a shared or production cluster as an experiment. The client does not infer safety, select a replica, retry the action, or protect acknowledged updates.
 
+Official reference guides: [Solr 8.11 Collections API](https://solr.apache.org/guide/8_11/collections-api.html), [Solr 9.11 shard management](https://solr.apache.org/guide/solr/9_11/deployment-guide/shard-management.html), and [Solr 10.1 shard management](https://solr.apache.org/guide/solr/10_1/deployment-guide/shard-management.html).
+
 The action has unit serialization and consumer TypeScript coverage. It remains runtime-unverified on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 baselines until an isolated stale-replica fault-injection test can demonstrate actual leader reassignment and cleanup in the manual opt-in SolrCloud workflow. A successful HTTP response alone is not sufficient evidence.
