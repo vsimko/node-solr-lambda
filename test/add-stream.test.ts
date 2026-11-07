@@ -439,3 +439,24 @@ test("addStream reuses configured auth, headers, and request-default parameters"
   assert.equal(requestUrl?.searchParams.get("wt"), "json");
   assert.equal(requestUrl?.searchParams.get("echoParams"), "none");
 });
+
+
+test("addStream preserves errors from a Node.js Readable source", async () => {
+  const failure = new Error("node readable failed");
+  const source = new Readable({
+    objectMode: true,
+    read() {
+      this.destroy(failure);
+    }
+  });
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  await assert.rejects(client.addStream(source), error => error === failure);
+});
