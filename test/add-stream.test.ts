@@ -324,7 +324,7 @@ test("addStream consumer cancellation interrupts validation and preserves the HT
 });
 
 
-test("addStream rejects a successful response received before upload completion", async () => {
+test("addStream rejects an early success response and never retries the incomplete upload", async () => {
   let iteratorReturned = false;
   let fetchCalls = 0;
   let nextCalls = 0;
