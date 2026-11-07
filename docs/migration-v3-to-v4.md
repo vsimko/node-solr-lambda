@@ -162,7 +162,7 @@ This workflow is exercised as an integration test against the pinned Solr 8.11.4
 
 ## Migration checklist
 
-- [ ] Upgrade the runtime to Node.js 20, 22, or 24.
+- [ ] Upgrade to Node.js 22, 24, or 26 (active LTS). Node 20 is accepted only as a legacy v4 compatibility target and is upstream EOL.
 - [ ] Replace `prepareSolrClient()` and `prepareCoreAdmin()` with `createSolrClient()`.
 - [ ] Convert `hostname`/`port`/`protocol` configuration to `baseUrl`; set `core` or `collection`.
 - [ ] Review legacy defaults, especially `commitWithin` and `overwrite`, and configure required behavior explicitly.
