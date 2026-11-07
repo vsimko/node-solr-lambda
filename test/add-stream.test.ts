@@ -349,3 +349,48 @@ test("addStream rejects a successful response received before upload completion"
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(iteratorReturned, true);
 });
+
+
+test("addStream preserves an early non-success HTTP response", async () => {
+  let iteratorReturned = false;
+  let calls = 0;
+  let nextCalls = 0;
+  const source: AsyncIterable<{ id: string }> = {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          nextCalls++;
+          return { done: false as const, value: { id: `early-error-${nextCalls}` } };
+        },
+        async return() {
+          iteratorReturned = true;
+          return { done: true as const, value: undefined };
+        }
+      };
+    }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    retry: { maxAttempts: 3, methods: ["POST"] },
+    fetch: async (_input, init) => {
+      calls++;
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      await reader.read(); // one document; leave the stream incomplete
+      return new Response('{"error":{"msg":"rejected early"}}', {
+        status: 400,
+        statusText: "Bad Request"
+      });
+    }
+  });
+
+  await assert.rejects(client.addStream(source), (error: unknown) => {
+    assert.ok(error instanceof SolrHttpError);
+    assert.equal(error.status, 400);
+    return true;
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(calls, 1, "streaming POST must not be retried");
+  assert.equal(iteratorReturned, true);
+});
