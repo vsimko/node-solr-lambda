@@ -3,7 +3,7 @@
 A modern Apache Solr client for JavaScript and TypeScript on Node.js, with TypeScript-first contracts and a first-class JavaScript experience. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable request models, and a shared transport for query, update, administration, and raw requests.
 
 - **Node.js:** 22, 24, and 26 (active LTS); Node 20 is retained only as a legacy v4 compatibility target.
-- **Solr:** 8.x, 9.x, and 10.x; compatibility is recorded per operation in the [compatibility matrix](docs/compatibility.md)
+- **Solr:** 10.x current, 9.11.x previous maintenance, and 8.11.4 legacy compatibility only; compatibility is recorded per operation in the [compatibility matrix](docs/compatibility.md)
 - **Modules:** ESM and CommonJS
 - **Runtime dependencies:** none; [Zod](https://zod.dev/) is an optional peer dependency for runtime validation
 
