@@ -94,7 +94,7 @@ test("accepts all documented non-completed GitHub Actions run states", () => {
 
 test("validates configured CI matrix provenance separately from observed runs", () => {
   const valid = structuredClone(base);
-  valid.ci.configuredMatrix = [{ dimension: "node", values: [20, 22, 24], sourcePath: ".github/workflows/ci.yml" }];
+  valid.ci.configuredMatrix = [{ dimension: "node", values: [20, 22, 24, 26], sourcePath: ".github/workflows/ci.yml" }];
   assert.deepEqual(validateSiteData(valid, rules), []);
   const invalid = structuredClone(base);
   invalid.ci.configuredMatrix = [{ dimension: "node", values: [], sourcePath: "../outside.yml" }];
