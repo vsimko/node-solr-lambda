@@ -15,6 +15,7 @@ Options:
   --docs N                           Documents for bulk/stream workloads (default: 10000)
   --batch-size N                     Documents per bulk request (default: 500)
   --iterations N                     Query requests per mode (default: 100)
+  --rows N                           Documents returned by each query (default: 10; use 0 for count-only)
   --concurrency N                    Concurrent requests (default: 4)
   --warmup N                         Query warm-up requests (default: 10)
   --payload-bytes N                  Approximate body string size per document (default: 256)
@@ -34,11 +35,11 @@ Use a dedicated disposable collection. The script never creates or deletes colle
 function parseArgs(argv) {
   const options = {
     workload: "all", mode: "both", docs: 10000, batchSize: 500,
-    iterations: 100, concurrency: 4, warmup: 10, payloadBytes: 256, output: null
+    iterations: 100, rows: 10, concurrency: 4, warmup: 10, payloadBytes: 256, output: null
   };
   const names = new Map([
     ["--workload", "workload"], ["--mode", "mode"], ["--docs", "docs"],
-    ["--batch-size", "batchSize"], ["--iterations", "iterations"],
+    ["--batch-size", "batchSize"], ["--iterations", "iterations"], ["--rows", "rows"],
     ["--concurrency", "concurrency"], ["--warmup", "warmup"],
     ["--payload-bytes", "payloadBytes"], ["--output", "output"]
   ]);
@@ -54,7 +55,7 @@ function parseArgs(argv) {
   for (const key of ["docs", "batchSize", "iterations", "concurrency"]) {
     if (!Number.isInteger(options[key]) || options[key] < 1) throw new RangeError(`--${key} must be a positive integer`);
   }
-  for (const key of ["warmup", "payloadBytes"]) {
+  for (const key of ["warmup", "payloadBytes", "rows"]) {
     if (!Number.isInteger(options[key]) || options[key] < 0) throw new RangeError(`--${key} must be a non-negative integer`);
   }
   if (!["query", "bulk", "stream", "all"].includes(options.workload)) throw new Error("Invalid --workload");
@@ -137,16 +138,19 @@ async function run() {
   }
 
   async function sendQuery(mode) {
-    if (mode === "client") return client.query({ query: "*:*", limit: 0, params: { wt: "json" } });
+    if (mode === "client") return client.query({ query: "*:*", limit: options.rows, params: { wt: "json" } });
     const url = new URL(selectUrl);
     url.searchParams.set("q", "*:*");
-    url.searchParams.set("rows", "0");
+    url.searchParams.set("rows", String(options.rows));
     url.searchParams.set("wt", "json");
     return readJsonResponse(await fetch(url, { headers }), "direct Fetch query");
   }
 
   for (const workload of workloads) {
     for (const mode of modes) {
+      if (workload === "query") {
+        for (let index = 0; index < options.warmup; index++) await sendQuery(mode);
+      }
       const measured = await measure(async () => {
         if (workload === "bulk") {
           const batchCount = Math.ceil(options.docs / options.batchSize);
@@ -198,7 +202,6 @@ async function run() {
           };
         }
 
-        for (let index = 0; index < options.warmup; index++) await sendQuery(mode);
         const requests = await runConcurrent(options.iterations, options.concurrency, () => sendQuery(mode));
         return {
           requests: options.iterations, concurrency: options.concurrency, warmup: options.warmup,
