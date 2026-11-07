@@ -78,7 +78,7 @@ The 8.11, 9.11, and 10.1 guides describe the API families below. The Replica Man
 
 The package engine range is `^20.0.0 || ^22.0.0 || ^24.0.0 || ^26.0.0`. Node.js 26 is Active LTS; Node.js 24 and 22 are Maintenance LTS. Node.js 20 reached end-of-life on 2026-04-30 and is retained only as a legacy v4 compatibility target; it is not recommended for new production deployments. The project does not remove Node 20 from the v4 engine range in this change; that decision belongs to a future major release. See the [official Node.js release schedule](https://github.com/nodejs/Release#release-schedule). The CI workflow defines Node.js 20 (legacy), 22, 24, and 26 jobs for type checking, consumer type fixtures, unit tests, builds, and release/documentation checks. Each standalone Solr, authenticated Solr, and SolrCloud integration suite uses the Cartesian product of those four Node versions and the three exact pinned Solr baselines.
 
-Streaming ingestion was delivered in #300, hardened in #317, and completed with independent test coverage in #321. The final lifecycle matrix in CI run [#42392182590](https://github.com/vsimko/node-solr-lambda/actions/runs/42392182590) passed 30/30 jobs across Node.js 20/22/24 and pinned Solr 8.11.4/9.11.0/10.1.0 standalone, security-enabled, and SolrCloud matrices; the 250-document `addStream()` fixture was read back with exact count/order on all three Solr versions. The consumer/test follow-up run [#42392800998](https://github.com/vsimko/node-solr-lambda/actions/runs/42392800998) also passed 30/30. Documentation reconciliation in #325 passed the dedicated docs/API-inventory checks. This certifies the tested JSON-array ingestion behavior on those pinned images; it does not certify atomicity or behavior on other Solr releases.
+Streaming ingestion was delivered in #300, hardened in #317, and completed with independent test coverage in #321. The final lifecycle matrix in CI run [#42392182590](https://github.com/vsimko/node-solr-lambda/actions/runs/42392182590) passed the previous 30-job matrix across Node.js 20/22/24 and pinned Solr 8.11.4/9.11.0/10.1.0 standalone, security-enabled, and SolrCloud suites; the 250-document `addStream()` fixture was read back with exact count/order on all three Solr versions. The consumer/test follow-up run [#42392800998](https://github.com/vsimko/node-solr-lambda/actions/runs/42392800998) also passed 30/30. Documentation reconciliation in #325 passed the dedicated docs/API-inventory checks. This certifies the tested JSON-array ingestion behavior on those pinned images; it does not certify atomicity or behavior on other Solr releases.
 
 ## Endpoint matrix
 
@@ -141,22 +141,17 @@ See the [machine-readable API inventory](api-inventory.json) for operation-level
 
 ## Current support policy
 
-- Target Solr server lines are 8.x, 9.x, and 10.x.
-- The minimum supported patch release for each line is **not established**.
-- The selected endpoint behaviors listed as Tested have passed against the pinned patch images; this does not certify every endpoint or all patch releases in a major line.
-- Treat only the explicitly listed operations as **Tested**; other actions, options, and response models remain unverified.
-- A successful TypeScript build, unit test, or documentation lookup is not server compatibility evidence.
-- If an endpoint differs by version, record the difference here and add a focused test before changing its status.
+The current tiers and lifecycle rules are defined in [Project support policy](#project-support-policy) above. Runtime certification remains operation-specific; a successful TypeScript build, unit test, or documentation lookup is not server compatibility evidence. If an endpoint differs by version, record the difference here and add a focused test before changing its status.
 
 ## Integration test infrastructure
 
-CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. The integration workflows run on Node.js 20, 22, and 24, covering all nine Node.js/Solr-version combinations in each of the three integration suites (27 integration jobs total), in addition to the three Node.js unit/build jobs. This full matrix was added in PR #226; its CI run #522 passed all 30 jobs. Earlier runs such as CI #162 and #177 provide historical evidence for the individual integration behaviors, but should not be read as evidence that the full Node.js/Solr matrix was already enabled at that time. The passing SolrCloud coverage includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection on both authentication and authorization handlers, authenticated reads, authentication property mutation/read-back, malformed JSON rejection, and that negative response bodies do not echo configured credentials. Unit tests also assert request Authorization headers are not copied into client HTTP error properties.
+CI starts pinned official Solr images and runs standalone, security-enabled standalone, and SolrCloud integration suites on Solr 8.11.4, 9.11.0, and 10.1.0. Each integration suite covers Node.js 20 (legacy), 22, 24, and 26 across all three pinned Solr images: a 4 × 3 Cartesian product per suite (36 integration combinations across the three suites), in addition to the four Node.js unit/type/build/release jobs and documentation checks. The expanded matrix passed in CI run [#42398855690](https://github.com/vsimko/node-solr-lambda/actions/runs/42398855690). Earlier runs such as CI #162, #177, and #522 provide historical evidence for individual behaviors or the former three-Node matrix; they should not be read as evidence that Node.js 26 was tested in those runs. The passing SolrCloud coverage includes Collections CREATE/LIST/DELETE, alias lifecycle, implicit-router shard create/delete with CLUSTERSTATUS read-back, and Streaming Expressions search. The security-enabled matrix verifies anonymous rejection on both authentication and authorization handlers, authenticated reads, authentication property mutation/read-back, malformed JSON rejection, and that negative response bodies do not echo configured credentials. Unit tests also assert request Authorization headers are not copied into client HTTP error properties.
 
-| Solr line | Pinned Docker image |
-| --- | --- |
-| 8.x | `solr:8.11.4` |
-| 9.x | `solr:9.11.0` |
-| 10.x | `solr:10.1.0` |
+| Solr line | Pinned Docker image | Client tier |
+| --- | --- | --- |
+| 8.x (upstream EOL) | `solr:8.11.4` | Legacy compatibility only |
+| 9.x | `solr:9.11.0` | Current compatibility target |
+| 10.x | `solr:10.1.0` | Current primary target |
 
 Run the same suite locally after starting a Solr container and creating an isolated core:
 
