@@ -76,7 +76,7 @@ jobs:
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
             case "$path" in
-              README.md|docs/*.md|docs/**/*.md)
+              README.md|CHANGELOG.md|docs/*.md|docs/**/*.md|docs/*.json|docs/**/*.json)
                 docs_changed=true
                 website_only=false
                 ;;
