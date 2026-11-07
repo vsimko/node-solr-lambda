@@ -104,7 +104,7 @@ const response = await solr.addStream(
 );
 ```
 
-The client serializes one document at a time and sends a valid top-level JSON array to `/update`. A backpressure-aware Fetch request stream prevents the client from buffering the complete iterable. The configured `jsonCodec` is used for each document; validation is applied per document when an `addStream` input schema is configured.
+The client serializes one document at a time and sends a valid top-level JSON array to `/update`. The Web request body uses a one-chunk queue and pull-based production, so the client does not buffer the complete iterable. Memory use is bounded by the queued chunk, one in-flight pull/serialization, and the largest individual document; a single unusually large document can still require substantial memory. The configured `jsonCodec` is used for each document; validation is applied per document when an `addStream` input schema is configured.
 
 Important semantics:
 
@@ -115,7 +115,7 @@ Important semantics:
 - `addStream()` does not commit automatically. Search visibility follows the same hard/soft commit policy as other update methods.
 - Memory use is bounded by stream buffering plus the largest individual serialized document; a single unusually large document can still require substantial memory.
 
-The isolated integration test streams a deterministic 250-document fixture and verifies count/order read-back on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Unit tests cover lazy production/backpressure, empty input, cancellation, producer failure, and no-retry behavior.
+The isolated integration test streams a deterministic 250-document fixture and verifies count/order read-back on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Unit tests cover a slow consumer and bounded pull-ahead, delayed producers, empty input, producer and validation failures, HTTP errors, timeout and caller/consumer cancellation, iterator cleanup, configured codec use, shared auth/headers/request defaults, and no-retry behavior.
 
 ## Atomic and partial document updates
 
