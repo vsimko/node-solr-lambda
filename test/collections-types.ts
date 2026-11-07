@@ -2,7 +2,9 @@ import type {
   AddReplicaParams,
   CollectionAdminParams,
   CollectionReplicaType,
-  DeleteReplicaParams
+  DeleteReplicaParams,
+  ForceLeaderParams,
+  SolrCollectionShardOperationResponse
 } from "../src/index.js";
 import type { SolrClient } from "../src/client.js";
 
@@ -101,8 +103,6 @@ void client.collections("CREATESHARD", { collection: "books", shard: "shard2" })
 void client.collections("DELETESHARD", { collection: "books", shard: "shard2" });
 void client.collections("MIGRATE", migrate);
 
-
-import type { ForceLeaderParams, SolrCollectionShardOperationResponse } from "../src/index.js";
 const forceLeaderParams = {
   collection: "books",
   shard: "shard1"
