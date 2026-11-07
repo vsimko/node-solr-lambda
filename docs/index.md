@@ -40,6 +40,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 
 - [Migration from v3 to v4](migration-v3-to-v4.md)
 - [Development roadmap](roadmap.md)
+- [Comparison with solr-client](solr-client-comparison.md)
 - [Release process](release-process.md)
 - [v4.0.0 release notes (draft)](release-notes-v4.0.0.md)
 
@@ -48,6 +49,8 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Public project website](../website/index.html)
 
 - [GitHub Pages architecture decision (ADR 0001)](adr/0001-github-pages-site.md)
+- [Solr client API coverage and implementation principles (ADR 0002)](adr/0002-solr-client-api-coverage.md)
+- [Cross-client regression test strategy (ADR 0003)](adr/0003-cross-client-test-strategy.md)
 - [Website data contract](site-data-contract.md)
 - [Website data JSON Schema](site-data.schema.json)
 - [Website data validation rules and commands](site-data-validation.md)

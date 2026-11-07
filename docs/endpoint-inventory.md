@@ -29,7 +29,11 @@ This inventory defines the boundary of the typed client API after review against
 | --- | --- | --- |
 | V2 backup endpoints | No dedicated V2 wrappers | The client exposes V1 ReplicationHandler and Collections API backup actions; Solr V2 backup routes and JSON payloads remain outside the typed client surface. |
 | V2 API paths | No dedicated V2 wrappers | The typed client currently uses V1 paths for CoreAdmin, Collections, Schema, and Config. V2 paths and payloads differ and are not inferred from V1 types. Use the generic request escape hatch only when the caller owns the V2 contract. |
-| Other built-in/custom request handlers and Search Components | No dedicated typed wrappers unless listed above | Examples include SQL, Terms, SpellCheck, Suggester, RealTime Get, Clustering, Query Elevation, and application-defined handlers/components. They remain callable through generic request methods where the endpoint accepts the supplied request, but are outside the current autocomplete-first typed surface. |
+| Terms handler `/terms` | No dedicated typed wrapper | Deferred pending a concrete consumer requirement; generic `request()` remains available. Terms is distinct from Suggester and SpellCheck. |
+| Suggester handler/component | Planned — [#293](https://github.com/vsimko/node-solr-lambda/issues/293) | First-class autocomplete/suggestion request and response contracts are accepted for design; not implemented or compatibility-certified yet. |
+| RealTime Get `/get` | In progress — [PR #271](https://github.com/vsimko/node-solr-lambda/pull/271) | Typed single/multi-ID retrieval is implemented on the PR branch; merge and full CI evidence are still pending. |
+| SpellCheck | In progress — [PR #272](https://github.com/vsimko/node-solr-lambda/pull/272) | Typed query-component options and response contracts are implemented on a branch stacked on #271; merge #271 first. |
+| SQL, Clustering, Query Elevation, and application-defined handlers/components | No dedicated typed wrappers | They remain callable through generic request methods where supported by Solr, but are outside the current autocomplete-first typed surface. |
 | Server/plugin-specific administration endpoints | Excluded from the stable typed surface | Plugin-specific, deployment-specific, and custom endpoints cannot be exhaustively modelled in a general-purpose client. Use the explicit raw/custom request escape hatch. |
 
 ## Important boundaries
@@ -50,3 +54,21 @@ This inventory defines the boundary of the typed client API after review against
 - [V2 API — Solr 10.1](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
 - [User-Managed Index Replication — Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/user-managed-index-replication.html)
 - [Backup and Restore — Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/backup-restore.html)
+
+
+## Cross-client regression test decisions
+
+The generic HTTP transport and open Solr document model are verified by tests inspired by Solarium and pysolr, without adding new endpoint wrappers:
+
+- Nested parent/child/grandchild documents are indexed as ordinary JSON document data and retrieved with Solr's `[child]` document transformer. The client does not introduce a separate nested-document abstraction. Important: Solr's `/update/json/docs` convenience path flattens complex JSON by default; use `add([document])` to select `/update` and preserve nested pseudo-fields.
+- Unicode strings and multi-valued fields are checked by exact integration read-back, rather than only checking that JSON.stringify accepts UTF-8.
+- Long query parameters are preserved intact on the current GET `/select` contract. The client does not automatically switch oversized GET requests to POST; callers needing POST can use `queryJson()` or `request()` where appropriate. No automatic URL-length policy is implied.
+- Generic `request()` preserves repeated query parameters and unknown plugin response fields.
+- These standalone fidelity tests are distinct from security-enabled standalone and SolrCloud suites. Multi-node Cloud tests remain opt-in and are used only where multiple live nodes are essential.
+
+See [ADR 0003](adr/0003-cross-client-test-strategy.md), [cross-client comparison](solr-client-comparison.md), and [issue #297](https://github.com/vsimko/node-solr-lambda/issues/297). The new integration assertions are pending execution in the pinned Solr CI matrix; do not treat their presence in source as completed compatibility evidence.
+
+
+## Cross-client test coverage notes
+
+The current transport contract is explicit: query operations use GET and do not automatically switch to POST based on URL length. Long-query preservation is tested as a transport invariant, not a claim that every proxy/server accepts arbitrarily large URLs. Generic custom-handler requests preserve repeated query parameters and extensible JSON response fields. Nested-document and Unicode round-trip cases are exercised through the ordinary JSON Update and Query APIs; they do not add a dedicated nested-document API.

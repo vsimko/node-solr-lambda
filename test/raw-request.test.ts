@@ -118,3 +118,38 @@ test("raw response streams retain caller cancellation until the body is consumed
 
   await assert.rejects(pendingRead, SolrAbortError);
 });
+
+
+test("custom handlers preserve repeated query parameters and unknown JSON response fields", async () => {
+  let requestedUrl = "";
+  let requestedMethod = "";
+  const query = new URLSearchParams();
+  query.append("fq", "type:product");
+  query.append("fq", "status:active");
+  query.append("custom.flag", "true");
+
+  const payload = {
+    responseHeader: { status: 0 },
+    pluginResponse: { suggestions: ["one", "two"] },
+    futurePluginField: { enabled: true }
+  };
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    fetch: async (input, init) => {
+      requestedUrl = String(input);
+      requestedMethod = String(init?.method);
+      return new Response(JSON.stringify(payload), {
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  const result = await client.request<typeof payload>("/solr/catalog/custom-handler", { query });
+  const url = new URL(requestedUrl);
+  assert.equal(requestedMethod, "GET");
+  assert.equal(url.pathname, "/solr/catalog/custom-handler");
+  assert.deepEqual(url.searchParams.getAll("fq"), ["type:product", "status:active"]);
+  assert.equal(url.searchParams.get("custom.flag"), "true");
+  assert.deepEqual(result, payload);
+  assert.deepEqual(result.futurePluginField, { enabled: true });
+});
