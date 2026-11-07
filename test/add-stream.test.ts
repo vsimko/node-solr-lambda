@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { Readable } from "node:stream";
 import { createSolrClient, SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
@@ -348,4 +349,94 @@ test("addStream rejects a successful response received before upload completion"
   await assert.rejects(client.addStream(source), SolrNetworkError);
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(iteratorReturned, true);
+});
+
+test("addStream handles a slow async producer without changing JSON-array framing", async () => {
+  let requestBody = "";
+  let produced = 0;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      requestBody = await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    for (let index = 0; index < 3; index++) {
+      await new Promise(resolve => setImmediate(resolve));
+      produced++;
+      yield { id: `slow-producer-${index}` };
+    }
+  }
+
+  await client.addStream(documents());
+  assert.equal(produced, 3);
+  assert.deepEqual(JSON.parse(requestBody), [
+    { id: "slow-producer-0" },
+    { id: "slow-producer-1" },
+    { id: "slow-producer-2" }
+  ]);
+});
+
+test("addStream accepts a Node.js Readable through its async iterator", async () => {
+  let requestBody = "";
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    fetch: async (_input, init) => {
+      requestBody = await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  await client.addStream(Readable.from([{ id: "node-readable-1" }, { id: "node-readable-2" }]));
+  assert.deepEqual(JSON.parse(requestBody), [
+    { id: "node-readable-1" },
+    { id: "node-readable-2" }
+  ]);
+});
+
+test("addStream reuses configured auth, headers, and request-default parameters", async () => {
+  let authorization: string | null = null;
+  let customHeader: string | null = null;
+  let defaultHeader: string | null = null;
+  let requestHeader: string | null = null;
+  let contentType: string | null = null;
+  let requestUrl: URL | undefined;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    auth: { type: "bearer", token: "stream-token" },
+    headers: { "x-client": "shared-header" },
+    requestDefaults: {
+      params: { wt: "json", echoParams: "none" },
+      headers: { "x-default": "default-header" }
+    },
+    fetch: async (input, init) => {
+      requestUrl = new URL(String(input));
+      const headers = new Headers(init?.headers);
+      authorization = headers.get("authorization");
+      customHeader = headers.get("x-client");
+      defaultHeader = headers.get("x-default");
+      requestHeader = headers.get("x-request");
+      contentType = headers.get("content-type");
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    yield { id: "one" };
+  }
+
+  await client.addStream(documents(), {}, { headers: { "x-request": "request-header" } });
+  assert.equal(authorization, "Bearer stream-token");
+  assert.equal(customHeader, "shared-header");
+  assert.equal(defaultHeader, "default-header");
+  assert.equal(requestHeader, "request-header");
+  assert.equal(contentType, "application/json");
+  assert.equal(requestUrl?.searchParams.get("wt"), "json");
+  assert.equal(requestUrl?.searchParams.get("echoParams"), "none");
 });
