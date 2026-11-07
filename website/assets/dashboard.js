@@ -35,7 +35,8 @@ async function main(){
     if(!response.ok)throw new Error("HTTP "+response.status);
     const data=await response.json();
     el("package-version").textContent=data.package.version;
-    renderProgress(data);\n    const api=data.apiCoverage.records||[];
+    renderProgress(data);
+    const api=data.apiCoverage.records||[];
     el("api-summary").textContent=api.length+" documented operations · operation-level implementation and compatibility evidence";
     const drawApi=()=>{
       const query=el("api-search").value.toLowerCase(),version=el("version-filter").value;
