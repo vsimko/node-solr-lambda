@@ -85,7 +85,7 @@ const rebalanceParams = {
 } satisfies import("../src/index.js").RebalanceLeadersParams;
 void moveClient.collections("REBALANCELEADERS", rebalanceParams);
 
-import type { MigrateCollectionParams, SplitShardParams, SolrCollectionShardOperationResponse } from "../src/index.js";
+import type { MigrateCollectionParams, SplitShardParams } from "../src/index.js";
 const splitByShard: SplitShardParams = { collection: "books", shard: "shard1", ranges: "0-7fffffff,80000000-ffffffff", splitMethod: "rewrite", async: "split-1" };
 const splitByRouteKey: SplitShardParams = { collection: "books", "split.key": "tenant!", numSubShards: 2, async: "split-2" };
 const migrate: MigrateCollectionParams = { collection: "source", "split.key": "tenant!", "target.collection": "target", "forward.timeout": 60, async: "migrate-1" };
