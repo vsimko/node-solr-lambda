@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { Readable } from "node:stream";
 import { createSolrClient, SolrAbortError, SolrHttpError, SolrTimeoutError, SolrValidationError } from "../src/index.js";
 
 async function readBody(body: BodyInit | null | undefined): Promise<string> {
