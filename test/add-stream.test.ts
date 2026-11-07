@@ -25,6 +25,7 @@ test("addStream emits a JSON array incrementally and reuses update parameters", 
     core: "catalog",
     fetch: async (input, init) => {
       requestUrl = new URL(String(input));
+      assert.equal((init as RequestInit & { duplex?: string }).duplex, "half");
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
       const decoder = new TextDecoder();
       const first = await reader.read();
