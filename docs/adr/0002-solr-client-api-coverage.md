@@ -35,9 +35,24 @@ Adopt the following product and implementation decisions:
 - **Implement ingestion as a Node Duplex only:** rejected pending API design. AsyncIterable and Web Streams may better fit the shared Fetch transport and Node/browser-compatible abstractions.
 - **Add a prepare-commit convenience method:** rejected for now because the option is not documented as a supported public request contract in the pinned Solr guides, and the two-phase lifecycle has not been verified independently on the pinned versions. The generic request escape hatch is sufficient for expert callers who accept the risk.
 
+## Implementation outcome (2026-11-07)
+
+The accepted feature work has been delivered:
+
+- **RealTime Get:** PR #271 adds typed single-ID and multi-ID contracts. The integration test proves uncommitted read-after-write behavior before searcher visibility on Solr 8.11.4, 9.11.0, and 10.1.0.
+- **SpellCheck:** PR #272 adds typed optional query-component contracts. The configured-handler integration test verifies indexed suggestions, frequencies, and collation on all three pinned Solr versions.
+- **Suggester:** PR #298 adds typed optional query-component contracts. The disposable configured-handler integration test verifies indexed terms and weights on all three pinned Solr versions.
+- **BigInt-safe JSON:** PR #299 adds the injectable `SolrJsonCodec`; native JSON remains the default and callers may supply a lossless BigInt-aware codec.
+- **Streaming ingestion:** PRs #300, #317, and #321 deliver bounded-memory `addStream(AsyncIterable)`, transport lifecycle hardening, and independent consumer/failure-mode tests. PR #325 reconciles the API and compatibility documentation. The deterministic 250-document read-back passed on all three pinned Solr versions.
+- **Cross-client regression tests:** PR #296 adds nested-document, Unicode, long-query, and custom-handler coverage; nested-document and Unicode read-back passed on all three pinned Solr versions.
+
+The pinned integration evidence for RealTime Get, SpellCheck, Suggester, nested-document/Unicode fidelity, and streaming ingestion is recorded in CI run [#42392182590](https://github.com/vsimko/node-solr-lambda/actions/runs/42392182590). The independent streaming consumer/test matrix passed in [#42392800998](https://github.com/vsimko/node-solr-lambda/actions/runs/42392800998). BigInt codec tests passed in [#42361470308](https://github.com/vsimko/node-solr-lambda/actions/runs/42361470308).
+
+Terms remains deliberately deferred pending concrete demand. Prepare-commit remains outside the typed stable surface until an authoritative cross-version contract and deterministic lifecycle evidence exist.
+
 ## Consequences
 
-- Roadmap and issues #292, #293, and #295 track accepted follow-on work; #294 is closed as not planned after the API audit. PRs #271/#272 remain the current RealTime Get and SpellCheck implementation path.
+- RealTime Get (#271), SpellCheck (#272), Suggester (#293), BigInt-safe JSON (#292), and streaming ingestion (#295) are implemented and merged. #294 remains closed as not planned after the prepare-commit API audit.
 - API coverage and endpoint inventory distinguish in-progress, accepted, deferred, and implemented features.
 - Compatibility and machine-readable inventory must not claim support until exact tests pass.
 - No runtime code, package dependency, package identity, or release behavior is changed by this ADR.
