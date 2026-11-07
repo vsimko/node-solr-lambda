@@ -124,6 +124,7 @@ The primary goal is to build the best Apache Solr client in the world for JavaSc
 - [Machine-readable API inventory](docs/api-inventory.json)
 - [Public API review](docs/public-api-review.md)
 - [Solr compatibility](docs/compatibility.md)
+- [Performance benchmarking](docs/benchmarking.md)
 - [Migration from v3 to v4](docs/migration-v3-to-v4.md)
 - [Client architecture](docs/architecture.md)
 - [Development roadmap](docs/roadmap.md)

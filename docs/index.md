@@ -37,6 +37,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Machine-readable API inventory](api-inventory.json)
 - [Public API review](public-api-review.md)
 - [Solr server compatibility matrix](compatibility.md)
+- [Performance benchmarking](benchmarking.md)
 
 ## Product strategy
 
