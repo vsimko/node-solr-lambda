@@ -100,3 +100,16 @@ void [invalidSplit, invalidSplitAlias, invalidMigrate];
 void client.collections("CREATESHARD", { collection: "books", shard: "shard2" });
 void client.collections("DELETESHARD", { collection: "books", shard: "shard2" });
 void client.collections("MIGRATE", migrate);
+
+
+import type { ForceLeaderParams, SolrCollectionShardOperationResponse } from "../src/index.js";
+const forceLeaderParams = {
+  collection: "books",
+  shard: "shard1"
+} satisfies ForceLeaderParams;
+const forceLeaderResponse: Promise<SolrCollectionShardOperationResponse> = client.collections("FORCELEADER", forceLeaderParams);
+void forceLeaderResponse;
+
+// @ts-expect-error FORCELEADER requires a shard name.
+const invalidForceLeader: ForceLeaderParams = { collection: "books" };
+void invalidForceLeader;
