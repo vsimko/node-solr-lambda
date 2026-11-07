@@ -159,6 +159,7 @@ jobs:
       - name: Build and validate website
         run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
 
+  # Node 20 is retained for legacy v4 compatibility; 22/24/26 are the supported LTS targets.
   test:
     needs: changes
     if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
