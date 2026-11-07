@@ -297,6 +297,9 @@ export class SolrTransport {
     };
     const nextWithAbort = async (): Promise<IteratorResult<unknown>> => {
       if (signal.aborted || stopController.signal.aborted) throw abortError();
+      // Acquire only after checking abort, and start next() in the same turn. An
+      // unstarted async generator's return() does not run its finally block.
+      if (!iterator) iterator = body.documents[Symbol.asyncIterator]();
       let pending: Promise<IteratorResult<unknown>>;
       try {
         // Start next() synchronously before exposing the abort listener. Deferring it
@@ -340,7 +343,6 @@ export class SolrTransport {
             return;
           }
 
-          if (!iterator) iterator = body.documents[Symbol.asyncIterator]();
           const next = await nextWithAbort();
           if (next.done) {
             completed = true;
