@@ -96,7 +96,7 @@ Runtime input/output validation is opt-in and uses an application-supplied schem
 
 The project targets Solr 8.x, 9.x, and 10.x and runs integration jobs against pinned images Solr 8.11.4, 9.11.0, and 10.1.0. Evidence is operation-specific: a tested query or admin action does not certify every option or every handler on that Solr major. Unverified and excluded behavior is called out in the [compatibility matrix](docs/compatibility.md) and [endpoint inventory](docs/endpoint-inventory.md).
 
-## Product direction\n\nThe primary goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js, with measurable leadership in API coverage, correctness, compatibility, testing, performance, and developer experience. See the [north-star strategy and roadmap](docs/roadmap.md#north-star-objective-best-in-class-solr-client) and tracking issue [#311](https://github.com/vsimko/node-solr-lambda/issues/311).\n\n## Documentation
+## Product direction\n\nThe primary goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js, with measurable leadership in API coverage, correctness, compatibility, testing, performance, and developer experience. See the [north-star strategy and roadmap](docs/roadmap.md#north-star-objective-best-in-class-solr-client) and tracking issue [#311](https://github.com/vsimko/node-solr-lambda/issues/310).\n\n## Documentation
 
 - [Complete documentation index](docs/index.md)
 - [Getting started](docs/getting-started.md)
