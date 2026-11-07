@@ -360,6 +360,7 @@ export class SolrTransport {
             return;
           }
 
+          if (signal.aborted || stopController.signal.aborted) throw abortError();
           const document = await awaitWithAbort(thisTransport.validate(body.operation, "inputs", next.value));
           const serialized = stringifyBody(document, thisTransport.#clientConfig.jsonCodec);
           if (typeof serialized !== "string") {
