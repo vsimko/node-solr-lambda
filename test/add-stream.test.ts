@@ -73,11 +73,11 @@ test("addStream applies bounded pull-based backpressure to a slow request consum
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
       assert.equal(new TextDecoder().decode((await reader.read()).value), "[");
       await new Promise(resolve => setImmediate(resolve));
-      assert.equal(produced, 0, "the source must wait until the consumer asks for a document");
+      assert.equal(produced, 1, "only the single queued document may be produced ahead");
       const firstDocument = await reader.read();
       assert.match(new TextDecoder().decode(firstDocument.value), /"id":"slow-0"/);
       await new Promise(resolve => setImmediate(resolve));
-      assert.equal(produced, 1, "the one-chunk queue must not drain the remaining source");
+      assert.equal(produced, 2, "the one-chunk queue must not drain the remaining source");
       const secondDocument = await reader.read();
       assert.match(new TextDecoder().decode(secondDocument.value), /"id":"slow-1"/);
       await readRemaining(reader);
@@ -319,6 +319,7 @@ test("addStream cancellation closes the source async iterator", async () => {
     fetch: async (_input, init) => {
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
       await reader.read();
+      await reader.read();
       return await new Promise<Response>((_resolve, reject) => {
         init?.signal?.addEventListener("abort", async () => {
           await reader.cancel();
@@ -349,6 +350,7 @@ test("addStream closes the iterator when the Fetch consumer cancels the body", a
     core: "catalog",
     fetch: async (_input, init) => {
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read();
       await reader.read();
       await reader.cancel("consumer stopped reading");
       return new Response('{"responseHeader":{"status":0}}');
