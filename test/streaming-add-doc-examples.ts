@@ -17,7 +17,7 @@ const result = solr.addStream(products, {
   route: "catalog-shard"
 }, {
   timeoutMs: 60_000,
-  signal: controls.signal
+  ...(controls.signal ? { signal: controls.signal } : {})
 });
 
 async function* generateDocuments(): AsyncGenerator<SolrDocument> {
