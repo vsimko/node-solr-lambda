@@ -788,6 +788,29 @@
         "test/admin-api-types.ts"
       ],
       "notes": "Read-only logger configuration and level information. This client method does not mutate logger levels; integration tests verify a representative response on pinned Solr 8.11.4, 9.11.0, and 10.1.0."
+    },
+    {
+      "id": "update.addStream",
+      "area": "Update",
+      "clientMethod": "addStream",
+      "httpMethod": "POST",
+      "path": "/solr/{core-or-collection}/update",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/update.md",
+      "testFiles": [
+        "test/add-stream.test.ts",
+        "test/streaming-add-doc-examples.ts",
+        "test/integration/solr-add-stream.test.ts"
+      ],
+      "notes": "Consumes an AsyncIterable<SolrDocument> and emits a valid top-level JSON array through a backpressure-aware Web ReadableStream. Serializes and validates one document at a time, reuses the configured JSON codec and shared request controls, propagates cancellation/producer errors, and disables retries for the non-replayable POST body. Unit tests cover lazy production, framing, empty input, cancellation, producer failure, JSON codec use, and no-retry semantics. A deterministic 250-document pinned Solr integration test has been added; runtime evidence remains pending the fresh CI matrix. Partial ingestion is possible if the source or connection fails after the server has accepted a prefix; the operation is not atomic and does not auto-commit."
     }
   ]
 }
