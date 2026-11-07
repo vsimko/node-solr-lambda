@@ -1847,6 +1847,39 @@ export type CommitOptions = SolrCommitOptions & {
   /** @deprecated maxSegments is valid only for optimize(). */
   maxSegments?: number;
 };
+/** Common RealTime Get options. Filters map to repeated Solr fq parameters. */
+export interface SolrGetOptions {
+  /** Stored fields to return. */
+  fields?: string | readonly string[];
+  /** Optional filter queries applied by the RealTime Get handler. */
+  filter?: string | readonly string[];
+  /** Additional Solr request parameters. Reserved get parameters must use their typed properties. */
+  params?: Readonly<Record<string, SolrQueryParamValue>>;
+}
+
+/** Retrieve one document by its unique key. */
+export interface SolrGetSingleRequest extends SolrGetOptions {
+  id: string;
+  ids?: never;
+}
+
+/** Retrieve at least two documents; Solr returns a query-shaped response. */
+export interface SolrGetMultipleRequest extends SolrGetOptions {
+  ids: readonly [string, string, ...string[]];
+  id?: never;
+}
+
+export type SolrGetRequest = SolrGetSingleRequest | SolrGetMultipleRequest;
+
+/** Response from a single-ID RealTime Get request. */
+export interface SolrGetSingleResponse<TDocument = unknown> {
+  doc?: TDocument | null;
+  [key: string]: unknown;
+}
+
+/** Response from a multi-ID RealTime Get request. */
+export type SolrGetMultipleResponse<TDocument = unknown> = SolrResponse<TDocument>;
+
 export interface SolrResponse<TDocument = unknown, TJsonFacet = unknown> {
   responseHeader?: SolrResponseHeader;
   response?: SolrQueryResult<TDocument>;

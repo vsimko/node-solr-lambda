@@ -1,5 +1,6 @@
 import { SolrTransport } from "./transport.js";
 import * as queryApi from "./apis/query.js";
+import * as realtimeGetApi from "./apis/get.js";
 import * as updateApi from "./apis/update.js";
 import { schema as schemaApi } from "./apis/schema.js";
 import { config as configApi } from "./apis/config.js";
@@ -13,13 +14,20 @@ import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CollectionAdminResponse, CoreAdminAction, CoreAdminCommandResponse, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClusterStatusResponse, SolrCollectionShardOperationResponse,
   SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
-  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrAuthorizationCommand, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrAuthenticationResponse, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse
+  SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrAuthorizationCommand, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrAuthenticationResponse, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse,
+  SolrGetRequest, SolrGetSingleRequest, SolrGetMultipleRequest, SolrGetSingleResponse, SolrGetMultipleResponse
 } from "./types.js";
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
 export class SolrClient extends SolrTransport {
   constructor(config: SolrClientConfig = {}) {
     super(config);
+  }
+
+  get<TDocument = unknown>(request: SolrGetSingleRequest, requestOptions?: RequestControlOptions): Promise<SolrGetSingleResponse<TDocument>>;
+  get<TDocument = unknown>(request: SolrGetMultipleRequest, requestOptions?: RequestControlOptions): Promise<SolrGetMultipleResponse<TDocument>>;
+  get<TDocument = unknown>(request: SolrGetRequest, requestOptions: RequestControlOptions = {}): Promise<SolrGetSingleResponse<TDocument> | SolrGetMultipleResponse<TDocument>> {
+    return realtimeGetApi.get<TDocument>(this, this.endpoint("/get"), request, requestOptions);
   }
 
   query<T = unknown>(query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {

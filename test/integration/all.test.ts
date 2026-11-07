@@ -5,6 +5,7 @@ import "./solr-config-operations.test.js";
 import "./solr-core-lifecycle.test.js";
 import "./solr-core-status-discovery.test.js";
 import "./solr-export.test.js";
+import "./solr-get.test.js";
 import "./solr-facets.test.js";
 import "./solr-json-query.test.js";
 import "./solr-highlighting.test.js";

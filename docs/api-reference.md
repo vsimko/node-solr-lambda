@@ -12,6 +12,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | --- | --- | --- |
 | `SolrClient.query()` | Execute a typed Select query | [Query API](query.md) |
 | `SolrClient.queryJson()` | Execute the JSON Request API | [Query API](query.md) |
+| `SolrClient.get()` | Retrieve the latest document version by unique key | [RealTime Get API](realtime-get.md) |
 | `SolrClient.add()` | Add documents | [Update API](update.md) |
 | `SolrClient.update()` | Replace documents | [Update API](update.md) |
 | `SolrClient.updateCommands()` | Submit typed JSON update commands | [Update API](update.md) |
