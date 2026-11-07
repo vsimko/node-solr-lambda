@@ -27,8 +27,8 @@ This inventory defines the boundary of the typed client API after review against
 
 | Endpoint / feature | Status | Reason / tracking |
 | --- | --- | --- |
-| V2 backup endpoints | No dedicated V2 wrappers | The client exposes V1 ReplicationHandler and Collections API backup actions; Solr V2 backup routes and JSON payloads remain outside the typed client surface. |
-| V2 API paths | No dedicated V2 wrappers | The typed client currently uses V1 paths for CoreAdmin, Collections, Schema, and Config. V2 paths and payloads differ and are not inferred from V1 types. Use the generic request escape hatch only when the caller owns the V2 contract. |
+| V2 backup endpoints | No dedicated V2 wrappers | Core-level and collection-level V2 backup/restore routes have distinct paths and payloads, and collection backup routes changed in Solr 9.3. See the [V2 compatibility strategy](solr-v2-api-strategy.md); do not reuse V1 backup models. |
+| V2 API paths | No dedicated V2 wrappers | The typed client currently uses V1 paths for CoreAdmin, Collections, Schema, and Config. V2 routes and payloads are version-sensitive, including the Solr 9.3 route redesign. See the [V2 compatibility and typed-client strategy](solr-v2-api-strategy.md). Use the generic request escape hatch only when the caller owns the V2 contract. |
 | Terms handler `/terms` | No dedicated typed wrapper | Deferred pending a concrete consumer requirement; generic `request()` remains available. Terms is distinct from Suggester and SpellCheck. |
 | Suggester handler/component | Implemented as an optional Search Component in `query()` | Typed dictionary, lookup text, count, context-filter, build/reload, and suggestion response contracts are available. The SearchHandler and dictionary must be configured server-side. Unit and consumer type coverage exists; the disposable configured-handler integration test verifies indexed terms and weights and passed on pinned Solr 8.11.4, 9.11.0, and 10.1.0 (CI run #42392182590). |
 | RealTime Get `/get` | Implemented — `get()` | Typed mutually exclusive single-ID and multi-ID request/response contracts, field selection, repeated filter queries, custom parameters, and shared request controls are implemented. Unit serialization/validation and consumer type fixtures exist; the integration test verifies uncommitted single-ID and multi-ID read-after-write behavior on pinned Solr 8.11.4, 9.11.0, and 10.1.0 (CI run #42392182590). |
@@ -41,7 +41,7 @@ This inventory defines the boundary of the typed client API after review against
 - A generic transport method is not evidence that a particular endpoint is supported.
 - A documented Solr endpoint is not automatically part of the typed client contract.
 - SolrCloud Collections backup/restore and core-level ReplicationHandler backup/restore are distinct APIs with different topology and storage requirements; both V1 surfaces are implemented and have integration coverage on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 versions.
-- Solr 10.1 documents both V1 and V2 paths in several areas. The client’s V1 wrappers do not imply V2 compatibility.
+- Solr 10.1 documents both V1 and V2 paths in several areas and no longer allows V2 to be disabled using the former enablement property. Secure V2 paths explicitly; the client’s V1 wrappers do not imply V2 compatibility. See the [V2 compatibility strategy](solr-v2-api-strategy.md).
 - Every compatibility statement must name the tested behavior and pinned server version. See [Solr server compatibility](compatibility.md) and the [machine-readable API inventory](api-inventory.json).
 
 ## Official reference guides
@@ -51,7 +51,9 @@ This inventory defines the boundary of the typed client API after review against
 - [Solr 10.1 Reference Guide](https://solr.apache.org/guide/solr/10_1/)
 - [Request Handlers and Search Components — Solr 10.1](https://solr.apache.org/guide/solr/10_1/configuration-guide/requesthandlers-searchcomponents.html)
 - [Collections API — Solr 10.1](https://solr.apache.org/guide/solr/10_1/configuration-guide/collections-api.html)
+- [V2 API — Solr 8.11](https://solr.apache.org/guide/8_11/v2-api.html)
 - [V2 API — Solr 10.1](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
+- [Solr 9.11 release notes — V2 route changes](https://solr.apache.org/docs/9_11_0/changes/Changes.html)
 - [User-Managed Index Replication — Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/user-managed-index-replication.html)
 - [Backup and Restore — Solr 10.1](https://solr.apache.org/guide/solr/10_1/deployment-guide/backup-restore.html)
 

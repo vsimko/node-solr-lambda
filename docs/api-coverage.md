@@ -4,6 +4,8 @@ See the [public API reference](api-reference.md) for the package-root client met
 
 See the [Solr endpoint inventory](endpoint-inventory.md) for the explicit typed-client boundary, deferred endpoint families, and official Solr reference sources.
 
+The [Solr V2 API strategy](solr-v2-api-strategy.md) records the V1/V2 route map, version boundaries, and recommended explicit parallel namespace. Existing public methods remain V1; V2 is not currently typed or runtime-certified.
+
 See [Client architecture](architecture.md) for module boundaries, type-model guidelines, and shared request conventions. The [roadmap](roadmap.md) tracks priorities and links to implementation issues.
 
 See the [machine-readable API inventory](api-inventory.json) for each operation, request path, type coverage, unit-test status, and per-version integration status. The [Collections action coverage matrix](collections-api-coverage.md) maps each exposed Collections action to its input type, response contract, tests, and pinned Solr evidence.
@@ -12,6 +14,7 @@ A generic request method does not mean that every endpoint has a typed wrapper, 
 
 | API area | Current public surface | Remaining work |
 | --- | --- | --- |
+| Solr V2 API | No dedicated V2 typed namespace yet; current CoreAdmin, Collections, Schema, and Config methods use V1 routes. | V2 routes and payloads are version-sensitive; implement an explicit parallel namespace without automatic V1/V2 fallback. See the [V2 strategy](solr-v2-api-strategy.md) and Issue #327. |
 | Package exports | ESM and CommonJS runtime entries; conditional TypeScript declarations for both module systems | Older TypeScript resolution modes use the top-level declaration entry. |
 | v3 to v4 migration | Migration guide maps legacy client/configuration and helper patterns to the v4 factory, typed methods, Fetch transport, and error classes; compile-only checks reject legacy config keys and an end-to-end CRUD integration test verifies the replacement flow on Solr 8.11.4/9.11.0/10.1.0 | Application-specific v3 query/configuration defaults still require a deliberate migration review. |
 | Client transport | Typed base URL, core/collection, Basic/Bearer auth headers, header precedence, client and per-request timeouts, AbortSignal controls, custom fetch, request defaults, opt-in retries, optional `SolrJsonCodec` for lossless JSON parsing/serialization, and same-origin raw requests with raw string bodies and streamed responses via `requestRaw()` | Native JSON remains the default; exact 64-bit integer handling is opt-in through a caller-supplied codec. The built-in transport does not log requests or copy Authorization values into error properties; custom logging and server-controlled error bodies still require redaction. Advanced auth mechanisms and retry telemetry remain. XML is a generic raw-request escape hatch rather than a typed update API. |
