@@ -138,7 +138,7 @@ test("addStream serializes each document with the configured JSON codec", async 
       parse: text => JSON.parse(text),
       stringify: value => JSON.stringify(value, (_key, item: unknown) =>
         typeof item === "bigint" ? `__BIGINT__${item}` : item
-      )?.replace(/"__BIGINT__(\\d+)"/g, "$1")
+      )?.replace(/"__BIGINT__(\d+)"/g, "$1")
     },
     fetch: async (_input, init) => {
       requestBody = await readBody(init?.body);
