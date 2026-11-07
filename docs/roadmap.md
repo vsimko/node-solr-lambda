@@ -37,7 +37,7 @@ We optimize for five mutually reinforcing pillars:
 
 The primary product goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js. This means more than a broad method list: every important capability should have a correct typed contract, clear documentation, relevant tests, and explicit version evidence.
 
-The objective is tracked by [#311](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams:
+The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams:
 
 | Workstream | Tracking | Required evidence |
 | --- | --- | --- |
