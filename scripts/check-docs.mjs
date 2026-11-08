@@ -51,7 +51,7 @@ for (const method of v2Methods) {
     `API reference is missing SolrV2Client.${method}()`);
 }
 for (const method of v2CoreAdminMethods) {
-  assert.match(apiReference, new RegExp(`SolrV2CoreAdminClient\\\\.${method}\\\\(\\\\)`),
+  assert.match(apiReference, new RegExp(`SolrV2CoreAdminClient\.${method}\(\)`),
     `API reference is missing SolrV2CoreAdminClient.${method}()`);
 }
 for (const entry of inventory.entries) {
