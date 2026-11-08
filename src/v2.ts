@@ -63,8 +63,7 @@ export class SolrV2Client {
 /**
  * Typed Core Admin operations for the Solr V2 API.
  *
- * Runtime evidence is pinned to Solr 9.11.0 and 10.1.0. Solr 8.11.4 documents
- * only the V1 CoreAdmin surface, so these methods do not claim Solr 8 support.
+ * Runtime evidence is being checked against pinned Solr 8.11.4, 9.11.0, and 10.1.0. The 8.11.4 V2 API guide documents the Core Admin route family; runtime support remains unverified until its pinned-image integration test passes.
  * CoreAdmin is intended for standalone/user-managed cores; SolrCloud users
  * should use the Collections V2 API instead.
  */
