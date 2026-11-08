@@ -50,6 +50,10 @@ for (const method of v2Methods) {
   assert.match(apiReference, new RegExp(`SolrV2Client\\.${method}\\(\\)`),
     `API reference is missing SolrV2Client.${method}()`);
 }
+for (const method of v2CoreAdminMethods) {
+  assert.match(apiReference, new RegExp(`SolrV2CoreAdminClient\\\\.${method}\\\\(\\\\)`),
+    `API reference is missing SolrV2CoreAdminClient.${method}()`);
+}
 for (const entry of inventory.entries) {
   const methods = entry.clientMethod.split(/\s*\/\s*/);
   for (const method of methods) {
