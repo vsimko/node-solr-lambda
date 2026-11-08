@@ -22,6 +22,7 @@ This inventory defines the boundary of the typed client API after review against
 | Export handler `/export` | `export()`, `exportStream()` | Typed export parameters and raw backpressure-aware response/byte-stream access; docValues sort-field flow tested on all three pinned versions. |
 | ReplicationHandler V1 `/solr/{core}/replication` | `replication()`, `replicationFile()` | Typed commands include indexversion, details, filelist, fetchindex/abortfetch, enablepoll/disablepoll, leader/follower control, backup, restore, restorestatus, and deletebackup, plus raw file-content streaming. Core backup/restore and one-shot leader/follower fetch/read-back are integration-tested on Solr 8.11.4, 9.11.0, and 10.1.0. In-progress abort/read-back is tested on Solr 9.11.0 and 10.1.0; Solr 8.11.4 remains explicitly unverified because no observable active-fetch state was exposed. `enablepoll`/`disablepoll` have serialization coverage only. |
 | Generic/custom request handlers | `request()`, `requestRaw()` | Escape hatches for custom paths and parameters. These do not imply typed support or integration certification for arbitrary endpoints. |
+| Solr V2 generic API | `v2.request<T>()`, `v2.requestRaw()` | Explicit `/solr/api/` namespace over the shared transport. Caller owns operation-specific contracts. Runtime compatibility is unverified per Solr major; see the [V2 strategy](solr-v2-api-strategy.md). |
 
 ## Explicitly deferred or excluded endpoint families
 

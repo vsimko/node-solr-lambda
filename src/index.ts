@@ -1,3 +1,4 @@
+export { SolrV2Client } from "./v2.js";
 export { SolrClient } from "./client.js";
 export { SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "./errors.js";
 export type { SolrErrorMetadata } from "./errors.js";

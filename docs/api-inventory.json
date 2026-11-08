@@ -833,6 +833,51 @@
         "test/collections-types.ts"
       ],
       "notes": "V1 expert-level shard leader recovery action. Exact collection/shard query serialization and ForceLeaderParams/SolrCollectionShardOperationResponse inference are unit/type-tested. Apache Solr warns that promoting a stale replica may lose acknowledged updates. No runtime test has been executed; actual leader reassignment requires an isolated stale-replica fault-injection scenario."
+    },
+    {
+      "id": "v2.request",
+      "area": "V2 Generic",
+      "clientMethod": "v2.request",
+      "httpMethod": "GET/POST/PUT/DELETE",
+      "path": "/solr/api/{path}",
+      "methodImplemented": true,
+      "typeCoverage": "generic-by-design",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2.test.ts",
+        "test/v2-types.ts",
+        "test/v2-introspection.test.ts"
+      ],
+      "notes": "Low-level JSON request escape hatch only. The caller owns operation-specific request/response contracts. Shared transport applies auth, defaults, timeout, cancellation, retry, validation and JSON codec. No operation-specific runtime compatibility is claimed."
+    },
+    {
+      "id": "v2.requestRaw",
+      "area": "V2 Generic",
+      "clientMethod": "v2.requestRaw",
+      "httpMethod": "GET/POST/PUT/DELETE",
+      "path": "/solr/api/{path}",
+      "methodImplemented": true,
+      "typeCoverage": "generic-by-design",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2.test.ts",
+        "test/v2-types.ts"
+      ],
+      "notes": "Low-level raw-response escape hatch only. The caller owns operation-specific request/response contracts. No operation-specific runtime compatibility is claimed."
     }
   ]
 }

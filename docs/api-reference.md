@@ -44,9 +44,20 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 | `SolrClient.request()` | Send a custom request through the shared transport | [Raw requests](raw-requests.md) |
 | `SolrClient.requestRaw()` | Send a custom request and retain the Fetch Response | [Raw requests](raw-requests.md) |
 
+## Explicit Solr V2 namespace
+
+The client also exposes an opt-in `solr.v2` namespace. It uses the same configured transport as V1 but requires V2 paths explicitly; existing V1 methods never switch routes automatically.
+
+| Method | Purpose | Contract |
+| --- | --- | --- |
+| `SolrV2Client.request()` | Send a JSON V2 request and parse its response | Caller supplies the V2-specific response generic and request body; query parameters use `options.query`. |
+| `SolrV2Client.requestRaw()` | Send a V2 request and retain the raw Fetch Response | For streaming, custom response writers, or caller-owned parsing. |
+
+Both methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. The test-only `fetchV2Introspection()` helper fetches an endpoint's `/_introspect` document without deriving public types from it. Query parameters must be supplied through `RequestOptions.query`. This is a generic escape hatch, not operation-specific V2 typing or runtime certification; see the [V2 compatibility strategy](solr-v2-api-strategy.md).
+
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, and request controls; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, `SolrV2Client`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, and request controls; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
 
 Use named imports from the package root:
 

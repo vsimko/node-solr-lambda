@@ -1,10 +1,10 @@
 # Solr V2 API strategy
 
-This document records the V1/V2 compatibility audit requested by [Issue #327](https://github.com/vsimko/node-solr-lambda/issues/327). It is a design and documentation decision, not evidence that the client already implements or runtime-tests V2 operations.
+This document records the V1/V2 compatibility audit requested by [Issue #327](https://github.com/vsimko/node-solr-lambda/issues/327). The generic namespace foundation is implemented; this strategy does not claim operation-specific V2 support or runtime compatibility.
 
 ## Decision
 
-Keep the existing typed methods on Solr's V1 routes. Introduce V2 support as an explicit, parallel API surface (proposed namespace: `client.v2`) with operation-specific request and response contracts.
+Keep the existing typed methods on Solr's V1 routes. Expose V2 through an explicit, parallel `client.v2` namespace. The initial generic request methods are implemented; operation-specific request and response contracts remain follow-up work.
 
 - Never silently redirect an existing V1 method to a V2 path.
 - Never infer a V2 payload or response type from a V1 contract.
@@ -69,7 +69,7 @@ Solr 10.1 documents the same broad route families and adds operational pressure 
 
 ## Recommended implementation order
 
-1. **Foundation:** add a distinct `client.v2` namespace using the existing shared transport, URL safety, auth, timeout, cancellation, error, and custom-fetch behavior. Do not alter V1 methods. Establish a V2 request/response envelope policy and a version-support annotation convention.
+1. **Foundation — implemented in #332:** a distinct `client.v2` namespace uses the existing shared transport, including auth, timeout, cancellation, errors, and custom Fetch. It rejects path traversal and does not alter V1 methods. The generic methods do not imply operation-specific contracts or version support.
 2. **Read-only discovery and status:** add the smallest stable, high-value read operations first (for example collection/core/cluster status), with exact route tests and response models that preserve unknown fields.
 3. **High-value cluster recovery:** implement FORCELEADER as its own explicitly dangerous operation, coordinated with [Issue #328](https://github.com/vsimko/node-solr-lambda/issues/328). Require per-version route verification and an opt-in, isolated multi-node SolrCloud test that verifies the resulting leader, not merely HTTP success.
 4. **Core Admin lifecycle:** add V2 core status/reload/rename/unload/backup operations as separate contracts from V1 CoreAdmin.
@@ -96,3 +96,21 @@ Each operation must state its minimum supported Solr version. If an operation is
 - [Solr 9.11 major changes and V2 compatibility notes](https://solr.apache.org/guide/solr/9_11/upgrade-notes/major-changes-in-solr-9.html)
 - [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
 - [Solr 10 major changes and V2 security implications](https://solr.apache.org/guide/solr/latest/upgrade-notes/major-changes-in-solr-10.html)
+
+
+## Implemented namespace foundation
+
+Issue #332 adds an explicit `client.v2` namespace backed by the same transport instance as V1. The initial surface is intentionally limited to:
+
+- `client.v2.request<T>("/api/…", options)` for JSON requests.
+- `client.v2.requestRaw("/api/…", options)` for raw responses and streaming/custom writers.
+- Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior.
+- A TypeScript template-literal path constraint and runtime guard requiring a relative `/api/` path; pass query parameters through `options.query`.
+- A test-only `fetchV2Introspection()` helper appends `/_introspect` and preserves the result as an open JSON document. It is discovery evidence only; the package does not generate public types from introspection.
+
+This is a low-level V2 escape hatch, not operation-specific typed support. It performs no V1 fallback, does not change existing V1 methods, and makes no runtime compatibility claim for any Solr release. Operation-specific Core Admin and Collections methods remain in #333 and #334. The namespace foundation must pass its unit and consumer type tests before #332 is closed.
+
+
+### Introspection fixture policy
+
+The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource path}/_introspect` through the public namespace. Tests may retain raw, version-labelled introspection JSON under `test/fixtures/v2-introspection/{solr-version}/` after it has been captured from the exact pinned image. Fixtures must preserve the original response and capture metadata (Solr image tag, endpoint path, and capture date). Do not normalize away unknown fields, treat the experimental document as a stable schema, or generate package declarations from it. A fixture is evidence for route discovery; actual request integration tests remain necessary before marking an operation supported.

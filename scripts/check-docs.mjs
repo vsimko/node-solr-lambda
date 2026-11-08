@@ -31,15 +31,22 @@ function parseClassMethods(path, className) {
     .map((member) => member.name.text);
 }
 
+const v2Methods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2Client");
 const publicMethods = new Set([
   ...parseClassMethods(join(root, "src/client.ts"), "SolrClient"),
-  ...parseClassMethods(join(root, "src/transport.ts"), "SolrTransport")
+  ...parseClassMethods(join(root, "src/transport.ts"), "SolrTransport"),
+  ...v2Methods.map((method) => `v2.${method}`)
 ]);
 const documentedMethods = new Set(
   [...apiReference.matchAll(/\x60SolrClient\.([A-Za-z_$][\w$]*)\(\)\x60/g)].map((match) => match[1])
 );
 for (const method of publicMethods) {
+  if (method.startsWith("v2.")) continue;
   assert.ok(documentedMethods.has(method), `API reference is missing SolrClient.${method}()`);
+}
+for (const method of v2Methods) {
+  assert.match(apiReference, new RegExp(`SolrV2Client\\.${method}\\(\\)`),
+    `API reference is missing SolrV2Client.${method}()`);
 }
 for (const entry of inventory.entries) {
   const methods = entry.clientMethod.split(/\s*\/\s*/);
