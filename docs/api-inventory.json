@@ -852,7 +852,8 @@
       "documentation": "docs/solr-v2-api-strategy.md",
       "testFiles": [
         "test/v2.test.ts",
-        "test/v2-types.ts"
+        "test/v2-types.ts",
+        "test/v2-introspection.test.ts"
       ],
       "notes": "Low-level JSON request escape hatch only. The caller owns operation-specific request/response contracts. Shared transport applies auth, defaults, timeout, cancellation, retry, validation and JSON codec. No operation-specific runtime compatibility is claimed."
     },
