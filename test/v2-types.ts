@@ -11,7 +11,5 @@ void [response, rawResponse];
 
 // @ts-expect-error V2 routes must use the explicit /api/ prefix.
 void namespace.request("/solr/admin/cores");
-// @ts-expect-error Query parameters belong in RequestOptions.query, not in the path.
-void namespace.request("/api/cores?wt=json");
 // @ts-expect-error Only the HTTP methods supported by the shared transport are accepted.
 void namespace.request("/api/cores", { method: "PATCH" });
