@@ -1,4 +1,3 @@
-import type { createSolrClient, SolrV2Client } from "../src/index.js";
 import { createSolrClient as createClient } from "../src/index.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -35,5 +34,3 @@ test("v2 namespace rejects non-V2 paths and query strings in the path", () => {
   assert.throws(() => client.v2.request("/api/cores?wt=json" as `/api/${string}`), /relative \/api\//);
 });
 
-void (null as unknown as typeof createSolrClient);
-void (null as unknown as SolrV2Client);
