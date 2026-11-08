@@ -123,7 +123,7 @@ export class SolrV2CoreAdminClient {
   }
 
   private corePath(core: string): `/api/cores/${string}` {
-    if (typeof core !== "string" || core.trim().length === 0 || core.includes("/") || core.includes("\\\\")) {
+    if (typeof core !== "string" || core.trim().length === 0 || core.includes("/") || core.includes("\\")) {
       throw new TypeError("Solr V2 Core Admin requires a non-empty core name without path separators");
     }
     return `/api/cores/${encodeURIComponent(core)}`;
