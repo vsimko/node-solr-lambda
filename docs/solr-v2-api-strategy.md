@@ -96,3 +96,15 @@ Each operation must state its minimum supported Solr version. If an operation is
 - [Solr 9.11 major changes and V2 compatibility notes](https://solr.apache.org/guide/solr/9_11/upgrade-notes/major-changes-in-solr-9.html)
 - [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
 - [Solr 10 major changes and V2 security implications](https://solr.apache.org/guide/solr/latest/upgrade-notes/major-changes-in-solr-10.html)
+
+
+## Implemented namespace foundation
+
+Issue #332 adds an explicit `client.v2` namespace backed by the same transport instance as V1. The initial surface is intentionally limited to:
+
+- `client.v2.request<T>("/api/…", options)` for JSON requests.
+- `client.v2.requestRaw("/api/…", options)` for raw responses and streaming/custom writers.
+- Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior.
+- A TypeScript template-literal path constraint and runtime guard requiring a relative `/api/` path; pass query parameters through `options.query`.
+
+This is a low-level V2 escape hatch, not operation-specific typed support. It performs no V1 fallback, does not change existing V1 methods, and makes no runtime compatibility claim for any Solr release. Operation-specific Core Admin and Collections methods remain in #333 and #334. The namespace foundation must pass its unit and consumer type tests before #332 is closed.
