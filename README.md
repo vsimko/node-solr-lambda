@@ -79,7 +79,7 @@ The public client exposes typed methods for the main Solr API families:
 - **Query:** `query()` and `queryJson()`, including typed parser options, filters, facets, highlighting, grouping, stats, cursor pagination, and response models.
 - **Documents:** `add()`, backpressure-aware `addStream()` for `AsyncIterable` sources, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
 - **Schema and Config:** `schema()` and `config()` with typed command models.
-- **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`.
+- **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`. The explicit `client.v2.coreAdmin` namespace adds typed V2 core status/reload/rename/unload methods for Solr 9.11.0 and 10.1.0 standalone/user-managed cores; SolrCloud users should use Collections APIs.
 - **Replication and backups:** `replication()`, `replicationFile()`, and the SolrCloud backup/restore actions exposed through `collections()`.
 - **Streaming:** `stream()`, `export()`, and `exportStream()`.
 - **Advanced/custom endpoints:** `request()` and `requestRaw()` use the shared transport. Raw requests are an escape hatch, not a claim that every Solr handler has a dedicated type or has been integration-tested.
