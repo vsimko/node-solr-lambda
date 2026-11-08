@@ -249,7 +249,7 @@ jobs:
           SOLR_BACKUP_LOCATION: /var/solr/backups
           SOLR_V2_INTROSPECTION_OUTPUT: ${{ runner.temp }}/v2-introspection/${{ matrix.solr-version }}/cores.json
       - name: Upload V2 Core Admin introspection fixtures
-        if: success() && matrix.node == 26 && matrix.solr-version != '8.11.4'
+        if: success() && matrix.node == 26
         uses: actions/upload-artifact@v4
         with:
           name: v2-core-admin-introspection-${{ matrix.solr-version }}
