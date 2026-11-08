@@ -18,14 +18,19 @@ test("v2 namespace uses shared transport and leaves V1 routes unchanged", async 
     }
   });
 
-  await client.v2.request("/api/cores", { method: "POST", body: { create: { name: "books" } } });
+  await client.v2.request("/api/cores", { method: "POST", query: { wt: "json" }, body: { create: { name: "books" } } });
+  const raw = await client.v2.requestRaw("/api/cores", { method: "GET" });
+  assert.equal(raw.status, 200);
+  assert.deepEqual(await raw.json(), { responseHeader: { status: 0 } });
   await client.query({ query: "*:*" });
 
   assert.equal(requests[0]!.url.pathname, "/solr/api/cores");
   assert.equal(requests[0]!.method, "POST");
+  assert.equal(requests[0]!.url.searchParams.get("wt"), "json");
   assert.deepEqual(JSON.parse(requests[0]!.body!), { create: { name: "books" } });
   assert.equal(requests[0]!.authorization, "Bearer test-token");
-  assert.equal(requests[1]!.url.pathname, "/solr/catalog/select");
+  assert.equal(requests[1]!.url.pathname, "/solr/api/cores");
+  assert.equal(requests[2]!.url.pathname, "/solr/catalog/select");
 });
 
 test("v2 namespace rejects non-V2 paths and query strings in the path", () => {
