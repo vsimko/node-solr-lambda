@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { SolrHttpError } from "../../src/index.js";
 import { integrationTest } from "./fixtures.js";
 import { fetchV2Introspection } from "../helpers/v2-introspection.js";
 
@@ -57,8 +58,9 @@ integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated
           deleteDataDir: true,
           deleteInstanceDir: true
         });
-      } catch {
-        // The V2 unload may have completed even if a subsequent verification request failed.
+      } catch (error) {
+        // A 400/404 here means V2 unload already removed the core.
+        if (!(error instanceof SolrHttpError) || ![400, 404].includes(error.status)) throw error;
       }
     }
   }
