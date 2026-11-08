@@ -1,4 +1,5 @@
 import { SolrTransport } from "./transport.js";
+import { SolrV2Client } from "./v2.js";
 import * as queryApi from "./apis/query.js";
 import * as realtimeGetApi from "./apis/get.js";
 import * as updateApi from "./apis/update.js";
@@ -20,8 +21,12 @@ import type {
 
 /** Public Solr client. API methods delegate to domain modules over one transport. */
 export class SolrClient extends SolrTransport {
+  /** Explicit, opt-in Solr V2 API namespace; V1 methods remain unchanged. */
+  readonly v2: SolrV2Client;
+
   constructor(config: SolrClientConfig = {}) {
     super(config);
+    this.v2 = new SolrV2Client(this);
   }
 
   get<TDocument = unknown>(request: SolrGetSingleRequest, requestOptions?: RequestControlOptions): Promise<SolrGetSingleResponse<TDocument>>;
