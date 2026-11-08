@@ -24,12 +24,12 @@ test("v2 namespace uses shared transport and leaves V1 routes unchanged", async 
   assert.deepEqual(await raw.json(), { responseHeader: { status: 0 } });
   await client.query({ query: "*:*" });
 
-  assert.equal(requests[0]!.url.pathname, "/solr/api/cores");
+  assert.equal(requests[0]!.url.pathname, "/api/cores");
   assert.equal(requests[0]!.method, "POST");
   assert.equal(requests[0]!.url.searchParams.get("wt"), "json");
   assert.deepEqual(JSON.parse(requests[0]!.body!), { create: { name: "books" } });
   assert.equal(requests[0]!.authorization, "Bearer test-token");
-  assert.equal(requests[1]!.url.pathname, "/solr/api/cores");
+  assert.equal(requests[1]!.url.pathname, "/api/cores");
   assert.equal(requests[2]!.url.pathname, "/solr/catalog/select");
 });
 
