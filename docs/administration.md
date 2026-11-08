@@ -9,6 +9,20 @@ const admin = createSolrClient({ baseUrl: "http://localhost:8983" });
 const status = await admin.coreAdmin("STATUS", { core: "catalog" });
 ```
 
+For Solr 9.11.0 and 10.1.0, the explicit V2 namespace exposes a separate typed Core Admin client. These methods are intended for standalone or user-managed cores; use Collections APIs for SolrCloud.
+
+```ts
+const v2 = createSolrClient({ baseUrl: "http://localhost:8983" });
+const allCores = await v2.v2.coreAdmin.list({ indexInfo: false });
+const oneCore = await v2.v2.coreAdmin.status("catalog");
+await v2.v2.coreAdmin.reload("catalog");
+await v2.v2.coreAdmin.rename("catalog", { to: "catalog_archive" });
+// Unload is destructive. Data/index deletion flags default to false.
+await v2.v2.coreAdmin.unload("catalog_archive");
+```
+
+The V2 Core Admin routes are distinct from V1 and are not automatically selected by `coreAdmin()`. Solr 8.11.4 is unverified for these V2 operations because its CoreAdmin reference guide documents the V1 API only. Runtime integration and security evidence currently covers pinned Solr 9.11.0 and 10.1.0. See [API coverage](api-coverage.md).
+
 Use `collections()` to send a SolrCloud Collections API action.
 
 ```ts
