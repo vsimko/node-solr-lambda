@@ -106,5 +106,11 @@ Issue #332 adds an explicit `client.v2` namespace backed by the same transport i
 - `client.v2.requestRaw("/api/…", options)` for raw responses and streaming/custom writers.
 - Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior.
 - A TypeScript template-literal path constraint and runtime guard requiring a relative `/api/` path; pass query parameters through `options.query`.
+- A test-only `fetchV2Introspection()` helper appends `/_introspect` and preserves the result as an open JSON document. It is discovery evidence only; the package does not generate public types from introspection.
 
 This is a low-level V2 escape hatch, not operation-specific typed support. It performs no V1 fallback, does not change existing V1 methods, and makes no runtime compatibility claim for any Solr release. Operation-specific Core Admin and Collections methods remain in #333 and #334. The namespace foundation must pass its unit and consumer type tests before #332 is closed.
+
+
+### Introspection fixture policy
+
+The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource path}/_introspect` through the public namespace. Tests may retain raw, version-labelled introspection JSON under `test/fixtures/v2-introspection/{solr-version}/` after it has been captured from the exact pinned image. Fixtures must preserve the original response and capture metadata (Solr image tag, endpoint path, and capture date). Do not normalize away unknown fields, treat the experimental document as a stable schema, or generate package declarations from it. A fixture is evidence for route discovery; actual request integration tests remain necessary before marking an operation supported.
