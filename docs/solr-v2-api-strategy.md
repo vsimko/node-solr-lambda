@@ -94,6 +94,9 @@ Each operation must state its minimum supported Solr version. If an operation is
 - [Solr 9.11 reference guide](https://solr.apache.org/guide/solr/9_11/index.html)
 - [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html)
 - [Solr 9.11 major changes and V2 compatibility notes](https://solr.apache.org/guide/solr/9_11/upgrade-notes/major-changes-in-solr-9.html)
+- [Solr 8.11 CoreAdmin API (V1 routes only)](https://solr.apache.org/guide/8_11/coreadmin-api.html)
+- [Solr 9.11 CoreAdmin API](https://solr.apache.org/guide/solr/9_11/configuration-guide/coreadmin-api.html)
+- [Solr 10.1 CoreAdmin API](https://solr.apache.org/guide/solr/10_1/configuration-guide/coreadmin-api.html)
 - [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
 - [Solr 10 major changes and V2 security implications](https://solr.apache.org/guide/solr/latest/upgrade-notes/major-changes-in-solr-10.html)
 
