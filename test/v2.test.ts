@@ -34,3 +34,20 @@ test("v2 namespace rejects non-V2 paths and query strings in the path", () => {
   assert.throws(() => client.v2.request("/api/cores?wt=json" as `/api/${string}`), /relative \/api\//);
 });
 
+
+test("v2 namespace rejects normalized and encoded path traversal", () => {
+  const client = createClient({ fetch: async () => { throw new Error("fetch must not run"); } });
+  for (const path of [
+    "/api/../admin/cores",
+    "/api/%2e%2e/admin/cores",
+    "/api/%2E%2E/admin/cores",
+    "/api/%2fadmin/cores",
+    "/api/%5cadmin/cores",
+    "/api/%zz"
+  ]) {
+    assert.throws(
+      () => client.v2.request(path as `/api/${string}`),
+      /Solr V2 path/
+    );
+  }
+});
