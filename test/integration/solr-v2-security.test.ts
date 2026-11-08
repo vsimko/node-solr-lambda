@@ -11,7 +11,7 @@ test("V2 Core Admin enforces authentication and permits an authenticated admin",
   skip: process.env.SOLR_SECURITY !== "true" || !baseUrl || !core || !username || !password ||
     !["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
 }, async () => {
-  const anonymous = await fetch(`${baseUrl}/api/cores/`);
+  const anonymous = await fetch(new URL("/api/cores/", baseUrl));
   assert.equal(anonymous.status, 401);
   await anonymous.arrayBuffer();
 
