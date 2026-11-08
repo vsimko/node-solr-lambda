@@ -839,7 +839,7 @@
       "area": "V2 Generic",
       "clientMethod": "v2.request",
       "httpMethod": "GET/POST/PUT/DELETE",
-      "path": "/solr/api/{path}",
+      "path": "/api/{path}",
       "methodImplemented": true,
       "typeCoverage": "generic-by-design",
       "unitTests": "present",
@@ -862,7 +862,7 @@
       "area": "V2 Generic",
       "clientMethod": "v2.requestRaw",
       "httpMethod": "GET/POST/PUT/DELETE",
-      "path": "/solr/api/{path}",
+      "path": "/api/{path}",
       "methodImplemented": true,
       "typeCoverage": "generic-by-design",
       "unitTests": "present",
@@ -901,7 +901,7 @@
       "id": "v2.coreAdmin.list",
       "clientMethod": "v2.coreAdmin.list",
       "httpMethod": "GET",
-      "path": "/solr/api/cores/"
+      "path": "/api/cores/"
     },
     {
       "area": "Core Admin V2",
@@ -925,7 +925,7 @@
       "id": "v2.coreAdmin.status",
       "clientMethod": "v2.coreAdmin.status",
       "httpMethod": "GET",
-      "path": "/solr/api/cores/{core}"
+      "path": "/api/cores/{core}"
     },
     {
       "area": "Core Admin V2",
@@ -949,7 +949,7 @@
       "id": "v2.coreAdmin.reload",
       "clientMethod": "v2.coreAdmin.reload",
       "httpMethod": "POST",
-      "path": "/solr/api/cores/{core}/reload"
+      "path": "/api/cores/{core}/reload"
     },
     {
       "area": "Core Admin V2",
@@ -973,7 +973,7 @@
       "id": "v2.coreAdmin.rename",
       "clientMethod": "v2.coreAdmin.rename",
       "httpMethod": "POST",
-      "path": "/solr/api/cores/{core}/rename"
+      "path": "/api/cores/{core}/rename"
     },
     {
       "area": "Core Admin V2",
@@ -997,7 +997,7 @@
       "id": "v2.coreAdmin.unload",
       "clientMethod": "v2.coreAdmin.unload",
       "httpMethod": "POST",
-      "path": "/solr/api/cores/{core}/unload"
+      "path": "/api/cores/{core}/unload"
     }
   ]
 }
