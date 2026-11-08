@@ -32,10 +32,12 @@ function parseClassMethods(path, className) {
 }
 
 const v2Methods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2Client");
+const v2CoreAdminMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2CoreAdminClient");
 const publicMethods = new Set([
   ...parseClassMethods(join(root, "src/client.ts"), "SolrClient"),
   ...parseClassMethods(join(root, "src/transport.ts"), "SolrTransport"),
-  ...v2Methods.map((method) => `v2.${method}`)
+  ...v2Methods.map((method) => `v2.${method}`),
+  ...v2CoreAdminMethods.map((method) => `v2.coreAdmin.${method}`)
 ]);
 const documentedMethods = new Set(
   [...apiReference.matchAll(/\x60SolrClient\.([A-Za-z_$][\w$]*)\(\)\x60/g)].map((match) => match[1])
