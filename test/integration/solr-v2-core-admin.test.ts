@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { SolrHttpError } from "../../src/index.js";
 import { integrationTest } from "./fixtures.js";
 import { fetchV2Introspection } from "../helpers/v2-introspection.js";
@@ -13,6 +15,18 @@ integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated
   const name = await createCore("v2_core");
   const introspection = await fetchV2Introspection(client, "/api/cores");
   assert.ok(Array.isArray(introspection.spec), "Core Admin V2 introspection must expose its spec array");
+  const fixtureOutput = process.env.SOLR_V2_INTROSPECTION_OUTPUT;
+  if (fixtureOutput) {
+    mkdirSync(dirname(fixtureOutput), { recursive: true });
+    writeFileSync(fixtureOutput, JSON.stringify({
+      metadata: {
+        solrVersion: process.env.SOLR_VERSION,
+        endpoint: "/api/cores/_introspect",
+        capturedAt: new Date().toISOString()
+      },
+      introspection
+    }, null, 2) + "\\n");
+  }
 
   const all = await client.v2.coreAdmin.list({ indexInfo: true });
   assert.equal(all.status?.[name]?.name, name);
