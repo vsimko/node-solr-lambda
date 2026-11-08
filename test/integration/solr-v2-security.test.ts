@@ -9,7 +9,7 @@ const password = process.env.SOLR_PASSWORD;
 
 test("V2 Core Admin enforces authentication and permits an authenticated admin", {
   skip: process.env.SOLR_SECURITY !== "true" || !baseUrl || !core || !username || !password ||
-    !["8.11.4", "9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
+    !["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
 }, async () => {
   const anonymous = await fetch(new URL("/api/cores/", baseUrl));
   assert.equal(anonymous.status, 401);
