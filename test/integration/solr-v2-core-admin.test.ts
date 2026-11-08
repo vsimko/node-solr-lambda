@@ -25,31 +25,41 @@ integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated
   assert.equal(reloaded.status?.[name]?.name, name);
 
   const renamedName = createId("v2_renamed");
-  await client.v2.coreAdmin.rename(name, { to: renamedName });
-  const renamed = await client.v2.coreAdmin.status(renamedName);
-  assert.equal(renamed.status?.[renamedName]?.name, renamedName);
-
-  // Restore the original name so the shared fixture's cleanup can unload it.
-  await client.v2.coreAdmin.rename(renamedName, { to: name });
+  let currentName = name;
+  try {
+    await client.v2.coreAdmin.rename(name, { to: renamedName });
+    currentName = renamedName;
+    const renamed = await client.v2.coreAdmin.status(renamedName);
+    assert.equal(renamed.status?.[renamedName]?.name, renamedName);
+  } finally {
+    // Restore the original name so the shared fixture's cleanup can unload it.
+    if (currentName !== name) {
+      await client.v2.coreAdmin.rename(currentName, { to: name });
+    }
+  }
   const restored = await client.v2.coreAdmin.status(name);
   assert.equal(restored.status?.[name]?.name, name);
 
   const unloadName = createId("v2_unload");
   await client.coreAdmin("CREATE", { name: unloadName, instanceDir: unloadName, configSet: "_default" });
-  let unloaded = false;
+  let cleanupNeeded = true;
   try {
     await client.v2.coreAdmin.unload(unloadName, {});
-    const afterUnload = await client.coreAdmin<{ status?: Record<string, unknown> }>("STATUS", { core: unloadName });
-    assert.equal(afterUnload.status?.[unloadName], undefined);
-    unloaded = true;
+    const afterUnload = await client.v2.coreAdmin.list();
+    cleanupNeeded = Boolean(afterUnload.status?.[unloadName]);
+    assert.equal(cleanupNeeded, false);
   } finally {
-    if (!unloaded) {
-      await client.coreAdmin("UNLOAD", {
-        core: unloadName,
-        deleteIndex: true,
-        deleteDataDir: true,
-        deleteInstanceDir: true
-      });
+    if (cleanupNeeded) {
+      try {
+        await client.coreAdmin("UNLOAD", {
+          core: unloadName,
+          deleteIndex: true,
+          deleteDataDir: true,
+          deleteInstanceDir: true
+        });
+      } catch {
+        // The V2 unload may have completed even if a subsequent verification request failed.
+      }
     }
   }
 }, 120_000, v2CoreAdminSupported ? undefined : "V2 Core Admin is not documented for the Solr 8.11 baseline");
