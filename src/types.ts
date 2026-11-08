@@ -1243,6 +1243,62 @@ export interface SolrClientConfig {
   validation?: ValidationConfig;
 }
 
+
+/** Optional query parameters for V2 Core Admin status discovery. */
+export interface SolrV2CoreStatusOptions {
+  /** Include index statistics in status results. Defaults to Solr's true. */
+  indexInfo?: boolean;
+}
+
+/** Extensible index statistics returned by V2 Core Admin status. */
+export interface SolrV2CoreIndexStatus {
+  numDocs?: number;
+  maxDoc?: number;
+  deletedDocs?: number;
+  segmentCount?: number;
+  [key: string]: unknown;
+}
+
+/** Extensible status for one core returned by the V2 Core Admin API. */
+export interface SolrV2CoreStatus {
+  name?: string;
+  instanceDir?: string;
+  dataDir?: string;
+  config?: string;
+  schema?: string;
+  startTime?: string;
+  uptime?: number;
+  index?: SolrV2CoreIndexStatus;
+  [key: string]: unknown;
+}
+
+/** V2 Core Admin status response. Unknown server fields remain available. */
+export interface SolrV2CoreStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  status?: Readonly<Record<string, SolrV2CoreStatus>>;
+  initFailures?: Readonly<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
+/** V2 Core Admin rename request body. */
+export interface SolrV2CoreRenameParams {
+  to: string;
+}
+
+/** V2 Core Admin unload options. All destructive flags default to false. */
+export interface SolrV2CoreUnloadParams {
+  deleteIndex?: boolean;
+  deleteDataDir?: boolean;
+  deleteInstanceDir?: boolean;
+}
+
+/** Extensible response envelope for V2 Core Admin state-changing operations. */
+export interface SolrV2CoreOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  core?: string;
+  [key: string]: unknown;
+}
+
 /** Built-in Solr query parsers. Custom parser names remain accepted. */
 export type SolrQueryParser = "lucene" | "dismax" | "edismax" | (string & {});
 
