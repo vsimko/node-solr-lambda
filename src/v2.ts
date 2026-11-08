@@ -29,5 +29,18 @@ export class SolrV2Client {
     if (!path.startsWith("/api/") || path.includes("?") || path.includes("#") || path.includes("\\") || path.includes("://")) {
       throw new TypeError("Solr V2 path must be a relative /api/ path without a query or fragment");
     }
+    // URL normalizes dot segments (including percent-encoded forms). Reject them
+    // before passing the path to the transport so a V2 path cannot escape /api/.
+    for (const segment of path.split("/")) {
+      let decoded: string;
+      try {
+        decoded = decodeURIComponent(segment);
+      } catch {
+        throw new TypeError("Solr V2 path must contain valid percent-encoding");
+      }
+      if (decoded === "." || decoded === ".." || decoded.includes("/") || decoded.includes("\\\\")) {
+        throw new TypeError("Solr V2 path must not contain dot segments or encoded path separators");
+      }
+    }
   }
 }
