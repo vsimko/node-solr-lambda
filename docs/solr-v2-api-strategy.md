@@ -70,7 +70,7 @@ Solr 10.1 documents the same broad route families and adds operational pressure 
 ## Recommended implementation order
 
 1. **Foundation — implemented in #332:** a distinct `client.v2` namespace uses the existing shared transport, including auth, timeout, cancellation, errors, and custom Fetch. It rejects path traversal and does not alter V1 methods. The generic methods do not imply operation-specific contracts or version support.
-2. **Read-only discovery and status — Core Admin implemented in #333:** `GET /api/cores/` and `GET /api/cores/{core}` have typed, extensible response contracts and runtime evidence on Solr 9.11.0/10.1.0. The 8.11.4 CoreAdmin guide documents only V1; its V2 Core Admin status remains unverified.
+2. **Read-only discovery and status — Core Admin implemented in #333:** `GET /api/cores/` and `GET /api/cores/{core}` have typed, extensible response contracts and runtime evidence on Solr 9.11.0/10.1.0. The 8.11.4 CoreAdmin guide documents V1, while the separate 8.11 V2 API guide lists `/api/cores` and `/api/cores/{core}` lifecycle routes. The 8.11.4 runtime result is pending the current integration run.
 3. **High-value cluster recovery:** implement FORCELEADER as its own explicitly dangerous operation, coordinated with [Issue #328](https://github.com/vsimko/node-solr-lambda/issues/328). Require per-version route verification and an opt-in, isolated multi-node SolrCloud test that verifies the resulting leader, not merely HTTP success.
 4. **Core Admin lifecycle — implemented in #333:** V2 reload/rename/unload are separate contracts from V1 CoreAdmin and are integration-tested on Solr 9.11.0/10.1.0. Core backup/restore remains deferred pending independent route and behavior review.
 5. **Schema and Config:** add V2 command methods only after command-specific request/response differences are recorded and consumer TypeScript tests exist.
@@ -94,7 +94,8 @@ Each operation must state its minimum supported Solr version. If an operation is
 - [Solr 9.11 reference guide](https://solr.apache.org/guide/solr/9_11/index.html)
 - [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html)
 - [Solr 9.11 major changes and V2 compatibility notes](https://solr.apache.org/guide/solr/9_11/upgrade-notes/major-changes-in-solr-9.html)
-- [Solr 8.11 CoreAdmin API (V1 routes only)](https://solr.apache.org/guide/8_11/coreadmin-api.html)
+- [Solr 8.11 CoreAdmin API (V1)](https://solr.apache.org/guide/8_11/coreadmin-api.html)
+- [Solr 8.11 V2 API guide (Core Admin V2 routes)](https://solr.apache.org/guide/8_11/v2-api.html)
 - [Solr 9.11 CoreAdmin API](https://solr.apache.org/guide/solr/9_11/configuration-guide/coreadmin-api.html)
 - [Solr 10.1 CoreAdmin API](https://solr.apache.org/guide/solr/10_1/configuration-guide/coreadmin-api.html)
 - [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
@@ -121,6 +122,6 @@ The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource
 
 ## Core Admin V2 implementation status
 
-Issue #333 adds `client.v2.coreAdmin` with list/status, reload, rename, and unload operations. The contracts are distinct from V1 CoreAdmin and preserve unknown response fields. Exact routes and payloads are tested on pinned Solr 9.11.0 and 10.1.0, including authenticated/anonymous security checks. Solr 8.11.4 remains explicitly unverified: its versioned CoreAdmin guide documents V1 routes only. Core Admin V2 is for standalone/user-managed cores; SolrCloud management must use Collections APIs.
+Issue #333 adds `client.v2.coreAdmin` with list/status, reload, rename, and unload operations. The contracts are distinct from V1 CoreAdmin and preserve unknown response fields. Exact routes and payloads are tested on pinned Solr 9.11.0 and 10.1.0, including authenticated/anonymous security checks. Solr 8.11.4 has a separate V2 API guide that documents the Core Admin route family; runtime verification on the pinned 8.11.4 image is pending. Core Admin V2 is for standalone/user-managed cores; SolrCloud management must use Collections APIs.
 
 The integration workflow captures per-operation `/_introspect` responses as CI artifacts for Solr 9.11.0 and 10.1.0. These raw outputs are retained as version-labelled fixtures and are discovery evidence only, not stable generated types.
