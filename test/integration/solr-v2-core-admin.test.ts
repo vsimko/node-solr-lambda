@@ -5,7 +5,7 @@ import { SolrHttpError } from "../../src/index.js";
 import { integrationTest } from "./fixtures.js";
 import { fetchV2Introspection } from "../helpers/v2-introspection.js";
 
-const v2CoreAdminSupported = ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "");
+const v2CoreAdminSupported = ["8.11.4", "9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "");
 
 integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated cores", async ({
   client,
@@ -87,4 +87,4 @@ integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated
       }
     }
   }
-}, 120_000, v2CoreAdminSupported ? undefined : "V2 Core Admin is not documented for the Solr 8.11 baseline");
+}, 120_000, v2CoreAdminSupported ? undefined : "V2 Core Admin route is not in the pinned Solr documentation baseline");
