@@ -111,9 +111,16 @@ Issue #332 adds an explicit `client.v2` namespace backed by the same transport i
 - A TypeScript template-literal path constraint and runtime guard requiring a relative `/api/` path; pass query parameters through `options.query`.
 - A test-only `fetchV2Introspection()` helper appends `/_introspect` and preserves the result as an open JSON document. It is discovery evidence only; the package does not generate public types from introspection.
 
-This is a low-level V2 escape hatch, not operation-specific typed support. It performs no V1 fallback, does not change existing V1 methods, and makes no runtime compatibility claim for any Solr release. Operation-specific Core Admin and Collections methods remain in #333 and #334. The namespace foundation must pass its unit and consumer type tests before #332 is closed.
+This is a low-level V2 escape hatch, not operation-specific typed support by itself. It performs no V1 fallback and does not change existing V1 methods. Typed Core Admin methods are implemented separately in #333; typed Collections methods remain in #334.
 
 
 ### Introspection fixture policy
 
 The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource path}/_introspect` through the public namespace. Tests retain raw, version-labelled introspection JSON from the exact pinned image. The standalone CI job uploads `v2-core-admin-introspection-9.11.0` and `v2-core-admin-introspection-10.1.0` artifacts; the captured `cores.json` files are committed under `test/fixtures/v2-introspection/` after successful CI. Fixtures must preserve the original response and capture metadata (Solr image tag, endpoint path, and capture date). Do not normalize away unknown fields, treat the experimental document as a stable schema, or generate package declarations from it. A fixture is evidence for route discovery; actual request integration tests remain necessary before marking an operation supported.
+
+
+## Core Admin V2 implementation status
+
+Issue #333 adds `client.v2.coreAdmin` with list/status, reload, rename, and unload operations. The contracts are distinct from V1 CoreAdmin and preserve unknown response fields. Exact routes and payloads are tested on pinned Solr 9.11.0 and 10.1.0, including authenticated/anonymous security checks. Solr 8.11.4 remains explicitly unverified: its versioned CoreAdmin guide documents V1 routes only. Core Admin V2 is for standalone/user-managed cores; SolrCloud management must use Collections APIs.
+
+The integration workflow captures per-operation `/_introspect` responses as CI artifacts for Solr 9.11.0 and 10.1.0. These raw outputs are retained as version-labelled fixtures and are discovery evidence only, not stable generated types.
