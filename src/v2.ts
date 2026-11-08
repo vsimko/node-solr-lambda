@@ -38,7 +38,7 @@ export class SolrV2Client {
       } catch {
         throw new TypeError("Solr V2 path must contain valid percent-encoding");
       }
-      if (decoded === "." || decoded === ".." || decoded.includes("/") || decoded.includes("\\\\")) {
+      if (decoded === "." || decoded === ".." || decoded.includes("/") || decoded.includes("\\")) {
         throw new TypeError("Solr V2 path must not contain dot segments or encoded path separators");
       }
     }
