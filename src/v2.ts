@@ -8,10 +8,19 @@ import type { RequestControlOptions, RequestOptions, SolrV2CoreOperationResponse
  * Operation-specific methods and their version guarantees are added separately.
  */
 export class SolrV2Client {
+  private readonly apiBaseUrl: string;
+
   /** Typed Core Admin V2 operations. These target standalone/user-managed cores, not SolrCloud collections. */
   readonly coreAdmin: SolrV2CoreAdminClient;
 
-  constructor(private readonly transport: SolrTransport) {
+  constructor(private readonly transport: SolrTransport, baseUrl = "http://localhost:8983/") {
+    const configuredBase = new URL(baseUrl);
+    const segments = configuredBase.pathname.split("/").filter(Boolean);
+    // The standard Solr V1 webapp context is /solr, but V2 is mounted at /api.
+    // Preserve any reverse-proxy prefix while removing only a terminal /solr.
+    if (segments.at(-1) === "solr") segments.pop();
+    const proxyPrefix = segments.length ? `/${segments.join("/")}` : "";
+    this.apiBaseUrl = `${configuredBase.origin}${proxyPrefix}/api`;
     this.coreAdmin = new SolrV2CoreAdminClient(this);
   }
 
@@ -21,13 +30,13 @@ export class SolrV2Client {
    */
   request<T = unknown>(path: `/api/${string}`, options: RequestOptions = {}): Promise<T> {
     this.validatePath(path);
-    return this.transport.request<T>(`/solr${path}`, { ...options, operation: options.operation ?? "v2" });
+    return this.transport.request<T>(`${this.apiBaseUrl}${path.slice("/api".length)}`, { ...options, operation: options.operation ?? "v2" });
   }
 
   /** Send a raw V2 request and retain the Response body for streaming or custom writers. */
   requestRaw(path: `/api/${string}`, options: RequestOptions = {}): Promise<Response> {
     this.validatePath(path);
-    return this.transport.requestRaw(`/solr${path}`, { ...options, operation: options.operation ?? "v2" });
+    return this.transport.requestRaw(`${this.apiBaseUrl}${path.slice("/api".length)}`, { ...options, operation: options.operation ?? "v2" });
   }
 
   private validatePath(path: string): void {
