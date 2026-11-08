@@ -53,7 +53,7 @@ The client also exposes an opt-in `solr.v2` namespace. It uses the same configur
 | `SolrV2Client.request()` | Send a JSON V2 request and parse its response | Caller supplies the V2-specific response generic and request body; query parameters use `options.query`. |
 | `SolrV2Client.requestRaw()` | Send a V2 request and retain the raw Fetch Response | For streaming, custom response writers, or caller-owned parsing. |
 
-Both methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. Query parameters must be supplied through `RequestOptions.query`. This is a generic escape hatch, not operation-specific V2 typing or runtime certification; see the [V2 compatibility strategy](solr-v2-api-strategy.md).
+Both methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. The test-only `fetchV2Introspection()` helper fetches an endpoint's `/_introspect` document without deriving public types from it. Query parameters must be supplied through `RequestOptions.query`. This is a generic escape hatch, not operation-specific V2 typing or runtime certification; see the [V2 compatibility strategy](solr-v2-api-strategy.md).
 
 ## Root exports
 
