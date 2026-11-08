@@ -107,7 +107,7 @@ Issue #332 adds an explicit `client.v2` namespace backed by the same transport i
 
 - `client.v2.request<T>("/api/…", options)` for JSON requests.
 - `client.v2.requestRaw("/api/…", options)` for raw responses and streaming/custom writers.
-- Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior.
+- Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior. V2 URLs resolve at the server-root `/api` mount (not `/solr/api`); a reverse-proxy prefix is retained while a terminal `/solr` context segment is removed.
 - A TypeScript template-literal path constraint and runtime guard requiring a relative `/api/` path; pass query parameters through `options.query`.
 - A test-only `fetchV2Introspection()` helper appends `/_introspect` and preserves the result as an open JSON document. It is discovery evidence only; the package does not generate public types from introspection.
 
