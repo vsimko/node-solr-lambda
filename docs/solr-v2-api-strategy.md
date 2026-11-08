@@ -70,9 +70,9 @@ Solr 10.1 documents the same broad route families and adds operational pressure 
 ## Recommended implementation order
 
 1. **Foundation — implemented in #332:** a distinct `client.v2` namespace uses the existing shared transport, including auth, timeout, cancellation, errors, and custom Fetch. It rejects path traversal and does not alter V1 methods. The generic methods do not imply operation-specific contracts or version support.
-2. **Read-only discovery and status:** add the smallest stable, high-value read operations first (for example collection/core/cluster status), with exact route tests and response models that preserve unknown fields.
+2. **Read-only discovery and status — Core Admin implemented in #333:** `GET /api/cores/` and `GET /api/cores/{core}` have typed, extensible response contracts and runtime evidence on Solr 9.11.0/10.1.0. The 8.11.4 CoreAdmin guide documents only V1; its V2 Core Admin status remains unverified.
 3. **High-value cluster recovery:** implement FORCELEADER as its own explicitly dangerous operation, coordinated with [Issue #328](https://github.com/vsimko/node-solr-lambda/issues/328). Require per-version route verification and an opt-in, isolated multi-node SolrCloud test that verifies the resulting leader, not merely HTTP success.
-4. **Core Admin lifecycle:** add V2 core status/reload/rename/unload/backup operations as separate contracts from V1 CoreAdmin.
+4. **Core Admin lifecycle — implemented in #333:** V2 reload/rename/unload are separate contracts from V1 CoreAdmin and are integration-tested on Solr 9.11.0/10.1.0. Core backup/restore remains deferred pending independent route and behavior review.
 5. **Schema and Config:** add V2 command methods only after command-specific request/response differences are recorded and consumer TypeScript tests exist.
 6. **Collections backup/restore and remaining admin:** implement separately from core-level backups and only with explicit storage/topology semantics.
 7. **Security, metrics, plugins:** defer until route, permission, and response coverage is documented for each supported Solr line.
