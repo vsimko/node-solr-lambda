@@ -46,7 +46,7 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 ## Explicit Solr V2 namespace
 
-The client also exposes an opt-in `solr.v2` namespace. It uses the same configured transport as V1 but requires V2 paths explicitly; existing V1 methods never switch routes automatically.
+The client also exposes an opt-in `client.v2` namespace. It uses the same configured transport as V1 but requires V2 paths explicitly; existing V1 methods never switch routes automatically.
 
 | Method | Purpose | Contract |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ The client also exposes an opt-in `solr.v2` namespace. It uses the same configur
 | `SolrV2CoreAdminClient.rename()` | Rename a core | `POST /api/cores/{core}/rename` with `{ to }` JSON body. |
 | `SolrV2CoreAdminClient.unload()` | Unload a core | `POST /api/cores/{core}/unload`; data/index deletion flags are opt-in. |
 
-Both methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. The test-only `fetchV2Introspection()` helper fetches an endpoint's `/_introspect` document without deriving public types from it. Query parameters must be supplied through `RequestOptions.query`. The generic request methods remain an escape hatch. Typed Core Admin V2 methods are runtime-tested on Solr 9.11.0 and 10.1.0; Solr 8.11.4 is unverified because its CoreAdmin guide documents V1 only. These methods are for standalone/user-managed cores, not SolrCloud collections. See the [V2 compatibility strategy](solr-v2-api-strategy.md).
+The generic request methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. The test-only `fetchV2Introspection()` helper fetches an endpoint's `/_introspect` document without deriving public types from it. Query parameters must be supplied through `RequestOptions.query`. The generic request methods remain an escape hatch. Typed Core Admin V2 methods are runtime-tested on Solr 9.11.0 and 10.1.0; Solr 8.11.4 is unverified because its CoreAdmin guide documents V1 only. These methods are for standalone/user-managed cores, not SolrCloud collections. See the [V2 compatibility strategy](solr-v2-api-strategy.md).
 
 ## Root exports
 
