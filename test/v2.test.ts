@@ -56,3 +56,18 @@ test("v2 namespace rejects normalized and encoded path traversal", () => {
     );
   }
 });
+
+test("V2 API resolves outside the standard Solr webapp context and preserves proxy prefixes", async () => {
+  const paths: string[] = [];
+  const fetch = async (input: RequestInfo | URL) => {
+    paths.push(new URL(String(input)).pathname);
+    return new Response(JSON.stringify({ ok: true }));
+  };
+
+  const standard = createClient({ baseUrl: "http://localhost:8983/solr", fetch });
+  await standard.v2.request("/api/cores");
+  const proxied = createClient({ baseUrl: "http://localhost:8983/gateway/solr", fetch });
+  await proxied.v2.request("/api/cores");
+
+  assert.deepEqual(paths, ["/api/cores", "/gateway/api/cores"]);
+});
