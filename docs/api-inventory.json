@@ -897,7 +897,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1 only, so 8.11.4 remains unverified and is skipped by the V2 integration fixture. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Includes the optional indexInfo query parameter.",
+      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Includes the optional indexInfo query parameter.",
       "id": "v2.coreAdmin.list",
       "clientMethod": "v2.coreAdmin.list",
       "httpMethod": "GET",
@@ -921,7 +921,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1 only, so 8.11.4 remains unverified and is skipped by the V2 integration fixture. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Includes the optional indexInfo query parameter.",
+      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Includes the optional indexInfo query parameter.",
       "id": "v2.coreAdmin.status",
       "clientMethod": "v2.coreAdmin.status",
       "httpMethod": "GET",
@@ -945,7 +945,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1 only, so 8.11.4 remains unverified and is skipped by the V2 integration fixture. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. POST has no request body.",
+      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. POST has no request body.",
       "id": "v2.coreAdmin.reload",
       "clientMethod": "v2.coreAdmin.reload",
       "httpMethod": "POST",
@@ -969,7 +969,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1 only, so 8.11.4 remains unverified and is skipped by the V2 integration fixture. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. JSON body is { to: string }.",
+      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. JSON body is { to: string }.",
       "id": "v2.coreAdmin.rename",
       "clientMethod": "v2.coreAdmin.rename",
       "httpMethod": "POST",
@@ -993,7 +993,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1 only, so 8.11.4 remains unverified and is skipped by the V2 integration fixture. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Optional deleteIndex/deleteDataDir/deleteInstanceDir flags default to false.",
+      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Optional deleteIndex/deleteDataDir/deleteInstanceDir flags default to false.",
       "id": "v2.coreAdmin.unload",
       "clientMethod": "v2.coreAdmin.unload",
       "httpMethod": "POST",
