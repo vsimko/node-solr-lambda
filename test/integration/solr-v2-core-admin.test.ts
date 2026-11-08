@@ -25,7 +25,7 @@ integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated
         capturedAt: new Date().toISOString()
       },
       introspection
-    }, null, 2) + "\\n");
+    }, null, 2) + "\n");
   }
 
   const all = await client.v2.coreAdmin.list({ indexInfo: true });
