@@ -4,6 +4,7 @@ import "./solr-config-security.test.js";
 import "./solr-config-operations.test.js";
 import "./solr-core-lifecycle.test.js";
 import "./solr-core-status-discovery.test.js";
+import "./solr-v2-core-admin.test.js";
 import "./solr-export.test.js";
 import "./solr-get.test.js";
 import "./solr-facets.test.js";
