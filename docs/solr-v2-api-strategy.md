@@ -1,10 +1,10 @@
 # Solr V2 API strategy
 
-This document records the V1/V2 compatibility audit requested by [Issue #327](https://github.com/vsimko/node-solr-lambda/issues/327). It is a design and documentation decision, not evidence that the client already implements or runtime-tests V2 operations.
+This document records the V1/V2 compatibility audit requested by [Issue #327](https://github.com/vsimko/node-solr-lambda/issues/327). The generic namespace foundation is implemented; this strategy does not claim operation-specific V2 support or runtime compatibility.
 
 ## Decision
 
-Keep the existing typed methods on Solr's V1 routes. Introduce V2 support as an explicit, parallel API surface (proposed namespace: `client.v2`) with operation-specific request and response contracts.
+Keep the existing typed methods on Solr's V1 routes. Expose V2 through an explicit, parallel `client.v2` namespace. The initial generic request methods are implemented; operation-specific request and response contracts remain follow-up work.
 
 - Never silently redirect an existing V1 method to a V2 path.
 - Never infer a V2 payload or response type from a V1 contract.
@@ -69,7 +69,7 @@ Solr 10.1 documents the same broad route families and adds operational pressure 
 
 ## Recommended implementation order
 
-1. **Foundation:** add a distinct `client.v2` namespace using the existing shared transport, URL safety, auth, timeout, cancellation, error, and custom-fetch behavior. Do not alter V1 methods. Establish a V2 request/response envelope policy and a version-support annotation convention.
+1. **Foundation — implemented in #332:** a distinct `client.v2` namespace uses the existing shared transport, including auth, timeout, cancellation, errors, and custom Fetch. It rejects path traversal and does not alter V1 methods. The generic methods do not imply operation-specific contracts or version support.
 2. **Read-only discovery and status:** add the smallest stable, high-value read operations first (for example collection/core/cluster status), with exact route tests and response models that preserve unknown fields.
 3. **High-value cluster recovery:** implement FORCELEADER as its own explicitly dangerous operation, coordinated with [Issue #328](https://github.com/vsimko/node-solr-lambda/issues/328). Require per-version route verification and an opt-in, isolated multi-node SolrCloud test that verifies the resulting leader, not merely HTTP success.
 4. **Core Admin lifecycle:** add V2 core status/reload/rename/unload/backup operations as separate contracts from V1 CoreAdmin.
