@@ -13,15 +13,24 @@ integrationTest("V2 Core Admin discovers, reloads, renames, and unloads isolated
   createId
 }) => {
   const name = await createCore("v2_core");
-  const introspection = await fetchV2Introspection(client, "/api/cores");
-  assert.ok(Array.isArray(introspection.spec), "Core Admin V2 introspection must expose its spec array");
+  const corePath = `/api/cores/${encodeURIComponent(name)}` as `/api/${string}`;
+  const introspection = {
+    list: await fetchV2Introspection(client, "/api/cores"),
+    status: await fetchV2Introspection(client, corePath),
+    reload: await fetchV2Introspection(client, `${corePath}/reload` as `/api/${string}`),
+    rename: await fetchV2Introspection(client, `${corePath}/rename` as `/api/${string}`),
+    unload: await fetchV2Introspection(client, `${corePath}/unload` as `/api/${string}`)
+  };
+  for (const [operation, document] of Object.entries(introspection)) {
+    assert.ok(Array.isArray(document.spec), `Core Admin V2 ${operation} introspection must expose its spec array`);
+  }
   const fixtureOutput = process.env.SOLR_V2_INTROSPECTION_OUTPUT;
   if (fixtureOutput) {
     mkdirSync(dirname(fixtureOutput), { recursive: true });
     writeFileSync(fixtureOutput, JSON.stringify({
       metadata: {
         solrVersion: process.env.SOLR_VERSION,
-        endpoint: "/api/cores/_introspect",
+        endpoints: ["/api/cores", `${corePath}`, `${corePath}/reload`, `${corePath}/rename`, `${corePath}/unload`],
         capturedAt: new Date().toISOString()
       },
       introspection
