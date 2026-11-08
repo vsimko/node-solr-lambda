@@ -13,7 +13,9 @@ const declaredMethods = source => new Set(
     .filter(name => name !== "constructor")
 );
 const transportClass = transportSource.slice(transportSource.indexOf("export class SolrTransport"));
-const publicMethods = new Set([...declaredMethods(clientSource), ...declaredMethods(transportClass)]);
+const v2Source = readFileSync("src/v2.ts", "utf8");
+const v2Methods = [...declaredMethods(v2Source)].map(name => `v2.${name}`);
+const publicMethods = new Set([...declaredMethods(clientSource), ...declaredMethods(transportClass), ...v2Methods]);
 const inventoryMethods = new Set(inventory.entries.map(entry => entry.clientMethod));
 
 assert.equal(inventory.schemaVersion, 1);
