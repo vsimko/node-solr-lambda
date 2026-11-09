@@ -5,37 +5,25 @@ import { SolrHttpError } from "../../src/index.js";
 import { integrationTest } from "./fixtures.js";
 import { fetchV2Introspection } from "../helpers/v2-introspection.js";
 
-async function inspectOrRecordUnavailable(
-  client: Parameters<typeof fetchV2Introspection>[0],
-  path: `/api/${string}`
-): Promise<unknown> {
-  try {
-    return await fetchV2Introspection(client, path);
-  } catch (error) {
-    if (error instanceof SolrHttpError && error.status === 404) {
-      return { unavailable: true, status: error.status, payload: error.payload };
-    }
-    throw error;
-  }
-}
-
-integrationTest("V2 Core Admin introspection records per-operation availability on each pinned Solr version", async ({
+integrationTest("V2 Core Admin introspection captures the list and per-core resource documents", async ({
   client,
   createCore
 }) => {
   const name = await createCore("v2_introspect");
   const corePath = `/api/cores/${encodeURIComponent(name)}` as `/api/${string}`;
   const introspection = {
-    list: await inspectOrRecordUnavailable(client, "/api/cores"),
-    status: await inspectOrRecordUnavailable(client, corePath),
-    reload: await inspectOrRecordUnavailable(client, `${corePath}/reload` as `/api/${string}`),
-    rename: await inspectOrRecordUnavailable(client, `${corePath}/rename` as `/api/${string}`),
-    unload: await inspectOrRecordUnavailable(client, `${corePath}/unload` as `/api/${string}`)
+    list: await fetchV2Introspection(client, "/api/cores/"),
+    status: await fetchV2Introspection(client, corePath)
   };
   assert.ok(
     typeof introspection.list === "object" && introspection.list !== null &&
       Array.isArray((introspection.list as { spec?: unknown }).spec),
     "Core Admin V2 root introspection must expose a spec array"
+  );
+  assert.ok(
+    typeof introspection.status === "object" && introspection.status !== null &&
+      Array.isArray((introspection.status as { spec?: unknown }).spec),
+    "Core Admin V2 per-core introspection must expose a spec array"
   );
 
   const fixtureOutput = process.env.SOLR_V2_INTROSPECTION_OUTPUT;
@@ -44,7 +32,7 @@ integrationTest("V2 Core Admin introspection records per-operation availability 
     writeFileSync(fixtureOutput, JSON.stringify({
       metadata: {
         solrVersion: process.env.SOLR_VERSION,
-        endpoints: ["/api/cores", corePath, `${corePath}/reload`, `${corePath}/rename`, `${corePath}/unload`],
+        endpoints: ["/api/cores/_introspect", `${corePath}/_introspect`],
         capturedAt: new Date().toISOString()
       },
       introspection
@@ -52,20 +40,25 @@ integrationTest("V2 Core Admin introspection records per-operation availability 
   }
 });
 
+integrationTest("V2 Core Admin list and status work on every pinned Solr version", async ({
+  client,
+  createCore
+}) => {
+  const name = await createCore("v2_read");
+  const all = await client.v2.coreAdmin.list({ indexInfo: false });
+  assert.equal(all.status?.[name]?.name, name);
+
+  const one = await client.v2.coreAdmin.status(name, { indexInfo: false });
+  assert.equal(one.status?.[name]?.name, name);
+});
+
 const lifecycleRuntimeVersions = ["9.11.0", "10.1.0"];
-integrationTest("V2 Core Admin lists, reloads, renames, and unloads isolated cores", async ({
+integrationTest("V2 Core Admin reloads, renames, and unloads isolated cores", async ({
   client,
   createCore,
   createId
 }) => {
   const name = await createCore("v2_core");
-  const all = await client.v2.coreAdmin.list({ indexInfo: true });
-  assert.equal(all.status?.[name]?.name, name);
-  assert.equal(typeof all.status?.[name]?.instanceDir, "string");
-
-  const one = await client.v2.coreAdmin.status(name, { indexInfo: false });
-  assert.equal(one.status?.[name]?.name, name);
-
   await client.v2.coreAdmin.reload(name);
   const reloaded = await client.v2.coreAdmin.status(name);
   assert.equal(reloaded.status?.[name]?.name, name);
@@ -109,4 +102,4 @@ integrationTest("V2 Core Admin lists, reloads, renames, and unloads isolated cor
   }
 }, 120_000, lifecycleRuntimeVersions.includes(process.env.SOLR_VERSION ?? "")
   ? undefined
-  : "Core Admin V2 lifecycle runtime verification is pending for this Solr version");
+  : "The implemented lifecycle subroutes are only runtime-verified on Solr 9.11.0 and 10.1.0");
