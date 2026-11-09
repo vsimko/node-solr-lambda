@@ -9,7 +9,7 @@ const admin = createSolrClient({ baseUrl: "http://localhost:8983" });
 const status = await admin.coreAdmin("STATUS", { core: "catalog" });
 ```
 
-For Solr 9.11.0 and 10.1.0, the explicit V2 namespace exposes a separate typed Core Admin client. These methods are intended for standalone or user-managed cores; use Collections APIs for SolrCloud.
+The explicit V2 namespace exposes a separate typed Core Admin client for standalone or user-managed cores; use Collections APIs for SolrCloud. The read-only list/status operations are integration-tested on the pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. The implemented reload/rename/unload subroutes are integration-tested on Solr 9.11.0 and 10.1.0 only.
 
 ```ts
 const v2 = createSolrClient({ baseUrl: "http://localhost:8983" });
@@ -21,7 +21,7 @@ await v2.v2.coreAdmin.rename("catalog", { to: "catalog_archive" });
 await v2.v2.coreAdmin.unload("catalog_archive");
 ```
 
-The V2 Core Admin routes are distinct from V1 and are not automatically selected by `coreAdmin()`. Solr 8.11.4 is unverified for these V2 operations because its CoreAdmin reference guide documents the V1 API only. Runtime integration and security evidence currently covers pinned Solr 9.11.0 and 10.1.0. See [API coverage](api-coverage.md).
+The V2 Core Admin routes are distinct from V1 and are not automatically selected by `coreAdmin()`. Solr 8.11.4 introspection exposes `reload`, `rename`, and `unload` as command names on `POST /api/cores/{core}`; the implemented client methods instead use the post-9.3 subroutes (`/reload`, `/rename`, `/unload`). Therefore the current lifecycle methods do not claim Solr 8.11.4 support. Solr 8.11.4 read-only list/status is tested separately. Security allow/deny evidence for these V2 paths currently covers pinned Solr 9.11.0 and 10.1.0. See [API coverage](api-coverage.md) and the raw fixtures in `test/fixtures/v2-introspection/`.
 
 Use `collections()` to send a SolrCloud Collections API action.
 
