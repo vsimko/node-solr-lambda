@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "solrVersion": "9.11.0",
+    "endpoints": [
+      "/api/cores/_introspect",
+      "/api/cores/{core}/_introspect"
+    ],
+    "capturedAt": "2026-11-08T21:38:55.775Z"
+  },
+  "introspection": {
+    "list": {
+      "responseHeader": {
+        "status": 0,
+        "QTime": 0
+      },
+      "spec": [
+        {
+          "methods": ["POST"],
+          "url": {"paths": ["/cores"]},
+          "commands": {
+            "create": {
+              "type": "object",
+              "properties": {
+                "schema": {"type": "string"},
+                "dataDir": {"type": "string"},
+                "roles": {"type": "array", "items": {"type": "string"}},
+                "newCollection": {"type": "boolean"},
+                "collection": {"type": "string"},
+                "configSet": {"type": "string"},
+                "instanceDir": {"type": "string"},
+                "ulogDir": {"type": "string"},
+                "replicaType": {"type": "string"},
+                "loadOnStartup": {"type": "boolean"},
+                "async": {"type": "string"},
+                "coreNodeName": {"type": "string"},
+                "name": {"type": "string"},
+                "numShards": {"type": "integer"},
+                "shard": {"type": "string"},
+                "isTransient": {"type": "boolean"},
+                "config": {"type": "string"},
+                "properties": {"type": "object", "additionalProperties": true}
+              },
+              "required": ["name"],
+              "additionalProperties": true
+            }
+          }
+        },
+        {
+          "methods": ["GET"],
+          "url": {"paths": ["/cores"]}
+        }
+      ],
+      "WARNING": "This response format is experimental.  It is likely to change in the future."
+    },
+    "status": {
+      "responseHeader": {"status": 0, "QTime": 0},
+      "spec": [
+        {
+          "methods": ["POST"],
+          "url": {"paths": ["/cores/{core}"]},
+          "commands": {
+            "request-buffer-updates": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        },
+        {
+          "methods": ["GET"],
+          "url": {"paths": ["/cores/{core}"]}
+        }
+      ],
+      "WARNING": "This response format is experimental.  It is likely to change in the future."
+    }
+  }
+}
