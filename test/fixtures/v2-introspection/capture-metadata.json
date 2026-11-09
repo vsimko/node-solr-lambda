@@ -1,0 +1,24 @@
+{
+  "endpoint": "/api/cores/integration/select/_introspect",
+  "capturedAt": "2026-11-09",
+  "workflowRunId": 42675757588,
+  "workflowRunNumber": 983,
+  "sourceCommit": "645e129548e52946bd24ef34cd60ae4e2891eb88",
+  "captures": {
+    "8.11.4": {
+      "solrImage": "solr:8.11.4",
+      "nodeVersion": 22,
+      "jobId": 129356680645
+    },
+    "9.11.0": {
+      "solrImage": "solr:9.11.0",
+      "nodeVersion": 22,
+      "jobId": 129356680572
+    },
+    "10.1.0": {
+      "solrImage": "solr:10.1.0",
+      "nodeVersion": 22,
+      "jobId": 129356680473
+    }
+  }
+}
