@@ -14,7 +14,7 @@ import * as advancedApi from "./apis/advanced.js";
 import * as replicationApi from "./apis/replication.js";
 import type {
   CollectionAdminAction, CollectionAdminParams, CollectionAdminResponse, CoreAdminAction, CoreAdminCommandResponse, CoreAdminParams, RequestControlOptions, SolrMetricsParams, SolrMetricsResponse, SolrCommitOptions, SolrSoftCommitOptions, SolrConfigCommand, SolrConfigCommandResponse, SolrConfigReadResponse, SolrConfigOverlayResponse, SolrSchemaCommand, SolrSchemaCommandResponse, CollectionBackupParams, CollectionRestoreParams, CollectionListBackupParams, CollectionDeleteBackupParams, CollectionAsyncRequestStatusParams, CollectionAsyncRequestDeleteParams, SolrCollectionBackupResponse, SolrCollectionBackupListResponse, SolrCollectionBackupDeleteResponse, SolrCollectionAsyncRequestStatusResponse, SolrCollectionAsyncRequestDeleteResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse, SolrClusterStatusResponse, SolrCollectionShardOperationResponse,
-  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrUpdateOptions, SolrUpdateResponse,
+  SolrAtomicUpdateDocument, SolrClientConfig, SolrDelete, SolrDeleteOptions, SolrDocument, SolrJsonQueryRequest, SolrJsonUpdateCommands, SolrOptimizeOptions, SolrQuery, SolrQueryResponse, SolrJsonQueryResponse, SolrUpdateOptions, SolrUpdateResponse,
   SolrReplicationCommand, SolrReplicationParams, SolrReplicationResponse, SolrReplicationFileContentParams, SolrAuthorizationCommand, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrAuthenticationResponse, SolrReplicationFileListParams, SolrReplicationFileListResponse, SolrReplicationDeleteBackupParams, SolrExportParams, SolrStreamingExpressionResponse, SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemLoggingResponse,
   SolrGetRequest, SolrGetSingleRequest, SolrGetMultipleRequest, SolrGetSingleResponse, SolrGetMultipleResponse
 } from "./types.js";
@@ -35,12 +35,12 @@ export class SolrClient extends SolrTransport {
     return realtimeGetApi.get<TDocument>(this, this.endpoint("/get"), request, requestOptions);
   }
 
-  query<T = unknown>(query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {
+  query<T = SolrQueryResponse>(query: SolrQuery, requestOptions: RequestControlOptions = {}): Promise<T> {
     return queryApi.query<T>(this, this.endpoint("/select"), query, requestOptions);
   }
 
-  queryJson<T = unknown>(request: SolrJsonQueryRequest, requestOptions?: RequestControlOptions): Promise<T>;
-  queryJson<T = unknown>(request: Readonly<Record<string, unknown>> & { facet?: never }, requestOptions?: RequestControlOptions): Promise<T>;
+  queryJson<T = SolrJsonQueryResponse>(request: SolrJsonQueryRequest, requestOptions?: RequestControlOptions): Promise<T>;
+  queryJson<T = SolrJsonQueryResponse>(request: Readonly<Record<string, unknown>> & { facet?: never }, requestOptions?: RequestControlOptions): Promise<T>;
   queryJson<T = unknown>(request: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
     return queryApi.queryJson<T>(this, this.endpoint("/query"), request, requestOptions);
   }
