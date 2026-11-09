@@ -82,7 +82,7 @@ The public client exposes typed methods for the main Solr API families:
 - **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`.
 - **Replication and backups:** `replication()`, `replicationFile()`, and the SolrCloud backup/restore actions exposed through `collections()`.
 - **Streaming:** `stream()`, `export()`, and `exportStream()`.
-- **Advanced/custom endpoints:** `request()` and `requestRaw()` use the shared transport. Raw requests are an escape hatch, not a claim that every Solr handler has a dedicated type or has been integration-tested.
+- **Advanced/custom endpoints:** `request()` and `requestRaw()` use the shared V1 transport. The explicit `solr.v2.request<T>()` and `solr.v2.requestRaw()` namespace provides a generic `/api/` V2 escape hatch over the same transport; callers own V2 request/response contracts, and operation-specific runtime compatibility remains unverified. Raw requests are not a claim that every Solr handler has a dedicated type or has been integration-tested.
 
 Supported options are represented by named TypeScript interfaces and discriminated unions. Custom query parameters use `params`; administrative models provide `customParams` where appropriate. Prefer a typed method when one exists.
 
