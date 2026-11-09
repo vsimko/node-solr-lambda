@@ -14,7 +14,7 @@ test("V2 introspection helper appends the introspection suffix without generatin
   });
 
   const result = await fetchV2Introspection(client, "/api/collections/");
-  assert.equal(new URL(requested).pathname, "/solr/api/collections/_introspect");
+  assert.equal(new URL(requested).pathname, "/api/collections/_introspect");
   assert.deepEqual(result, payload);
 });
 
