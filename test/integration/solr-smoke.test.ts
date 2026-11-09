@@ -23,7 +23,7 @@ integrationTest("Solr supports basic add, commit, query, and delete operations",
 });
 
 integrationTest("V2 query introspection and GET query work on the pinned Solr version", async ({ client }) => {
-  const introspection = await fetchV2Introspection(client, "/api/c/integration/select");
+  const introspection = await fetchV2Introspection(client, "/api/cores/integration/select");
   assert.equal(typeof introspection, "object");
   assert.notEqual(introspection, null);
   assert.ok(Object.keys(introspection).length > 0, "Solr must return a non-empty V2 introspection document");
@@ -32,7 +32,7 @@ integrationTest("V2 query introspection and GET query work on the pinned Solr ve
   console.log(`SOLR_V2_INTROSPECTION_FIXTURE ${process.env.SOLR_VERSION ?? "unknown"} ${JSON.stringify(introspection)}`);
 
   const response = await client.v2.request<{ response?: { numFound?: number } }>(
-    "/api/c/integration/select",
+    "/api/cores/integration/select",
     { method: "GET", query: { q: "*:*", rows: 0 } }
   );
   assert.equal(typeof response.response?.numFound, "number");
