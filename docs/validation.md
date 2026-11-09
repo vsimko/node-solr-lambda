@@ -13,7 +13,7 @@ Pass Zod schemas to the client:
 ```ts
 import { z } from "zod";
 import { createSolrClient } from "node-solr-lambda";
-const querySchema = z.object({ q: z.string().min(1) });
+const querySchema = z.object({ query: z.string().min(1) });
 const responseSchema = z.object({ response: z.object({ numFound: z.number() }) });
 const solr = createSolrClient({
   core: "catalog",
