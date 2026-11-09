@@ -118,7 +118,7 @@ jobs:
   dependency-audit:
     name: Dependency vulnerability audit
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true' && needs.changes.outputs.website_only != 'true'
+    if: needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
