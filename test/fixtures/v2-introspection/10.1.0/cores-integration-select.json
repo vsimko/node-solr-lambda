@@ -1,0 +1,1 @@
+{"responseHeader":{"status":0,"QTime":1},"spec":[{"methods":["GET","POST"],"url":{"paths":["/cores/integration$handlerName"]}}],"WARNING":"This response format is experimental.  It is likely to change in the future."}

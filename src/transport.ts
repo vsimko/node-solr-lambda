@@ -60,6 +60,11 @@ function resolveUrl(path: string, baseUrl: string): URL {
     return target;
   }
   const url = base;
+  // Solr V2 routes live at the webapp root (/api), not under the legacy /solr context path.
+  if (path.startsWith("/api/")) {
+    url.pathname = path;
+    return url;
+  }
   const baseSegments = url.pathname.split("/").filter(Boolean);
   const pathSegments = path.split("/").filter(Boolean);
   if (baseSegments[baseSegments.length - 1] === "solr" && pathSegments[0] === "solr") {
