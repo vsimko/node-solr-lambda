@@ -884,9 +884,9 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "partial",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
+        "8": "tested",
         "9": "tested",
         "10": "tested"
       },
@@ -897,7 +897,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Includes the optional indexInfo query parameter.",
+      "notes": "Explicit V2 read-only contract distinct from V1 Core Admin types. The exact list/status operations are integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 (CI run #42861195999; test/integration/solr-v2-core-admin.test.ts). This certifies only list and status: reload, rename, and unload remain runtime-unverified on Solr 8.11.4 and are tracked independently. This API is for standalone/user-managed cores, not SolrCloud collection management.",
       "id": "v2.coreAdmin.list",
       "clientMethod": "v2.coreAdmin.list",
       "httpMethod": "GET",
@@ -908,9 +908,9 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "partial",
+      "integrationTests": "tested",
       "versions": {
-        "8": "unverified",
+        "8": "tested",
         "9": "tested",
         "10": "tested"
       },
@@ -921,7 +921,7 @@
         "test/integration/solr-v2-core-admin.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Explicit V2 contract distinct from V1 CoreAdmin types. Official Solr 9.11 and 10.1 references document this V2 route; the Solr 8.11 CoreAdmin guide documents V1, while the separate 8.11 V2 guide lists the V2 Core Admin route family; runtime verification on pinned 8.11.4 is pending. Runtime tests cover pinned 9.11.0 and 10.1.0, including authenticated/anonymous access. This API is for standalone/user-managed cores, not SolrCloud collection management. Includes the optional indexInfo query parameter.",
+      "notes": "Explicit V2 read-only contract distinct from V1 Core Admin types. The exact list/status operations are integration-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 (CI run #42861195999; test/integration/solr-v2-core-admin.test.ts). This certifies only list and status: reload, rename, and unload remain runtime-unverified on Solr 8.11.4 and are tracked independently. This API is for standalone/user-managed cores, not SolrCloud collection management.",
       "id": "v2.coreAdmin.status",
       "clientMethod": "v2.coreAdmin.status",
       "httpMethod": "GET",
