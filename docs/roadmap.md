@@ -27,7 +27,7 @@ We optimize for five mutually reinforcing pillars:
 ### Strategic execution tracks
 
 - API surface and feature-gap inventory (audit #312 complete; V2 route strategy #327 complete; implementation #332–#334)
-- Solr/Node.js support policy (completed in #313; Node.js 26 qualification #329 merged); scheduled release discovery/matrix expansion remains #335
+- Solr/Node.js support policy (completed in #313; Node.js 26 qualification #329 merged); scheduled release discovery and guided qualification remains #335
 - Testing strategy, fault injection, security, and SolrCloud evidence (#315; mutation-testing baseline #343)
 - Reproducible performance and memory benchmark suite (#314; harness merged #338; controlled baseline reports #339)
 - Competitor/ecosystem comparison and public quality scorecard (#310)
@@ -42,7 +42,7 @@ The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/is
 | Workstream | Tracking | Required evidence |
 | --- | --- | --- |
 | API breadth and feature correctness | [#312](https://github.com/vsimko/node-solr-lambda/issues/312) (audit complete); V2 implementation #332–#334 | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |
-| Solr and Node.js compatibility | [#313](https://github.com/vsimko/node-solr-lambda/issues/313) (policy complete); release discovery #335 | Explicit support policy and evidence-backed version/deployment matrix |
+| Solr and Node.js compatibility | [#313](https://github.com/vsimko/node-solr-lambda/issues/313) (policy complete); weekly release discovery #335 | Explicit support policy and evidence-backed version/deployment matrix |
 | Performance and efficiency | [#314](https://github.com/vsimko/node-solr-lambda/issues/314) (harness #338 merged; baseline execution #339) | Reproducible comparisons, latency percentiles, throughput, CPU and memory measurements, regression budgets |
 | Test depth and reliability | [#315](https://github.com/vsimko/node-solr-lambda/issues/315) (strategy #343 follow-up) | API-to-test traceability, failure-mode coverage, consumer type tests, mutation/coverage trends, reliable CI evidence |
 
