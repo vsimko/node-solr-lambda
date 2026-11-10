@@ -70,14 +70,14 @@ const solr = createSolrClient({
 });
 ```
 
-The transport supports Basic or Bearer authentication, custom headers and Fetch implementations, request defaults, optional retries, per-request timeouts, and `AbortSignal` cancellation. Use HTTPS when credentials or sensitive data cross a network. Do not put credentials in URLs or log authorization headers, tokens, or unredacted server error bodies.
+The transport supports Basic or Bearer authentication, custom headers and Fetch implementations, request defaults, optional retries, per-request timeouts, and `AbortSignal` cancellation. An injectable `SolrJsonCodec` can opt into lossless handling of large JSON integers; native JSON parsing remains the default. Use HTTPS when credentials or sensitive data cross a network. Do not put credentials in URLs or log authorization headers, tokens, or unredacted server error bodies.
 
 ## API overview
 
 The public client exposes typed methods for the main Solr API families:
 
 - **Query:** `query()` and `queryJson()`, including typed parser options, filters, facets, highlighting, grouping, stats, cursor pagination, and response models.
-- **Documents:** `add()`, backpressure-aware `addStream()` for `AsyncIterable` sources, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
+- **Documents:** `get()` for RealTime Get, `add()`, backpressure-aware `addStream()` for `AsyncIterable` sources, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
 - **Schema and Config:** `schema()` and `config()` with typed command models.
 - **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`.
 - **Replication and backups:** `replication()`, `replicationFile()`, and the SolrCloud backup/restore actions exposed through `collections()`.

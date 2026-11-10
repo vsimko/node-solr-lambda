@@ -40,6 +40,12 @@
         <pre><code><i>import</i> { createSolrClient }
   <i>from</i> <b>"node-solr-lambda"</b>;
 
+<i>interface</i> Product {
+  id: string;
+  type: string;
+  price: number;
+}
+
 <i>const</i> solr = createSolrClient({
   baseUrl: <b>"http://localhost:8983"</b>,
   core: <b>"gettingstarted"</b>
@@ -68,7 +74,7 @@ result.response.docs;</code></pre>
   </section>
   <section class="stats-strip" id="features">
     <div><strong>26 / 24 / 22</strong><span>Current Node.js LTS targets · 20 legacy</span></div>
-    <div><strong>8.x / 9.x / 10.x</strong><span>Solr compatibility lines</span></div>
+    <div><strong>10.1.0 / 9.11.0 / 8.11.4</strong><span>Pinned Solr baselines · 8.x legacy</span></div>
     <div><strong>0</strong><span>Required runtime dependencies</span></div>
     <div><strong id="package-version">Loading…</strong><span>Package version</span></div>
   </section>
