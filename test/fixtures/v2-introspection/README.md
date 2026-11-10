@@ -6,7 +6,7 @@ Versioned Core Admin V2 introspection captures from the pinned standalone Solr i
 - `solr-9.11.0-core-admin.json`
 - `solr-10.1.0-core-admin.json`
 
-Each fixture records the image tag, the two valid resource-level introspection paths, capture timestamp, and the `responseHeader`/`spec`/experimental warning returned for the list and per-core resources. The 8.11.4 server also returns a large `availableSubPaths` map containing dynamically generated per-core routes; that volatile map is intentionally omitted from the committed fixture. The operation and command definitions in `spec` are retained as captured.
+Each fixture records the image tag, the two valid resource-level introspection paths, capture timestamp, and the `responseHeader`/`spec`/experimental warning returned for the list and per-core resources. The 8.11.4 response includes `availableSubPaths`, including dynamically generated per-core routes. The captured map is retained in the fixture for provenance, but its generated core name is instance-specific and must not be used to infer stable route support. Resource endpoint paths in `metadata.endpoints` are normalized to `/api/cores/{core}/_introspect`; the raw, version-labelled CI artifacts retain the original capture output.
 
 The CI workflow uploads one version-labelled artifact per pinned image:
 
