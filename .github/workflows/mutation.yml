@@ -1,0 +1,57 @@
+name: Mutation testing
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/mutation-baseline
+    paths:
+      - ".github/workflows/mutation.yml"
+      - "stryker.config.json"
+      - "src/transport.ts"
+      - "src/apis/update.ts"
+      - "src/apis/collections.ts"
+      - "src/apis/core-admin.ts"
+      - "test/**"
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mutation:
+    name: Critical module mutation baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Install pinned mutation tooling
+        run: npm install --no-save --no-package-lock @stryker-mutator/core@10.0.0 @stryker-mutator/typescript-checker@10.0.0
+
+      - name: Run mutation tests
+        run: npx --no-install stryker run
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report-${{ github.run_number }}
+          path: reports/mutation/
+          if-no-files-found: warn
+          retention-days: 90
