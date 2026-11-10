@@ -1,0 +1,84 @@
+name: Solr upstream release watch
+
+on:
+  schedule:
+    - cron: "13 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: solr-upstream-release-watch
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Detect official Solr releases missing from the CI matrix
+        id: detect
+        run: node scripts/check-solr-releases.mjs
+      - name: Create qualification issues
+        if: steps.detect.outputs.missing_versions != ''
+        uses: actions/github-script@v7
+        with:
+          available_versions: ${{ steps.detect.outputs.available_versions }}
+          configured_versions: ${{ steps.detect.outputs.configured_versions }}
+          missing_versions: ${{ steps.detect.outputs.missing_versions }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const available = core.getInput("available_versions");
+            const configured = core.getInput("configured_versions");
+            const missing = core.getInput("missing_versions").split(",").filter(Boolean);
+
+            for (const version of missing) {
+              const title = `ci: qualify Apache Solr ${version}`;
+              const existing = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:issue "${title}"`
+              });
+              if (existing.data.items.length > 0) {
+                core.info(`A tracking issue already exists for Solr ${version}.`);
+                continue;
+              }
+
+              const body = [
+                `## Candidate Apache Solr release: ${version}`,
+                "",
+                "The official Apache download index lists this stable release, but it is not present in the repository's pinned CI matrix.",
+                "",
+                `- Official download directory: https://downloads.apache.org/solr/solr/${version}/`,
+                "- Official release information: https://solr.apache.org/downloads.html",
+                `- Versions currently pinned in CI: ${configured || "(none detected)"}`,
+                `- Stable versions currently listed upstream: ${available || "(none detected)"}`,
+                "",
+                "This notification does **not** certify or automatically add support for the candidate version.",
+                "",
+                "## Qualification checklist",
+                "- [ ] Review the official release notes and reference guide.",
+                "- [ ] Add the exact image version to standalone, security-enabled, and SolrCloud matrices in a reviewed PR.",
+                "- [ ] Run the full required matrix and inspect operation-level failures.",
+                "- [ ] Update API inventory, compatibility policy, endpoint coverage, and release notes from completed evidence.",
+                "- [ ] Decide whether this release becomes a supported baseline or is explicitly deferred.",
+                "",
+                "Follow the qualification procedure in docs/compatibility.md and link the evidence here."
+              ].join("\n");
+
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ["ci"]
+              });
+              core.info(`Created qualification issue for Solr ${version}.`);
+            }
