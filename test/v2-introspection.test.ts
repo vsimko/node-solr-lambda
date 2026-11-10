@@ -35,8 +35,8 @@ test("committed Core Admin introspection fixtures cover all pinned Solr versions
     )) as {
       metadata: { solrVersion: string; endpoints: string[] };
       introspection: {
-        list: { spec?: unknown[] };
-        status: { spec?: unknown[] };
+        list: { spec?: unknown[]; availableSubPaths?: Record<string, string[]> };
+        status: { spec?: unknown[]; availableSubPaths?: Record<string, string[]> };
       };
     };
 
@@ -50,6 +50,18 @@ test("committed Core Admin introspection fixtures cover all pinned Solr versions
     assert.ok(fixture.introspection.list.spec.length > 0);
     assert.ok(fixture.introspection.status.spec.length > 0);
   }
+
+  const legacy = JSON.parse(readFileSync(
+    new URL("./fixtures/v2-introspection/solr-8.11.4-core-admin.json", import.meta.url),
+    "utf8"
+  )) as {
+    introspection: {
+      list: { availableSubPaths?: Record<string, string[]> };
+      status: { availableSubPaths?: Record<string, string[]> };
+    };
+  };
+  assert.ok(Object.keys(legacy.introspection.list.availableSubPaths ?? {}).length > 0);
+  assert.ok(Object.keys(legacy.introspection.status.availableSubPaths ?? {}).length > 0);
 });
 
 test("Solr 8.11.4 fixture records legacy Core Admin commands on the per-core resource", () => {
