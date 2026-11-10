@@ -369,3 +369,30 @@ void solr.query<SolrQueryResponse<{ id: string; title_txt: string }>>({
 void solr.query({ moreLikeThis: { interestingTerms: "all" } });
 // @ts-expect-error MoreLikeThis counts are numeric.
 void solr.query({ moreLikeThis: { count: "five" } });
+
+
+// Default query methods expose Solr's response envelope without requiring a generic.
+void solr.query({ query: "*:*" }).then(page => {
+  const total: number | undefined = page.response?.numFound;
+  const headerStatus: number | undefined = page.responseHeader?.status;
+  const docs: unknown[] | undefined = page.response?.docs;
+  void [total, headerStatus, docs];
+});
+
+void solr.queryJson({ query: { lucene: "*:*" } }).then(page => {
+  const total: number | undefined = page.response?.numFound;
+  const headerStatus: number | undefined = page.responseHeader?.status;
+  const docs: unknown[] | undefined = page.response?.docs;
+  void [total, headerStatus, docs];
+});
+
+// Explicit response generics remain supported for document and JSON-facet inference.
+interface JsonFacetSummary { count: number }
+void solr.queryJson<SolrJsonQueryResponse<{ id: string }, JsonFacetSummary>>({
+  query: { lucene: "*:*" },
+  facet: { count: "count()" }
+}).then(page => {
+  const id: string | undefined = page.response?.docs?.[0]?.id;
+  const count: number | undefined = page.facets?.count;
+  void [id, count];
+});

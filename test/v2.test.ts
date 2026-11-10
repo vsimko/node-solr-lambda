@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 test("v2 namespace uses shared transport and leaves V1 routes unchanged", async () => {
   const requests: { url: URL; method: string; body?: string; authorization: string | null }[] = [];
   const client = createClient({
+    baseUrl: "http://localhost:8983/solr",
     core: "catalog",
     auth: { type: "bearer", token: "test-token" },
     fetch: async (input, init) => {

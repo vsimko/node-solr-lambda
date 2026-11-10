@@ -7,12 +7,14 @@
 - Replace the v3 functional Axios client with a TypeScript-first Fetch-based `SolrClient`, supporting Node.js 20/22/24/26 (Node 20 retained as legacy EOL compatibility), ESM and CommonJS, and no required runtime dependencies; keep Zod optional for runtime validation.
 - Add Node.js 26 Active LTS support and expand the unit/type, standalone, security, and SolrCloud CI matrices to Node.js 20/22/24/26; retain Node.js 20 only as legacy compatibility.
 - Add typed transport configuration for Basic/Bearer authentication, headers, request defaults, retries, timeouts, cancellation, structured HTTP/network/timeout/abort/validation errors, and safe raw/streaming requests.
-- Add an autocomplete-first Query API covering parser-specific options, filters, sorting, cursorMark pagination, classic and JSON facets, highlighting, grouping, stats, MoreLikeThis, debug/explain, and spatial helpers.
-- Add typed document update contracts for JSON documents and command objects, atomic updates, update/delete options, commit/soft-commit/optimize behavior, and update response/error envelopes.
+- Add an autocomplete-first Query API covering parser-specific options, filters, sorting, cursorMark pagination, classic and JSON facets, highlighting, grouping, stats, MoreLikeThis, debug/explain, spatial helpers, and optional SpellCheck and Suggester components.
+- Add typed document contracts including RealTime Get (`get()`), JSON documents and command objects, atomic updates, update/delete options, commit/soft-commit/optimize behavior, and update response/error envelopes.
 - Add `SolrClient.addStream()` for backpressure-aware JSON-array document ingestion from async iterables, with bounded buffering, cancellation, and explicit partial-ingestion semantics.
+- Add an injectable `SolrJsonCodec` for caller-selected lossless JSON parsing and serialization, including BigInt-safe handling; native JSON behavior remains the default.
 - Add typed Core Admin, Collections, Schema, Config, Security, Metrics, and System API contracts, with action-specific request models and response shapes for the operations documented in the API reference.
 - Add an explicit shared-transport Solr V2 namespace and typed Core Admin V2 list/status/reload/rename/unload operations, with isolated runtime and security evidence on Solr 9.11.0 and 10.1.0; Solr 8.11.4 V2 Core Admin remains unverified.
 - Add the typed V1 Collections `FORCELEADER` action with exact serialization and consumer type coverage; stale-replica runtime verification remains unverified pending isolated fault-injection testing.
+- Add an explicit `client.v2` namespace with generic JSON and raw request methods over the shared transport; V1 methods remain unchanged, and operation-specific V2 contracts/runtime compatibility remain unverified.
 - Add a reproducible query, bulk-ingestion, and streaming benchmark harness comparing the client with direct Node.js Fetch; no performance leadership claim is made.
 
 - Add Update API unit coverage for JSON endpoint selection, typed success responses, and Solr HTTP failures, plus Solr 8/9/10 delete-by-query persisted-state integration coverage.
@@ -37,6 +39,7 @@
 ### Documentation
 
 - Add a public API reference and machine-readable operation inventory, with consistency checks against package exports and client methods.
+- Document the explicit generic Solr V2 namespace, its `/api/` path constraints, shared-transport behavior, introspection fixture policy, and unverified operation-specific compatibility boundary.
 - Add action-specific Collections API evidence and an explicit public API review, including the stable, generic escape-hatch, and internal export decisions.
 - Document npm tarball validation, prerelease dist-tag behavior, release rollback, and the manually gated GitHub Actions/npm OIDC trusted-publishing workflow.
 - Add a Solr 8.11.4/9.11.0/10.1.0 Schema API compatibility matrix with explicit V1/V2 scope and unverified similarity plugin behavior.
@@ -44,7 +47,7 @@
 - Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.
 - Expand the v3-to-v4 migration guide with a complete v4 CRUD example and link its compile-time and Solr integration checks.
 - Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.
-- Expand standalone, authenticated, and SolrCloud integration CI to Node.js 20/22/24 across Solr 8.11.4/9.11.0/10.1.0; document the complete matrix and its successful CI evidence.
+- Expand standalone, authenticated, and SolrCloud integration CI to Node.js 20/22/24/26 across Solr 8.11.4/9.11.0/10.1.0; document the complete matrix and its successful CI evidence.
 - Document ReplicationHandler abort lifecycle evidence per Solr version, including the Solr 8.11.4 observability limitation, and keep one-shot fetch verification separate.
 - Document the opt-in SPLITSHARD/MIGRATE workflow and retain explicit non-certification until a maintainer manually runs it on every pinned Solr version.
 

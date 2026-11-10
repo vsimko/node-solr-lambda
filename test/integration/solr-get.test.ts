@@ -4,17 +4,18 @@ import { integrationTest } from "./fixtures.js";
 
 integrationTest("RealTime Get reads uncommitted documents by one ID and multiple IDs", async ({
   client,
-  createId
+  createId,
+  addDocuments
 }) => {
   const singleId = createId("realtime-get-single");
   const multiId1 = createId("realtime-get-multi");
   const multiId2 = createId("realtime-get-multi");
 
-  await client.add([
+  await addDocuments([
     { id: singleId, name_s: "single" },
     { id: multiId1, name_s: "multi-one" },
     { id: multiId2, name_s: "multi-two" }
-  ], { commitWithin: 10000000 });
+  ]);
 
   const searcherView = await client.query<SolrQueryResponse<{ id: string; name_s: string }>>({
     query: `id:${singleId}`,

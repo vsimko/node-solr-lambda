@@ -1,7 +1,6 @@
 name: CI
 
 permissions:
-  actions: write
   contents: read
 
 concurrency:
@@ -23,12 +22,15 @@ jobs:
   changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     outputs:
       docs_only: ${{ steps.classify.outputs.docs_only }}
       docs_changed: ${{ steps.classify.outputs.docs_changed }}
       website_only: ${{ steps.classify.outputs.website_only }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
       - id: classify
@@ -113,14 +115,31 @@ jobs:
           echo "Cancelling this workflow run"
           gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
 
+  dependency-audit:
+    name: Dependency vulnerability audit
+    needs: changes
+    if: needs.changes.outputs.docs_only != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - run: npm ci
+      - name: Audit locked dependencies
+        run: npm audit --audit-level=high
+
   docs:
     name: Documentation checks
     needs: changes
     if: needs.changes.outputs.docs_changed == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - run: npm ci
@@ -150,8 +169,8 @@ jobs:
     if: needs.changes.outputs.website_only == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -168,9 +187,12 @@ jobs:
       matrix:
         node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
@@ -208,9 +230,12 @@ jobs:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
         node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
@@ -284,12 +309,15 @@ jobs:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
         node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     env:
       SOLR_USERNAME: integration-admin
       SOLR_PASSWORD: integration-password
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
@@ -390,9 +418,12 @@ jobs:
         solr-version: ["8.11.4", "9.11.0", "10.1.0"]
         node: [20, 22, 24, 26]
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci

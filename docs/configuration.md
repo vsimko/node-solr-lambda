@@ -14,7 +14,7 @@ Pass a configuration object to `createSolrClient`.
 
 You can set a reverse-proxy prefix in `baseUrl`. For example, `https://search.example/proxy/solr` works with the client paths. The client does not add a second `/solr` segment.
 
-Set either `core` or `collection` for collection-scoped methods. If both are set, `core` takes precedence. Global admin methods do not need either value.
+Set `core` or `collection` for collection-scoped methods. If both are supplied, `core` takes precedence because scoped paths select `core` first. Prefer setting exactly one target to keep the client configuration unambiguous. Global admin methods do not need either value.
 
 ## Authentication and headers
 
