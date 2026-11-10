@@ -1,6 +1,7 @@
 import { createSolrClient } from "../src/index.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fetchV2Introspection } from "./helpers/v2-introspection.js";
 
@@ -79,4 +80,30 @@ test("Solr 8.11.4 fixture records legacy Core Admin commands on the per-core res
   assert.ok(commands.includes("reload"));
   assert.ok(commands.includes("rename"));
   assert.ok(commands.includes("unload"));
+});
+
+test("raw Core Admin captures retain the complete original CI artifact payloads", () => {
+  const captures = [
+    ["8.11.4", "c016b9ad94af04b54ca2edf0e60a47d2826991931941f3e000db76e57f634d26"],
+    ["9.11.0", "c83dd0e77e52145ca85847f82e53cd9979ccca2d9ca583ff555b53a0225bf7c2"],
+    ["10.1.0", "79bfc7584b042d4cf8b2c699856fc73936d4e587650c7ddc33b34c3f80370827"]
+  ] as const;
+
+  for (const [version, expectedSha256] of captures) {
+    const bytes = readFileSync(
+      new URL(`./fixtures/v2-introspection/raw/solr-${version}-core-admin.json`, import.meta.url)
+    );
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedSha256,
+      `Solr ${version} raw fixture must remain byte-for-byte unchanged`);
+
+    const capture = JSON.parse(bytes.toString("utf8")) as {
+      metadata: { solrVersion: string; endpoints: string[] };
+      introspection: { list: { spec?: unknown[] }; status: { spec?: unknown[] } };
+    };
+    assert.equal(capture.metadata.solrVersion, version);
+    assert.equal(capture.metadata.endpoints[0], "/api/cores/_introspect");
+    assert.match(capture.metadata.endpoints[1] ?? "", /^\/api\/cores\/[^/]+\/_introspect$/);
+    assert.ok((capture.introspection.list.spec?.length ?? 0) > 0);
+    assert.ok((capture.introspection.status.spec?.length ?? 0) > 0);
+  }
 });
