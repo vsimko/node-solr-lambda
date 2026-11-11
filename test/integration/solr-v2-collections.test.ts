@@ -18,10 +18,9 @@ cloudIntegrationTest("V2 Collections status reads isolated collection state", as
 }) => {
   const collection = await createCollection("v2_status");
   const response = await client.v2.collections.status(collection);
-  const status = response[collection] as { activeShards?: number; inactiveShards?: number } | undefined;
-  assert.ok(status && typeof status === "object", "status response must be keyed by collection name");
-  assert.equal(status.activeShards, 1);
-  assert.equal(status.inactiveShards, 0);
+  assert.equal(response.name, collection);
+  assert.equal(response.activeShards, 1);
+  assert.equal(response.inactiveShards, 0);
 }, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
   ? undefined
   : "The V2 per-collection status route is available from Solr 9.3; the pinned 8.11 line is not claimed");
@@ -48,7 +47,15 @@ cloudIntegrationTest("V2 Aliases list and detail read back an isolated alias", a
   const alias = await createAlias(collection, "v2_alias");
   const list = await client.v2.aliases.list();
   assert.equal(list.aliases?.[alias], collection, "GET /api/aliases must include the alias mapping");
-  const detail = await client.v2.aliases.status(alias);
+  let detail;
+  try {
+    detail = await client.v2.aliases.status(alias);
+  } catch (error) {
+    if (error && typeof error === "object" && "body" in error) {
+      console.error("V2 alias detail diagnostic", { endpoint: "endpoint" in error ? error.endpoint : undefined, status: "status" in error ? error.status : undefined, body: error.body });
+    }
+    throw error;
+  }
   assert.equal(detail.name, alias);
   assert.deepEqual(detail.collections, [collection]);
 }, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
