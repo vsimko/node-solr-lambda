@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createSolrClient, SolrHttpError } from "../src/index.js";
+import { createSolrClient, SolrHttpError, SolrNetworkError } from "../src/index.js";
 
 test("retry policy can be disabled for otherwise retryable GET responses", async () => {
   let calls = 0;
@@ -93,4 +93,85 @@ test("URLSearchParams retain repeated values while request defaults fill only mi
     "type:book",
     "status:published"
   ]);
+});
+
+
+test("transport rejects invalid base URL, timeout, and authentication configuration", () => {
+  assert.throws(() => createSolrClient({ baseUrl: "https://solr.example.test?wt=json" }), /query string or fragment/);
+  assert.throws(() => createSolrClient({ baseUrl: "https://solr.example.test/#catalog" }), /query string or fragment/);
+  assert.throws(() => createSolrClient({ timeoutMs: Number.NaN }), /timeoutMs must be a positive number/);
+  assert.throws(() => createSolrClient({ timeoutMs: Number.POSITIVE_INFINITY }), /timeoutMs must be a positive number/);
+  assert.throws(() => createSolrClient({ auth: { type: "basic", username: " " } }), /non-empty username/);
+  assert.throws(() => createSolrClient({ password: "secret" }), /A password requires a username/);
+  assert.throws(() => createSolrClient({
+    username: "user",
+    auth: { type: "bearer", token: "token" }
+  }), /Use either auth or username\/password/);
+});
+
+test("transport retry configuration rejects invalid attempt, delay, and status boundaries", () => {
+  for (const maxAttempts of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.throws(() => createSolrClient({ retry: { maxAttempts } }), /retry\.maxAttempts must be a positive integer/);
+  }
+  for (const baseDelayMs of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.throws(() => createSolrClient({ retry: { baseDelayMs } }), /retry\.baseDelayMs must be zero or greater/);
+  }
+  for (const maxDelayMs of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.throws(() => createSolrClient({ retry: { maxDelayMs } }), /retry\.maxDelayMs must be zero or greater/);
+  }
+  assert.throws(
+    () => createSolrClient({ retry: { baseDelayMs: 10, maxDelayMs: 9 } }),
+    /retry\.maxDelayMs must be greater than or equal to retry\.baseDelayMs/
+  );
+  for (const retryableStatuses of [[99], [600], [200.5], [Number.NaN], [Number.POSITIVE_INFINITY]]) {
+    assert.throws(
+      () => createSolrClient({ retry: { retryableStatuses } }),
+      /retryableStatuses must contain HTTP status codes/
+    );
+  }
+  assert.doesNotThrow(() => createSolrClient({
+    retry: { maxAttempts: 1, baseDelayMs: 0, maxDelayMs: 0, retryableStatuses: [100, 200, 429, 599] }
+  }));
+});
+
+test("requestRaw cleans up the timeout when Fetch returns a response without a body", async () => {
+  let signal: AbortSignal | undefined;
+  const client = createSolrClient({
+    core: "catalog",
+    timeoutMs: 10,
+    fetch: async (_input, init) => {
+      signal = init?.signal ?? undefined;
+      return new Response(null);
+    }
+  });
+
+  const response = await client.requestRaw("/solr/catalog/export");
+  assert.equal(response.body, null);
+  await new Promise(resolve => setTimeout(resolve, 20));
+  assert.equal(signal?.aborted, false);
+});
+
+test("requestRaw classifies response-body read failures as network errors", async () => {
+  const failure = new Error("response stream failed");
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(new ReadableStream<Uint8Array>({
+      start(controller) { controller.error(failure); }
+    }))
+  });
+
+  const response = await client.requestRaw("/solr/catalog/export");
+  await assert.rejects(response.text(), SolrNetworkError);
+});
+
+test("requestRaw classifies non-success response-body read failures as network errors", async () => {
+  const failure = new Error("error response stream failed");
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => new Response(new ReadableStream<Uint8Array>({
+      start(controller) { controller.error(failure); }
+    }), { status: 503, statusText: "Service Unavailable" })
+  });
+
+  await assert.rejects(client.requestRaw("/solr/catalog/export"), SolrNetworkError);
 });
