@@ -33,11 +33,15 @@ function parseClassMethods(path, className) {
 
 const v2Methods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2Client");
 const v2CoreAdminMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2CoreAdminClient");
+const v2CollectionsMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2CollectionsClient");
+const v2ClusterMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2ClusterClient");
 const publicMethods = new Set([
   ...parseClassMethods(join(root, "src/client.ts"), "SolrClient"),
   ...parseClassMethods(join(root, "src/transport.ts"), "SolrTransport"),
   ...v2Methods.map((method) => `v2.${method}`),
-  ...v2CoreAdminMethods.map((method) => `v2.coreAdmin.${method}`)
+  ...v2CoreAdminMethods.map((method) => `v2.coreAdmin.${method}`),
+  ...v2CollectionsMethods.map((method) => `v2.collections.${method}`),
+  ...v2ClusterMethods.map((method) => `v2.cluster.${method}`)
 ]);
 const documentedMethods = new Set(
   [...apiReference.matchAll(/\x60SolrClient\.([A-Za-z_$][\w$]*)\(\)\x60/g)].map((match) => match[1])
@@ -51,8 +55,16 @@ for (const method of v2Methods) {
     `API reference is missing SolrV2Client.${method}()`);
 }
 for (const method of v2CoreAdminMethods) {
-  assert.match(apiReference, new RegExp(`SolrV2CoreAdminClient\.${method}\(\)`),
+  assert.match(apiReference, new RegExp(`SolrV2CoreAdminClient\\.${method}\\(\\)`),
     `API reference is missing SolrV2CoreAdminClient.${method}()`);
+}
+for (const method of v2CollectionsMethods) {
+  assert.match(apiReference, new RegExp(`SolrV2CollectionsClient\\.${method}\\(\\)`),
+    `API reference is missing SolrV2CollectionsClient.${method}()`);
+}
+for (const method of v2ClusterMethods) {
+  assert.match(apiReference, new RegExp(`SolrV2ClusterClient\\.${method}\\(\\)`),
+    `API reference is missing SolrV2ClusterClient.${method}()`);
 }
 for (const entry of inventory.entries) {
   const methods = entry.clientMethod.split(/\s*\/\s*/);
