@@ -33,12 +33,14 @@ function parseClassMethods(path, className) {
 
 const v2Methods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2Client");
 const v2CoreAdminMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2CoreAdminClient");
+const v2AliasesMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2AliasesClient");
 const v2CollectionsMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2CollectionsClient");
 const v2ClusterMethods = parseClassMethods(join(root, "src/v2.ts"), "SolrV2ClusterClient");
 const publicMethods = new Set([
   ...parseClassMethods(join(root, "src/client.ts"), "SolrClient"),
   ...parseClassMethods(join(root, "src/transport.ts"), "SolrTransport"),
   ...v2Methods.map((method) => `v2.${method}`),
+  ...v2AliasesMethods.map((method) => `v2.aliases.${method}`),
   ...v2CoreAdminMethods.map((method) => `v2.coreAdmin.${method}`),
   ...v2CollectionsMethods.map((method) => `v2.collections.${method}`),
   ...v2ClusterMethods.map((method) => `v2.cluster.${method}`)
@@ -53,6 +55,10 @@ for (const method of publicMethods) {
 for (const method of v2Methods) {
   assert.match(apiReference, new RegExp(`SolrV2Client\\.${method}\\(\\)`),
     `API reference is missing SolrV2Client.${method}()`);
+}
+for (const method of v2AliasesMethods) {
+  assert.match(apiReference, new RegExp(`SolrV2AliasesClient\\.${method}\\(\\)`),
+    `API reference is missing SolrV2AliasesClient.${method}()`);
 }
 for (const method of v2CoreAdminMethods) {
   assert.match(apiReference, new RegExp(`SolrV2CoreAdminClient\\.${method}\\(\\)`),
