@@ -35,7 +35,7 @@
   "concurrency": 2,
   "timeoutMS": 120000,
   "tempDirName": ".stryker-tmp",
-  "reporters": ["clear-text", "html", "json"],
+  "reporters": ["progress", "clear-text", "html", "json"],
   "thresholds": {
     "high": 80,
     "low": 60,
