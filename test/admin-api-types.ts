@@ -404,7 +404,7 @@ void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).t
   void [mode, javaVersion, dump, loggers];
 });
 
-import type { SolrAuthorizationCommand, SolrAuthorizationPermission, SolrAuthorizationPermissionResponse, SolrAuthorizationResponse } from "../src/index.js";
+import type { SolrAuthorizationCommand, SolrAuthorizationPermissionResponse, SolrAuthorizationResponse } from "../src/index.js";
 declare const authorizationClient: SolrClient;
 const authorizationRead: Promise<SolrAuthorizationResponse> = authorizationClient.security("authorization");
 void authorizationRead.then(result => {
