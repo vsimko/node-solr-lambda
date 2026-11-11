@@ -147,7 +147,7 @@ Alias CRUD, collection lifecycle, shard/replica management, backup/restore, and 
 
 ## V2 alias read operations
 
-The read-only alias slice exposes `client.v2.aliases.list()` (`GET /api/aliases`) and `client.v2.aliases.status(name)` (`GET /api/aliases/{alias}`). The Solr 9.2, 9.11, and 10.1 Alias Management guides document both response shapes: the list returns an `aliases` name-to-collection mapping and optional per-alias `properties`; the detail response returns `name`, a `collections` array, and optional `properties`.
+The read-only alias slice exposes `client.v2.aliases.list()` (`GET /api/aliases`) and `client.v2.aliases.status(name)` (`GET /api/aliases/{alias}`). The Solr 9.2, 9.11, and 10.1 Alias Management guides document both response shapes: the list returns an `aliases` name-to-collection mapping and optional per-alias `properties`; the detail response returns `alias`, a `collections` array, and optional `properties`.
 
 The Solr 9.11 release notes record the alias mutation redesign in Solr 9.3, including the move of alias creation to `POST /api/aliases` and the updated delete route; this does not change the documented GET read paths described above. Runtime claims are limited to the pinned Solr 9.11.0 and 10.1.0 baselines. Solr 8.11.4 remains explicitly unclaimed; no V1 fallback is performed. Integration tests create a disposable alias using the existing V1 fixture helper, then verify both V2 read paths and exact target mapping. BasicAuth authorization checks include `GET /api/aliases`.
 
