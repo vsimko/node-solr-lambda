@@ -1090,7 +1090,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read-only V2 alias discovery, distinct from V1 LISTALIASES. Official Solr 9.11 and 10.1 Alias Management guides document the exact route and response shape; Solr 8.11.4 is not claimed because the alias API was redesigned in Solr 9.3. Runtime verification on pinned 9.11.0/10.1.0 and BasicAuth allow/deny checks are pending the current PR CI run.",
+      "notes": "Read-only V2 alias discovery, distinct from V1 LISTALIASES. Official Solr 9.2, 9.11, and 10.1 Alias Management guides document the exact GET route and response shape; Solr 8.11.4 is not claimed. Solr 9.3's alias mutation redesign is not applied to these read contracts. Runtime verification on pinned 9.11.0/10.1.0 and BasicAuth allow/deny checks are pending the current PR CI run.",
       "id": "v2.aliases.list",
       "clientMethod": "v2.aliases.list",
       "httpMethod": "GET",
@@ -1114,7 +1114,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read one alias and its collection targets/properties. The route is documented in Solr 9.11 and 10.1; Solr 8.11.4 is not claimed. Runtime verification on pinned 9.11.0/10.1.0 is pending the current PR CI run.",
+      "notes": "Read one alias and its collection targets/properties. The route is documented in Solr 9.2, 9.11, and 10.1; Solr 8.11.4 is not claimed. Runtime verification on pinned 9.11.0/10.1.0 is pending the current PR CI run.",
       "id": "v2.aliases.status",
       "clientMethod": "v2.aliases.status",
       "httpMethod": "GET",
