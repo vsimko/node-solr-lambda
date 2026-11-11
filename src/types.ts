@@ -1294,7 +1294,7 @@ export interface SolrV2AliasListResponse {
 /** GET /api/aliases/{alias} response. */
 export interface SolrV2AliasStatusResponse {
   responseHeader?: SolrResponseHeader;
-  name?: string;
+  alias?: string;
   collections?: readonly string[];
   properties?: Readonly<Record<string, unknown>>;
   readonly [key: string]: unknown;
