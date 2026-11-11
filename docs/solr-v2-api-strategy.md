@@ -144,3 +144,11 @@ Official route and behavior references:
 - [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) — route changes for aliases and cluster status.
 
 Alias CRUD, collection lifecycle, shard/replica management, backup/restore, and destructive actions remain outside this first read-only tranche. Their V2 routes changed during the Solr 9.3 redesign and require their own request/response contracts, minimum-version decisions, and isolated behavior tests. FORCELEADER remains coordinated with #328/#341.
+
+## V2 alias read operations
+
+The read-only alias slice exposes `client.v2.aliases.list()` (`GET /api/aliases`) and `client.v2.aliases.status(name)` (`GET /api/aliases/{alias}`). The 9.11 and 10.1 Alias Management guides document both response shapes: the list returns an `aliases` name-to-collection mapping and optional per-alias `properties`; the detail response returns `name`, a `collections` array, and optional `properties`.
+
+Solr 9.11 release notes record the alias API redesign in Solr 9.3, including the move of alias creation to `POST /api/aliases` and the updated delete route. The read methods are therefore claimed only for the pinned Solr 9.11.0 and 10.1.0 baselines. Solr 8.11.4 remains explicitly unclaimed; no V1 fallback is performed. Integration tests create a disposable alias using the existing V1 fixture helper, then verify both V2 read paths and exact target mapping. BasicAuth authorization checks include `GET /api/aliases`.
+
+These wrappers are read-only. Alias creation, deletion, property mutation, and routed-alias management remain separate follow-up work and are not implied by the read methods.
