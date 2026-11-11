@@ -460,3 +460,53 @@ test("addStream preserves errors from a Node.js Readable source", async () => {
 
   await assert.rejects(client.addStream(source), error => error === failure);
 });
+
+test("addStream caller abort interrupts a pending iterator.next() and closes the source", async () => {
+  const abort = new AbortController();
+  const reason = new Error("caller stopped streaming");
+  let release!: () => void;
+  let notifyFetchStarted!: () => void;
+  let finalized = false;
+  const fetchStarted = new Promise<void>(resolve => { notifyFetchStarted = resolve; });
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    timeoutMs: 1000,
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // opening JSON array delimiter
+      const pendingDocument = reader.read();
+      await new Promise(resolve => setImmediate(resolve));
+      notifyFetchStarted();
+      return await new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          void reader.cancel();
+          reject(init.signal?.reason);
+        }, { once: true });
+        void pendingDocument;
+      });
+    }
+  });
+
+  async function* documents() {
+    try {
+      await new Promise<void>(resolve => { release = resolve; });
+      yield { id: "after-caller-abort" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  const request = client.addStream(documents(), {}, { signal: abort.signal });
+  await fetchStarted;
+  abort.abort(reason);
+  await assert.rejects(request, (error: unknown) => {
+    assert.ok(error instanceof SolrAbortError);
+    assert.equal(error.reason, reason);
+    return true;
+  });
+
+  release();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(finalized, true);
+});
