@@ -238,10 +238,11 @@ export function cloudIntegrationTest(
   run: (fixture: SolrCloudIntegrationFixture) => Promise<void>,
   requiresMultipleNodes = false,
   requiresDestructiveOptIn = false,
-  skipReason?: string
+  skipReason?: string,
+  timeoutMs?: number
 ): void {
   const localEndpoint = baseUrl ? ["localhost", "127.0.0.1", "::1"].includes(new URL(baseUrl).hostname) : false;
-  test(name, { skip: !baseUrl || !cloudEnabled || (requiresMultipleNodes && process.env.SOLR_MULTINODE !== "true") || (requiresDestructiveOptIn && (process.env.SOLR_DESTRUCTIVE_OPT_IN !== "true" || !localEndpoint)) || skipReason || false }, async () => {
+  test(name, { skip: !baseUrl || !cloudEnabled || (requiresMultipleNodes && process.env.SOLR_MULTINODE !== "true") || (requiresDestructiveOptIn && (process.env.SOLR_DESTRUCTIVE_OPT_IN !== "true" || !localEndpoint)) || skipReason || false, ...(timeoutMs ? { timeout: timeoutMs } : {}) }, async () => {
     const client = new SolrClient({ baseUrl: baseUrl!, timeoutMs: 30_000 });
     const createdCollections = new Set<string>();
     const createdAliases = new Set<string>();

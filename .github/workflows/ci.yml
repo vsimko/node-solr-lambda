@@ -18,6 +18,11 @@ on:
         required: false
         default: false
         type: boolean
+      enable_forceleader_fault_injection:
+        description: "Run stale-replica FORCELEADER fault injection; acknowledged updates may be lost on disposable test data"
+        required: false
+        default: false
+        type: boolean
 jobs:
   changes:
     name: Detect changed paths
@@ -521,3 +526,121 @@ jobs:
           done
           echo "Cancelling this workflow run"
           gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/cancel" || true
+
+  forceleader-fault-injection:
+    name: FORCELEADER stale-replica fault injection (${{ matrix.solr-version }})
+    if: github.event_name == 'workflow_dispatch' && inputs.enable_forceleader_fault_injection == true
+    strategy:
+      fail-fast: false
+      matrix:
+        solr-version: ["8.11.4", "9.11.0", "10.1.0"]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Create isolated SolrCloud network and independent ZooKeeper
+        run: |
+          docker network create solr-forceleader-net
+          docker run --detach \
+            --name solr-forceleader-zk \
+            --hostname solr-forceleader-zk \
+            --network solr-forceleader-net \
+            --network-alias solr-forceleader-zk \
+            --env ZOO_4LW_COMMANDS_WHITELIST=ruok,stat,srvr \
+            --label com.vsimko.node-solr-lambda.forceleader=zookeeper \
+            zookeeper:3.9.3
+      - name: Wait for independent ZooKeeper
+        run: |
+          for attempt in {1..60}; do
+            if docker exec solr-forceleader-zk bash -lc 'zkServer.sh status' > /dev/null 2>&1; then
+              echo "Independent ZooKeeper is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs solr-forceleader-zk
+          exit 1
+      - name: Start primary SolrCloud node
+        run: |
+          docker run --detach \
+            --name solr-forceleader-1 \
+            --hostname solr-forceleader-1 \
+            --network solr-forceleader-net \
+            --network-alias solr-forceleader-1 \
+            --publish 127.0.0.1:8983:8983 \
+            --label com.vsimko.node-solr-lambda.forceleader=true \
+            --env SOLR_HOST=solr-forceleader-1 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            "solr:${{ matrix.solr-version }}" \
+            solr-foreground -c -z solr-forceleader-zk:2181
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:8983/solr/ > /dev/null &&
+              docker exec solr-forceleader-1 bash -lc 'solr zk ls / -z solr-forceleader-zk:2181' > /dev/null 2>&1; then
+              echo "Primary SolrCloud node and independent ZooKeeper are ready"
+              break
+            fi
+            sleep 5
+          done
+          if ! docker exec solr-forceleader-1 bash -lc 'solr zk ls / -z solr-forceleader-zk:2181' > /dev/null 2>&1; then
+            docker logs solr-forceleader-zk
+            docker logs solr-forceleader-1
+            exit 1
+          fi
+      - name: Upload the default configset to ZooKeeper
+        run: |
+          docker exec solr-forceleader-1 bash -lc 'solr zk upconfig -n _default -d /opt/solr/server/solr/configsets/_default -z solr-forceleader-zk:2181'
+      - name: Start secondary SolrCloud node
+        run: |
+          docker run --detach \
+            --name solr-forceleader-2 \
+            --hostname solr-forceleader-2 \
+            --network solr-forceleader-net \
+            --network-alias solr-forceleader-2 \
+            --publish 127.0.0.1:8984:8983 \
+            --label com.vsimko.node-solr-lambda.forceleader=true \
+            --env SOLR_HOST=solr-forceleader-2 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            "solr:${{ matrix.solr-version }}" \
+            solr-foreground -c -z solr-forceleader-zk:2181
+          for attempt in {1..60}; do
+            live_nodes=$(docker exec solr-forceleader-1 bash -lc 'solr zk ls /live_nodes -z solr-forceleader-zk:2181' 2>/dev/null || true)
+            if curl --fail --silent http://127.0.0.1:8984/solr/ > /dev/null &&
+              [ "$(printf '%s\n' "$live_nodes" | grep -c '_solr' || true)" -ge 2 ]; then
+              echo "Both dedicated SolrCloud nodes joined the independent ZooKeeper cluster"
+              exit 0
+            fi
+            sleep 5
+          done
+          docker logs solr-forceleader-2
+          exit 1
+      - name: Run the isolated FORCELEADER scenario only
+        run: npm run test:forceleader-optin
+        env:
+          SOLR_BASE_URL: http://127.0.0.1:8983/solr
+          SOLR_CLOUD: "true"
+          SOLR_MULTINODE: "true"
+          SOLR_DESTRUCTIVE_OPT_IN: "true"
+          SOLR_VERSION: "${{ matrix.solr-version }}"
+          SOLR_FORCELEADER_PRIMARY_CONTAINER: solr-forceleader-1
+          SOLR_FORCELEADER_SECONDARY_CONTAINER: solr-forceleader-2
+          SOLR_FORCELEADER_ZK_CONTAINER: solr-forceleader-zk
+          SOLR_FORCELEADER_CONTAINER_LABEL: com.vsimko.node-solr-lambda.forceleader
+          SOLR_FORCELEADER_NETWORK: solr-forceleader-net
+          SOLR_FORCELEADER_PRIMARY_PORT: "8983"
+          SOLR_FORCELEADER_SECONDARY_PORT: "8984"
+      - name: Print FORCELEADER fault-injection logs
+        if: always()
+        run: |
+          docker logs solr-forceleader-1 || true
+          docker logs solr-forceleader-2 || true
+          docker logs solr-forceleader-zk || true
+      - name: Remove dedicated FORCELEADER containers and network
+        if: always()
+        run: |
+          docker rm --force solr-forceleader-1 solr-forceleader-2 solr-forceleader-zk || true
+          docker network rm solr-forceleader-net || true
