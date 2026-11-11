@@ -53,4 +53,4 @@ cloudIntegrationTest("V2 Aliases list and detail read back an isolated alias", a
   assert.deepEqual(detail.collections, [collection]);
 }, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
   ? undefined
-  : "The REST-style V2 alias read routes are documented for Solr 9.3+; Solr 8.11.4 is not claimed");
+  : "The V2 alias read routes are not claimed on pinned Solr 8.11.4; no V1 fallback is used");
