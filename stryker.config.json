@@ -1,0 +1,59 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "tap",
+  "tap": {
+    "testFiles": [
+      "test/add-stream.test.ts",
+      "test/admin.test.ts",
+      "test/authentication.test.ts",
+      "test/cancellation.test.ts",
+      "test/client.test.ts",
+      "test/collections-custom-params-boundaries.test.ts",
+      "test/errors.test.ts",
+      "test/modules.test.ts",
+      "test/mutation-regressions.test.ts",
+      "test/raw-request.test.ts",
+      "test/retry.test.ts",
+      "test/transport-edge-cases.test.ts",
+      "test/transport-response-lifecycle.test.ts",
+      "test/transport-retry-config-boundaries.test.ts",
+      "test/transport-serialization.test.ts",
+      "test/update-mutation-boundaries.test.ts",
+      "test/validation.test.ts",
+      "test/v2.test.ts"
+    ],
+    "nodeArgs": [
+      "--import",
+      "tsx"
+    ],
+    "forceBail": true
+  },
+  "checkers": [
+    "typescript"
+  ],
+  "tsconfigFile": "tsconfig.json",
+  "typescriptChecker": {
+    "prioritizePerformanceOverAccuracy": true
+  },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/transport.ts",
+    "src/apis/update.ts",
+    "src/apis/collections.ts",
+    "src/apis/core-admin.ts"
+  ],
+  "concurrency": 2,
+  "timeoutMS": 120000,
+  "tempDirName": ".stryker-tmp",
+  "reporters": [
+    "progress",
+    "clear-text",
+    "html",
+    "json"
+  ],
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": null
+  }
+}
