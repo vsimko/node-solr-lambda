@@ -133,9 +133,9 @@ Issue #334 begins with the low-risk discovery surface only:
 
 - `client.v2.collections.list()` — `GET /api/collections`, returning the cluster collection names.
 - `client.v2.collections.status(name, options?)` — `GET /api/collections/{collection}`, returning the collection-keyed status. The exposed flags are limited to `coreInfo`, `segments`, `fieldInfo`, and `sizeInfo`; this is not full parity with V1 COLSTATUS index/size-analysis options.
-- `client.v2.cluster.status()` — `GET /api/cluster`. The response contract remains extensible: the Solr 8.11 V2 guide shows a compact `collections` list, while newer Solr lines expose richer cluster state.
+- `client.v2.cluster.status()` — `GET /api/cluster`. The response contract remains extensible. GET CLUSTERSTATUS is documented from Solr 9.11; the Solr 8.11 guide lists other cluster command routes but does not document this GET operation.
 
-The methods use the shared V2 transport and do not call V1 methods or fall back to V1 routes. Collection names are path-encoded and empty/path-like names are rejected before Fetch. Unit serialization, consumer type fixtures, isolated SolrCloud read-back tests, and authenticated/anonymous route-gate tests are included. Runtime certification remains pending the current pinned Solr 8.11.4 / 9.11.0 / 10.1.0 CI matrix; no compatibility claim should be upgraded until those jobs pass.
+The methods use the shared V2 transport and do not call V1 methods or fall back to V1 routes. Collection names are path-encoded and empty/path-like names are rejected before Fetch. Unit serialization, consumer type fixtures, isolated SolrCloud read-back tests, and authenticated/anonymous route-gate tests are included. Collection listing is tested across the pinned Solr 8.11.4 / 9.11.0 / 10.1.0 matrix; per-collection status is limited to Solr 9.3+ (therefore pinned 9.11.0 / 10.1.0), and GET cluster status is limited to Solr 9.11+ (therefore pinned 9.11.0 / 10.1.0). CI results must pass before runtime certification is recorded.
 
 Official route and behavior references:
 - [Solr 8.11 V2 API guide](https://solr.apache.org/guide/8_11/v2-api.html) — `/api/collections`, `/api/cluster`, and introspection.
