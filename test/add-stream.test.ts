@@ -510,3 +510,31 @@ test("addStream caller abort interrupts a pending iterator.next() and closes the
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(finalized, true);
 });
+
+
+test("addStream rejects a JSON codec that cannot serialize a streamed document", async () => {
+  let finalized = false;
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    jsonCodec: {
+      parse: text => JSON.parse(text),
+      stringify: () => undefined
+    },
+    fetch: async (_input, init) => {
+      await readBody(init?.body);
+      return new Response('{"responseHeader":{"status":0}}');
+    }
+  });
+
+  async function* documents() {
+    try {
+      yield { id: "not-serializable" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  await assert.rejects(client.addStream(documents()), /must serialize every streamed document to a string/);
+  assert.equal(finalized, true);
+});
