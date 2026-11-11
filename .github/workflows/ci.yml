@@ -551,6 +551,7 @@ jobs:
             --hostname solr-forceleader-zk \\
             --network solr-forceleader-net \\
             --network-alias solr-forceleader-zk \\
+            --env ZOO_4LW_COMMANDS_WHITELIST=ruok,stat,srvr \\
             --label com.vsimko.node-solr-lambda.forceleader=zookeeper \\
             zookeeper:3.9.3
       - name: Wait for independent ZooKeeper
