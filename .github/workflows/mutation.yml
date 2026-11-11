@@ -1,3 +1,4 @@
+# Mutation targets are sharded into independent jobs; progress is emitted by Stryker's progress reporter.
 name: Mutation testing
 
 on:
