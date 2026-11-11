@@ -141,7 +141,7 @@ The permission and authorization configuration models remain extensible with unk
 
 `SolrAuthorizationRole`, `SolrAuthorizationPermission`, `SolrAuthorizationCommand`, and `SolrAuthorizationResponse` are exported from the package root. Compile-time fixtures cover role assignment/removal, permission create/update/delete, extension fields, and invalid command shapes. Serialization tests verify the exact JSON command body. Live Solr security integration tests verify authenticated authorization reads on Solr 8.11.4, 9.11.0, and 10.1.0; mutating authorization commands are not run against shared integration security state.
 
-See the [Apache Solr Rule-Based Authorization Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/rule-based-authorization-plugin.html) for the server-side permission and role semantics. The client intentionally models the common V1 command contract and leaves plugin-specific extensions open.
+See the [Apache Solr Rule-Based Authorization Plugin guide](https://solr.apache.org/guide/solr/10_1/deployment-guide/rule-based-authorization-plugin.html) for the server-side permission and role semantics. The client intentionally models the common V1 command contract and leaves plugin-specific extensions open through the explicit `customOptions` property. Known fields such as `collection`, `path`, `method`, `role`, `before`, and `index` are checked directly, so misspelled built-in properties are rejected by consumer TypeScript checks instead of being silently accepted as arbitrary plugin fields.
 ## Authentication API models
 
 The `security("authentication")` overload defaults to `SolrAuthenticationResponse` and accepts `SolrAuthenticationCommand` for the Basic Authentication API:
