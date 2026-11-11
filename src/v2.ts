@@ -70,6 +70,7 @@ export class SolrV2Client {
  *
  * CoreAdmin is intended for standalone/user-managed cores; SolrCloud users
  * should use the Collections V2 API instead.
+ * Compatibility claims are operation- and version-specific; see docs/compatibility.md.
  */
 export class SolrV2CoreAdminClient {
   constructor(private readonly v2: SolrV2Client) {}
