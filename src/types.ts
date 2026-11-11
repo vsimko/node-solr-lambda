@@ -1250,6 +1250,23 @@ export interface SolrClientConfig {
 }
 
 
+/** Response to GET /api/aliases. Alias values are comma-separated collection names. */
+export interface SolrV2AliasListResponse {
+  responseHeader?: SolrResponseHeader;
+  aliases?: Readonly<Record<string, string>>;
+  properties?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  readonly [key: string]: unknown;
+}
+
+/** Response to GET /api/aliases/{alias}. */
+export interface SolrV2AliasResponse {
+  responseHeader?: SolrResponseHeader;
+  name?: string;
+  collections?: readonly string[];
+  properties?: Readonly<Record<string, unknown>>;
+  readonly [key: string]: unknown;
+}
+
 /** Response to GET /api/collections. Collection names are cluster-wide. */
 export interface SolrV2CollectionListResponse {
   responseHeader?: SolrResponseHeader;
