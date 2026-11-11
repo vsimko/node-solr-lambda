@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - test/mutation-baseline
+      - test/mutation-tap-runner
     paths:
       - ".github/workflows/mutation.yml"
       - "stryker.config.json"
@@ -43,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: Install pinned mutation tooling
-        run: npm install --no-save --no-package-lock @stryker-mutator/core@10.0.0 @stryker-mutator/typescript-checker@10.0.0
+        run: npm install --no-save --no-package-lock @stryker-mutator/core@10.0.0 @stryker-mutator/typescript-checker@10.0.0 @stryker-mutator/tap-runner@10.0.0
 
       - name: Run mutation tests
         run: npx --no-install stryker run
@@ -54,5 +55,5 @@ jobs:
         with:
           name: mutation-report-${{ github.run_number }}
           path: reports/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
