@@ -90,8 +90,12 @@ async function queryIds(client: SolrClient): Promise<Set<string>> {
 async function waitForIds(client: SolrClient, expected: string[], label: string): Promise<Set<string>> {
   let found = new Set<string>();
   for (let attempt = 0; attempt < 60; attempt += 1) {
-    found = await queryIds(client);
-    if (expected.every(id => found.has(id))) return found;
+    try {
+      found = await queryIds(client);
+      if (expected.every(id => found.has(id))) return found;
+    } catch {
+      // The collection may still be recovering on the node being checked.
+    }
     await delay(1_000);
   }
   throw new Error(`${label} did not become visible: expected ${expected.join(", ")}, found ${[...found].join(", ")}`);
@@ -202,6 +206,7 @@ cloudIntegrationTest(
           const replicas = Object.values(shard?.replicas ?? {});
           stateWithoutLeader = state;
           if (liveNodes.length === 1 && liveNodes[0] === staleReplica.node_name &&
+            replicas.some(replica => replica.node_name === staleReplica.node_name) &&
             replicas.every(replica => !isLeader(replica))) {
             noLeader = true;
             break;
@@ -224,12 +229,16 @@ cloudIntegrationTest(
       let postState: SolrClusterStatusResponse | undefined;
       let promoted = false;
       for (let attempt = 0; attempt < 90; attempt += 1) {
-        postState = await staleClient.collections("CLUSTERSTATUS", { collection });
-        const shard = postState.cluster?.collections?.[collection]?.shards?.[shardName];
-        const newLeader = Object.values(shard?.replicas ?? {}).find(isLeader);
-        if (newLeader?.node_name === staleReplica.node_name && newLeader.state === "active") {
-          promoted = true;
-          break;
+        try {
+          postState = await staleClient.collections("CLUSTERSTATUS", { collection });
+          const shard = postState.cluster?.collections?.[collection]?.shards?.[shardName];
+          const newLeader = Object.values(shard?.replicas ?? {}).find(isLeader);
+          if (newLeader?.node_name === staleReplica.node_name && newLeader.state === "active") {
+            promoted = true;
+            break;
+          }
+        } catch {
+          // Allow the new leader state to settle before the next observation.
         }
         await delay(1_000);
       }
