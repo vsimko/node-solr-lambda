@@ -53,3 +53,33 @@ test("V2 Collections status rejects empty or path-like collection names before f
     assert.throws(() => client.v2.collections.status(name), /non-empty collection name/);
   }
 });
+
+test("V2 alias list and status use the documented GET routes", async () => {
+  const requests: { url: URL; method: string }[] = [];
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      requests.push({ url: new URL(String(input)), method: String(init?.method) });
+      const body = requests.length === 1
+        ? { responseHeader: { status: 0 }, aliases: { books_alias: "books" }, properties: {} }
+        : { responseHeader: { status: 0 }, name: "books_alias", collections: ["books"], properties: { owner: "tests" } };
+      return new Response(JSON.stringify(body));
+    }
+  });
+
+  const list = await client.v2.aliases.list();
+  const status = await client.v2.aliases.status("books_alias");
+  assert.equal(list.aliases?.books_alias, "books");
+  assert.deepEqual(status.collections, ["books"]);
+  assert.equal(status.properties?.owner, "tests");
+  assert.equal(requests[0]!.url.pathname, "/api/aliases");
+  assert.equal(requests[0]!.method, "GET");
+  assert.equal(requests[1]!.url.pathname, "/api/aliases/books_alias");
+  assert.equal(requests[1]!.method, "GET");
+});
+
+test("V2 alias status rejects empty or path-like alias names before fetch", () => {
+  const client = createSolrClient({ fetch: async () => { throw new Error("fetch must not run"); } });
+  for (const name of ["", " ", "../admin", "a/b", "a\\\\b"]) {
+    assert.throws(() => client.v2.aliases.status(name), /non-empty alias name/);
+  }
+});
