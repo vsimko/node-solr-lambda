@@ -218,8 +218,9 @@ test("delete forwards request-control options and accepts commitWithin zero", as
     timeoutMs: 1000,
     headers: { "x-delete-request": "boundary" }
   });
+  await client.add({ id: "zero-commit-within" }, { commitWithin: 0 });
 
-  assert.equal(calls, 1);
+  assert.equal(calls, 2);
   assert.equal(capturedHeaders?.get("x-delete-request"), "boundary");
   assert.ok(capturedSignal instanceof AbortSignal);
 });
