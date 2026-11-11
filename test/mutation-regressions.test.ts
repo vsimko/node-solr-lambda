@@ -10,6 +10,23 @@ test("transport accepts the inclusive HTTP status-code boundaries for retry poli
   }));
 });
 
+test("transport retries a configured 599 response", async () => {
+  let calls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    retry: { maxAttempts: 2, retryableStatuses: [599], baseDelayMs: 0, maxDelayMs: 0 },
+    fetch: async () => {
+      calls += 1;
+      return calls === 1
+        ? new Response("edge status", { status: 599 })
+        : new Response(JSON.stringify({ status: "ok" }));
+    }
+  });
+
+  assert.deepEqual(await client.ping(), { status: "ok" });
+  assert.equal(calls, 2);
+});
+
 test("transport rejects retry status values outside the HTTP status-code range", () => {
   for (const status of [99, 600, 100.5, Number.NaN, Number.POSITIVE_INFINITY]) {
     assert.throws(
