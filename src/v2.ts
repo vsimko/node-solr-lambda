@@ -135,7 +135,7 @@ export class SolrV2AliasesClient {
 
   /** Read one alias, including its collection targets and properties. */
   status(alias: string, requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasStatusResponse> {
-    if (typeof alias !== "string" || alias.trim().length === 0 || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
+    if (typeof alias !== "string" || alias.trim().length === 0 || alias === "." || alias === ".." || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
       throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
     }
     return this.v2.request<SolrV2AliasStatusResponse>(`/api/aliases/${encodeURIComponent(alias)}`, {
