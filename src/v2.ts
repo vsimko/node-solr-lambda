@@ -5,7 +5,7 @@ import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
  *
  * Exposes a generic JSON/raw request escape hatch and operation-specific typed
- * Core Admin methods. V1 methods never fall back to V2 routes.
+ * typed Core Admin, Collections, and cluster discovery methods. V1 methods never fall back to V2 routes.
  */
 export class SolrV2Client {
   private readonly apiBaseUrl: string;
@@ -96,9 +96,11 @@ export class SolrV2CollectionsClient {
       collection.includes("/") || collection.includes("\\")) {
       throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
     }
-    const query = Object.fromEntries(
-      Object.entries(options).filter(([, value]) => value !== undefined)
-    );
+    const query: Record<string, boolean> = {};
+    if (options.coreInfo !== undefined) query.coreInfo = options.coreInfo;
+    if (options.segments !== undefined) query.segments = options.segments;
+    if (options.fieldInfo !== undefined) query.fieldInfo = options.fieldInfo;
+    if (options.sizeInfo !== undefined) query.sizeInfo = options.sizeInfo;
     return this.v2.request<SolrV2CollectionStatusResponse>(
       `/api/collections/${encodeURIComponent(collection)}`,
       {
@@ -115,8 +117,8 @@ export class SolrV2ClusterClient {
   constructor(private readonly v2: SolrV2Client) {}
 
   /**
-   * Read cluster status. Solr 8.11 returns a compact collection-name list;
-   * 9.11 and 10.1 expose richer cluster state on the same route.
+   * Read cluster status. GET /api/cluster is documented for Solr 9.11 and 10.1;
+   * the Solr 8.11 V2 guide documents cluster command routes, not this GET operation.
    */
   status(requestOptions: RequestControlOptions = {}): Promise<SolrV2ClusterStatusResponse> {
     return this.v2.request<SolrV2ClusterStatusResponse>("/api/cluster", {
