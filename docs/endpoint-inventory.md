@@ -24,6 +24,7 @@ This inventory defines the boundary of the typed client API after review against
 | Generic/custom request handlers | `request()`, `requestRaw()` | Escape hatches for custom paths and parameters. These do not imply typed support or integration certification for arbitrary endpoints. |
 | Solr V2 generic API | `v2.request<T>()`, `v2.requestRaw()` | Explicit `/api/` namespace over the shared transport. Caller owns operation-specific contracts. |
 | Solr V2 Core Admin | `v2.coreAdmin.list()`, `status()`, `reload()`, `rename()`, `unload()` | Typed V2 routes and request/response contracts. Runtime-tested on pinned Solr 9.11.0 and 10.1.0; Solr 8.11.4 has a separate V2 API guide documenting the Core Admin route family; runtime verification is pending on the pinned image. These routes are for standalone/user-managed cores, not SolrCloud collection management. See [Core Admin V2 coverage](api-coverage.md) and [V2 strategy](solr-v2-api-strategy.md). |
+| Solr V2 Collections and cluster discovery | `v2.collections.list()`, `v2.collections.status()`, `v2.cluster.status()` | Read-only `GET /api/collections`, `GET /api/collections/{collection}`, and `GET /api/cluster` contracts. Collection list/status are SolrCloud operations; cluster response is version-extensible (Solr 8.11 documents a compact collection list, newer versions expose richer cluster state). Exact pinned-image runtime and security-gate evidence is pending CI. Alias CRUD and collection mutations remain out of scope. |
 
 ## Explicitly deferred or excluded endpoint families
 
