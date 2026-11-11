@@ -553,6 +553,17 @@ jobs:
             --network-alias solr-forceleader-zk \\
             --label com.vsimko.node-solr-lambda.forceleader=zookeeper \\
             zookeeper:3.9.3
+      - name: Wait for independent ZooKeeper
+        run: |
+          for attempt in {1..60}; do
+            if docker exec solr-forceleader-zk bash -lc 'zkServer.sh status' > /dev/null 2>&1; then
+              echo "Independent ZooKeeper is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs solr-forceleader-zk
+          exit 1
       - name: Start primary SolrCloud node
         run: |
           docker run --detach \\
