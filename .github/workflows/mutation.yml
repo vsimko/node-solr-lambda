@@ -1,0 +1,87 @@
+# Mutation targets are split into disjoint line ranges. The union covers the four
+# production files in the baseline scope exactly once; keep ranges adjacent.
+name: Mutation testing
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/mutation-baseline
+      - test/mutation-tap-runner
+      - test/issue-364-mutation-run-15
+    paths:
+      - ".github/workflows/mutation.yml"
+      - "stryker.config.json"
+      - "src/transport.ts"
+      - "src/apis/update.ts"
+      - "src/apis/collections.ts"
+      - "src/apis/core-admin.ts"
+      - "test/**"
+      - "docs/testing-strategy.md"
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutation:
+    name: Mutation / ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - shard: transport-helpers
+            mutate: "src/transport.ts:1-150"
+          - shard: transport-streaming
+            mutate: "src/transport.ts:151-300"
+          - shard: transport-validation-retry
+            mutate: "src/transport.ts:301-450"
+          - shard: transport-request-lifecycle
+            mutate: "src/transport.ts:451-599"
+          - shard: update-validation-streaming
+            mutate: "src/apis/update.ts:1-132"
+          - shard: update-commands-operations
+            mutate: "src/apis/update.ts:133-264"
+          - shard: collections
+            mutate: "src/apis/collections.ts:1-27"
+          - shard: core-admin
+            mutate: "src/apis/core-admin.ts:1-18"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Install pinned mutation tooling
+        run: npm install --no-save --no-package-lock @stryker-mutator/core@10.0.0 @stryker-mutator/typescript-checker@10.0.0 @stryker-mutator/tap-runner@10.0.0
+
+      - name: Run mutation tests for ${{ matrix.shard }}
+        run: npx --no-install stryker run --mutate "${{ matrix.mutate }}"
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report-${{ matrix.shard }}-${{ github.run_number }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Verify mutation reports
+        if: success()
+        run: test -s reports/mutation/mutation.html && test -s reports/mutation/mutation.json
