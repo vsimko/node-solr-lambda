@@ -83,7 +83,7 @@ export interface SolrStreamingExpressionResponse<TTuple extends SolrStreamingExp
 export type SolrAuthorizationRole = string | readonly string[];
 /** Request-parameter constraints supported by the built-in RuleBasedAuthorizationPlugin. */
 export type SolrAuthorizationParameterValues = string | number | boolean | null | readonly (string | number | boolean | null)[];
-/** Stable built-in permission fields; plugin-specific properties remain extensible. */
+/** Stable built-in permission fields; plugin-specific fields belong in customOptions. */
 export interface SolrAuthorizationPermission {
   name?: string;
   role?: SolrAuthorizationRole;
@@ -93,7 +93,8 @@ export interface SolrAuthorizationPermission {
   params?: Readonly<Record<string, SolrAuthorizationParameterValues>>;
   before?: number;
   index?: number;
-  [key: string]: unknown;
+  /** Explicit escape hatch for RuleBasedAuthorizationPlugin extensions and custom plugins. */
+  customOptions?: Readonly<Record<string, unknown>>;
 }
 export interface SolrAuthorizationSetPermission extends SolrAuthorizationPermission { role: SolrAuthorizationRole; }
 export interface SolrAuthorizationUpdatePermission extends SolrAuthorizationPermission { index: number; }
@@ -107,7 +108,8 @@ export interface SolrAuthorizationConfig {
   class?: string;
   "user-role"?: Readonly<Record<string, SolrAuthorizationRole>>;
   permissions?: readonly SolrAuthorizationPermission[];
-  [key: string]: unknown;
+  /** Explicit escape hatch for plugin-specific authorization configuration. */
+  customOptions?: Readonly<Record<string, unknown>>;
 }
 export interface SolrAuthorizationResponse {
   authorization?: SolrAuthorizationConfig;
