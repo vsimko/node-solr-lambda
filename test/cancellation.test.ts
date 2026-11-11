@@ -129,3 +129,19 @@ test("raw export clears timeout when the response body is consumed", async () =>
   await new Promise(resolve => setTimeout(resolve, 25));
   assert.equal(signal?.aborted, false);
 });
+
+test("per-request timeout rejects non-positive and non-finite values before fetch", async () => {
+  let fetchCalls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => {
+      fetchCalls++;
+      return new Response(JSON.stringify({ status: "ok" }));
+    }
+  });
+
+  for (const timeoutMs of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    await assert.rejects(client.ping({ timeoutMs }), RangeError);
+  }
+  assert.equal(fetchCalls, 0);
+});

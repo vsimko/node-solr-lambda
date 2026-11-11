@@ -213,7 +213,7 @@ export class SolrTransport {
     this.validateConfig(config);
     this.#clientConfig = Object.freeze({ ...config });
     this.requestFetch = config.fetch ?? globalThis.fetch;
-    if (!this.requestFetch) throw new Error("Node.js 20 or later with global fetch is required");
+    if (!this.requestFetch) throw new Error("Node.js 22 or later with global fetch is required");
   }
 
   private validateConfig(config: SolrClientConfig): void {
