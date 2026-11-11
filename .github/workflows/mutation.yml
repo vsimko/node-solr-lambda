@@ -57,3 +57,7 @@ jobs:
           path: reports/
           if-no-files-found: warn
           retention-days: 90
+
+      - name: Verify mutation reports
+        if: success()
+        run: test -s reports/mutation.html && test -s reports/mutation.json
