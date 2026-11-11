@@ -1071,6 +1071,54 @@
         "test/integration/solr-v2-security.test.ts"
       ],
       "notes": "Read-only cluster discovery. GET CLUSTERSTATUS at /api/cluster is documented from Solr 9.11; pinned Solr 8.11.4 is explicitly not claimed/skipped. Runtime tests pass on pinned 9.11.0 and 10.1.0 in CI run #43008748363; response preserves unknown fields."
+    },
+    {
+      "area": "Solr V2 Aliases",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read-only V2 alias discovery, distinct from V1 LISTALIASES. Official Solr 9.11 and 10.1 Alias Management guides document the exact route and response shape; Solr 8.11.4 is not claimed because the alias API was redesigned in Solr 9.3. Runtime verification on pinned 9.11.0/10.1.0 and BasicAuth allow/deny checks are pending the current PR CI run.",
+      "id": "v2.aliases.list",
+      "clientMethod": "v2.aliases.list",
+      "httpMethod": "GET",
+      "path": "/api/aliases"
+    },
+    {
+      "area": "Solr V2 Aliases",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read one alias and its collection targets/properties. The route is documented in Solr 9.11 and 10.1; Solr 8.11.4 is not claimed. Runtime verification on pinned 9.11.0/10.1.0 is pending the current PR CI run.",
+      "id": "v2.aliases.status",
+      "clientMethod": "v2.aliases.status",
+      "httpMethod": "GET",
+      "path": "/api/aliases/{alias}"
     }
   ]
 }
