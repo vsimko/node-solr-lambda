@@ -194,8 +194,16 @@ test("transport validates URL protocol and embedded credentials and accepts basi
     }
   });
   await client.requestRaw("/api/cores");
+  const basicClient = createSolrClient({
+    auth: { type: "basic", username: "basic-user", password: "basic-pass" },
+    fetch: async (_input, init) => {
+      authorization.push(new Headers(init?.headers).get("authorization") ?? "");
+      return new Response("{}");
+    }
+  });
+  await basicClient.requestRaw("/api/cores");
   assert.deepEqual(paths, ["/api/cores"]);
-  assert.deepEqual(authorization, ["Basic bGVnYWN5LXVzZXI6"]);
+  assert.deepEqual(authorization, ["Basic bGVnYWN5LXVzZXI6", "Basic YmFzaWMtdXNlcjpiYXNpYy1wYXNz"]);
 });
 
 test("request without a configured core or collection fails before Fetch", async () => {
