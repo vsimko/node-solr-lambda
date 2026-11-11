@@ -22,7 +22,9 @@ cloudIntegrationTest("V2 Collections status reads isolated collection state", as
   assert.ok(status && typeof status === "object", "status response must be keyed by collection name");
   assert.equal(status.activeShards, 1);
   assert.equal(status.inactiveShards, 0);
-});
+}, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
+  ? undefined
+  : "The V2 per-collection status route is available from Solr 9.3; the pinned 8.11 line is not claimed");
 
 cloudIntegrationTest("V2 cluster status reports the isolated collection", async ({
   client,
@@ -33,4 +35,6 @@ cloudIntegrationTest("V2 cluster status reports the isolated collection", async 
   const listed = response.collections?.includes(collection) ??
     Boolean(response.cluster?.collections?.[collection]);
   assert.ok(listed, "GET /api/cluster must report the isolated collection");
-});
+}, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
+  ? undefined
+  : "GET /api/cluster CLUSTERSTATUS is documented from Solr 9.11; Solr 8.11 is not claimed");
