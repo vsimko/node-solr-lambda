@@ -36,6 +36,9 @@ void client.v2.coreAdmin.rename("books", {});
 void client.v2.coreAdmin.list({ indexInfo: "false" });
 
 import type {
+  SolrV2AliasListResponse,
+  SolrV2AliasResponse,
+  SolrV2AliasesClient,
   SolrV2CollectionListResponse,
   SolrV2CollectionStatusOptions,
   SolrV2CollectionStatusResponse,
@@ -43,6 +46,11 @@ import type {
   SolrV2CollectionsClient,
   SolrV2ClusterClient
 } from "../src/index.js";
+
+const aliasesNamespace: SolrV2AliasesClient = client.v2.aliases;
+const aliasList: Promise<SolrV2AliasListResponse> = aliasesNamespace.list();
+const aliasDetails: Promise<SolrV2AliasResponse> = aliasesNamespace.get("books_current");
+void [aliasList, aliasDetails];
 
 const collectionsNamespace: SolrV2CollectionsClient = client.v2.collections;
 const clusterNamespace: SolrV2ClusterClient = client.v2.cluster;
