@@ -259,3 +259,34 @@ test("Streaming Expressions delegate to the advanced API module", async () => {
   assert.equal(parsed.searchParams.get("expr"), "search(catalog, q=*:*)");
   assert.equal(parsed.searchParams.get("wt"), "json");
 });
+
+test("Security authentication request secrets are not copied into client HTTP error metadata", async () => {
+  const password = "auth-secret-that-must-not-leak";
+  const client = createSolrClient({
+    baseUrl: "http://localhost:8983/solr",
+    fetch: async (_input, init) => {
+      assert.deepEqual(JSON.parse(String(init?.body)), {
+        "set-user": { alice: password }
+      });
+      return new Response(JSON.stringify({
+        error: { code: 400, msg: "Authentication update rejected" }
+      }), {
+        status: 400,
+        statusText: "Bad Request",
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  await assert.rejects(
+    client.security("authentication", { "set-user": { alice: password } }),
+    error => {
+      assert.ok(error instanceof SolrHttpError);
+      assert.equal(error.message.includes(password), false);
+      assert.equal(error.body.includes(password), false);
+      assert.equal(JSON.stringify(error.payload).includes(password), false);
+      assert.equal(JSON.stringify(error.solrError).includes(password), false);
+      return true;
+    }
+  );
+});
