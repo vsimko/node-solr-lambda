@@ -59,7 +59,8 @@ test("atomic update validation rejects malformed metadata, keys, and modifiers b
     { id: "one", count: { inc: "1" } },
     { id: "one", count: { inc: Infinity } },
     { id: "one", tags: { removeregex: 42 } },
-    { id: "one", tags: { removeregex: ["valid", 42] } }
+    { id: "one", tags: { removeregex: ["valid", 42] } },
+    { id: true, count: { inc: 1 } }
   ];
 
   for (const document of invalidDocuments) {
@@ -179,4 +180,46 @@ test("JSON update commands reject conflicting commit and optimize openSearcher v
     commit: { openSearcher: true },
     optimize: { openSearcher: false }
   }));
+});
+
+
+test("addStream rejects a non-AsyncIterable source before Fetch", () => {
+  let calls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => {
+      calls++;
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  assert.throws(() => client.addStream([] as never), /AsyncIterable/);
+  assert.equal(calls, 0);
+});
+
+test("delete forwards request-control options and accepts commitWithin zero", async () => {
+  const controller = new AbortController();
+  let capturedHeaders: Headers | undefined;
+  let capturedSignal: AbortSignal | undefined;
+  let calls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      calls++;
+      capturedHeaders = new Headers(init?.headers);
+      capturedSignal = init?.signal ?? undefined;
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.delete("one", {
+    commitWithin: 0,
+    signal: controller.signal,
+    timeoutMs: 1000,
+    headers: { "x-delete-request": "boundary" }
+  });
+
+  assert.equal(calls, 1);
+  assert.equal(capturedHeaders?.get("x-delete-request"), "boundary");
+  assert.ok(capturedSignal instanceof AbortSignal);
 });
