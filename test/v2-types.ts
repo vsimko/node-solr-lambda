@@ -60,3 +60,11 @@ void [collectionList, collectionStatus, clusterStatus];
 
 // @ts-expect-error Collection status flags are booleans.
 void collectionsNamespace.status("books", { coreInfo: "true" });
+
+import type { SolrV2AliasesClient, SolrV2AliasListResponse, SolrV2AliasStatusResponse } from "../src/index.js";
+const aliasesNamespace: SolrV2AliasesClient = client.v2.aliases;
+const aliases: Promise<SolrV2AliasListResponse> = aliasesNamespace.list();
+const alias: Promise<SolrV2AliasStatusResponse> = aliasesNamespace.status("books_alias");
+void [aliases, alias];
+// @ts-expect-error Alias names must be strings.
+void aliasesNamespace.status(123);
