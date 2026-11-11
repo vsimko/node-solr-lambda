@@ -1283,8 +1283,8 @@ export interface SolrV2CollectionStatusResponse {
 }
 
 /**
- * GET /api/cluster response. Solr 8.11 exposes a compact collections list;
- * newer Solr versions may expose the richer cluster status document.
+ * GET /api/cluster response. The CLUSTERSTATUS V2 route is documented from
+ * Solr 9.11; its response remains extensible across Solr versions.
  */
 export interface SolrV2ClusterStatusResponse {
   responseHeader?: SolrResponseHeader;
