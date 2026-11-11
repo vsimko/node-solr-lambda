@@ -175,3 +175,37 @@ test("requestRaw classifies non-success response-body read failures as network e
 
   await assert.rejects(client.requestRaw("/solr/catalog/export"), SolrNetworkError);
 });
+
+
+test("transport validates URL protocol and embedded credentials and accepts basic auth fallbacks", async () => {
+  assert.throws(() => createSolrClient({ baseUrl: "ftp://solr.example.test" }), /HTTP or HTTPS/);
+  assert.throws(() => createSolrClient({ baseUrl: "https://user:secret@solr.example.test" }), /embedded credentials/);
+  assert.throws(() => createSolrClient({ auth: { type: "bearer", token: " " } }), /non-empty token/);
+
+  const authorization: string[] = [];
+  const paths: string[] = [];
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test/solr",
+    username: "legacy-user",
+    fetch: async (input, init) => {
+      paths.push(new URL(String(input)).pathname);
+      authorization.push(new Headers(init?.headers).get("authorization") ?? "");
+      return new Response("{}");
+    }
+  });
+  await client.requestRaw("/api/cores");
+  assert.deepEqual(paths, ["/api/cores"]);
+  assert.deepEqual(authorization, ["Basic bGVnYWN5LXVzZXI6"]);
+});
+
+test("request without a configured core or collection fails before Fetch", async () => {
+  let calls = 0;
+  const client = createSolrClient({
+    fetch: async () => {
+      calls++;
+      return new Response("{}");
+    }
+  });
+  await assert.rejects(client.query(), /Set 'core' or 'collection'/);
+  assert.equal(calls, 0);
+});
