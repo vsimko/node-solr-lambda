@@ -503,6 +503,7 @@ jobs:
         env:
           SOLR_BASE_URL: http://localhost:8983/solr
           SOLR_CLOUD: "true"
+          SOLR_VERSION: "${{ matrix.solr-version }}"
           SOLR_MULTINODE: "true"
           SOLR_BACKUP_LOCATION: /var/solr/backups
       - name: Print SolrCloud logs
