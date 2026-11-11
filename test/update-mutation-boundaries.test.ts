@@ -224,3 +224,37 @@ test("delete forwards request-control options and accepts commitWithin zero", as
   assert.equal(capturedHeaders?.get("x-delete-request"), "boundary");
   assert.ok(capturedSignal instanceof AbortSignal);
 });
+
+
+test("JSON update commands accept string and query deletes with independent commit and optimize options", async () => {
+  const requests: Array<{ url: URL; body: unknown }> = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requests.push({
+        url: new URL(String(input)),
+        body: JSON.parse(String(init?.body))
+      });
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.updateCommands({ delete: "one", commit: { softCommit: true } });
+  await client.updateCommands({ delete: { query: "*:*" }, optimize: { maxSegments: 2, openSearcher: true } });
+  await client.updateCommands({ commit: { expungeDeletes: true } });
+  await client.updateCommands({ rollback: {} });
+  await client.updateCommands({ commit: { openSearcher: true } });
+
+  assert.deepEqual(requests[0]!.body, { delete: "one", commit: { softCommit: true } });
+  assert.deepEqual(requests[1]!.body, { delete: { query: "*:*" }, optimize: { maxSegments: 2 } });
+  assert.equal(requests[1]!.url.searchParams.get("openSearcher"), "true");
+  assert.deepEqual(requests[2]!.body, { commit: { expungeDeletes: true } });
+  assert.deepEqual(requests[3]!.body, { rollback: {} });
+  assert.equal(requests[4]!.url.searchParams.get("openSearcher"), "true");
+});
+
+test("commit rejects incompatible soft-commit and optimize-only options", () => {
+  const client = createClient();
+  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true }));
+  assert.throws(() => client.commit({ maxSegments: 1 } as never));
+});
