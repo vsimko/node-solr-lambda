@@ -16,9 +16,13 @@ const transportClass = transportSource.slice(transportSource.indexOf("export cla
 const v2Source = readFileSync("src/v2.ts", "utf8");
 const v2ClientSource = v2Source.slice(v2Source.indexOf("export class SolrV2Client"), v2Source.indexOf("export class SolrV2CoreAdminClient"));
 const v2CoreAdminSource = v2Source.slice(v2Source.indexOf("export class SolrV2CoreAdminClient"));
+const v2CollectionsSource = v2Source.slice(v2Source.indexOf("export class SolrV2CollectionsClient"), v2Source.indexOf("export class SolrV2ClusterClient"));
+const v2ClusterSource = v2Source.slice(v2Source.indexOf("export class SolrV2ClusterClient"), v2Source.indexOf("export class SolrV2CoreAdminClient"));
 const v2Methods = [
   ...[...declaredMethods(v2ClientSource)].map(name => `v2.${name}`),
-  ...[...declaredMethods(v2CoreAdminSource)].map(name => `v2.coreAdmin.${name}`)
+  ...[...declaredMethods(v2CoreAdminSource)].map(name => `v2.coreAdmin.${name}`),
+  ...[...declaredMethods(v2CollectionsSource)].map(name => `v2.collections.${name}`),
+  ...[...declaredMethods(v2ClusterSource)].map(name => `v2.cluster.${name}`)
 ];
 const publicMethods = new Set([...declaredMethods(clientSource), ...declaredMethods(transportClass), ...v2Methods]);
 const inventoryMethods = new Set(inventory.entries.map(entry => entry.clientMethod));
