@@ -44,7 +44,17 @@ Not every API requires every failure mode. The API inventory and focused test na
 
 The Node.js built-in test coverage report is generated on Node.js 26 in CI and is published in the workflow summary. It is an initial visibility baseline for the unit suite, not a release threshold: coverage percentages alone do not measure assertion quality, Solr compatibility, or safety.
 
-Mutation testing is not yet part of ordinary CI. [Issue #343](https://github.com/vsimko/node-solr-lambda/issues/343) tracks a focused mutation-testing baseline for the shared transport, update/streaming, and admin serialization code. Do not set a mutation-score gate until equivalent mutants and meaningful survivors have been reviewed.
+Mutation testing runs separately from the ordinary Node/Solr matrix in the manual/weekly **Mutation testing** workflow. The initial StrykerJS scope is the shared transport, update/streaming, Collections, and Core Admin code. The workflow uses StrykerJS core and the TypeScript checker pinned to `10.0.0`, and stores HTML/JSON reports as workflow artifacts.
+
+To reproduce the configured run locally, install the pinned tooling without changing the lockfile, then run Stryker:
+
+```sh
+npm ci
+npm install --no-save --no-package-lock @stryker-mutator/core@10.0.0 @stryker-mutator/typescript-checker@10.0.0
+npx --no-install stryker run
+```
+
+The selected test files, mutation targets, concurrency, and reporters are defined in the root `stryker.config.json`. The first baseline is tracked in [issue #343](https://github.com/vsimko/node-solr-lambda/issues/343); its score and survivor classification remain pending until a completed workflow run publishes a report. Do not set a mutation-score gate until equivalent mutants and meaningful survivors have been reviewed and missing tests added.
 
 ## Flaky-test and CI failure policy
 
