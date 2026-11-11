@@ -131,6 +131,7 @@ The integration workflow captures per-operation `/_introspect` responses as CI a
 
 Issue #334 begins with the low-risk discovery surface only:
 
+- `client.v2.aliases.list()` / `get(name)` — `GET /api/aliases` and `GET /api/aliases/{alias}`, returning alias-to-collection mappings, properties, and single-alias detail. The intuitive paths are documented from Solr 9.2; the Solr 9.0 route `/api/cluster/aliases` is deliberately not rewritten, and Solr 8.11 is not claimed.
 - `client.v2.collections.list()` — `GET /api/collections`, returning the cluster collection names.
 - `client.v2.collections.status(name, options?)` — `GET /api/collections/{collection}`, returning the collection-keyed status. The exposed flags are limited to `coreInfo`, `segments`, `fieldInfo`, and `sizeInfo`; this is not full parity with V1 COLSTATUS index/size-analysis options.
 - `client.v2.cluster.status()` — `GET /api/cluster`. The response contract remains extensible. GET CLUSTERSTATUS is documented from Solr 9.11; the Solr 8.11 guide lists other cluster command routes but does not document this GET operation.
@@ -140,6 +141,8 @@ The methods use the shared V2 transport and do not call V1 methods or fall back 
 Official route and behavior references:
 - [Solr 8.11 V2 API guide](https://solr.apache.org/guide/8_11/v2-api.html) — `/api/collections`, `/api/cluster`, and introspection.
 - [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html) — current V2 route families and experimental contract boundary.
+- [Solr 9.2 Alias Management guide](https://solr.apache.org/guide/solr/9_2/deployment-guide/alias-management.html) — `GET /api/aliases` and `GET /api/aliases/{alias}`.
+- [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) — confirms the intuitive alias route path.
 - [Solr Collection Management guide](https://solr.apache.org/guide/solr/latest/deployment-guide/collection-management.html) — LIST and COLSTATUS V2 routes and response semantics.
 - [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) — route changes for aliases and cluster status.
 
