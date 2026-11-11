@@ -1077,7 +1077,7 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "partial",
+      "integrationTests": "not-run",
       "versions": {
         "8": "unverified",
         "9": "unverified",
@@ -1101,7 +1101,7 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "partial",
+      "integrationTests": "not-run",
       "versions": {
         "8": "unverified",
         "9": "unverified",
