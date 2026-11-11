@@ -41,6 +41,9 @@ test("V2 Collections and cluster routes enforce BasicAuth before handler executi
   skip: process.env.SOLR_SECURITY !== "true" || !baseUrl || !username || !password
 }, async () => {
   const paths = ["/api/collections", "/api/cluster"];
+  if (["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")) {
+    paths.push("/api/aliases", "/api/aliases/auth-gate-check");
+  }
   const authorization = `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
 
   for (const path of paths) {
