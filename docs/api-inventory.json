@@ -1021,7 +1021,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read-only SolrCloud collection-name discovery. Uses the V2 route directly and shares transport authentication, timeout, cancellation, and error behavior. Integration test creates an isolated collection and verifies it appears in the result; per-version runtime certification is pending the current CI matrix."
+      "notes": "Read-only SolrCloud collection-name discovery. GET /api/collections is documented on the pinned 8.11.4, 9.11.0, and 10.1.0 reference baselines. Uses the V2 route directly and shares transport authentication, timeout, cancellation, and error behavior. Integration test creates an isolated collection and verifies it appears in the result; exact runtime certification is pending the current CI matrix."
     },
     {
       "id": "v2.collections.status",
@@ -1045,7 +1045,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read-only per-collection status with narrowly typed common flags and an extensible response. This is not a promise of parity with every V1 COLSTATUS detail/size-analysis option. Runtime evidence is pending the pinned SolrCloud matrix."
+      "notes": "Read-only per-collection status with narrowly typed common flags and an extensible response. The V2 CollectionStatus route was introduced in Solr 9.3, so pinned Solr 8.11.4 is explicitly unsupported/skipped; runtime tests target pinned 9.11.0 and 10.1.0. This is not a promise of parity with every V1 COLSTATUS detail/size-analysis option."
     },
     {
       "id": "v2.cluster.status",
@@ -1069,7 +1069,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read-only cluster discovery. Solr 8.11 documents a compact collections list while newer pinned versions expose richer cluster status; the response contract intentionally preserves unknown fields. Runtime evidence is pending the pinned SolrCloud matrix."
+      "notes": "Read-only cluster discovery. GET CLUSTERSTATUS at /api/cluster is documented from Solr 9.11; pinned Solr 8.11.4 is explicitly not claimed/skipped. The response contract preserves unknown fields. Runtime evidence is pending the pinned 9.11.0 and 10.1.0 SolrCloud matrix."
     }
   ]
 }
