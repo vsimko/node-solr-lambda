@@ -74,4 +74,4 @@ jobs:
 
       - name: Verify mutation reports
         if: success()
-        run: test -s reports/mutation.html && test -s reports/mutation.json
+        run: test -s reports/mutation/mutation.html && test -s reports/mutation/mutation.json
