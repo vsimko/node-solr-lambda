@@ -11,7 +11,6 @@ async function readBody(body: BodyInit | null | undefined): Promise<string> {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<never>((_resolve, reject) => {
     timeout = setTimeout(() => {
-      void reader.cancel().catch(() => undefined);
       reject(new Error("Timed out waiting for streamed request body to close"));
     }, 500);
   });
@@ -43,15 +42,30 @@ test("addStream emits a JSON array incrementally and reuses update parameters", 
       assert.equal((init as RequestInit & { duplex?: string }).duplex, "half");
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
       const decoder = new TextDecoder();
-      const first = await reader.read();
-      assert.equal(decoder.decode(first.value), "[");
-      await new Promise(resolve => setTimeout(resolve, 5));
-      assert.equal(produced, 1, "only one document may be queued while the consumer is paused");
-      requestBody = "[" + decoder.decode((await reader.read()).value);
-      while (true) {
-        const next = await reader.read();
-        if (next.done) break;
-        requestBody += decoder.decode(next.value);
+      let deadline: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const first = await reader.read();
+        assert.equal(decoder.decode(first.value), "[");
+        await new Promise(resolve => setTimeout(resolve, 5));
+        assert.equal(produced, 1, "only one document may be queued while the consumer is paused");
+        const remaining = async (): Promise<string> => {
+          let text = decoder.decode((await reader.read()).value);
+          while (true) {
+            const next = await reader.read();
+            if (next.done) break;
+            text += decoder.decode(next.value);
+          }
+          return text;
+        };
+        const bodyDeadline = new Promise<never>((_resolve, reject) => {
+          deadline = setTimeout(() => reject(new Error("Timed out waiting for streamed request body to close")), 500);
+        });
+        requestBody = "[" + await Promise.race([remaining(), bodyDeadline]);
+      } catch (error) {
+        await reader.cancel().catch(() => undefined);
+        throw error;
+      } finally {
+        if (deadline !== undefined) clearTimeout(deadline);
       }
       return new Response('{"responseHeader":{"status":0}}', {
         headers: { "content-type": "application/json" }
