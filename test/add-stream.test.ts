@@ -8,13 +8,27 @@ async function readBody(body: BodyInit | null | undefined): Promise<string> {
   const reader = (body as ReadableStream<Uint8Array>).getReader();
   const decoder = new TextDecoder();
   let text = "";
-  while (true) {
-    const next = await reader.read();
-    if (next.done) break;
-    text += decoder.decode(next.value, { stream: true });
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(() => {
+      void reader.cancel().catch(() => undefined);
+      reject(new Error("Timed out waiting for streamed request body to close"));
+    }, 500);
+  });
+  const consume = async (): Promise<string> => {
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      text += decoder.decode(next.value, { stream: true });
+    }
+    text += decoder.decode();
+    return text;
+  };
+  try {
+    return await Promise.race([consume(), deadline]);
+  } finally {
+    if (timeout !== undefined) clearTimeout(timeout);
   }
-  text += decoder.decode();
-  return text;
 }
 
 test("addStream emits a JSON array incrementally and reuses update parameters", async () => {
@@ -511,6 +525,54 @@ test("addStream caller abort interrupts a pending iterator.next() and closes the
   assert.equal(finalized, true);
 });
 
+
+test("addStream abort with a non-Error reason still closes a pending source", async () => {
+  const abort = new AbortController();
+  let release!: () => void;
+  let notifyFetchStarted!: () => void;
+  let finalized = false;
+  const fetchStarted = new Promise<void>(resolve => { notifyFetchStarted = resolve; });
+  const client = createSolrClient({
+    baseUrl: "https://solr.example.test",
+    core: "catalog",
+    timeoutMs: 1000,
+    fetch: async (_input, init) => {
+      const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read();
+      const pendingDocument = reader.read();
+      await new Promise(resolve => setImmediate(resolve));
+      notifyFetchStarted();
+      return await new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          void reader.cancel();
+          reject(init.signal?.reason);
+        }, { once: true });
+        void pendingDocument;
+      });
+    }
+  });
+
+  async function* documents() {
+    try {
+      await new Promise<void>(resolve => { release = resolve; });
+      yield { id: "after-string-abort" };
+    } finally {
+      finalized = true;
+    }
+  }
+
+  const request = client.addStream(documents(), {}, { signal: abort.signal });
+  await fetchStarted;
+  abort.abort("caller stopped streaming");
+  await assert.rejects(request, (error: unknown) => {
+    assert.ok(error instanceof SolrAbortError);
+    assert.equal(error.reason, "caller stopped streaming");
+    return true;
+  });
+  release();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(finalized, true);
+});
 
 test("addStream rejects a JSON codec that cannot serialize a streamed document", async () => {
   let finalized = false;
