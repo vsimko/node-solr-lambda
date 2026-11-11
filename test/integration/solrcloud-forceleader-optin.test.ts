@@ -135,10 +135,22 @@ cloudIntegrationTest(
 
     const collection = await createCollection("forceleader_stale_replica", 2);
     const shardName = "shard1";
-    const initial = await client.collections("CLUSTERSTATUS", { collection });
+    let initial: SolrClusterStatusResponse | undefined;
+    let initialReplicas: Array<[string, NonNullable<NonNullable<NonNullable<SolrClusterStatusResponse["cluster"]>["collections"]>[string]["shards"]>[string]["replicas"]>[string]]> = [];
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      initial = await client.collections("CLUSTERSTATUS", { collection });
+      const shard = initial.cluster?.collections?.[collection]?.shards?.[shardName];
+      initialReplicas = Object.entries(shard?.replicas ?? {});
+      const leaders = initialReplicas.filter(([, replica]) => isLeader(replica));
+      if (initialReplicas.length === 2 &&
+        initialReplicas.every(([, replica]) => replica.state === "active") &&
+        new Set(initialReplicas.map(([, replica]) => replica.node_name)).size === 2 &&
+        leaders.length === 1) break;
+      await delay(1_000);
+    }
+    assert.ok(initial, "The disposable collection must expose cluster status");
     const initialShard = initial.cluster?.collections?.[collection]?.shards?.[shardName];
     assert.ok(initialShard, "The disposable collection must expose shard1");
-    const initialReplicas = Object.entries(initialShard.replicas ?? {});
     assert.equal(initialReplicas.length, 2, "The shard must have exactly two replicas");
     assert.ok(initialReplicas.every(([, replica]) => replica.state === "active"),
       "Both replicas must be active before fault injection");
