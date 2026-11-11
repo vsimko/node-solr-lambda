@@ -17,7 +17,7 @@ function serializeAuthorizationCommand(command: Readonly<Record<string, unknown>
     customOptions?: Readonly<Record<string, unknown>>;
     [key: string]: unknown;
   };
-  return { [name]: { ...options, ...customOptions } };
+  return { [name]: { ...customOptions, ...options } };
 }
 
 export function security<T>(client: SolrTransport, area: "authentication" | "authorization", command?: Readonly<Record<string, unknown>>, requestOptions: RequestControlOptions = {}): Promise<T> {
