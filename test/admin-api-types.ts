@@ -404,18 +404,19 @@ void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).t
   void [mode, javaVersion, dump, loggers];
 });
 
-import type { SolrAuthorizationCommand, SolrAuthorizationPermission, SolrAuthorizationResponse } from "../src/index.js";
+import type { SolrAuthorizationCommand, SolrAuthorizationPermissionResponse, SolrAuthorizationResponse } from "../src/index.js";
 declare const authorizationClient: SolrClient;
 const authorizationRead: Promise<SolrAuthorizationResponse> = authorizationClient.security("authorization");
 void authorizationRead.then(result => {
   const pluginClass: string | undefined = result.authorization?.class;
   const role: string | readonly string[] | undefined = result.authorization?.["user-role"]?.alice;
-  const permission: SolrAuthorizationPermission | undefined = result.authorization?.permissions?.[0];
+  const permission: SolrAuthorizationPermissionResponse | undefined = result.authorization?.permissions?.[0];
   const permissionName: string | undefined = permission?.name;
-  void [pluginClass, role, permissionName];
+  const pluginPermissionField: unknown = permission?.pluginPermissionField;
+  void [pluginClass, role, permissionName, pluginPermissionField];
 });
 const setRoles: SolrAuthorizationCommand = { "set-user-role": { alice: ["admin", "dev"], guest: null } };
-const setPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { action: ["LIST", "CLUSTERSTATUS"] }, role: ["admin", "reader"], pluginExtension: { enabled: true } } };
+const setPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { action: ["LIST", "CLUSTERSTATUS"] }, role: ["admin", "reader"], customOptions: { pluginExtension: { enabled: true } } } };
 const updatePermission: SolrAuthorizationCommand = { "update-permission": { index: 1, role: "admin" } };
 const deletePermission: SolrAuthorizationCommand = { "delete-permission": 3 };
 void [setRoles, setPermission, updatePermission, deletePermission];
@@ -432,7 +433,12 @@ const invalidRoleMapping: SolrAuthorizationCommand = { "set-user-role": { alice:
 const invalidPermissionDelete: SolrAuthorizationCommand = { "delete-permission": "read" };
 // @ts-expect-error Built-in permission creation requires an explicit role assignment.
 const invalidPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read" } };
-void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission];
+// @ts-expect-error Known permission fields reject misspellings instead of treating them as plugin options.
+const invalidPermissionField: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read", role: "reader", colletion: "catalog" } };
+// @ts-expect-error Known permission fields retain their documented value types.
+const invalidPermissionCollection: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read", role: "reader", collection: 42 } };
+const pluginPermission: SolrAuthorizationCommand = { "set-permission": { name: "custom-read", role: "reader", customOptions: { pluginExtension: true } } };
+void [invalidPermissionUpdate, invalidRoleMapping, invalidPermissionDelete, invalidPermission, invalidPermissionField, invalidPermissionCollection, pluginPermission];
 
 import type { SolrAuthenticationCommand, SolrAuthenticationResponse, SolrBasicAuthConfig } from "../src/index.js";
 declare const authenticationClient: SolrClient;
