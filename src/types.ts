@@ -1250,7 +1250,6 @@ export interface SolrClientConfig {
 }
 
 
-/** Optional query parameters for V2 Core Admin status discovery. */
 /** Response to GET /api/collections. Collection names are cluster-wide. */
 export interface SolrV2CollectionListResponse {
   responseHeader?: SolrResponseHeader;
@@ -1295,6 +1294,7 @@ export interface SolrV2ClusterStatusResponse {
   readonly [key: string]: unknown;
 }
 
+/** Optional query parameters for V2 Core Admin status discovery. */
 export interface SolrV2CoreStatusOptions {
   /** Include index statistics in status results. Defaults to Solr's true. */
   indexInfo?: boolean;
