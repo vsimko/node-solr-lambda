@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { SolrClient, type SolrClusterStatusResponse } from "../../src/index.js";
+import { SolrClient, type SolrClusterReplica, type SolrClusterStatusResponse } from "../../src/index.js";
 import { cloudIntegrationTest } from "./fixtures.js";
 
 interface NodeContainer {
@@ -136,7 +136,7 @@ cloudIntegrationTest(
     const collection = await createCollection("forceleader_stale_replica", 2);
     const shardName = "shard1";
     let initial: SolrClusterStatusResponse | undefined;
-    let initialReplicas: Array<[string, NonNullable<NonNullable<NonNullable<SolrClusterStatusResponse["cluster"]>["collections"]>[string]["shards"]>[string]["replicas"]>[string]]> = [];
+    let initialReplicas: Array<[string, SolrClusterReplica]> = [];
     for (let attempt = 0; attempt < 60; attempt += 1) {
       initial = await client.collections("CLUSTERSTATUS", { collection });
       const shard = initial.cluster?.collections?.[collection]?.shards?.[shardName];
