@@ -451,7 +451,7 @@ test("Authorization API serializes typed built-in permission and user-role comma
   assert.deepEqual(requested.slice(1).map(item => item.method), ["POST", "POST", "POST", "POST"]);
   assert.deepEqual(requested.slice(1).map(item => item.body), [
     { "set-user-role": { alice: ["admin", "dev"], guest: null } },
-    { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { wt: ["json", "xml"], rows: 10 }, role: ["admin", "reader"], customOptions: { customPluginOption: { enabled: true } } } },
+    { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { wt: ["json", "xml"], rows: 10 }, role: ["admin", "reader"], customPluginOption: { enabled: true } } },
     { "update-permission": { index: 2, role: "admin", path: "/update" } },
     { "delete-permission": 3 }
   ]);
