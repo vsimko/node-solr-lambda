@@ -21,7 +21,7 @@ test("Collections customParams serializes only supported scalar values", async (
       "property.null": null,
       "property.object": { enabled: true },
       "property.array": ["a", "b"]
-    }
+    } as never
   });
 
   const url = new URL(requested);
@@ -36,7 +36,7 @@ test("Collections customParams serializes only supported scalar values", async (
   assert.equal(url.searchParams.has("property.array"), false);
 });
 
-test("Collections customParams safely ignores null, array, and empty containers", async () => {
+test("Collections customParams ignores null, arrays, and empty containers", async () => {
   const requested: string[] = [];
   const client = createSolrClient({
     fetch: async input => {
@@ -45,7 +45,8 @@ test("Collections customParams safely ignores null, array, and empty containers"
     }
   });
 
-  await client.collections("LIST", { customParams: null });
+  await client.collections("LIST", { customParams: null as never });
+  await client.collections("LIST", { customParams: [] as never });
   await client.collections("LIST", { customParams: {} });
 
   for (const target of requested) {
