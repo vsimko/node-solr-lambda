@@ -4,7 +4,7 @@ See the [public API reference](api-reference.md) for the package-root client met
 
 See the [Solr endpoint inventory](endpoint-inventory.md) for the explicit typed-client boundary, deferred endpoint families, and official Solr reference sources.
 
-The [Solr V2 API strategy](solr-v2-api-strategy.md) records the V1/V2 route map and version boundaries. The client now exposes a low-level, explicit `client.v2` namespace over the shared transport; operation-specific V2 wrappers and runtime certification remain separate follow-up work.
+The [Solr V2 API strategy](solr-v2-api-strategy.md) records the V1/V2 route map and version boundaries. The explicit `client.v2` namespace uses the shared transport and now includes typed Core Admin plus read-only Collections/cluster discovery operations. Remaining V2 route families require separate request/response contracts and per-version runtime evidence.
 
 See [Client architecture](architecture.md) for module boundaries, type-model guidelines, and shared request conventions. The [roadmap](roadmap.md) tracks priorities and links to implementation issues.
 
