@@ -36,3 +36,23 @@ test("V2 Core Admin enforces authentication and permits an authenticated admin",
     error => error instanceof SolrHttpError && error.status === 401
   );
 });
+
+test("V2 Collections and cluster routes enforce BasicAuth before handler execution", {
+  skip: process.env.SOLR_SECURITY !== "true" || !baseUrl || !username || !password
+}, async () => {
+  const paths = ["/api/collections", "/api/cluster"];
+  const authorization = `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
+
+  for (const path of paths) {
+    const anonymous = await fetch(new URL(path, baseUrl));
+    assert.equal(anonymous.status, 401, `${path} must reject anonymous access`);
+    await anonymous.arrayBuffer();
+
+    const authenticated = await fetch(new URL(path, baseUrl), {
+      headers: { authorization }
+    });
+    assert.notEqual(authenticated.status, 401,
+      `${path} must accept valid credentials and reach the endpoint handler`);
+    await authenticated.arrayBuffer();
+  }
+});
