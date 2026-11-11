@@ -59,7 +59,8 @@ test("atomic update validation rejects malformed metadata, keys, and modifiers b
     { id: "one", count: { inc: "1" } },
     { id: "one", count: { inc: Infinity } },
     { id: "one", tags: { removeregex: 42 } },
-    { id: "one", tags: { removeregex: ["valid", 42] } }
+    { id: "one", tags: { removeregex: ["valid", 42] } },
+    { id: true, count: { inc: 1 } }
   ];
 
   for (const document of invalidDocuments) {
@@ -179,4 +180,81 @@ test("JSON update commands reject conflicting commit and optimize openSearcher v
     commit: { openSearcher: true },
     optimize: { openSearcher: false }
   }));
+});
+
+
+test("addStream rejects a non-AsyncIterable source before Fetch", () => {
+  let calls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async () => {
+      calls++;
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  assert.throws(() => client.addStream([] as never), /AsyncIterable/);
+  assert.equal(calls, 0);
+});
+
+test("delete forwards request-control options and accepts commitWithin zero", async () => {
+  const controller = new AbortController();
+  let capturedHeaders: Headers | undefined;
+  let capturedSignal: AbortSignal | undefined;
+  let calls = 0;
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (_input, init) => {
+      calls++;
+      capturedHeaders = new Headers(init?.headers);
+      capturedSignal = init?.signal ?? undefined;
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.delete("one", {
+    commitWithin: 0,
+    signal: controller.signal,
+    timeoutMs: 1000,
+    headers: { "x-delete-request": "boundary" }
+  });
+  assert.equal(capturedHeaders?.get("x-delete-request"), "boundary");
+  assert.ok(capturedSignal instanceof AbortSignal);
+
+  await client.add({ id: "zero-commit-within" }, { commitWithin: 0 });
+  assert.equal(calls, 2);
+});
+
+
+test("JSON update commands accept string and query deletes with independent commit and optimize options", async () => {
+  const requests: Array<{ url: URL; body: unknown }> = [];
+  const client = createSolrClient({
+    core: "catalog",
+    fetch: async (input, init) => {
+      requests.push({
+        url: new URL(String(input)),
+        body: JSON.parse(String(init?.body))
+      });
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.updateCommands({ delete: "one", commit: { softCommit: true } });
+  await client.updateCommands({ delete: { query: "*:*" }, optimize: { maxSegments: 2, openSearcher: true } });
+  await client.updateCommands({ commit: { expungeDeletes: true } });
+  await client.updateCommands({ rollback: {} });
+  await client.updateCommands({ commit: { openSearcher: true } });
+
+  assert.deepEqual(requests[0]!.body, { delete: "one", commit: { softCommit: true } });
+  assert.deepEqual(requests[1]!.body, { delete: { query: "*:*" }, optimize: { maxSegments: 2 } });
+  assert.equal(requests[1]!.url.searchParams.get("openSearcher"), "true");
+  assert.deepEqual(requests[2]!.body, { commit: { expungeDeletes: true } });
+  assert.deepEqual(requests[3]!.body, { rollback: {} });
+  assert.equal(requests[4]!.url.searchParams.get("openSearcher"), "true");
+});
+
+test("commit rejects incompatible soft-commit and optimize-only options", () => {
+  const client = createClient();
+  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true } as never));
+  assert.throws(() => client.commit({ maxSegments: 1 } as never));
 });
