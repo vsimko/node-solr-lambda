@@ -141,7 +141,7 @@ function validateJsonUpdateCommands(commands: SolrJsonUpdateCommands): void {
       }
     } else if (name === "delete") {
       const validDelete = typeof value === "string" ||
-        (Array.isArray(value) && value.every(id => typeof id === "string")) ||
+        (Array.isArray(value) && value.length > 0 && value.every(id => typeof id === "string")) ||
         (!!value && typeof value === "object" && !Array.isArray(value) && (() => {
           const command = value as Record<string, unknown>;
           const hasId = typeof command.id === "string";
