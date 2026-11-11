@@ -31,7 +31,7 @@ We optimize for five mutually reinforcing pillars:
 - Testing strategy, fault injection, security, and SolrCloud evidence (#315; mutation-testing baseline #343)
 - Reproducible performance and memory benchmark suite (#314; harness merged #338; controlled baseline reports #339)
 - Competitor/ecosystem comparison and public quality scorecard (#310)
-- High-value feature work: SolrCloud FORCELEADER #328 and V2 implementation #332–#334
+- High-value feature work: SolrCloud FORCELEADER contract #328 and stale-replica evidence #341; V2 implementation #332–#334 (PR #361 merged the first read-only tranche; #334 remains open for alias and mutation follow-ups)
 
 ## North-star objective: best-in-class Solr client
 
@@ -83,6 +83,7 @@ The cross-client regression test audit (#297) is implemented in PR #296 with ADR
 | Work | Tracking | Current status |
 | --- | --- | --- |
 | Execute the opt-in, loopback-only SPLITSHARD and MIGRATE verification workflow for each pinned Solr version; retain non-certification until evidence exists | [#232](https://github.com/vsimko/node-solr-lambda/issues/232) | Test harness and manual `workflow_dispatch` workflow are merged in PR #253. A maintainer must manually run it with `enable_destructive_solrcloud_tests=true` and record successful evidence for Solr 8.11.4, 9.11.0, and 10.1.0. |
+| Execute the isolated stale-replica FORCELEADER fault-injection workflow for each pinned Solr version | [#341](https://github.com/vsimko/node-solr-lambda/issues/341) | PR #362 adds a separate manual `workflow_dispatch` input and job with independent ZooKeeper, two labelled Solr containers, loopback-only ports, and an explicit acknowledged-data-loss assertion. Harness is not runtime evidence until a maintainer dispatches `enable_forceleader_fault_injection=true` and records each Solr result. |
 
 ### Separate release gate
 
