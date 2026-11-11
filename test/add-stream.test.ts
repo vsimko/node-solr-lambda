@@ -11,7 +11,6 @@ async function readBody(body: BodyInit | null | undefined): Promise<string> {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<never>((_resolve, reject) => {
     timeout = setTimeout(() => {
-      void reader.cancel().catch(() => undefined);
       reject(new Error("Timed out waiting for streamed request body to close"));
     }, 500);
   });
