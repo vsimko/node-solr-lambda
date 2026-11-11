@@ -55,3 +55,35 @@ test("Collections customParams ignores null, arrays, and empty containers", asyn
     assert.deepEqual([...url.searchParams.keys()], ["action"]);
   }
 });
+
+
+test("Collections customParams ignores non-empty arrays without leaking numeric keys", async () => {
+  let requested = "";
+  const client = createSolrClient({
+    fetch: async input => {
+      requested = String(input);
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.collections("LIST", { customParams: ["unexpected"] as never });
+  const url = new URL(requested);
+  assert.equal(url.searchParams.get("action"), "LIST");
+  assert.equal(url.searchParams.has("0"), false);
+});
+
+test("Collections ignores unsupported object-valued top-level parameters", async () => {
+  let requested = "";
+  const client = createSolrClient({
+    fetch: async input => {
+      requested = String(input);
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+
+  await client.collections("LIST", { name: { nested: true } } as never);
+  const url = new URL(requested);
+  assert.equal(url.searchParams.get("action"), "LIST");
+  assert.equal(url.searchParams.has("name"), false);
+  assert.doesNotMatch(url.toString(), /\[object Object\]/);
+});

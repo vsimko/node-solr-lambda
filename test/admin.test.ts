@@ -544,3 +544,34 @@ test("Collections shard lifecycle and MIGRATE actions serialize V1 parameters ex
   assert.equal(requests[3]?.searchParams.get("forward.timeout"), "60");
   assert.equal(requests[3]?.searchParams.get("async"), "migrate-1");
 });
+
+
+test("Collections and Core Admin route input and output validation by operation key", async () => {
+  const inputOperations: string[] = [];
+  const outputOperations: string[] = [];
+  const schema = (operation: string, calls: string[]) => ({
+    safeParseAsync: async (value: unknown) => {
+      calls.push(operation);
+      return { success: true as const, data: value };
+    }
+  });
+  const client = createSolrClient({
+    validation: {
+      inputs: {
+        collections: schema("collections", inputOperations),
+        coreAdmin: schema("coreAdmin", inputOperations)
+      },
+      outputs: {
+        collections: schema("collections", outputOperations),
+        coreAdmin: schema("coreAdmin", outputOperations)
+      }
+    },
+    fetch: async () => new Response(JSON.stringify({ responseHeader: { status: 0 }, status: {} }))
+  });
+
+  await client.collections("LIST");
+  await client.coreAdmin("STATUS");
+
+  assert.deepEqual(inputOperations, ["collections", "coreAdmin"]);
+  assert.deepEqual(outputOperations, ["collections", "coreAdmin"]);
+});
