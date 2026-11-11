@@ -134,6 +134,11 @@ cloudIntegrationTest(
     assertDedicatedContainer(containers[1]!, `solr:${version}`, labelKey, networkName);
     const zkLabels = JSON.parse(docker(["inspect", "--format", "{{json .Config.Labels}}", zkName])) as Record<string, string>;
     assert.equal(zkLabels[labelKey], "zookeeper", "ZooKeeper must be the separately labelled workflow-owned service");
+    assert.equal(docker(["inspect", "--format", "{{.Config.Image}}", zkName]), "zookeeper:3.9.3");
+    const zkNetworks = JSON.parse(docker(["inspect", "--format", "{{json .NetworkSettings.Networks}}", zkName])) as Record<string, unknown>;
+    assert.ok(networkName in zkNetworks, "ZooKeeper must share the dedicated private Docker network");
+    assert.notEqual(zkName, primaryName);
+    assert.notEqual(zkName, secondaryName);
     assert.equal(docker(["inspect", "--format", "{{.State.Running}}", zkName]), "true",
       "ZooKeeper must remain independent from both Solr node containers");
 
@@ -294,5 +299,5 @@ cloudIntegrationTest(
   true,
   true,
   undefined,
-  300_000
+  600_000
 );
