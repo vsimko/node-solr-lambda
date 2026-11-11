@@ -172,7 +172,6 @@ cloudIntegrationTest(
     const staleClient = clientAt(baseUrl, staleContainer.port, collection);
     const baselineIds = [1, 2, 3].map(index => `baseline-${randomUUID()}-${index}`);
     const acknowledgedAfterStale = [1, 2, 3].map(index => `late-${randomUUID()}-${index}`);
-    const stopped = new Set<string>();
 
     console.log("FORCELEADER_INITIAL_CLUSTER_STATE", JSON.stringify(initial));
 
@@ -183,17 +182,14 @@ cloudIntegrationTest(
       await waitForIds(staleClient, baselineIds, "follower baseline");
 
       docker(["stop", "--time", "10", staleContainer.name]);
-      stopped.add(staleContainer.name);
 
       await leaderClient.add(acknowledgedAfterStale.map(id => ({ id, phase: "acknowledged-while-follower-offline" })));
       await leaderClient.commit({ waitSearcher: true });
       await waitForIds(leaderClient, [...baselineIds, ...acknowledgedAfterStale], "old leader acknowledged updates");
 
       docker(["stop", "--time", "10", leaderContainer.name]);
-      stopped.add(leaderContainer.name);
 
       docker(["start", staleContainer.name]);
-      stopped.delete(staleContainer.name);
       await waitForHttp(nodeBaseUrl(baseUrl, staleContainer.port), "stale replica node");
 
       let stateWithoutLeader: SolrClusterStatusResponse | undefined;
@@ -260,7 +256,6 @@ cloudIntegrationTest(
           const running = docker(["inspect", "--format", "{{.State.Running}}", container.name]) === "true";
           if (!running) docker(["start", container.name]);
           await waitForHttp(nodeBaseUrl(baseUrl, container.port), `restarted ${container.name}`);
-          stopped.delete(container.name);
         } catch (error) {
           cleanupErrors.push(error);
         }
