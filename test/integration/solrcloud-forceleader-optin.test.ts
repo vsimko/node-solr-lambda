@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { SolrClient } from "../../src/index.js";
+import { SolrClient, type SolrClusterStatusResponse } from "../../src/index.js";
 import { cloudIntegrationTest } from "./fixtures.js";
 
 interface NodeContainer {
@@ -184,7 +184,7 @@ cloudIntegrationTest(
       stopped.delete(staleContainer.name);
       await waitForHttp(nodeBaseUrl(baseUrl, staleContainer.port), "stale replica node");
 
-      let stateWithoutLeader: Awaited<ReturnType<typeof client.collections<"CLUSTERSTATUS">>> | undefined;
+      let stateWithoutLeader: SolrClusterStatusResponse | undefined;
       let noLeader = false;
       for (let attempt = 0; attempt < 120; attempt += 1) {
         try {
@@ -213,7 +213,7 @@ cloudIntegrationTest(
       });
       assert.equal(forced.responseHeader?.status, 0, "FORCELEADER should be accepted only after the shard has no leader");
 
-      let postState: Awaited<ReturnType<typeof client.collections<"CLUSTERSTATUS">>> | undefined;
+      let postState: SolrClusterStatusResponse | undefined;
       let promoted = false;
       for (let attempt = 0; attempt < 90; attempt += 1) {
         postState = await staleClient.collections("CLUSTERSTATUS", { collection });
