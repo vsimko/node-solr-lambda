@@ -1267,19 +1267,20 @@ export interface SolrV2CollectionStatusOptions {
 
 /** Extensible status information for one SolrCloud collection. */
 export interface SolrV2CollectionStatus {
+  name?: string;
   znodeVersion?: number;
-  creationTimeMillis?: number;
+  creationTimeMillis?: number | string;
   properties?: Readonly<Record<string, unknown>>;
   activeShards?: number;
   inactiveShards?: number;
+  schemaNonCompliant?: readonly string[];
   shards?: Readonly<Record<string, unknown>>;
   readonly [key: string]: unknown;
 }
 
-/** GET /api/collections/{collection} returns the status under the collection name. */
-export interface SolrV2CollectionStatusResponse {
+/** GET /api/collections/{collection} returns CollectionStatusResponse directly. */
+export interface SolrV2CollectionStatusResponse extends SolrV2CollectionStatus {
   responseHeader?: SolrResponseHeader;
-  readonly [collectionOrMetadata: string]: unknown;
 }
 
 /** GET /api/aliases response with extensible alias/property maps. */
