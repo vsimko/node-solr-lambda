@@ -1,5 +1,5 @@
 import type { SolrTransport } from "./transport.js";
-import type { RequestControlOptions, RequestOptions, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
+import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
@@ -13,6 +13,12 @@ export class SolrV2Client {
   /** Typed Core Admin V2 operations. These target standalone/user-managed cores, not SolrCloud collections. */
   readonly coreAdmin: SolrV2CoreAdminClient;
 
+  /** Read-only SolrCloud Collections V2 operations. */
+  readonly collections: SolrV2CollectionsClient;
+
+  /** Read-only cluster-level V2 discovery operations. */
+  readonly cluster: SolrV2ClusterClient;
+
   constructor(private readonly transport: SolrTransport, baseUrl = "http://localhost:8983/") {
     const configuredBase = new URL(baseUrl);
     const segments = configuredBase.pathname.split("/").filter(Boolean);
@@ -22,6 +28,8 @@ export class SolrV2Client {
     const proxyPrefix = segments.length ? `/${segments.join("/")}` : "";
     this.apiBaseUrl = `${configuredBase.origin}${proxyPrefix}/api`;
     this.coreAdmin = new SolrV2CoreAdminClient(this);
+    this.collections = new SolrV2CollectionsClient(this);
+    this.cluster = new SolrV2ClusterClient(this);
   }
 
   /**
@@ -59,6 +67,64 @@ export class SolrV2Client {
   }
 }
 
+
+/**
+ * Read-only SolrCloud Collections V2 discovery operations.
+ *
+ * Collection listing and per-collection status are documented by the official
+ * Solr V2 Collections API. The status response is intentionally open because
+ * its index and shard details vary by Solr version and requested flags.
+ */
+export class SolrV2CollectionsClient {
+  constructor(private readonly v2: SolrV2Client) {}
+
+  /** List collection names in the connected SolrCloud cluster. */
+  list(requestOptions: RequestControlOptions = {}): Promise<SolrV2CollectionListResponse> {
+    return this.v2.request<SolrV2CollectionListResponse>("/api/collections", {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+
+  /** Read status for one collection. */
+  status(
+    collection: string,
+    options: SolrV2CollectionStatusOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2CollectionStatusResponse> {
+    if (typeof collection !== "string" || collection.trim().length === 0 ||
+      collection.includes("/") || collection.includes("\\")) {
+      throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
+    }
+    const query = Object.fromEntries(
+      Object.entries(options).filter(([, value]) => value !== undefined)
+    );
+    return this.v2.request<SolrV2CollectionStatusResponse>(
+      `/api/collections/${encodeURIComponent(collection)}`,
+      {
+        ...requestOptions,
+        method: "GET",
+        ...(Object.keys(query).length > 0 ? { query } : {})
+      }
+    );
+  }
+}
+
+/** Read-only cluster-level V2 discovery operations. */
+export class SolrV2ClusterClient {
+  constructor(private readonly v2: SolrV2Client) {}
+
+  /**
+   * Read cluster status. Solr 8.11 returns a compact collection-name list;
+   * 9.11 and 10.1 expose richer cluster state on the same route.
+   */
+  status(requestOptions: RequestControlOptions = {}): Promise<SolrV2ClusterStatusResponse> {
+    return this.v2.request<SolrV2ClusterStatusResponse>("/api/cluster", {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+}
 
 /**
  * Typed Core Admin operations for the Solr V2 API.
