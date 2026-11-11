@@ -116,7 +116,6 @@ export class SolrV2CollectionsClient {
   }
 }
 
-/** Read-only cluster-level V2 discovery operations. */
 /**
  * Read-only SolrCloud alias discovery operations.
  * GET /api/aliases and GET /api/aliases/{alias} are documented for Solr 9.3+.
