@@ -214,6 +214,6 @@ test("request without a configured core or collection fails before Fetch", async
       return new Response("{}");
     }
   });
-  await assert.rejects(client.query({ query: "*:*" }), /Set 'core' or 'collection'/);
+  assert.throws(() => client.query({ query: "*:*" }), /Set 'core' or 'collection'/);
   assert.equal(calls, 0);
 });
