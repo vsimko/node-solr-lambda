@@ -56,7 +56,7 @@ cloudIntegrationTest("V2 Aliases list and detail read back an isolated alias", a
     }
     throw error;
   }
-  assert.equal(detail.name, alias);
+  assert.equal(detail.alias, alias);
   assert.deepEqual(detail.collections, [collection]);
 }, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
   ? undefined
