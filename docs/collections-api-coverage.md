@@ -2,6 +2,10 @@
 
 This matrix is deliberately action-specific. The public client infers a named response contract from each action literal. The lower-level request helpers remain available for callers that need to model server- or plugin-specific response payloads. Solr-version evidence below refers only to the pinned Solr 8.11.4, 9.11.0, and 10.1.0 integration jobs.
 
+## V2 read-only discovery
+
+The parallel V2 namespace exposes `client.v2.collections.list()` (`GET /api/collections`), `client.v2.collections.status(name)` (`GET /api/collections/{collection}`), and `client.v2.cluster.status()` (`GET /api/cluster`). These are separate from the V1 `collections()` action contracts below. They are read-only, use V2-specific extensible response types, and do not perform V1 fallback. Their isolated SolrCloud and security-gate tests are present; pinned-version runtime evidence remains pending CI. Alias and mutating V2 operations are not included in this tranche.
+
 ## Action matrix
 
 | Action | Input contract | Response contract | Unit / type evidence | Integration evidence |
