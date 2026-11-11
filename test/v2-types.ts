@@ -34,3 +34,29 @@ void [v2Status, oneCore, reloaded, renamed, unloaded];
 void client.v2.coreAdmin.rename("books", {});
 // @ts-expect-error indexInfo is boolean.
 void client.v2.coreAdmin.list({ indexInfo: "false" });
+
+import type {
+  SolrV2CollectionListResponse,
+  SolrV2CollectionStatusOptions,
+  SolrV2CollectionStatusResponse,
+  SolrV2ClusterStatusResponse,
+  SolrV2CollectionsClient,
+  SolrV2ClusterClient
+} from "../src/index.js";
+
+const collectionsNamespace: SolrV2CollectionsClient = client.v2.collections;
+const clusterNamespace: SolrV2ClusterClient = client.v2.cluster;
+const collectionList: Promise<SolrV2CollectionListResponse> = collectionsNamespace.list();
+const collectionStatusOptions: SolrV2CollectionStatusOptions = {
+  coreInfo: true,
+  segments: false,
+  fieldInfo: true,
+  sizeInfo: false
+};
+const collectionStatus: Promise<SolrV2CollectionStatusResponse> =
+  collectionsNamespace.status("books", collectionStatusOptions);
+const clusterStatus: Promise<SolrV2ClusterStatusResponse> = clusterNamespace.status();
+void [collectionList, collectionStatus, clusterStatus];
+
+// @ts-expect-error Collection status flags are booleans.
+void collectionsNamespace.status("books", { coreInfo: "true" });

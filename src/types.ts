@@ -1250,6 +1250,50 @@ export interface SolrClientConfig {
 }
 
 
+/** Response to GET /api/collections. Collection names are cluster-wide. */
+export interface SolrV2CollectionListResponse {
+  responseHeader?: SolrResponseHeader;
+  collections?: readonly string[];
+  readonly [key: string]: unknown;
+}
+
+/** Optional, explicitly supported fields for the V2 collection status endpoint. */
+export interface SolrV2CollectionStatusOptions {
+  coreInfo?: boolean;
+  segments?: boolean;
+  fieldInfo?: boolean;
+  sizeInfo?: boolean;
+}
+
+/** Extensible status information for one SolrCloud collection. */
+export interface SolrV2CollectionStatus {
+  znodeVersion?: number;
+  creationTimeMillis?: number;
+  properties?: Readonly<Record<string, unknown>>;
+  activeShards?: number;
+  inactiveShards?: number;
+  shards?: Readonly<Record<string, unknown>>;
+  readonly [key: string]: unknown;
+}
+
+/** GET /api/collections/{collection} returns the status under the collection name. */
+export interface SolrV2CollectionStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  readonly [collectionOrMetadata: string]: unknown;
+}
+
+/**
+ * GET /api/cluster response. The CLUSTERSTATUS V2 route is documented from
+ * Solr 9.11; its response remains extensible across Solr versions.
+ */
+export interface SolrV2ClusterStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  collections?: readonly string[];
+  cluster?: SolrClusterStatus;
+  live_nodes?: readonly string[];
+  readonly [key: string]: unknown;
+}
+
 /** Optional query parameters for V2 Core Admin status discovery. */
 export interface SolrV2CoreStatusOptions {
   /** Include index statistics in status results. Defaults to Solr's true. */

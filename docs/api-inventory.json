@@ -998,6 +998,78 @@
       "clientMethod": "v2.coreAdmin.unload",
       "httpMethod": "POST",
       "path": "/api/cores/{core}/unload"
+    },
+    {
+      "id": "v2.collections.list",
+      "area": "Solr V2 Collections",
+      "clientMethod": "v2.collections.list",
+      "httpMethod": "GET",
+      "path": "/api/collections",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "tested",
+      "versions": {
+        "8": "tested",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read-only SolrCloud collection-name discovery. GET /api/collections is runtime-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 in CI run #43008748363 across Node 20/22/24/26. The test creates an isolated collection and verifies it appears in the V2 list. Uses the shared V2 transport."
+    },
+    {
+      "id": "v2.collections.status",
+      "area": "Solr V2 Collections",
+      "clientMethod": "v2.collections.status",
+      "httpMethod": "GET",
+      "path": "/api/collections/{collection}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read-only per-collection status with narrowly typed common flags and an extensible response. The V2 CollectionStatus route was introduced in Solr 9.3, so pinned Solr 8.11.4 is explicitly not claimed/skipped; runtime tests pass on pinned 9.11.0 and 10.1.0 in CI run #43008748363. This is not full parity with every V1 COLSTATUS detail/size-analysis option."
+    },
+    {
+      "id": "v2.cluster.status",
+      "area": "Solr V2 cluster",
+      "clientMethod": "v2.cluster.status",
+      "httpMethod": "GET",
+      "path": "/api/cluster",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "tested",
+        "10": "tested"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read-only cluster discovery. GET CLUSTERSTATUS at /api/cluster is documented from Solr 9.11; pinned Solr 8.11.4 is explicitly not claimed/skipped. Runtime tests pass on pinned 9.11.0 and 10.1.0 in CI run #43008748363; response preserves unknown fields."
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Solr V2 API strategy
 
-This document records the V1/V2 compatibility audit requested by [Issue #327](https://github.com/vsimko/node-solr-lambda/issues/327). The generic namespace foundation is implemented; this strategy does not claim operation-specific V2 support or runtime compatibility.
+This document records the V1/V2 compatibility audit requested by [Issue #327](https://github.com/vsimko/node-solr-lambda/issues/327). The explicit namespace, Core Admin operations, and the initial read-only Collections/cluster operations are implemented as separate typed layers; compatibility remains operation- and version-specific.
 
 ## Decision
 
@@ -125,3 +125,22 @@ The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource
 Issue #333 adds `client.v2.coreAdmin` with list/status, reload, rename, and unload operations. The contracts are distinct from V1 CoreAdmin and preserve unknown response fields. Exact routes and payloads are tested on pinned Solr 9.11.0 and 10.1.0, including authenticated/anonymous security checks. Solr 8.11.4 has a separate V2 API guide that documents the Core Admin route family; runtime verification on the pinned 8.11.4 image is pending. Core Admin V2 is for standalone/user-managed cores; SolrCloud management must use Collections APIs.
 
 The integration workflow captures per-operation `/_introspect` responses as CI artifacts for Solr 9.11.0 and 10.1.0. These raw outputs are retained as version-labelled fixtures and are discovery evidence only, not stable generated types.
+
+
+## Collections V2 read-only implementation status
+
+Issue #334 begins with the low-risk discovery surface only:
+
+- `client.v2.collections.list()` — `GET /api/collections`, returning the cluster collection names.
+- `client.v2.collections.status(name, options?)` — `GET /api/collections/{collection}`, returning the collection-keyed status. The exposed flags are limited to `coreInfo`, `segments`, `fieldInfo`, and `sizeInfo`; this is not full parity with V1 COLSTATUS index/size-analysis options.
+- `client.v2.cluster.status()` — `GET /api/cluster`. The response contract remains extensible. GET CLUSTERSTATUS is documented from Solr 9.11; the Solr 8.11 guide lists other cluster command routes but does not document this GET operation.
+
+The methods use the shared V2 transport and do not call V1 methods or fall back to V1 routes. Collection names are path-encoded and empty/path-like names are rejected before Fetch. Unit serialization, consumer type fixtures, isolated SolrCloud read-back tests, and authenticated/anonymous route-gate tests are included. Collection listing is tested across the pinned Solr 8.11.4 / 9.11.0 / 10.1.0 matrix; per-collection status is limited to Solr 9.3+ (therefore pinned 9.11.0 / 10.1.0), and GET cluster status is limited to Solr 9.11+ (therefore pinned 9.11.0 / 10.1.0). CI results must pass before runtime certification is recorded.
+
+Official route and behavior references:
+- [Solr 8.11 V2 API guide](https://solr.apache.org/guide/8_11/v2-api.html) — `/api/collections`, `/api/cluster`, and introspection.
+- [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html) — current V2 route families and experimental contract boundary.
+- [Solr Collection Management guide](https://solr.apache.org/guide/solr/latest/deployment-guide/collection-management.html) — LIST and COLSTATUS V2 routes and response semantics.
+- [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) — route changes for aliases and cluster status.
+
+Alias CRUD, collection lifecycle, shard/replica management, backup/restore, and destructive actions remain outside this first read-only tranche. Their V2 routes changed during the Solr 9.3 redesign and require their own request/response contracts, minimum-version decisions, and isolated behavior tests. FORCELEADER remains coordinated with #328/#341.
