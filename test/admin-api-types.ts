@@ -404,15 +404,15 @@ void Promise.all([systemInfo, systemProperties, systemThreads, systemLogging]).t
   void [mode, javaVersion, dump, loggers];
 });
 
-import type { SolrAuthorizationCommand, SolrAuthorizationPermission, SolrAuthorizationResponse } from "../src/index.js";
+import type { SolrAuthorizationCommand, SolrAuthorizationPermission, SolrAuthorizationPermissionResponse, SolrAuthorizationResponse } from "../src/index.js";
 declare const authorizationClient: SolrClient;
 const authorizationRead: Promise<SolrAuthorizationResponse> = authorizationClient.security("authorization");
 void authorizationRead.then(result => {
   const pluginClass: string | undefined = result.authorization?.class;
   const role: string | readonly string[] | undefined = result.authorization?.["user-role"]?.alice;
-  const permission: SolrAuthorizationPermission | undefined = result.authorization?.permissions?.[0];
-  const permissionName: string | undefined = permission?.name;
-  void [pluginClass, role, permissionName];
+  const permission: SolrAuthorizationPermissionResponse | undefined = result.authorization?.permissions?.[0];
+  const permissionName: string | undefined = permission?.name;\n  const pluginPermissionField: unknown = permission?.pluginPermissionField;
+  void [pluginClass, role, permissionName, pluginPermissionField];
 });
 const setRoles: SolrAuthorizationCommand = { "set-user-role": { alice: ["admin", "dev"], guest: null } };
 const setPermission: SolrAuthorizationCommand = { "set-permission": { name: "catalog-read", collection: "catalog", path: ["/select", "/query"], method: ["GET", "POST"], params: { action: ["LIST", "CLUSTERSTATUS"] }, role: ["admin", "reader"], customOptions: { pluginExtension: { enabled: true } } } };
