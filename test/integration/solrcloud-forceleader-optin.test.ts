@@ -172,10 +172,12 @@ cloudIntegrationTest(
     const staleReplicaEntry = initialReplicas.find(([name]) => name !== leaderReplicaName);
     assert.ok(staleReplicaEntry, "A distinct follower replica must be available to make stale");
     const staleReplica = staleReplicaEntry[1];
-    assert.ok(leaderReplica.node_name && staleReplica.node_name, "Both replicas must expose node_name");
+    const leaderNodeName = leaderReplica.node_name;
+    const staleNodeName = staleReplica.node_name;
+    assert.ok(leaderNodeName && staleNodeName, "Both replicas must expose node_name");
 
-    const leaderContainer = nodeContainer(leaderReplica.node_name, containers);
-    const staleContainer = nodeContainer(staleReplica.node_name, containers);
+    const leaderContainer = nodeContainer(leaderNodeName, containers);
+    const staleContainer = nodeContainer(staleNodeName, containers);
     assert.notEqual(leaderContainer.name, staleContainer.name);
     const leaderClient = clientAt(baseUrl, leaderContainer.port, collection);
     const staleClient = clientAt(baseUrl, staleContainer.port, collection);
@@ -210,8 +212,8 @@ cloudIntegrationTest(
           const shard = state.cluster?.collections?.[collection]?.shards?.[shardName];
           const replicas = Object.values(shard?.replicas ?? {});
           stateWithoutLeader = state;
-          if (liveNodes.length === 1 && liveNodes[0] === staleReplica.node_name &&
-            replicas.some(replica => replica.node_name === staleReplica.node_name) &&
+          if (liveNodes.length === 1 && liveNodes[0] === staleNodeName &&
+            replicas.some(replica => replica.node_name === staleNodeName) &&
             replicas.every(replica => !isLeader(replica))) {
             noLeader = true;
             break;
@@ -238,7 +240,7 @@ cloudIntegrationTest(
           postState = await staleClient.collections("CLUSTERSTATUS", { collection });
           const shard = postState.cluster?.collections?.[collection]?.shards?.[shardName];
           const newLeader = Object.values(shard?.replicas ?? {}).find(isLeader);
-          if (newLeader?.node_name === staleReplica.node_name && newLeader.state === "active") {
+          if (newLeader?.node_name === staleNodeName && newLeader.state === "active") {
             promoted = true;
             break;
           }
@@ -248,7 +250,7 @@ cloudIntegrationTest(
         await delay(1_000);
       }
       assert.ok(promoted,
-        `FORCELEADER must promote the deliberately stale replica ${staleReplica.node_name}. Last state: ${JSON.stringify(postState)}`);
+        `FORCELEADER must promote the deliberately stale replica ${staleNodeName}. Last state: ${JSON.stringify(postState)}`);
       console.log("FORCELEADER_POST_PROMOTION_CLUSTER_STATE", JSON.stringify(postState));
 
       const promotedClient = clientAt(baseUrl, staleContainer.port, collection);
@@ -261,7 +263,7 @@ cloudIntegrationTest(
         preservedBaselineIds: baselineIds,
         acknowledgedOnFormerLeaderWhileFollowerOffline: acknowledgedAfterStale,
         expectedAbsentAfterStalePromotion: acknowledgedAfterStale,
-        promotedNode: staleReplica.node_name
+        promotedNode: staleNodeName
       }));
     } finally {
       const cleanupErrors: unknown[] = [];
