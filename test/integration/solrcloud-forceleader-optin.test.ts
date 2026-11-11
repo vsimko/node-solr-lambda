@@ -269,8 +269,25 @@ cloudIntegrationTest(
           cleanupErrors.push(error);
         }
       }
+      if (cleanupErrors.length === 0) {
+        let bothNodesLive = false;
+        for (let attempt = 0; attempt < 60; attempt += 1) {
+          try {
+            const recovered = await client.collections("CLUSTERSTATUS", { collection });
+            const liveNodes = recovered.cluster?.live_nodes ?? [];
+            if (containers.every(container => liveNodes.some(node => node.includes(container.name)))) {
+              bothNodesLive = true;
+              break;
+            }
+          } catch {
+            // Wait until the restarted nodes rejoin the cluster before fixture cleanup.
+          }
+          await delay(1_000);
+        }
+        if (!bothNodesLive) cleanupErrors.push(new Error("Both dedicated Solr nodes did not rejoin ZooKeeper before fixture cleanup"));
+      }
       if (cleanupErrors.length > 0) {
-        throw new AggregateError(cleanupErrors, "Failed to restart the dedicated FORCELEADER Solr nodes");
+        throw new AggregateError(cleanupErrors, "Failed to restart and recover the dedicated FORCELEADER Solr nodes");
       }
     }
   },
