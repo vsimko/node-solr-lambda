@@ -32,8 +32,8 @@ cloudIntegrationTest("V2 cluster status reports the isolated collection", async 
 }) => {
   const collection = await createCollection("v2_cluster");
   const response = await client.v2.cluster.status();
-  const listed = response.collections?.includes(collection) ??
-    Boolean(response.cluster?.collections?.[collection]);
+  const listed = Boolean(response.collections?.includes(collection) ||
+    response.cluster?.collections?.[collection]);
   assert.ok(listed, "GET /api/cluster must report the isolated collection");
 }, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
   ? undefined
