@@ -38,3 +38,19 @@ cloudIntegrationTest("V2 cluster status reports the isolated collection", async 
 }, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
   ? undefined
   : "GET /api/cluster CLUSTERSTATUS is documented from Solr 9.11; Solr 8.11 is not claimed");
+
+cloudIntegrationTest("V2 Aliases list and detail read back an isolated alias", async ({
+  client,
+  createCollection,
+  createAlias
+}) => {
+  const collection = await createCollection("v2_alias");
+  const alias = await createAlias(collection, "v2_alias");
+  const list = await client.v2.aliases.list();
+  assert.equal(list.aliases?.[alias], collection, "GET /api/aliases must include the alias mapping");
+  const detail = await client.v2.aliases.status(alias);
+  assert.equal(detail.name, alias);
+  assert.deepEqual(detail.collections, [collection]);
+}, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
+  ? undefined
+  : "The REST-style V2 alias read routes are documented for Solr 9.3+; Solr 8.11.4 is not claimed");
