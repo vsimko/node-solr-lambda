@@ -54,5 +54,12 @@ test("V2 Collections and cluster routes enforce BasicAuth before handler executi
     assert.notEqual(authenticated.status, 401,
       `${path} must accept valid credentials and reach the endpoint handler`);
     await authenticated.arrayBuffer();
+
+    const invalidAuthorization = `Basic ${Buffer.from(`${username}:wrong-password`).toString("base64")}`;
+    const denied = await fetch(new URL(path, baseUrl), {
+      headers: { authorization: invalidAuthorization }
+    });
+    assert.equal(denied.status, 401, `${path} must reject invalid credentials`);
+    await denied.arrayBuffer();
   }
 });
