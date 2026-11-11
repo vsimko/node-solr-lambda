@@ -9,6 +9,7 @@ on:
       - test/mutation-baseline
       - test/mutation-tap-runner
       - test/issue-364-mutation-run-15
+      - test/issue-364-mutation-run-16
     paths:
       - ".github/workflows/mutation.yml"
       - "stryker.config.json"
