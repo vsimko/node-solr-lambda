@@ -411,7 +411,8 @@ void authorizationRead.then(result => {
   const pluginClass: string | undefined = result.authorization?.class;
   const role: string | readonly string[] | undefined = result.authorization?.["user-role"]?.alice;
   const permission: SolrAuthorizationPermissionResponse | undefined = result.authorization?.permissions?.[0];
-  const permissionName: string | undefined = permission?.name;\n  const pluginPermissionField: unknown = permission?.pluginPermissionField;
+  const permissionName: string | undefined = permission?.name;
+  const pluginPermissionField: unknown = permission?.pluginPermissionField;
   void [pluginClass, role, permissionName, pluginPermissionField];
 });
 const setRoles: SolrAuthorizationCommand = { "set-user-role": { alice: ["admin", "dev"], guest: null } };
