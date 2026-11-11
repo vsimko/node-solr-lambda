@@ -48,7 +48,7 @@
     "test": "tsx --test test/*.test.ts",
     "test:integration": "tsx --test test/integration/all.test.ts",
     "test:types": "tsc --noEmit -p test/tsconfig.json",
-    "release:check": "npm run test:api-inventory && npm run docs:check && npm run test:consumer:no-zod && npm run test:bench && npm pack --dry-run",
+    "release:check": "npm run test:api-inventory && npm run docs:check && npm run test:consumer:no-zod && npm run test:bench && npm run test:release-watch && npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",
     "release:publish": "node scripts/publish.mjs",
     "test:consumer:no-zod": "node test/no-zod-consumer.mjs",
@@ -64,7 +64,8 @@
     "test:site-assets": "node --test test/site-assets.test.mjs",
     "test:bench": "node --test test/benchmark.test.mjs",
     "bench": "node bench/run.mjs",
-    "test:coverage": "node --experimental-test-coverage --import tsx --test test/*.test.ts"
+    "test:coverage": "node --experimental-test-coverage --import tsx --test test/*.test.ts",
+    "test:release-watch": "node --test test/solr-release-watch.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

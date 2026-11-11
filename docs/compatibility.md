@@ -49,7 +49,7 @@ For every new Solr release selected for support:
 6. Mark each operation as tested only after its exact behavior passes. Record unsupported or partially tested cases instead of inferring support from a green matrix.
 7. Revisit legacy baselines at the next major client release and document a deprecation window before removing them.
 
-The current matrix is intentionally pinned rather than dynamically claiming compatibility with all releases. Scheduled upstream-release discovery and automated matrix expansion are tracked separately in [Issue #335](https://github.com/vsimko/node-solr-lambda/issues/335).
+The current matrix is intentionally pinned rather than dynamically claiming compatibility with all releases. A weekly workflow checks the official Apache Solr download index and opens a qualification issue for each stable release missing from the matrix. It does not edit the matrix, merge changes, or certify support automatically; reviewed qualification remains required. See [Issue #335](https://github.com/vsimko/node-solr-lambda/issues/335).
 
 ## Status terms
 
