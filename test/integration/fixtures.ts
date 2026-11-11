@@ -66,8 +66,7 @@ export function integrationTest(
   name: string,
   run: (fixture: SolrIntegrationFixture) => Promise<void>,
   timeoutMs?: number,
-  skipReason?: string,
-  timeoutMs?: number
+  skipReason?: string
 ): void {
   test(name, { skip: !baseUrl || !core || skipReason || false, ...(timeoutMs ? { timeout: timeoutMs } : {}) }, async () => {
     const username = process.env.SOLR_USERNAME;
