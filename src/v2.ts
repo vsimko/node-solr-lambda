@@ -2,10 +2,10 @@ import type { SolrTransport } from "./transport.js";
 import type { RequestControlOptions, RequestOptions, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
- * Explicit Solr V2 API namespace.
+ * Explicit Solr V2 API namespace sharing the configured V1 transport.
  *
- * This foundation intentionally exposes only the shared-transport escape hatch.
- * Operation-specific methods and their version guarantees are added separately.
+ * Exposes a generic JSON/raw request escape hatch and operation-specific typed
+ * Core Admin methods. V1 methods never fall back to V2 routes.
  */
 export class SolrV2Client {
   private readonly apiBaseUrl: string;
@@ -63,7 +63,11 @@ export class SolrV2Client {
 /**
  * Typed Core Admin operations for the Solr V2 API.
  *
- * Runtime evidence is being checked against pinned Solr 8.11.4, 9.11.0, and 10.1.0. The 8.11.4 V2 API guide documents the Core Admin route family; runtime support remains unverified until its pinned-image integration test passes.
+ * List/status are integration-tested on pinned Solr 8.11.4, 9.11.0, and
+ * 10.1.0. The reload/rename/unload subroutes are tested on 9.11.0 and 10.1.0
+ * only: Solr 8.11.4 exposes those lifecycle commands on POST /api/cores/{core},
+ * not the post-9.3 subroutes implemented here.
+ *
  * CoreAdmin is intended for standalone/user-managed cores; SolrCloud users
  * should use the Collections V2 API instead.
  */
