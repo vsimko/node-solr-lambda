@@ -118,7 +118,7 @@ export class SolrV2CollectionsClient {
 
 /**
  * Read-only SolrCloud alias discovery operations.
- * GET /api/aliases and GET /api/aliases/{alias} are documented for Solr 9.3+.
+ * GET /api/aliases and GET /api/aliases/{alias} are documented in the Solr 9.2+ reference guides.
  * The Solr 8.11 line is intentionally not claimed.
  */
 export class SolrV2AliasesClient {
