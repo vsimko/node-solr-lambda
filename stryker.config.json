@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "command",
   "commandRunner": {
-    "command": "npm test"
+    "command": "npx tsx --test test/add-stream.test.ts test/admin.test.ts test/authentication.test.ts test/cancellation.test.ts test/client.test.ts test/errors.test.ts test/modules.test.ts test/raw-request.test.ts test/retry.test.ts test/transport-edge-cases.test.ts test/transport-serialization.test.ts test/validation.test.ts test/v2.test.ts"
   },
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
