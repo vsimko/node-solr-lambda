@@ -77,7 +77,7 @@ async function waitForHttp(baseUrl: string, label: string): Promise<void> {
 }
 
 async function queryIds(client: SolrClient): Promise<Set<string>> {
-  const result = await client.query<{ id?: string }>({
+  const result = await client.query<{ response?: { docs?: Array<{ id?: string }> } }>({
     query: "*:*",
     fields: ["id"],
     limit: 100
