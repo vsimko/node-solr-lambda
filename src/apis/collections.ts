@@ -9,7 +9,7 @@ export function collections<T, A extends CollectionAdminAction = CollectionAdmin
 ): Promise<T> {
   const query: Record<string, SolrQueryParamValue> = { action };
   for (const [key, value] of Object.entries(params)) {
-    if (key === "customParams" && value && typeof value === "object") {
+    if (key === "customParams" && value && typeof value === "object" && !Array.isArray(value)) {
       for (const [customKey, customValue] of Object.entries(value)) {
         if (typeof customValue === "string" || typeof customValue === "number" || typeof customValue === "boolean") {
           query[customKey] = customValue;
