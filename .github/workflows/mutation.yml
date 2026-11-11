@@ -13,6 +13,7 @@ on:
       - "src/apis/collections.ts"
       - "src/apis/core-admin.ts"
       - "test/**"
+      - "docs/testing-strategy.md"
   schedule:
     - cron: "17 3 * * 1"
 
@@ -21,7 +22,7 @@ permissions:
 
 concurrency:
   group: mutation-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   mutation:
