@@ -1,17 +1,20 @@
 import type { SolrTransport } from "./transport.js";
-import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
+import type { RequestControlOptions, RequestOptions, SolrV2AliasListResponse, SolrV2AliasResponse, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
  *
  * Exposes a generic JSON/raw request escape hatch and operation-specific typed
- * typed Core Admin, Collections, and cluster discovery methods. V1 methods never fall back to V2 routes.
+ * typed Core Admin, alias, Collections, and cluster discovery methods. V1 methods never fall back to V2 routes.
  */
 export class SolrV2Client {
   private readonly apiBaseUrl: string;
 
   /** Typed Core Admin V2 operations. These target standalone/user-managed cores, not SolrCloud collections. */
   readonly coreAdmin: SolrV2CoreAdminClient;
+
+  /** Read-only V2 collection alias discovery (Solr 9.2+). */
+  readonly aliases: SolrV2AliasesClient;
 
   /** Read-only SolrCloud Collections V2 operations. */
   readonly collections: SolrV2CollectionsClient;
@@ -28,6 +31,7 @@ export class SolrV2Client {
     const proxyPrefix = segments.length ? `/${segments.join("/")}` : "";
     this.apiBaseUrl = `${configuredBase.origin}${proxyPrefix}/api`;
     this.coreAdmin = new SolrV2CoreAdminClient(this);
+    this.aliases = new SolrV2AliasesClient(this);
     this.collections = new SolrV2CollectionsClient(this);
     this.cluster = new SolrV2ClusterClient(this);
   }
@@ -67,6 +71,37 @@ export class SolrV2Client {
   }
 }
 
+
+/**
+ * Read-only V2 collection alias discovery.
+ *
+ * The intuitive /api/aliases routes are documented from Solr 9.2. Solr 9.0
+ * used /api/cluster/aliases, so this client deliberately makes no 8.11 or
+ * pre-9.2 compatibility claim and does not rewrite or fall back between paths.
+ */
+export class SolrV2AliasesClient {
+  constructor(private readonly v2: SolrV2Client) {}
+
+  /** List all aliases and their collection mappings. */
+  list(requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasListResponse> {
+    return this.v2.request<SolrV2AliasListResponse>("/api/aliases", {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+
+  /** Read the collection mapping and properties for one alias. */
+  get(aliasName: string, requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasResponse> {
+    if (typeof aliasName !== "string" || aliasName.trim().length === 0 ||
+      aliasName === "." || aliasName === ".." || aliasName.includes("/") || aliasName.includes("\\")) {
+      throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators or dot segments");
+    }
+    return this.v2.request<SolrV2AliasResponse>(`/api/aliases/${encodeURIComponent(aliasName)}`, {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+}
 
 /**
  * Read-only SolrCloud Collections V2 discovery operations.
