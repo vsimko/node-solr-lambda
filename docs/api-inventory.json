@@ -830,9 +830,10 @@
       "documentation": "docs/administration.md",
       "testFiles": [
         "test/admin.test.ts",
-        "test/collections-types.ts"
+        "test/collections-types.ts",
+        "test/integration/solrcloud-forceleader-optin.test.ts"
       ],
-      "notes": "V1 expert-level shard leader recovery action. Exact collection/shard query serialization and ForceLeaderParams/SolrCollectionShardOperationResponse inference are unit/type-tested. Apache Solr warns that promoting a stale replica may lose acknowledged updates. No runtime test has been executed; actual leader reassignment requires an isolated stale-replica fault-injection scenario."
+      "notes": "V1 expert-level shard leader recovery action. Exact collection/shard query serialization and ForceLeaderParams/SolrCollectionShardOperationResponse inference are unit/type-tested. A dedicated manual-only test creates a two-replica collection, commits a baseline, stops the follower during acknowledged writes, stops the old leader, promotes the stale replica, and verifies the data-loss boundary. It validates workflow-owned container labels, Solr image tags, dedicated Docker network, and loopback-only host ports; an independent ZooKeeper container remains running. The workflow has not yet been manually dispatched, so integrationTests remains not-run and all pinned versions remain unverified."
     },
     {
       "id": "v2.request",
