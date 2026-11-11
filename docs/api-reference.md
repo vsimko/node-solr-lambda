@@ -46,18 +46,23 @@ All methods below are available on `SolrClient`. Unless otherwise noted, methods
 
 ## Explicit Solr V2 namespace
 
-The client also exposes an opt-in `solr.v2` namespace. It uses the same configured transport as V1 but requires V2 paths explicitly; existing V1 methods never switch routes automatically.
+The client also exposes an opt-in `client.v2` namespace. It uses the same configured transport as V1 but requires V2 paths explicitly; existing V1 methods never switch routes automatically.
 
 | Method | Purpose | Contract |
 | --- | --- | --- |
 | `SolrV2Client.request()` | Send a JSON V2 request and parse its response | Caller supplies the V2-specific response generic and request body; query parameters use `options.query`. |
 | `SolrV2Client.requestRaw()` | Send a V2 request and retain the raw Fetch Response | For streaming, custom response writers, or caller-owned parsing. |
+| `SolrV2CoreAdminClient.list()` | List status for all cores on one node | `GET /api/cores/`; optional `indexInfo` query parameter. |
+| `SolrV2CoreAdminClient.status()` | Read status for one core | `GET /api/cores/{core}`; optional `indexInfo` query parameter. |
+| `SolrV2CoreAdminClient.reload()` | Reload a core | `POST /api/cores/{core}/reload`. |
+| `SolrV2CoreAdminClient.rename()` | Rename a core | `POST /api/cores/{core}/rename` with `{ to }` JSON body. |
+| `SolrV2CoreAdminClient.unload()` | Unload a core | `POST /api/cores/{core}/unload`; data/index deletion flags are opt-in. |
 
-Both methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. The test-only `fetchV2Introspection()` helper fetches an endpoint's `/_introspect` document without deriving public types from it. Query parameters must be supplied through `RequestOptions.query`. This is a generic escape hatch, not operation-specific V2 typing or runtime certification; see the [V2 compatibility strategy](solr-v2-api-strategy.md).
+The generic request methods require a relative `/api/…` path. Dot-segment traversal, encoded separators, query strings, and fragments in the path are rejected. V2 requests resolve at the server-root `/api` mount rather than under the V1 `/solr` webapp context; a configured reverse-proxy prefix is retained while a terminal `/solr` segment is removed. The test-only `fetchV2Introspection()` helper fetches an endpoint's `/_introspect` document without deriving public types from it. Query parameters must be supplied through `RequestOptions.query`. The generic request methods remain an escape hatch. Typed Core Admin V2 methods are runtime-tested on Solr 9.11.0 and 10.1.0; Solr 8.11.4 has a separate V2 API guide documenting the Core Admin route family; runtime verification on the pinned 8.11.4 image is pending. These methods are for standalone/user-managed cores, not SolrCloud collections. See the [V2 compatibility strategy](solr-v2-api-strategy.md).
 
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, `SolrV2Client`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, and request controls; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, `SolrV2Client`, `SolrV2CoreAdminClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, request controls, and distinct V2 Core Admin status/rename/unload contracts; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
 
 Use named imports from the package root:
 

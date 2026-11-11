@@ -79,7 +79,7 @@ The public client exposes typed methods for the main Solr API families:
 - **Query:** `query()` and `queryJson()`, including typed parser options, filters, facets, highlighting, grouping, stats, cursor pagination, and response models.
 - **Documents:** `get()` for RealTime Get, `add()`, backpressure-aware `addStream()` for `AsyncIterable` sources, `update()`, `atomicUpdate()`, `updateCommands()`, `delete()`, `commit()`, `softCommit()`, `optimize()`, and `rollback()`.
 - **Schema and Config:** `schema()` and `config()` with typed command models.
-- **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`.
+- **Administration:** `coreAdmin()`, `collections()`, `ping()`, `security()`, `systemInfo()`, and `metrics()`. The explicit `client.v2.coreAdmin` namespace adds typed V2 core status/reload/rename/unload methods for Solr 9.11.0 and 10.1.0 standalone/user-managed cores; SolrCloud users should use Collections APIs.
 - **Replication and backups:** `replication()`, `replicationFile()`, and the SolrCloud backup/restore actions exposed through `collections()`.
 - **Streaming:** `stream()`, `export()`, and `exportStream()`.
 - **Advanced/custom endpoints:** `request()` and `requestRaw()` use the shared V1 transport. The explicit `solr.v2.request<T>()` and `solr.v2.requestRaw()` namespace provides a generic `/api/` V2 escape hatch over the same transport; callers own V2 request/response contracts, and operation-specific runtime compatibility remains unverified. Raw requests are not a claim that every Solr handler has a dedicated type or has been integration-tested.

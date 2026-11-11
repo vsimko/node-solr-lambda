@@ -70,9 +70,9 @@ Solr 10.1 documents the same broad route families and adds operational pressure 
 ## Recommended implementation order
 
 1. **Foundation — implemented in #332:** a distinct `client.v2` namespace uses the existing shared transport, including auth, timeout, cancellation, errors, and custom Fetch. It rejects path traversal and does not alter V1 methods. The generic methods do not imply operation-specific contracts or version support.
-2. **Read-only discovery and status:** add the smallest stable, high-value read operations first (for example collection/core/cluster status), with exact route tests and response models that preserve unknown fields.
+2. **Read-only discovery and status — Core Admin implemented in #333:** `GET /api/cores/` and `GET /api/cores/{core}` have typed, extensible response contracts and runtime evidence on Solr 8.11.4/9.11.0/10.1.0. The 8.11.4 CoreAdmin guide documents V1, while the separate 8.11 V2 API guide lists `/api/cores` and `/api/cores/{core}` lifecycle routes. The 8.11.4 runtime result is pending the current integration run.
 3. **High-value cluster recovery:** implement FORCELEADER as its own explicitly dangerous operation, coordinated with [Issue #328](https://github.com/vsimko/node-solr-lambda/issues/328). Require per-version route verification and an opt-in, isolated multi-node SolrCloud test that verifies the resulting leader, not merely HTTP success.
-4. **Core Admin lifecycle:** add V2 core status/reload/rename/unload/backup operations as separate contracts from V1 CoreAdmin.
+4. **Core Admin lifecycle — implemented in #333:** V2 reload/rename/unload are separate contracts from V1 CoreAdmin and are integration-tested on Solr 9.11.0/10.1.0. Core backup/restore remains deferred pending independent route and behavior review.
 5. **Schema and Config:** add V2 command methods only after command-specific request/response differences are recorded and consumer TypeScript tests exist.
 6. **Collections backup/restore and remaining admin:** implement separately from core-level backups and only with explicit storage/topology semantics.
 7. **Security, metrics, plugins:** defer until route, permission, and response coverage is documented for each supported Solr line.
@@ -94,6 +94,10 @@ Each operation must state its minimum supported Solr version. If an operation is
 - [Solr 9.11 reference guide](https://solr.apache.org/guide/solr/9_11/index.html)
 - [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html)
 - [Solr 9.11 major changes and V2 compatibility notes](https://solr.apache.org/guide/solr/9_11/upgrade-notes/major-changes-in-solr-9.html)
+- [Solr 8.11 CoreAdmin API (V1)](https://solr.apache.org/guide/8_11/coreadmin-api.html)
+- [Solr 8.11 V2 API guide (Core Admin V2 routes)](https://solr.apache.org/guide/8_11/v2-api.html)
+- [Solr 9.11 CoreAdmin API](https://solr.apache.org/guide/solr/9_11/configuration-guide/coreadmin-api.html)
+- [Solr 10.1 CoreAdmin API](https://solr.apache.org/guide/solr/10_1/configuration-guide/coreadmin-api.html)
 - [Solr 10.1 V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html)
 - [Solr 10 major changes and V2 security implications](https://solr.apache.org/guide/solr/latest/upgrade-notes/major-changes-in-solr-10.html)
 
@@ -104,13 +108,20 @@ Issue #332 adds an explicit `client.v2` namespace backed by the same transport i
 
 - `client.v2.request<T>("/api/…", options)` for JSON requests.
 - `client.v2.requestRaw("/api/…", options)` for raw responses and streaming/custom writers.
-- Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior.
+- Shared authentication, configured headers, request defaults, timeout, cancellation, retry policy, JSON codec, validation, and custom Fetch behavior. V2 URLs resolve at the server-root `/api` mount (not `/solr/api`); a reverse-proxy prefix is retained while a terminal `/solr` context segment is removed.
 - A TypeScript template-literal path constraint and runtime guard requiring a relative `/api/` path; pass query parameters through `options.query`.
 - A test-only `fetchV2Introspection()` helper appends `/_introspect` and preserves the result as an open JSON document. It is discovery evidence only; the package does not generate public types from introspection.
 
-This is a low-level V2 escape hatch, not operation-specific typed support. It performs no V1 fallback, does not change existing V1 methods, and makes no runtime compatibility claim for any Solr release. Operation-specific Core Admin and Collections methods remain in #333 and #334. The namespace foundation must pass its unit and consumer type tests before #332 is closed.
+This is a low-level V2 escape hatch, not operation-specific typed support by itself. It performs no V1 fallback and does not change existing V1 methods. Typed Core Admin methods are implemented separately in #333; typed Collections methods remain in #334.
 
 
 ### Introspection fixture policy
 
-The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource path}/_introspect` through the public namespace. Tests may retain raw, version-labelled introspection JSON under `test/fixtures/v2-introspection/{solr-version}/` after it has been captured from the exact pinned image. Fixtures must preserve the original response and capture metadata (Solr image tag, endpoint path, and capture date). Do not normalize away unknown fields, treat the experimental document as a stable schema, or generate package declarations from it. A fixture is evidence for route discovery; actual request integration tests remain necessary before marking an operation supported.
+The test-only helper in `test/helpers/v2-introspection.ts` fetches `{V2 resource path}/_introspect` through the public namespace. Tests retain raw, version-labelled introspection JSON from the exact pinned image. The standalone CI job uploads `v2-core-admin-introspection-8.11.4`, `v2-core-admin-introspection-9.11.0`, and `v2-core-admin-introspection-10.1.0` artifacts. Version-labelled fixtures are committed under `test/fixtures/v2-introspection/` with the image tag, resource paths, capture timestamp, and the list/per-core response specifications. The 8.11.4 fixture is a curated projection: its volatile `availableSubPaths` map contains generated core-specific paths and is omitted; the 9.11.0 and 10.1.0 resource documents are retained as returned. Do not treat experimental introspection as a stable schema or generate package declarations from it. A fixture is evidence for route discovery; actual request integration tests remain necessary before marking an operation supported.
+
+
+## Core Admin V2 implementation status
+
+Issue #333 adds `client.v2.coreAdmin` with list/status, reload, rename, and unload operations. The contracts are distinct from V1 CoreAdmin and preserve unknown response fields. Exact routes and payloads are tested on pinned Solr 9.11.0 and 10.1.0, including authenticated/anonymous security checks. Solr 8.11.4 has a separate V2 API guide that documents the Core Admin route family; runtime verification on the pinned 8.11.4 image is pending. Core Admin V2 is for standalone/user-managed cores; SolrCloud management must use Collections APIs.
+
+The integration workflow captures per-operation `/_introspect` responses as CI artifacts for Solr 9.11.0 and 10.1.0. These raw outputs are retained as version-labelled fixtures and are discovery evidence only, not stable generated types.

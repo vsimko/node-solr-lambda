@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "solrVersion": "10.1.0",
+    "endpoints": [
+      "/api/cores/_introspect",
+      "/api/cores/{core}/_introspect"
+    ],
+    "capturedAt": "2026-11-08T21:40:31.313Z"
+  },
+  "introspection": {
+    "list": {
+      "responseHeader": {"status": 0, "QTime": 1},
+      "spec": [
+        {
+          "methods": ["POST"],
+          "url": {"paths": ["/cores/{core}"]},
+          "commands": {
+            "request-buffer-updates": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        }
+      ],
+      "WARNING": "This response format is experimental.  It is likely to change in the future."
+    },
+    "status": {
+      "responseHeader": {"status": 0, "QTime": 0},
+      "spec": [
+        {
+          "methods": ["POST"],
+          "url": {"paths": ["/cores/{core}"]},
+          "commands": {
+            "request-buffer-updates": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        }
+      ],
+      "WARNING": "This response format is experimental.  It is likely to change in the future."
+    }
+  }
+}

@@ -26,7 +26,7 @@ export class SolrClient extends SolrTransport {
 
   constructor(config: SolrClientConfig = {}) {
     super(config);
-    this.v2 = new SolrV2Client(this);
+    this.v2 = new SolrV2Client(this, config.baseUrl);
   }
 
   get<TDocument = unknown>(request: SolrGetSingleRequest, requestOptions?: RequestControlOptions): Promise<SolrGetSingleResponse<TDocument>>;
