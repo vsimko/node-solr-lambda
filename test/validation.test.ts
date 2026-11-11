@@ -207,3 +207,28 @@ test("validation does not call schemas when no operation schema is configured", 
   await client.ping();
   assert.equal(parseCalls, 0);
 });
+
+
+test("requestRaw validates its body using the named input operation", async () => {
+  const validated: unknown[] = [];
+  const client = createSolrClient({
+    validation: {
+      inputs: {
+        rawBody: {
+          safeParseAsync: async (value: unknown) => {
+            validated.push(value);
+            return { success: true as const, data: value };
+          }
+        }
+      }
+    },
+    fetch: async () => new Response("{}")
+  });
+
+  await client.requestRaw("/api/cores", {
+    method: "POST",
+    operation: "rawBody",
+    body: { create: { name: "books" } }
+  });
+  assert.deepEqual(validated, [{ create: { name: "books" } }]);
+});
