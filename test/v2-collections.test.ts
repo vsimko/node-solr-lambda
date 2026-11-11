@@ -79,7 +79,7 @@ test("V2 alias list and status use the documented GET routes", async () => {
 
 test("V2 alias status rejects empty or path-like alias names before fetch", () => {
   const client = createSolrClient({ fetch: async () => { throw new Error("fetch must not run"); } });
-  for (const name of ["", " ", "../admin", "a/b", "a\\\\b"]) {
+  for (const name of ["", " ", ".", "..", "../admin", "a/b", "a\\\\b"]) {
     assert.throws(() => client.v2.aliases.status(name), /non-empty alias name/);
   }
 });
