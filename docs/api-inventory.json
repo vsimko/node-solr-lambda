@@ -1071,6 +1071,54 @@
         "test/integration/solr-v2-security.test.ts"
       ],
       "notes": "Read-only cluster discovery. GET CLUSTERSTATUS at /api/cluster is documented from Solr 9.11; pinned Solr 8.11.4 is explicitly not claimed/skipped. Runtime tests pass on pinned 9.11.0 and 10.1.0 in CI run #43008748363; response preserves unknown fields."
+    },
+    {
+      "id": "v2.aliases.list",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.list",
+      "httpMethod": "GET",
+      "path": "/api/aliases",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/api-reference.md",
+      "testFiles": [
+        "test/v2-aliases.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-aliases.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read-only alias mapping discovery. The intuitive /api/aliases route is documented from Solr 9.2; the earlier 9.0 route was /api/cluster/aliases, and Solr 8.11 is not claimed. Isolated SolrCloud integration and security-gate tests target pinned Solr 9.11.0 and 10.1.0; runtime evidence is pending the current CI matrix."
+    },
+    {
+      "id": "v2.aliases.get",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.get",
+      "httpMethod": "GET",
+      "path": "/api/aliases/{alias}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "partial",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/api-reference.md",
+      "testFiles": [
+        "test/v2-aliases.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-aliases.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read-only single-alias detail including collection names and properties. The intuitive /api/aliases/{alias} route is documented from Solr 9.2; Solr 8.11 is not claimed. Isolated SolrCloud integration and security-gate tests target pinned Solr 9.11.0 and 10.1.0; runtime evidence is pending the current CI matrix."
     }
   ]
 }
