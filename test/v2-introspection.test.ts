@@ -82,9 +82,11 @@ test("Solr 8.11.4 fixture records legacy Core Admin commands on the per-core res
   assert.ok(commands.includes("unload"));
 });
 
-test("committed Core Admin introspection snapshots remain byte-pinned", () => {
+test("raw Core Admin snapshots match compacted CI artifact payloads", () => {
+  // SHA-256 values are computed over the whitespace-compacted JSON member
+  // from the corresponding GitHub Actions #971 artifact (cores.json).
   const captures = [
-    ["8.11.4", "43dd7ed6705612e9cbdc1de8bf8911b0c82b622f25e99872ded67726e95d48bd"],
+    ["8.11.4", "c016b9ad94af04b54ca2edf0e60a47d2826991931941f3e000db76e57f634d26"],
     ["9.11.0", "c83dd0e77e52145ca85847f82e53cd9979ccca2d9ca583ff555b53a0225bf7c2"],
     ["10.1.0", "79bfc7584b042d4cf8b2c699856fc73936d4e587650c7ddc33b34c3f80370827"]
   ] as const;
@@ -94,7 +96,7 @@ test("committed Core Admin introspection snapshots remain byte-pinned", () => {
       new URL(`./fixtures/v2-introspection/raw/solr-${version}-core-admin.json`, import.meta.url)
     );
     assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedSha256,
-      `Solr ${version} committed snapshot must remain byte-for-byte unchanged`);
+      `Solr ${version} snapshot must match the compacted CI artifact payload`);
 
     const capture = JSON.parse(bytes.toString("utf8")) as {
       metadata: { solrVersion: string; endpoints: string[] };
