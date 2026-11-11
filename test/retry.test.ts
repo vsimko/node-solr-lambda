@@ -168,7 +168,7 @@ test("retry backoff grows exponentially and is capped at maxDelayMs", async () =
     retry: { maxAttempts: 4, baseDelayMs: 5, maxDelayMs: 8 },
     fetch: async (_input, _init) => {
       const attempt = scheduled.filter(delay => delay === 60_000).length;
-      return attempt < 3
+      return attempt < 4
         ? new Response("temporarily unavailable", { status: 503 })
         : new Response(JSON.stringify({ status: "ok" }));
     }
