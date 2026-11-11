@@ -104,12 +104,16 @@ export type SolrAuthorizationCommand =
   | { "set-permission": SolrAuthorizationSetPermission }
   | { "update-permission": SolrAuthorizationUpdatePermission }
   | { "delete-permission": number };
+/** Read model for a permission returned by Solr; preserve plugin-defined response fields. */
+export interface SolrAuthorizationPermissionResponse extends SolrAuthorizationPermission {
+  [key: string]: unknown;
+}
 export interface SolrAuthorizationConfig {
   class?: string;
   "user-role"?: Readonly<Record<string, SolrAuthorizationRole>>;
-  permissions?: readonly SolrAuthorizationPermission[];
-  /** Explicit escape hatch for plugin-specific authorization configuration. */
-  customOptions?: Readonly<Record<string, unknown>>;
+  permissions?: readonly SolrAuthorizationPermissionResponse[];
+  /** Solr/plugin-specific authorization configuration fields remain readable. */
+  [key: string]: unknown;
 }
 export interface SolrAuthorizationResponse {
   authorization?: SolrAuthorizationConfig;
