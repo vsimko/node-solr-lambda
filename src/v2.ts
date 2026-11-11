@@ -16,35 +16,7 @@ export class SolrV2Client {
   /** Read-only SolrCloud Collections V2 operations. */
   readonly collections: SolrV2CollectionsClient;
 
-  /**
- * Read-only SolrCloud alias discovery operations.
- * GET /api/aliases and GET /api/aliases/{alias} are documented for Solr 9.3+.
- * The Solr 8.11 line is intentionally not claimed.
- */
-export class SolrV2AliasesClient {
-  constructor(private readonly v2: SolrV2Client) {}
-
-  /** List aliases and their collection mappings. */
-  list(requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasListResponse> {
-    return this.v2.request<SolrV2AliasListResponse>("/api/aliases", {
-      ...requestOptions,
-      method: "GET"
-    });
-  }
-
-  /** Read one alias, including its collection targets and properties. */
-  status(alias: string, requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasStatusResponse> {
-    if (typeof alias !== "string" || alias.trim().length === 0 || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
-      throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
-    }
-    return this.v2.request<SolrV2AliasStatusResponse>(`/api/aliases/${encodeURIComponent(alias)}`, {
-      ...requestOptions,
-      method: "GET"
-    });
-  }
-}
-
-/** Read-only cluster-level V2 discovery operations. */
+  /** Read-only cluster-level V2 discovery operations. */
   readonly cluster: SolrV2ClusterClient;
 
   /** Read-only SolrCloud alias discovery operations (Solr 9.3+). */
@@ -145,6 +117,34 @@ export class SolrV2CollectionsClient {
 }
 
 /** Read-only cluster-level V2 discovery operations. */
+/**
+ * Read-only SolrCloud alias discovery operations.
+ * GET /api/aliases and GET /api/aliases/{alias} are documented for Solr 9.3+.
+ * The Solr 8.11 line is intentionally not claimed.
+ */
+export class SolrV2AliasesClient {
+  constructor(private readonly v2: SolrV2Client) {}
+
+  /** List aliases and their collection mappings. */
+  list(requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasListResponse> {
+    return this.v2.request<SolrV2AliasListResponse>("/api/aliases", {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+
+  /** Read one alias, including its collection targets and properties. */
+  status(alias: string, requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasStatusResponse> {
+    if (typeof alias !== "string" || alias.trim().length === 0 || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
+      throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
+    }
+    return this.v2.request<SolrV2AliasStatusResponse>(`/api/aliases/${encodeURIComponent(alias)}`, {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+}
+
 export class SolrV2ClusterClient {
   constructor(private readonly v2: SolrV2Client) {}
 
