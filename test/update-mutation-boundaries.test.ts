@@ -255,6 +255,6 @@ test("JSON update commands accept string and query deletes with independent comm
 
 test("commit rejects incompatible soft-commit and optimize-only options", () => {
   const client = createClient();
-  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true }));
+  assert.throws(() => client.commit({ softCommit: true, expungeDeletes: true } as never));
   assert.throws(() => client.commit({ maxSegments: 1 } as never));
 });
