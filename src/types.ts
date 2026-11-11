@@ -1282,6 +1282,23 @@ export interface SolrV2CollectionStatusResponse {
   readonly [collectionOrMetadata: string]: unknown;
 }
 
+/** GET /api/aliases response with extensible alias/property maps. */
+export interface SolrV2AliasListResponse {
+  responseHeader?: SolrResponseHeader;
+  aliases?: Readonly<Record<string, string>>;
+  properties?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  readonly [key: string]: unknown;
+}
+
+/** GET /api/aliases/{alias} response. */
+export interface SolrV2AliasStatusResponse {
+  responseHeader?: SolrResponseHeader;
+  name?: string;
+  collections?: readonly string[];
+  properties?: Readonly<Record<string, unknown>>;
+  readonly [key: string]: unknown;
+}
+
 /**
  * GET /api/cluster response. The CLUSTERSTATUS V2 route is documented from
  * Solr 9.11; its response remains extensible across Solr versions.
