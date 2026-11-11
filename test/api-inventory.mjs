@@ -14,7 +14,7 @@ const declaredMethods = source => new Set(
 );
 const transportClass = transportSource.slice(transportSource.indexOf("export class SolrTransport"));
 const v2Source = readFileSync("src/v2.ts", "utf8");
-const v2ClientSource = v2Source.slice(v2Source.indexOf("export class SolrV2Client"), v2Source.indexOf("export class SolrV2CoreAdminClient"));
+const v2ClientSource = v2Source.slice(v2Source.indexOf("export class SolrV2Client"), v2Source.indexOf("export class SolrV2CollectionsClient"));
 const v2CoreAdminSource = v2Source.slice(v2Source.indexOf("export class SolrV2CoreAdminClient"));
 const v2CollectionsSource = v2Source.slice(v2Source.indexOf("export class SolrV2CollectionsClient"), v2Source.indexOf("export class SolrV2ClusterClient"));
 const v2ClusterSource = v2Source.slice(v2Source.indexOf("export class SolrV2ClusterClient"), v2Source.indexOf("export class SolrV2CoreAdminClient"));
