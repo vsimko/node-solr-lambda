@@ -1,4 +1,5 @@
-# Mutation targets are sharded into independent jobs; progress is emitted by Stryker's progress reporter.
+# Mutation targets are split into disjoint line ranges. The union covers the four
+# production files in the baseline scope exactly once; keep ranges adjacent.
 name: Mutation testing
 
 on:
@@ -28,22 +29,30 @@ concurrency:
 
 jobs:
   mutation:
-    name: Mutation / ${{ matrix.module }}
+    name: Mutation / ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 45
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 8
       matrix:
         include:
-          - module: transport
-            mutate: src/transport.ts
-          - module: update
-            mutate: src/apis/update.ts
-          - module: collections
-            mutate: src/apis/collections.ts
-          - module: core-admin
-            mutate: src/apis/core-admin.ts
+          - shard: transport-helpers
+            mutate: "src/transport.ts:1-150"
+          - shard: transport-streaming
+            mutate: "src/transport.ts:151-300"
+          - shard: transport-validation-retry
+            mutate: "src/transport.ts:301-450"
+          - shard: transport-request-lifecycle
+            mutate: "src/transport.ts:451-599"
+          - shard: update-validation-streaming
+            mutate: "src/apis/update.ts:1-132"
+          - shard: update-commands-operations
+            mutate: "src/apis/update.ts:133-264"
+          - shard: collections
+            mutate: "src/apis/collections.ts:1-25"
+          - shard: core-admin
+            mutate: "src/apis/core-admin.ts:1-18"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,14 +69,14 @@ jobs:
       - name: Install pinned mutation tooling
         run: npm install --no-save --no-package-lock @stryker-mutator/core@10.0.0 @stryker-mutator/typescript-checker@10.0.0 @stryker-mutator/tap-runner@10.0.0
 
-      - name: Run mutation tests for ${{ matrix.module }}
+      - name: Run mutation tests for ${{ matrix.shard }}
         run: npx --no-install stryker run --mutate "${{ matrix.mutate }}"
 
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mutation-report-${{ matrix.module }}-${{ github.run_number }}
+          name: mutation-report-${{ matrix.shard }}-${{ github.run_number }}
           path: reports/
           if-no-files-found: warn
           retention-days: 90
