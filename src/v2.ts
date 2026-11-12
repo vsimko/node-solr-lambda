@@ -1,5 +1,6 @@
+import { SolrHttpError } from "./errors.js";
 import type { SolrTransport } from "./transport.js";
-import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
+import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
@@ -19,6 +20,9 @@ export class SolrV2Client {
   /** Read-only cluster-level V2 discovery operations. */
   readonly cluster: SolrV2ClusterClient;
 
+  /** Read-only SolrCloud alias discovery operations (Solr 9.3+). */
+  readonly aliases: SolrV2AliasesClient;
+
   constructor(private readonly transport: SolrTransport, baseUrl = "http://localhost:8983/") {
     const configuredBase = new URL(baseUrl);
     const segments = configuredBase.pathname.split("/").filter(Boolean);
@@ -30,6 +34,7 @@ export class SolrV2Client {
     this.coreAdmin = new SolrV2CoreAdminClient(this);
     this.collections = new SolrV2CollectionsClient(this);
     this.cluster = new SolrV2ClusterClient(this);
+    this.aliases = new SolrV2AliasesClient(this);
   }
 
   /**
@@ -112,7 +117,50 @@ export class SolrV2CollectionsClient {
   }
 }
 
-/** Read-only cluster-level V2 discovery operations. */
+/**
+ * Read-only SolrCloud alias discovery operations.
+ * GET /api/aliases and GET /api/aliases/{alias} are documented in the Solr 9.2+ reference guides.
+ * The Solr 8.11 line is intentionally not claimed.
+ */
+export class SolrV2AliasesClient {
+  constructor(private readonly v2: SolrV2Client) {}
+
+  /** List aliases and their collection mappings. */
+  list(requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasListResponse> {
+    return this.v2.request<SolrV2AliasListResponse>("/api/aliases", {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+
+  /** Read one alias, including its collection targets and properties. */
+  status(alias: string, requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasStatusResponse> {
+    if (typeof alias !== "string" || alias.trim().length === 0 || alias === "." || alias === ".." || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
+      throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
+    }
+    const path = `/api/aliases/${encodeURIComponent(alias)}` as `/api/${string}`;
+    return this.v2.request<SolrV2AliasStatusResponse>(path, {
+      ...requestOptions,
+      method: "GET"
+    }).catch(async error => {
+      // Some Solr 10.1.0 runtimes expose DELETE but not the documented detail GET.
+      // The V2 list response contains the same mapping and properties, so use it
+      // only for this specific 405 compatibility case.
+      if (!(error instanceof SolrHttpError) || error.status !== 405) throw error;
+      const listed = await this.list(requestOptions);
+      const mapping = listed.aliases?.[alias];
+      if (mapping === undefined) {
+        throw new SolrHttpError(404, "Not Found", error.endpoint, "", undefined);
+      }
+      return {
+        alias,
+        collections: mapping.split(",").map(collection => collection.trim()).filter(Boolean),
+        ...(listed.properties?.[alias] === undefined ? {} : { properties: listed.properties[alias] })
+      };
+    });
+  }
+}
+
 export class SolrV2ClusterClient {
   constructor(private readonly v2: SolrV2Client) {}
 

@@ -1,4 +1,4 @@
-export { SolrV2Client, SolrV2CoreAdminClient, SolrV2CollectionsClient, SolrV2ClusterClient } from "./v2.js";
+export { SolrV2Client, SolrV2CoreAdminClient, SolrV2CollectionsClient, SolrV2ClusterClient, SolrV2AliasesClient } from "./v2.js";
 export { SolrClient } from "./client.js";
 export { SolrAbortError, SolrHttpError, SolrNetworkError, SolrTimeoutError, SolrValidationError } from "./errors.js";
 export type { SolrErrorMetadata } from "./errors.js";
@@ -8,7 +8,7 @@ export type { SolrExportFieldType, SolrExportSortClause, SolrExportSort, SolrExp
 export type { SolrStatsFieldOptions, SolrStatsOptions } from "./types.js";
 export type { SolrGetOptions, SolrGetSingleRequest, SolrGetMultipleRequest, SolrGetRequest, SolrGetSingleResponse, SolrGetMultipleResponse } from "./types.js";
 export type { SolrSystemInfoResponse, SolrSystemPropertiesResponse, SolrSystemThreadsResponse, SolrSystemThreadInfo, SolrSystemLoggingResponse } from "./types.js";
-export type { SolrCollectionShardOperationResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatus, SolrV2CollectionStatusResponse, SolrV2ClusterStatusResponse } from "./types.js";
+export type { SolrCollectionShardOperationResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatus, SolrV2CollectionStatusResponse, SolrV2ClusterStatusResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse } from "./types.js";
 export type { SolrClusterReplica, SolrClusterShard, SolrClusterCollection, SolrClusterStatus, SolrClusterStatusResponse, SolrCollectionAliasesResponse, SolrCollectionAliasResponse } from "./types.js";
 export type { SolrAuthorizationRole, SolrAuthorizationParameterValues, SolrAuthorizationPermission, SolrAuthorizationPermissionResponse, SolrAuthorizationSetPermission, SolrAuthorizationUpdatePermission, SolrAuthorizationCommand, SolrAuthorizationConfig, SolrAuthorizationResponse, SolrAuthenticationCommand, SolrBasicAuthProperties, SolrAuthenticationSetUserMap, SolrBasicAuthConfig, SolrAuthenticationResponse } from "./types.js";
 export type { SolrReplicationCommand, SolrReplicationBaseParams, SolrReplicationFetchIndexParams, SolrReplicationBackupParams, SolrReplicationRestoreParams, SolrReplicationDeleteBackupParams, SolrReplicationFileListParams, SolrReplicationParams, SolrReplicationResponseHeader, SolrReplicationCommandResponse, SolrReplicationIndexVersionResponse, SolrReplicationFileMetadata, SolrReplicationFileListResponse, SolrReplicationBackupStatus, SolrReplicationRestoreStatus, SolrReplicationDetailsResponse, SolrReplicationRestoreStatusResponse, SolrReplicationResponse, SolrReplicationFileContentParams } from "./types.js";

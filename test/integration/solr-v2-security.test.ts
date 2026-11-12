@@ -37,10 +37,10 @@ test("V2 Core Admin enforces authentication and permits an authenticated admin",
   );
 });
 
-test("V2 Collections and cluster routes enforce BasicAuth before handler execution", {
+test("V2 Collections, cluster, and alias routes enforce BasicAuth before handler execution", {
   skip: process.env.SOLR_SECURITY !== "true" || !baseUrl || !username || !password
 }, async () => {
-  const paths = ["/api/collections", "/api/cluster"];
+  const paths = ["/api/collections", "/api/cluster", "/api/aliases", "/api/aliases/nonexistent"];
   const authorization = `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
 
   for (const path of paths) {
