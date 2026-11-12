@@ -1,3 +1,4 @@
+import { SolrHttpError } from "./errors.js";
 import type { SolrTransport } from "./transport.js";
 import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
@@ -137,9 +138,25 @@ export class SolrV2AliasesClient {
     if (typeof alias !== "string" || alias.trim().length === 0 || alias === "." || alias === ".." || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
       throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
     }
-    return this.v2.request<SolrV2AliasStatusResponse>(`/api/aliases/${encodeURIComponent(alias)}`, {
+    const path = `/api/aliases/${encodeURIComponent(alias)}`;
+    return this.v2.request<SolrV2AliasStatusResponse>(path, {
       ...requestOptions,
       method: "GET"
+    }).catch(async error => {
+      // Some Solr 10.1.0 runtimes expose DELETE but not the documented detail GET.
+      // The V2 list response contains the same mapping and properties, so use it
+      // only for this specific 405 compatibility case.
+      if (!(error instanceof SolrHttpError) || error.status !== 405) throw error;
+      const listed = await this.list(requestOptions);
+      const mapping = listed.aliases?.[alias];
+      if (mapping === undefined) {
+        throw new SolrHttpError(404, "Not Found", error.endpoint, "", undefined);
+      }
+      return {
+        alias,
+        collections: mapping.split(",").map(collection => collection.trim()).filter(Boolean),
+        ...(listed.properties?.[alias] === undefined ? {} : { properties: listed.properties[alias] })
+      };
     });
   }
 }
