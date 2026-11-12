@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   checkSolrReleases,
   compareVersions,
@@ -59,4 +60,16 @@ test("release check fails closed when the official index has no stable version d
 
 test("matrix parser fails closed when the CI matrix format changes unexpectedly", () => {
   assert.throws(() => parseSolrMatrixVersions("jobs: {}"), /No solr-version matrix/);
+});
+
+
+test("CI keeps pinned Solr baselines parseable and candidate qualification opt-in", () => {
+  const ciWorkflow = readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
+  assert.deepEqual(parseSolrMatrixVersions(ciWorkflow), ["8.11.4", "9.11.0", "10.1.0"]);
+  assert.equal(
+    [...ciWorkflow.matchAll(/include: \\$\\{\\{ fromJSON\\(needs\\.changes\\.outputs\\.solr_matrix_include\\) \\}\\}/g)].length,
+    3
+  );
+  assert.match(ciWorkflow, /candidate_solr_version:/);
+  assert.match(ciWorkflow, /downloads\\.apache\\.org\\/solr\\/solr\\/\\$CANDIDATE_SOLR_VERSION/);
 });
