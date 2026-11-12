@@ -16,7 +16,7 @@ The JSON report includes Node/V8 and host metadata, optional Solr version, elaps
 
 ## Requirements and safety
 
-- Node.js 20 or later (Node 20 is retained only for legacy v4 compatibility; prefer Node 26, 24, or 22).
+- Node.js 22, 24, or 26 (the v4 package engine range). Node.js 20 reached EOL and is not supported.
 - A running Solr server and a **pre-created disposable collection**.
 - A stable, dedicated host for meaningful performance comparisons.
 - Never point the benchmark at a production or shared Solr collection. The script adds uniquely named documents and does not create, clear, or delete collections/documents.

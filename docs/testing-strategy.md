@@ -15,7 +15,7 @@ This document defines the evidence expected before a public API or compatibility
 | Destructive/manual SolrCloud | Manual `workflow_dispatch`, destructive opt-in | High-risk operations in disposable, loopback-only clusters. | General production safety or support for untested topologies. |
 | Performance | `npm run bench` | Reproducible client-vs-direct-Fetch measurements on a controlled host. | Performance leadership or regression budgets until repeatable baselines exist. |
 
-The runtime integration suites cover the Cartesian product of Node.js 20 (legacy), 22, 24, and 26 with Solr 8.11.4, 9.11.0, and 10.1.0. Solr 8.11.4 is a legacy regression target because upstream Solr 8.x is EOL; see the [support policy](compatibility.md). The configured matrix is not itself evidence: a version/operation is marked tested only after its relevant workflow run completes successfully.
+The runtime integration suites cover the Cartesian product of Node.js 22, 24, and 26 with Solr 8.11.4, 9.11.0, and 10.1.0. Solr 8.11.4 is a legacy regression target because upstream Solr 8.x is EOL; see the [support policy](compatibility.md). The configured matrix is not itself evidence: a version/operation is marked tested only after its relevant workflow run completes successfully.
 
 ## API-to-test traceability
 

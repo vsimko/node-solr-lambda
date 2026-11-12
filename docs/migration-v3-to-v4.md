@@ -6,7 +6,7 @@ Version 4 is a TypeScript-first redesign, not a drop-in update to the v3 functio
 
 | | v3 | v4 |
 | --- | --- | --- |
-| Node.js | `>=8` | Node.js 26, 24, and 22; Node.js 20 is legacy-only (EOL) |
+| Node.js | `>=8` | Node.js 26, 24, and 22; Node.js 20 is unsupported (EOL) |
 | HTTP transport | Axios | Node.js built-in Fetch API |
 | Runtime dependencies | Axios | None; Zod is optional for runtime validation |
 | Module format | CommonJS | ESM and CommonJS exports |
@@ -162,7 +162,7 @@ This workflow is exercised as an integration test against the pinned Solr 8.11.4
 
 ## Migration checklist
 
-- [ ] Upgrade the runtime to Node.js 26, 24, or 22 (Node.js 20 is legacy-only and not recommended for new deployments).
+- [ ] Upgrade the runtime to Node.js 26, 24, or 22. Node.js 20 is unsupported.
 - [ ] Replace `prepareSolrClient()` and `prepareCoreAdmin()` with `createSolrClient()`.
 - [ ] Convert `hostname`/`port`/`protocol` configuration to `baseUrl`; set `core` or `collection`.
 - [ ] Review legacy defaults, especially `commitWithin` and `overwrite`, and configure required behavior explicitly.
