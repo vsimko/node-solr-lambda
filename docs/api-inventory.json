@@ -1022,7 +1022,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read-only SolrCloud collection-name discovery. GET /api/collections is runtime-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 in CI run #43008748363 across Node 20/22/24/26. The test creates an isolated collection and verifies it appears in the V2 list. Uses the shared V2 transport."
+      "notes": "Read-only SolrCloud collection-name discovery. GET /api/collections is runtime-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 in historical CI run #43008748363 across the then-configured Node 20/22/24/26 matrix. Node.js 20 is no longer supported; current package/CI targets are 22/24/26. The test creates an isolated collection and verifies it appears in the V2 list. Uses the shared V2 transport."
     },
     {
       "id": "v2.collections.status",
