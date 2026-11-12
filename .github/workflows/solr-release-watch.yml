@@ -63,7 +63,7 @@ jobs:
                 "",
                 "This notification does **not** certify or automatically add support for the candidate version.",
                 "<!-- solr-release-watch:metadata:end -->"
-              ].join("\\n");
+              ].join("\n");
 
               const existing = await github.rest.search.issuesAndPullRequests({
                 q: `repo:${owner}/${repo} is:issue "${title}"`
@@ -77,7 +77,7 @@ jobs:
                   issue_number: trackedIssue.number
                 });
                 const currentBody = current.data.body || "";
-                const markers = /<!-- solr-release-watch:metadata:start -->[\\s\\S]*?<!-- solr-release-watch:metadata:end -->/;
+                const markers = /<!-- solr-release-watch:metadata:start -->[\s\S]*?<!-- solr-release-watch:metadata:end -->/;
                 let updatedBody;
 
                 if (markers.test(currentBody)) {
@@ -85,10 +85,10 @@ jobs:
                 } else if (currentBody.startsWith(`## Candidate Apache Solr release: ${version}`)) {
                   const checklistIndex = currentBody.indexOf("## Qualification checklist");
                   updatedBody = checklistIndex >= 0
-                    ? `${metadata}\\n\\n${currentBody.slice(checklistIndex)}`
-                    : `${currentBody}\\n\\n${metadata}`;
+                    ? `${metadata}\n\n${currentBody.slice(checklistIndex)}`
+                    : `${currentBody}\n\n${metadata}`;
                 } else {
-                  updatedBody = `${currentBody.trim()}\\n\\n${metadata}`;
+                  updatedBody = `${currentBody.trim()}\n\n${metadata}`;
                 }
 
                 if (updatedBody !== currentBody) {
@@ -116,7 +116,7 @@ jobs:
                 "- [ ] Decide whether this release becomes a supported baseline or is explicitly deferred.",
                 "",
                 "Follow the qualification procedure in docs/compatibility.md and link the evidence here."
-              ].join("\\n");
+              ].join("\n");
 
               await github.rest.issues.create({
                 owner,
