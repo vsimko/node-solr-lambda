@@ -21,7 +21,7 @@ npm run release:check
 
 `release:check` validates the machine-readable API inventory, documentation links, and a real packed-tarball consumer. The consumer test runs `npm pack`, checks the packed file allowlist and manifest metadata, installs the tarball into a clean temporary project, verifies ESM `import` and CommonJS `require`, compiles `.mts` and `.cts` consumers against the packed declarations, and confirms optional `zod` is not installed as a required runtime dependency. `npm pack --dry-run` provides an additional human-readable package-content listing.
 
-The package supports Node.js 20, 22, 24, and 26 (`engines.node` and the CI matrix must stay aligned); Node.js 20 is retained only as an EOL legacy compatibility target. The package root exposes conditional ESM and CommonJS runtime entry points and matching declaration entry points. `zod` is an optional peer dependency; the core client must remain usable without it.
+The package supports Node.js 22, 24, and 26 (`engines.node` and the CI matrix must stay aligned). Node.js 20 reached end-of-life on 2026-04-30 and is excluded from the package engine range and CI matrix. The package root exposes conditional ESM and CommonJS runtime entry points and matching declaration entry points. `zod` is an optional peer dependency; the core client must remain usable without it.
 
 ## Trusted npm publishing
 
