@@ -21,7 +21,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: preview-pr-${{ github.event.pull_request.number }}
+  group: pages-branch-writes
   cancel-in-progress: true
 
 jobs:
