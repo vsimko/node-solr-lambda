@@ -51,7 +51,7 @@ export async function checkSolrReleases({ html, workflowYaml, fetchImpl = fetch 
     sourceUrl,
     availableVersions,
     configuredVersions,
-    missingVersions: availableVersions.filter(version => !configured.has(version))
+    missingVersions: availableVersions.filter(version => compareVersions(version, configuredVersions.at(-1)) > 0 && !configured.has(version))
   };
 }
 
