@@ -138,7 +138,7 @@ export class SolrV2AliasesClient {
     if (typeof alias !== "string" || alias.trim().length === 0 || alias === "." || alias === ".." || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
       throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
     }
-    const path = `/api/aliases/${encodeURIComponent(alias)}`;
+    const path = `/api/aliases/${encodeURIComponent(alias)}` as `/api/${string}`;
     return this.v2.request<SolrV2AliasStatusResponse>(path, {
       ...requestOptions,
       method: "GET"
