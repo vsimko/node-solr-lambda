@@ -20,7 +20,8 @@
       "test/transport-serialization.test.ts",
       "test/update-mutation-boundaries.test.ts",
       "test/validation.test.ts",
-      "test/v2.test.ts"
+      "test/v2.test.ts",
+      "test/add-stream-framing.test.ts"
     ],
     "nodeArgs": [
       "--import",
