@@ -61,7 +61,7 @@ test("V2 alias list and status use the documented GET routes", async () => {
       requests.push({ url: new URL(String(input)), method: String(init?.method) });
       const body = requests.length === 1
         ? { responseHeader: { status: 0 }, aliases: { books_alias: "books" }, properties: {} }
-        : { responseHeader: { status: 0 }, name: "books_alias", collections: ["books"], properties: { owner: "tests" } };
+        : { responseHeader: { status: 0 }, alias: "books_alias", collections: ["books"], properties: { owner: "tests" } };
       return new Response(JSON.stringify(body));
     }
   });
@@ -75,6 +75,46 @@ test("V2 alias list and status use the documented GET routes", async () => {
   assert.equal(requests[0]!.method, "GET");
   assert.equal(requests[1]!.url.pathname, "/api/aliases/books_alias");
   assert.equal(requests[1]!.method, "GET");
+});
+
+test("V2 alias status falls back to the V2 list only when detail GET is not allowed", async () => {
+  const requests: { url: URL; method: string }[] = [];
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      const url = new URL(String(input));
+      const method = String(init?.method);
+      requests.push({ url, method });
+      if (url.pathname === "/api/aliases/books_alias") {
+        return new Response("", { status: 405, statusText: "Method Not Allowed" });
+      }
+      return new Response(JSON.stringify({
+        responseHeader: { status: 0 },
+        aliases: { books_alias: "books,archive" },
+        properties: { books_alias: { owner: "tests" } }
+      }));
+    }
+  });
+
+  const status = await client.v2.aliases.status("books_alias");
+  assert.equal(requests[0]!.url.pathname, "/api/aliases/books_alias");
+  assert.equal(requests[0]!.method, "GET");
+  assert.equal(requests[1]!.url.pathname, "/api/aliases");
+  assert.equal(requests[1]!.method, "GET");
+  assert.equal(status.alias, "books_alias");
+  assert.deepEqual(status.collections, ["books", "archive"]);
+  assert.deepEqual(status.properties, { owner: "tests" });
+});
+
+test("V2 alias status preserves non-405 detail errors", async () => {
+  const client = createSolrClient({
+    fetch: async () => new Response(JSON.stringify({ error: { msg: "forbidden" } }), {
+      status: 403,
+      statusText: "Forbidden"
+    })
+  });
+  await assert.rejects(client.v2.aliases.status("books_alias"), (error: unknown) =>
+    error instanceof Error && "status" in error && error.status === 403
+  );
 });
 
 test("V2 alias status rejects empty or path-like alias names before fetch", () => {
