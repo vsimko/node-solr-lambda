@@ -74,7 +74,7 @@ jobs:
             if (compareVersions(candidate, newestBaseline) <= 0) {
               throw new Error("Candidate " + candidate + " must be newer than the newest pinned baseline " + newestBaseline + ".");
             }
-            NODE
+          NODE
 
             curl --fail --silent --show-error --location --max-time 15 \
               "https://downloads.apache.org/solr/solr/$CANDIDATE_SOLR_VERSION/" > /dev/null
