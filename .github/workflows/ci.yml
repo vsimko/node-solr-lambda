@@ -56,7 +56,7 @@ jobs:
         run: |
           solr_versions='["8.11.4","9.11.0","10.1.0"]'
           if [[ "$EVENT_NAME" == "workflow_dispatch" && -n "$CANDIDATE_SOLR_VERSION" ]]; then
-            if ! [[ "$CANDIDATE_SOLR_VERSION" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+            if ! [[ "$CANDIDATE_SOLR_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               echo "Candidate Solr version must be an exact stable x.y.z version." >&2
               exit 1
             fi
@@ -76,7 +76,7 @@ jobs:
             }
             NODE
 
-            curl --fail --silent --show-error --location --max-time 15 \\
+            curl --fail --silent --show-error --location --max-time 15 \
               "https://downloads.apache.org/solr/solr/$CANDIDATE_SOLR_VERSION/" > /dev/null
             solr_versions="$(node -e 'const v = process.argv[1]; process.stdout.write(JSON.stringify(["8.11.4", "9.11.0", "10.1.0", v]));' "$CANDIDATE_SOLR_VERSION")"
             echo "Adding official Solr $CANDIDATE_SOLR_VERSION to the qualification matrix."
