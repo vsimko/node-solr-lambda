@@ -10,7 +10,7 @@ A source-level review of [lbdremy/solr-node-client](https://github.com/lbdremy/s
 
 The reference repository is a legacy TypeScript client (solr-client 0.10.0-rc10; source reviewed at commit `c1a2f2a3ec233a19f84b061eb01ff4ae718d14ef`). It documents Node.js 12+ and Solr 3.2–8. Its implementation combines callback/promise APIs, `request`, Undici, JSONStream, Duplex streams, and optional `json-bigint`. These are useful examples of consumer needs, not an architectural baseline for this project.
 
-This project targets Node.js 20/22/24 and Solr 8/9/10, uses a shared Fetch transport, ESM/CommonJS exports, named TypeScript contracts, cancellation/timeouts, and no mandatory runtime dependencies.
+At the time this ADR was written, the project targeted Node.js 20/22/24 and Solr 8/9/10, using a shared Fetch transport, ESM/CommonJS exports, named TypeScript contracts, cancellation/timeouts, and no mandatory runtime dependencies. The current Node.js support policy is recorded in `docs/compatibility.md` and supersedes the historical Node.js target in this context: v4 supports Node.js 22/24/26; Node.js 20 reached EOL on 2026-04-30 and is unsupported.
 
 ## Decision
 
