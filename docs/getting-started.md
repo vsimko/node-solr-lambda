@@ -1,6 +1,6 @@
 # Getting started
 
-Use Node.js 26 (Active LTS), 24 or 22 (Maintenance LTS). Node.js 20 is retained only as an EOL legacy compatibility target for v4 and is not recommended for new deployments. The current Solr baselines are 10.1.0 (primary), 9.11.0 (compatibility), and 8.11.4 (legacy only because Solr 8.x is upstream EOL). Integration evidence is operation-specific; see the [API coverage matrix](api-coverage.md) and [compatibility policy](compatibility.md). Do not infer support for every patch release or endpoint.
+Use Node.js 26 (Active LTS), 24 or 22 (Maintenance LTS). Node.js 20 reached EOL on 2026-04-30 and is not supported by v4. The current Solr baselines are 10.1.0 (primary), 9.11.0 (compatibility), and 8.11.4 (legacy only because Solr 8.x is upstream EOL). Integration evidence is operation-specific; see the [API coverage matrix](api-coverage.md) and [compatibility policy](compatibility.md). Do not infer support for every patch release or endpoint.
 
 Install the package:
 
