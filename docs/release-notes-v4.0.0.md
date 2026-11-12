@@ -6,7 +6,7 @@
 
 Version 4 is a TypeScript-first redesign of node-solr-lambda. It replaces the v3 functional/Axios client with a Fetch-based `SolrClient`, typed request and response contracts, and a broader set of Solr API wrappers.
 
-- **Modern runtime and package:** Node.js 26 (Active LTS), 24 and 22 (Maintenance LTS), plus Node.js 20 for legacy compatibility only (EOL); ESM and CommonJS exports; no required runtime dependencies. Zod is an optional peer used only when runtime validation is enabled.
+- **Modern runtime and package:** Node.js 26 (Active LTS), 24 and 22 (Maintenance LTS); Node.js 20 reached EOL and is unsupported. ESM and CommonJS exports; no required runtime dependencies. Zod is an optional peer used only when runtime validation is enabled.
 - **Transport:** Basic/Bearer authentication, custom headers and Fetch implementations, request defaults, timeouts, AbortSignal cancellation, opt-in retry policy, structured error classes, and raw/streaming request methods.
 - **Query and documents:** Typed query parser options, filters, sorting, cursor pagination, classic and JSON facets, highlighting, grouping, stats, MoreLikeThis, debug/explain and spatial helpers; document add/update/delete, backpressure-aware `addStream()` ingestion from async iterables, atomic updates, JSON update commands, and explicit commit/soft-commit/optimize behavior.
 - **Administration:** Typed Schema, Config, Core Admin, Collections, Security, Metrics, System diagnostics, Export, ReplicationHandler, and backup/restore APIs. The Collections surface includes typed replica/shard lifecycle, aliases, cluster status, and V1 MIGRATE contracts.
@@ -23,7 +23,7 @@ Version 4 is not source-compatible with the v3 functional API.
 - Replace legacy helper calls with API-family methods such as `schema()`, `config()`, `coreAdmin()`, `collections()`, and typed document/query methods.
 - Review query, update, and default parameter shapes rather than assuming v3 serialization or defaults are preserved. In particular, configure required `commitWithin` and overwrite behavior explicitly.
 - Replace Axios error inspection with `SolrHttpError`, `SolrNetworkError`, `SolrTimeoutError`, `SolrAbortError`, and `SolrValidationError`.
-- Upgrade the runtime baseline to Node.js 20 or later (the tested CI matrix is 20/22/24/26, with Node.js 20 retained as an EOL legacy target).
+- Upgrade the runtime baseline to Node.js 22, 24, or 26. Node.js 20 reached EOL and is not supported.
 
 Use the [v3-to-v4 migration guide](migration-v3-to-v4.md) for code examples and the application migration checklist.
 
@@ -41,7 +41,7 @@ ReplicationHandler one-shot `fetchindex` with follower read-back is verified on 
 - [x] Public API surface and export decisions reviewed in PR #213 / Issue #108.
 - [x] Complete and merge the focused implementation work tracked by Issue #81 / PR #222.
 - [x] Reconcile this draft and the changelog against merged implementation/documentation PRs through PR #264. Re-run this reconciliation if additional changes land before the release candidate is cut.
-- [ ] Run the complete CI matrix on the exact release candidate commit: Node.js 20/22/24/26 and Solr 8.11.4/9.11.0/10.1.0.
+- [ ] Run the complete CI matrix on the exact release candidate commit: Node.js 22/24/26 and Solr 8.11.4/9.11.0/10.1.0.
 - [ ] Verify npm provenance/publication settings and the rollback procedure. The repository now has a manually dispatched OIDC trusted-publishing workflow (PR #225); npm Trusted Publisher account configuration and GitHub environment protection still require external verification.
 - [ ] Create the stable tag and publish only after every blocking gate is explicitly complete.
 - [ ] Install the published package from npm in a clean consumer and smoke-test ESM, CommonJS, and TypeScript declarations.
