@@ -17,7 +17,12 @@ The autocomplete-first work is tracked in [Issue #121](https://github.com/vsimko
 | Module | Responsibility |
 | --- | --- |
 | `transport.ts` | Fetch, base URL resolution, Basic/Bearer authentication, headers, request defaults, retries, combined caller cancellation and timeout signals, response-stream cleanup, validation, JSON parsing, and errors. |
+| `errors.ts` | Structured HTTP, network, timeout, abort, and validation error classes exposed by the public API. |
+| `types.ts` | Shared public configuration, request/response, query, administration, and validation contracts. |
+| `query-helpers.ts` | Composable helpers for sort expressions, field lists, filters, local parameters, functions, and spatial query syntax. |
+| `v2.ts` | Explicit V2 namespace over the shared transport, with V2 path validation, typed Core Admin operations, and read-only Collections/cluster discovery. |
 | `apis/query.ts` | Standard query and JSON Request API calls. |
+| `apis/get.ts` | RealTime Get request serialization and single-/multi-ID retrieval. |
 | `apis/update.ts` | Add, update, delete, commit, soft commit, optimize, and rollback. |
 | `apis/schema.ts` | Schema API requests. |
 | `apis/config.ts` | Config API requests. |
@@ -26,8 +31,9 @@ The autocomplete-first work is tracked in [Issue #121](https://github.com/vsimko
 | `apis/security.ts` | Authentication and authorization API requests. |
 | `apis/system.ts` | System information requests. |
 | `apis/metrics.ts` | Metrics API requests. |
+| `apis/replication.ts` | Typed ReplicationHandler JSON commands and raw replication-file responses. |
 | `apis/advanced.ts` | Streaming Expressions and raw export responses. |
-| `client.ts` | Public `SolrClient` facade and method signatures. |
+| `client.ts` | Public `SolrClient` facade, V1 method signatures, and composition of API modules over the shared transport. |
 
 ## Request conventions
 
