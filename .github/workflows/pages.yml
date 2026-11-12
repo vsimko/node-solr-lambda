@@ -19,8 +19,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: pages-production
-  cancel-in-progress: false
+  group: pages-branch-writes
+  queue: max
 
 jobs:
   build-and-deploy:
