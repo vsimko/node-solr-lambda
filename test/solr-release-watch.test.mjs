@@ -44,8 +44,8 @@ test("release check reports only official versions absent from the pinned matrix
   assert.deepEqual(result.missingVersions, []);
 });
 
-test("release check flags a new version without treating it as supported", async () => {
-  const html = listing.replace("</body>", '<a href="10.2.0/">10.2.0/</a></body>');
+test("release check ignores older unpinned releases and flags only versions newer than the newest baseline", async () => {
+  const html = listing.replace("</body>", '<a href="9.10.1/">9.10.1/</a><a href="10.2.0/">10.2.0/</a></body>');
   const result = await checkSolrReleases({ html, workflowYaml: workflow });
   assert.deepEqual(result.missingVersions, ["10.2.0"]);
 });
