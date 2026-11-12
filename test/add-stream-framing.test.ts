@@ -9,19 +9,29 @@ test("addStream emits exactly one JSON array frame and closes the request body",
     fetch: async (_input, init) => {
       const reader = (init?.body as ReadableStream<Uint8Array>).getReader();
       const decoder = new TextDecoder();
-      try {
-        const opening = await reader.read();
-        assert.equal(decoder.decode(opening.value), "[");
-        const document = await reader.read();
-        assert.equal(decoder.decode(document.value), '{"id":"framing"}');
-        const closing = await reader.read();
-        assert.equal(decoder.decode(closing.value), "]");
-        const end = await reader.read();
-        assert.equal(end.done, true, "the request body must close after the JSON array delimiter");
-      } catch (error) {
-        void reader.cancel().catch(() => undefined);
-        throw error;
-      }
+      const read = async () => {
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        try {
+          return await Promise.race([
+            reader.read(),
+            new Promise<never>((_resolve, reject) => {
+              timeout = setTimeout(() => reject(new Error("Timed out waiting for streamed request frame")), 100);
+            })
+          ]);
+        } finally {
+          if (timeout !== undefined) clearTimeout(timeout);
+        }
+      };
+
+      const opening = await read();
+      assert.equal(decoder.decode(opening.value), "[");
+      const document = await read();
+      assert.equal(decoder.decode(document.value), '{"id":"framing"}');
+      const closing = await read();
+      assert.equal(decoder.decode(closing.value), "]");
+      const end = await read();
+      assert.equal(end.done, true, "the request body must close after the JSON array delimiter");
+
       return new Response('{"responseHeader":{"status":0}}');
     }
   });
