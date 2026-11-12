@@ -58,7 +58,8 @@ The JSON Schema in `site-data.schema.json` is the machine-readable contract. Its
 - The workflow posts a PR comment containing the preview URL.
 - Closing a PR removes its preview.
 - Write-enabled preview publishing runs only when the PR head repository is this repository. Fork PRs remain covered by ordinary read-only CI/build checks and receive no write credentials.
-- Preview jobs are serialized per PR and cancel superseded builds.
+- All preview and production writers share the repository-wide `pages-branch-writes` concurrency group with `queue: max`; writes are serialized without cancelling in-progress or pending writers.
+- A queued preview event publishes only when its event head SHA still matches the PR's current head; stale `synchronize` events skip build and publish. Closing a PR always removes its preview.
 
 ### Production deployment
 
@@ -87,3 +88,8 @@ The JSON Schema in `site-data.schema.json` is the machine-readable contract. Its
 ## Consequences
 
 The `gh-pages` branch contains the production site at its root and active previews below `pr-preview/`. GitHub Pages must be configured to publish from the `gh-pages` branch root. The site remains static and build-time driven; new data sources require normalized snapshots, provenance, deterministic fixtures, and explicit failure semantics. Website tooling remains outside package runtime dependencies and npm publication contents.
+
+
+## Operational amendment (2026-11-12)
+
+A production deploy and a pull-request preview were observed racing to update `gh-pages`: the production push was rejected after the preview advanced the branch. PR #386 moved both workflows into the same repository-wide concurrency group and enabled `queue: max` (up to 100 pending runs), with no in-progress cancellation. Because a global queue can retain superseded preview events, the preview workflow checks that the event SHA is still the PR's current head before building or publishing. Stale preview events are skipped; the `closed` event still removes the isolated preview. This amendment supersedes the original per-PR serialization/cancellation statement above.
