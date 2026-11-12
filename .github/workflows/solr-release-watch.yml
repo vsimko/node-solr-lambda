@@ -43,25 +43,70 @@ jobs:
 
             for (const version of missing) {
               const title = `ci: qualify Apache Solr ${version}`;
-              const existing = await github.rest.search.issuesAndPullRequests({
-                q: `repo:${owner}/${repo} is:issue "${title}"`
-              });
-              if (existing.data.items.length > 0) {
-                core.info(`A tracking issue already exists for Solr ${version}.`);
-                continue;
-              }
-
-              const body = [
+              const [major, minor, patch] = version.split(".");
+              const docsVersion = `${major}_${minor}_${patch}`;
+              const guideVersion = `${major}_${minor}`;
+              const metadata = [
+                "<!-- solr-release-watch:metadata:start -->",
                 `## Candidate Apache Solr release: ${version}`,
                 "",
                 "The official Apache download index lists this stable release, but it is not present in the repository's pinned CI matrix.",
                 "",
                 `- Official download directory: https://downloads.apache.org/solr/solr/${version}/`,
-                "- Official release information: https://solr.apache.org/downloads.html",
+                `- Release notes: https://solr.apache.org/docs/${docsVersion}/changes/Changes.html`,
+                `- OpenAPI specification: https://downloads.apache.org/solr/solr/${version}/openApi/solr-openapi-${version}.json`,
+                `- Docker images: solr:${version} and solr:${version}-slim (https://hub.docker.com/_/solr)`,
+                `- Reference guide: https://solr.apache.org/guide/solr/${guideVersion}/`,
+                "- Official release overview: https://solr.apache.org/downloads.html",
                 `- Versions currently pinned in CI: ${configured || "(none detected)"}`,
                 `- Stable versions currently listed upstream: ${available || "(none detected)"}`,
                 "",
                 "This notification does **not** certify or automatically add support for the candidate version.",
+                "<!-- solr-release-watch:metadata:end -->"
+              ].join("\n");
+
+              const existing = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:issue "${title}"`
+              });
+              const trackedIssue = existing.data.items.find(issue => issue.title === title);
+
+              if (trackedIssue) {
+                const current = await github.rest.issues.get({
+                  owner,
+                  repo,
+                  issue_number: trackedIssue.number
+                });
+                const currentBody = current.data.body || "";
+                const markers = /<!-- solr-release-watch:metadata:start -->[\s\S]*?<!-- solr-release-watch:metadata:end -->/;
+                let updatedBody;
+
+                if (markers.test(currentBody)) {
+                  updatedBody = currentBody.replace(markers, metadata);
+                } else if (currentBody.startsWith(`## Candidate Apache Solr release: ${version}`)) {
+                  const checklistIndex = currentBody.indexOf("## Qualification checklist");
+                  updatedBody = checklistIndex >= 0
+                    ? `${metadata}\n\n${currentBody.slice(checklistIndex)}`
+                    : `${currentBody}\n\n${metadata}`;
+                } else {
+                  updatedBody = `${currentBody.trim()}\n\n${metadata}`;
+                }
+
+                if (updatedBody !== currentBody) {
+                  await github.rest.issues.update({
+                    owner,
+                    repo,
+                    issue_number: trackedIssue.number,
+                    body: updatedBody
+                  });
+                  core.info(`Refreshed release metadata on issue #${trackedIssue.number} for Solr ${version}.`);
+                } else {
+                  core.info(`Release metadata on issue #${trackedIssue.number} is already current.`);
+                }
+                continue;
+              }
+
+              const body = [
+                metadata,
                 "",
                 "## Qualification checklist",
                 "- [ ] Review the official release notes and reference guide.",
