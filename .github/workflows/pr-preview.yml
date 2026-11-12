@@ -33,24 +33,42 @@ jobs:
       - name: Check out pull request
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - name: Set up Node.js
+      - name: Check whether this preview commit is still current
+        id: freshness
         if: github.event.action != 'closed'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          current_head="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.head.sha')"
+          if [[ "$current_head" == "$EVENT_HEAD_SHA" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping stale preview event for $EVENT_HEAD_SHA; current PR head is $current_head."
+          fi
+
+      - name: Set up Node.js
+        if: github.event.action != 'closed' && steps.freshness.outputs.publish == 'true'
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
-        if: github.event.action != 'closed'
+        if: github.event.action != 'closed' && steps.freshness.outputs.publish == 'true'
         run: npm ci
 
       - name: Build website
-        if: github.event.action != 'closed'
+        if: github.event.action != 'closed' && steps.freshness.outputs.publish == 'true'
         run: SITE_GENERATED_AT="$(git log -1 --format=%cI)" npm run build:site
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Publish or remove pull-request preview
+        if: github.event.action == 'closed' || steps.freshness.outputs.publish == 'true'
         uses: rossjrw/pr-preview-action@873417d2df72380da1f3978378fb58560bcde976
         with:
           source-dir: dist-site/
