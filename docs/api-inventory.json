@@ -1077,11 +1077,11 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
         "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/solr-v2-api-strategy.md",
       "testFiles": [
@@ -1090,7 +1090,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read-only V2 alias discovery, distinct from V1 LISTALIASES. Official Solr 9.2, 9.11, and 10.1 Alias Management guides document the exact GET route and response shape; Solr 8.11.4 is not claimed. Solr 9.3's alias mutation redesign is not applied to these read contracts. Runtime verification on pinned 9.11.0/10.1.0 and BasicAuth allow/deny checks are pending the current PR CI run.",
+      "notes": "Read-only V2 alias discovery, distinct from V1 LISTALIASES. The exact GET list route and response shape are documented in Solr 9.2, 9.11, and 10.1 guides. Integration and BasicAuth coverage passed on pinned Solr 9.11.0 and 10.1.0 in CI #43210450787; Solr 8.11.4 is explicitly unclaimed.",
       "id": "v2.aliases.list",
       "clientMethod": "v2.aliases.list",
       "httpMethod": "GET",
@@ -1101,11 +1101,11 @@
       "methodImplemented": true,
       "typeCoverage": "complete",
       "unitTests": "present",
-      "integrationTests": "not-run",
+      "integrationTests": "tested",
       "versions": {
         "8": "unverified",
-        "9": "unverified",
-        "10": "unverified"
+        "9": "tested",
+        "10": "tested"
       },
       "documentation": "docs/solr-v2-api-strategy.md",
       "testFiles": [
@@ -1114,7 +1114,7 @@
         "test/integration/solr-v2-collections.test.ts",
         "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Read one alias and its collection targets/properties. The route is documented in Solr 9.2, 9.11, and 10.1; Solr 8.11.4 is not claimed. Runtime verification on pinned 9.11.0/10.1.0 is pending the current PR CI run.",
+      "notes": "Read one alias and its collection targets/properties. The documented detail GET is used directly when available; pinned Solr 10.1.0 returns 405 (Allow: DELETE,OPTIONS), so the client falls back only on 405 to the V2 alias-list response. This V2-only compatibility path and the direct route passed on pinned Solr 9.11.0/10.1.0 in CI #43210450787. Solr 8.11.4 is explicitly unclaimed.",
       "id": "v2.aliases.status",
       "clientMethod": "v2.aliases.status",
       "httpMethod": "GET",
