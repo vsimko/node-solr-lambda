@@ -52,7 +52,26 @@ cloudIntegrationTest("V2 Aliases list and detail read back an isolated alias", a
     detail = await client.v2.aliases.status(alias);
   } catch (error) {
     if (error && typeof error === "object" && "body" in error) {
-      console.error("V2 alias detail diagnostic", { endpoint: "endpoint" in error ? error.endpoint : undefined, status: "status" in error ? error.status : undefined, body: error.body });
+      const endpoint = "endpoint" in error && typeof error.endpoint === "string" ? error.endpoint : undefined;
+      let probe: unknown;
+      let introspection: unknown;
+      if (endpoint) {
+        try {
+          const response = await fetch(endpoint);
+          probe = { status: response.status, allow: response.headers.get("allow"), body: await response.text() };
+          const apiResponse = await fetch(new URL("/api/aliases/_introspect", endpoint));
+          introspection = { status: apiResponse.status, body: await apiResponse.text() };
+        } catch (diagnosticError) {
+          introspection = diagnosticError instanceof Error ? diagnosticError.message : String(diagnosticError);
+        }
+      }
+      console.error("V2 alias detail diagnostic", {
+        endpoint,
+        status: "status" in error ? error.status : undefined,
+        body: error.body,
+        probe,
+        introspection
+      });
     }
     throw error;
   }
