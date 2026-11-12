@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: pages-production
+  group: pages-branch-writes
   cancel-in-progress: false
 
 jobs:
