@@ -1,4 +1,4 @@
-# solr-ts-client
+# Solr TS Client
 
 A modern Apache Solr client for JavaScript and TypeScript on Node.js, with TypeScript-first contracts and a first-class JavaScript experience. Version 4 replaces the v3 Axios-based functional API with a Fetch-based client, discoverable request models, and a shared transport for query, update, administration, and raw requests.
 
