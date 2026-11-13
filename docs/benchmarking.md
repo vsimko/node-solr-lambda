@@ -56,7 +56,7 @@ A client from another language (for example Apache SolrJ) is not a like-for-like
 - The benchmark requires a running Solr server and a **pre-created disposable collection**.
 - Use identical Solr version, schema/configset, dataset, request parameters, and JVM settings for any meaningful comparison.
 - `--mode both` is convenient for exploration, but it runs client mode before Fetch mode. Separate collections/processes are preferred when order or mutation could affect results.
-- Query defaults to `q=*:* ` and returns 10 documents; use `--rows 0` for count-only requests.
+- Query defaults to `q=*:*` and returns 10 documents; use `--rows 0` for count-only requests.
 - Bulk request latency is measured per batch; final commit duration is reported separately.
 - Streaming throughput excludes the final commit; ingestion and commit durations are reported separately.
 - Peak RSS is sampled and may miss short-lived spikes. CPU and memory metrics are process-level.
