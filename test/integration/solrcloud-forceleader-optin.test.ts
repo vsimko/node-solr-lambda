@@ -53,10 +53,15 @@ function assertDedicatedContainer(
   assert.equal(docker(["inspect", "--format", "{{.State.Running}}", container.name]), "true");
 
   const bindings = JSON.parse(docker(["inspect", "--format", "{{json .HostConfig.PortBindings}}", container.name])) as
-    Record<string, Array<{ HostIp: string; HostPort: string }>>;
-  const binding = bindings["8983/tcp"]?.[0];
-  assert.equal(binding?.HostIp, "127.0.0.1", `${container.name} must publish only on loopback`);
-  assert.equal(binding?.HostPort, String(container.port));
+    Record<string, Array<{ HostIp: string; HostPort: string }> | null>;
+  const publishedBindings = Object.entries(bindings).flatMap(([containerPort, entries]) =>
+    (entries ?? []).map(binding => ({ containerPort, ...binding }))
+  );
+  assert.equal(publishedBindings.length, 1, `${container.name} must have exactly one published port`);
+  const binding = publishedBindings[0]!;
+  assert.equal(binding.containerPort, "8983/tcp", `${container.name} must publish only the Solr HTTP port`);
+  assert.equal(binding.HostIp, "127.0.0.1", `${container.name} must publish only on loopback`);
+  assert.equal(binding.HostPort, String(container.port));
 
   const networks = JSON.parse(docker(["inspect", "--format", "{{json .NetworkSettings.Networks}}", container.name])) as
     Record<string, unknown>;
