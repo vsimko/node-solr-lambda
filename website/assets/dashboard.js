@@ -52,8 +52,15 @@ async function main(){
     const drawDocs=()=>render("docs-list",docs.filter(x=>(x.title+" "+x.path).toLowerCase().includes(el("docs-search").value.toLowerCase())),x=>makeCard(x.title,"guide",[x.path],x.url));
     drawDocs();el("docs-search").addEventListener("input",drawDocs);
     const npm=data.npm.records?.[0];
-    if(npm){el("npm-version").textContent=npm.version;const p=document.createElement("p");p.textContent=(Number.isFinite(npm.downloads)?npm.downloads.toLocaleString()+" downloads in the last 7 days":"Download count unavailable")+" · published package";el("npm-version").after(p)}
-    else el("npm-version").textContent="solr-ts-client";
+    const npmStatus=document.createElement("p");
+    if(npm){
+      el("npm-version").textContent=npm.version;
+      npmStatus.textContent=(Number.isFinite(npm.downloads)?npm.downloads.toLocaleString()+" downloads in the last 7 days":"Download count unavailable")+" · published package";
+    }else{
+      el("npm-version").textContent="solr-ts-client";
+      npmStatus.textContent="Package details will appear after the first public release.";
+    }
+    el("npm-version").after(npmStatus);
     const copy=el("copy-install");
     copy?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText("npm install solr-ts-client");copy.textContent="Copied"}catch{copy.textContent="Copy unavailable"}});
   }catch(error){
