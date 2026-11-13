@@ -46,10 +46,7 @@ jobs:
             }
           '
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run test:types
-      - run: npm test
-      - run: npm run build
-      - run: npm run release:check
-      - name: Publish with npm trusted publishing
-        run: npm run release:publish -- --provenance
+      # npm stage publish runs prepublishOnly, which performs type checks,
+      # tests, build, release checks, and package dry-run before staging.
+      - name: Stage with npm trusted publishing
+        run: npm run release:stage
