@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createSolrClient } from "../dist/esm/index.js";
-import { cpus } from "node:os";
+import { cpus, release as osRelease, totalmem } from "node:os";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
@@ -224,7 +224,9 @@ async function run() {
       node: process.version,
       v8: process.versions.v8,
       platform: process.platform,
+      osRelease: osRelease(),
       arch: process.arch,
+      totalMemoryBytes: totalmem(),
       cpuModel: cpus()[0]?.model || null,
       cpuCount: cpus().length,
       solrVersion: process.env.SOLR_VERSION || null,
