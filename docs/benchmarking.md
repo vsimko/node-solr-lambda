@@ -12,7 +12,7 @@ The runner supports three workloads:
 
 Each workload can run through the typed client, direct Fetch, or both. The direct Fetch path uses the same Node.js runtime and network stack, so the comparison isolates client-layer serialization/transport overhead rather than comparing different HTTP implementations.
 
-The JSON report includes Node/V8 and host metadata, optional Solr version, elapsed time, throughput, request latency percentiles (p50/p95/p99), process CPU time, RSS/heap deltas, sampled peak RSS, and event-loop delay. For bulk requests, latency is measured per batch; for streaming, ingestion and commit times are reported separately.
+The JSON report includes Node/V8 and host metadata (OS release, architecture, CPU model/count, and total physical memory), optional Solr version, elapsed time, throughput, request latency percentiles (p50/p95/p99), process CPU time, RSS/heap deltas, sampled peak RSS, and event-loop delay. For bulk requests, latency is measured per batch; for streaming, ingestion and commit times are reported separately.
 
 ## Requirements and safety
 
