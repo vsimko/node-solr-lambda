@@ -64,7 +64,7 @@ export async function checkSolrReleases({ html, workflowYaml, fetchImpl = fetch 
     const response = await fetchImpl(sourceUrl, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error(`Apache Solr download index returned HTTP ${response.status}`);
     const contentType = response.headers?.get?.("content-type");
-    if (contentType && !/text\/html/i.test(contentType)) {
+    if (!contentType || !/text\/html/i.test(contentType)) {
       throw new Error(`Apache Solr download index returned unexpected content type: ${contentType}`);
     }
     const body = await response.text();
