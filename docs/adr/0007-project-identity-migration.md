@@ -40,9 +40,9 @@ The maintainer explicitly selected `solr-ts-client` as the intended GitHub repos
 
 Follow-up checks produced these results:
 
-- Exact public GitHub repository searches for `solr-ts-client` returned zero results. This is a search result, not a namespace reservation or guarantee of availability.
-- The exact npm registry metadata lookup could not be completed because network/DNS access from the research environment failed. npm package availability and ownership remain unverified.
-- RDAP lookups for `solr-ts-client.com`, `solr-ts-client.dev`, and `solr-ts-client.io` could not be completed because the RDAP endpoints were inaccessible. No domain availability claim is made.
+- Exact public GitHub repository searches for `solr-ts-client` returned zero results; `GET /repos/vsimko/solr-ts-client` returned HTTP 404. These are public-namespace signals, not a namespace reservation or guarantee of availability.
+- An isolated GitHub Actions experiment queried the npm registry directly: `solr-ts-client` and nine punctuation variants each returned HTTP 404 (`not-found-in-registry`). This is a positive availability signal, not a reservation, ownership guarantee, or proof that npm's publish-time similarity/security checks will accept the name.
+- The same experiment queried RDAP for `solr-ts-client.com`, `solr-ts-client.dev`, and `solr-ts-client.io`; each returned HTTP 404. Treat these as unregistered/not-found signals only, not proof of reservability. Confirm with an authoritative registrar before any purchase.
 - Search-engine queries did not produce authoritative trademark-register clearance. No trademark clearance is claimed.
 - The existing SolrTS project remains a close conceptual and visual neighbor and creates a discoverability/confusion risk that must be explicitly accepted or mitigated.
 
@@ -187,14 +187,30 @@ These results do not inspect Git history, issue/PR text, discussions, GitHub Pag
 
 Before marking the inventory complete, repeat the search for variants and external surfaces: case/spacing variants, old GitHub URL forms, npm package/import strings, badges and Pages URLs, GitHub Actions environment/repository identifiers, release and OIDC settings, issue/PR templates, discussions, and npm Trusted Publisher configuration. External account settings and downstream dependents require maintainer access and are not visible from this repository search.
 
+### Isolated availability-check experiment (2026-11-13)
+
+A temporary script and GitHub Actions workflow were created on branch `experiment/solr-ts-client-name-check`, executed, and then removed from that branch. The run completed successfully: [workflow run #43459266781](https://github.com/vsimko/node-solr-lambda/actions/runs/43459266781). The uploaded report artifact is retained until its configured expiration.
+
+Observed results:
+
+- **npm exact name:** `https://registry.npmjs.org/solr-ts-client` returned HTTP 404.
+- **npm punctuation variants:** all nine tested variants returned HTTP 404: `solrtsclient`, `solr.ts.client`, `solr_ts_client`, `solr-ts.client`, `solr-ts_client`, `solr.ts-client`, `solr.ts_client`, `solr_ts-client`, and `solr_ts.client`.
+- **GitHub owner lookup:** `GET /repos/vsimko/solr-ts-client` returned HTTP 404; global exact-name repository search returned HTTP 200 with `total_count: 0`. A malformed repository-scoped search query returned HTTP 422 and was excluded from the evidence.
+- **RDAP:** `solr-ts-client.com`, `solr-ts-client.dev`, and `solr-ts-client.io` each returned HTTP 404. Confirm directly with a registrar before treating any domain as purchasable.
+- **Trademarks:** the script could not perform authenticated/authoritative DPMA or EUIPO clearance. Manual review remains required.
+
+The temporary script and workflow were removed in two cleanup commits. The experiment branch itself remains because the available GitHub integration has no delete-branch/ref operation; it can be deleted manually in GitHub if desired. No files from the experiment were merged to the default branch, and no repository rename, npm publication/reservation, deprecation, or domain purchase occurred.
+
+These checks improve the evidence but do not change the **NO-GO** decision: npm namespace/publish-time acceptance, registrar confirmation, trademark review, and explicit resolution/acceptance of the SolrTS confusion risk remain outstanding.
+
 ## Current status and open work
 
 - [x] Maintainer selected full repository + package rename direction.
 - [x] Existing release workflow and release documentation inspected.
 - [x] Initial candidate set and known collisions recorded.
-- [ ] Verify exact npm availability/ownership for `solr-ts-client` (registry lookup unavailable from the research environment).
+- [ ] Confirm npm namespace/ownership and publish-time acceptance for `solr-ts-client` (direct registry lookup returned 404, but this is not a reservation or publish-time guarantee).
 - [x] Run exact public GitHub repository search for `solr-ts-client` (zero results; not a reservation).
-- [ ] Verify domain availability for `solr-ts-client` through an authoritative registrar/RDAP source.
+- [ ] Confirm domain availability for `solr-ts-client.com`, `.dev`, and `.io` with an authoritative registrar (RDAP returned 404 for all three; purchase/reservability not established).
 - [x] Complete first-pass searchable tracked-file inventory (42 exact-literal matches); variant, historical/external and account-level checks remain open.
 - [ ] Complete authoritative npm and trademark checks; explicitly resolve naming-confusion risk with existing SolrTS project and obtain final identity go/no-go approval.
 - [ ] Prepare migration PR and execute only after go/no-go approval.
