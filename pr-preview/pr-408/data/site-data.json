@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-13T21:18:25.000Z",
+  "generatedAt": "2026-11-13T23:09:44.000Z",
   "package": {
     "name": "solr-ts-client",
     "repository": "https://github.com/vsimko/solr-ts-client",
@@ -12,85 +12,85 @@
       "id": "package",
       "kind": "repository",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/package.json",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
       "status": "available"
     },
     {
       "id": "api-inventory",
       "kind": "repository",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/docs/api-inventory.json",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
       "status": "available"
     },
     {
       "id": "docs-index",
       "kind": "repository",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/docs/index.md",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
       "status": "available"
     },
     {
       "id": "roadmap",
       "kind": "repository",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/docs/roadmap.md",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
       "status": "available"
     },
     {
       "id": "changelog",
       "kind": "repository",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
       "status": "available"
     },
     {
       "id": "ci-workflow",
       "kind": "repository",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/.github/workflows/ci.yml",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
       "status": "available"
     },
     {
       "id": "github-actions",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/solr-ts-client/actions/runs?per_page=20",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
-      "status": "unavailable"
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
+      "status": "available"
     },
     {
       "id": "github-issues",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/solr-ts-client/issues?state=all&per_page=100",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
-      "status": "unavailable"
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
+      "status": "available"
     },
     {
       "id": "npm-registry",
       "kind": "npm",
       "url": "https://registry.npmjs.org/solr-ts-client",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
-      "status": "unavailable"
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
+      "status": "available"
     },
     {
       "id": "npm-downloads",
       "kind": "npm",
       "url": "https://api.npmjs.org/downloads/point/2026-11-07:2026-11-13/solr-ts-client",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
-      "status": "unavailable"
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
+      "status": "available"
     },
     {
       "id": "github-releases",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/solr-ts-client/releases?per_page=50",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
-      "status": "unavailable"
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
+      "status": "available"
     },
     {
       "id": "github-tags",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/solr-ts-client/tags?per_page=50",
-      "retrievedAt": "2026-11-13T21:18:25.000Z",
-      "status": "unavailable"
+      "retrievedAt": "2026-11-13T23:09:44.000Z",
+      "status": "available"
     }
   ],
   "apiCoverage": {
@@ -98,7 +98,7 @@
     "sourceIds": [
       "api-inventory"
     ],
-    "observedAt": "2026-11-13T21:18:25.000Z",
+    "observedAt": "2026-11-13T23:09:44.000Z",
     "records": [
       {
         "id": "update.add",
@@ -1760,12 +1760,12 @@
     ]
   },
   "ci": {
-    "status": "unavailable",
+    "status": "available",
     "sourceIds": [
       "github-actions",
       "ci-workflow"
     ],
-    "observedAt": "2026-11-13T21:18:25.000Z",
+    "observedAt": "2026-11-13T23:09:44.000Z",
     "configuredMatrix": [
       {
         "dimension": "node",
@@ -1786,50 +1786,850 @@
         "sourcePath": ".github/workflows/ci.yml"
       }
     ],
-    "records": []
+    "records": [
+      {
+        "id": "43524996164",
+        "runId": "43524996164",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "in_progress",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43524996164",
+        "commit": "374aa89347996e3b61d21ed548c767202957951d",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T23:09:46Z",
+        "observed": true
+      },
+      {
+        "id": "43524996058",
+        "runId": "43524996058",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "in_progress",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43524996058",
+        "commit": "374aa89347996e3b61d21ed548c767202957951d",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T23:09:46Z",
+        "observed": true
+      },
+      {
+        "id": "43524986952",
+        "runId": "43524986952",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43524986952",
+        "commit": "d736bc98072b42248b646e2211a90ed895148507",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T23:09:42Z",
+        "completedAt": "2026-11-13T23:10:06Z",
+        "observed": true
+      },
+      {
+        "id": "43524986894",
+        "runId": "43524986894",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43524986894",
+        "commit": "d736bc98072b42248b646e2211a90ed895148507",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T23:09:42Z",
+        "completedAt": "2026-11-13T23:09:48Z",
+        "observed": true
+      },
+      {
+        "id": "43524978564",
+        "runId": "43524978564",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43524978564",
+        "commit": "ac643aa3626bbd478a3c6d84aa7a74759844771e",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T23:09:38Z",
+        "completedAt": "2026-11-13T23:09:49Z",
+        "observed": true
+      },
+      {
+        "id": "43524978559",
+        "runId": "43524978559",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43524978559",
+        "commit": "ac643aa3626bbd478a3c6d84aa7a74759844771e",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T23:09:38Z",
+        "completedAt": "2026-11-13T23:09:45Z",
+        "observed": true
+      },
+      {
+        "id": "43523388263",
+        "runId": "43523388263",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43523388263",
+        "commit": "c8955faed2349a14a65bb80fa0d5ee90e1592c43",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T22:57:14Z",
+        "completedAt": "2026-11-13T22:57:40Z",
+        "observed": true
+      },
+      {
+        "id": "43509599703",
+        "runId": "43509599703",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509599703",
+        "commit": "c8955faed2349a14a65bb80fa0d5ee90e1592c43",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T21:19:07Z",
+        "completedAt": "2026-11-13T21:20:23Z",
+        "observed": true
+      },
+      {
+        "id": "43509502909",
+        "runId": "43509502909",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509502909",
+        "commit": "bd04da1050c68e63171b01f6c4f301cc31b83a75",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:18:28Z",
+        "completedAt": "2026-11-13T21:20:32Z",
+        "observed": true
+      },
+      {
+        "id": "43509502878",
+        "runId": "43509502878",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509502878",
+        "commit": "bd04da1050c68e63171b01f6c4f301cc31b83a75",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:18:28Z",
+        "completedAt": "2026-11-13T21:21:34Z",
+        "observed": true
+      },
+      {
+        "id": "43509474577",
+        "runId": "43509474577",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509474577",
+        "commit": "53bb23aee5c8923511f4cb38a412725a87356b73",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T21:18:16Z",
+        "completedAt": "2026-11-13T21:18:51Z",
+        "observed": true
+      },
+      {
+        "id": "43509420408",
+        "runId": "43509420408",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509420408",
+        "commit": "faea9b69f34d9b657b76633096522bf1eecf27cf",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:17:55Z",
+        "completedAt": "2026-11-13T21:18:44Z",
+        "observed": true
+      },
+      {
+        "id": "43509420336",
+        "runId": "43509420336",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509420336",
+        "commit": "faea9b69f34d9b657b76633096522bf1eecf27cf",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:17:55Z",
+        "completedAt": "2026-11-13T21:18:52Z",
+        "observed": true
+      },
+      {
+        "id": "43509394952",
+        "runId": "43509394952",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509394952",
+        "commit": "1211418e1014d9033bcb09db7789bc6407617108",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:17:45Z",
+        "completedAt": "2026-11-13T21:18:02Z",
+        "observed": true
+      },
+      {
+        "id": "43509394941",
+        "runId": "43509394941",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43509394941",
+        "commit": "1211418e1014d9033bcb09db7789bc6407617108",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:17:45Z",
+        "completedAt": "2026-11-13T21:17:58Z",
+        "observed": true
+      },
+      {
+        "id": "43508186338",
+        "runId": "43508186338",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43508186338",
+        "commit": "dc24f0071ce3a007c50b3e9e5f078b6fa6c6b214",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T21:09:49Z",
+        "completedAt": "2026-11-13T21:10:54Z",
+        "observed": true
+      },
+      {
+        "id": "43508060622",
+        "runId": "43508060622",
+        "workflow": "Pull request website preview",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43508060622",
+        "commit": "79e37f2d45be91d314bbee7250c82bab02d492e5",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:08:59Z",
+        "completedAt": "2026-11-13T21:10:55Z",
+        "observed": true
+      },
+      {
+        "id": "43508060481",
+        "runId": "43508060481",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43508060481",
+        "commit": "79e37f2d45be91d314bbee7250c82bab02d492e5",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:08:59Z",
+        "completedAt": "2026-11-13T21:12:14Z",
+        "observed": true
+      },
+      {
+        "id": "43508048483",
+        "runId": "43508048483",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43508048483",
+        "commit": "9df34c61ecb20e5369886314923ba282940ecace",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T21:08:54Z",
+        "completedAt": "2026-11-13T21:09:26Z",
+        "observed": true
+      },
+      {
+        "id": "43507987453",
+        "runId": "43507987453",
+        "workflow": "CI",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "runUrl": "https://github.com/vsimko/solr-ts-client/actions/runs/43507987453",
+        "commit": "6b4f8c69b5222519fee3db25a33aa5fa6b79993f",
+        "ref": "refs/heads/chore/solr-ts-client-identity",
+        "startedAt": "2026-11-13T21:08:29Z",
+        "completedAt": "2026-11-13T21:09:16Z",
+        "observed": true
+      }
+    ]
   },
   "roadmap": {
-    "status": "unavailable",
+    "status": "available",
     "sourceIds": [
       "roadmap",
       "github-issues"
     ],
-    "observedAt": "2026-11-13T21:18:25.000Z",
-    "records": []
+    "observedAt": "2026-11-13T23:09:44.000Z",
+    "records": [
+      {
+        "id": "github-310",
+        "number": 310,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/310",
+        "priority": "P3",
+        "state": "open",
+        "title": "[Strategy] Make this the best-in-class JavaScript/TypeScript/Node.js Apache Solr client",
+        "labels": [
+          "strategy",
+          "roadmap"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Product direction **North-star: make solr-ts-client the best-in-class Apache Solr client for JavaScript, TypeScript, and Node.js.** The goal is leadership through demonstrable quality—not a marketing claim or feature-count contest. See [strategic goal #310](https://github.com/vsimko/solr-ts-client/issues/310)."
+      },
+      {
+        "id": "github-312",
+        "number": 312,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/312",
+        "priority": "P3",
+        "state": "closed",
+        "title": "[API Coverage] Audit Solr API surface and close high-value capability gaps",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## North-star objective: best-in-class Solr client | API breadth and feature correctness | [#312](https://github.com/vsimko/solr-ts-client/issues/312) (audit complete); V2 implementation #332–#334 | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |"
+      },
+      {
+        "id": "github-313",
+        "number": 313,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/313",
+        "priority": "P3",
+        "state": "closed",
+        "title": "[Compatibility] Establish and expand the Solr and Node.js support matrix",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## North-star objective: best-in-class Solr client | Solr and Node.js compatibility | [#313](https://github.com/vsimko/solr-ts-client/issues/313) (policy complete); weekly release discovery #335 | Explicit support policy and evidence-backed version/deployment matrix |"
+      },
+      {
+        "id": "github-314",
+        "number": 314,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/314",
+        "priority": "P3",
+        "state": "open",
+        "title": "[Performance] Build reproducible Solr client benchmarks and optimization budgets",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## North-star objective: best-in-class Solr client | Performance and efficiency | [#314](https://github.com/vsimko/solr-ts-client/issues/314) (harness #338 merged; baseline execution #339) | Reproducible comparisons, latency percentiles, throughput, CPU and memory measurements, regression budgets |"
+      },
+      {
+        "id": "github-315",
+        "number": 315,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/315",
+        "priority": "P3",
+        "state": "closed",
+        "title": "[Quality] Raise test depth, reliability, and regression confidence",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## North-star objective: best-in-class Solr client | Test depth and reliability | [#315](https://github.com/vsimko/solr-ts-client/issues/315) (mutation baseline #343 accepted at 81.51%; no score gate) | API-to-test traceability, failure-mode coverage, consumer type tests, coverage visibility, reliable CI evidence |"
+      },
+      {
+        "id": "github-271",
+        "number": 271,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/271",
+        "priority": "P1",
+        "state": "merged",
+        "title": "feat: add typed RealTime Get API",
+        "labels": [
+          "enhancement",
+          "typescript"
+        ],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P1 — complete | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/solr-ts-client/pull/271) | Direct unique-key single/multi-document retrieval; uncommitted read-after-write integration passed on pinned Solr 8.11.4/9.11.0/10.1.0. |"
+      },
+      {
+        "id": "github-272",
+        "number": 272,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/272",
+        "priority": "P2",
+        "state": "merged",
+        "title": "feat(query): add typed SpellCheck component contracts",
+        "labels": [
+          "enhancement",
+          "typescript"
+        ],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | Typed SpellCheck query component | [#272](https://github.com/vsimko/solr-ts-client/pull/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |"
+      },
+      {
+        "id": "github-299",
+        "number": 299,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/299",
+        "priority": "P2",
+        "state": "merged",
+        "title": "feat(transport): add opt-in lossless JSON codec",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | BigInt-safe JSON codec | [PR #299](https://github.com/vsimko/solr-ts-client/pull/299) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |"
+      },
+      {
+        "id": "github-298",
+        "number": 298,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/298",
+        "priority": "P2",
+        "state": "merged",
+        "title": "feat(query): add typed Suggester component",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | Typed Suggester query component | [PR #298](https://github.com/vsimko/solr-ts-client/pull/298) | Typed autocomplete dictionary selection, query/count/context controls, lifecycle flags, and extensible suggestion response contracts on the existing query API. |"
+      },
+      {
+        "id": "github-300",
+        "number": 300,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/300",
+        "priority": "P2",
+        "state": "merged",
+        "title": "feat(update): add backpressure-aware streaming ingestion",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/solr-ts-client/pull/300), [#317](https://github.com/vsimko/solr-ts-client/pull/317), [#321](https://github.com/vsimko/solr-ts-client/pull/321), [#325](https://github.com/vsimko/solr-ts-client/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |"
+      },
+      {
+        "id": "github-317",
+        "number": 317,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/317",
+        "priority": "P2",
+        "state": "merged",
+        "title": "fix(update): harden addStream transport lifecycle",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/solr-ts-client/pull/300), [#317](https://github.com/vsimko/solr-ts-client/pull/317), [#321](https://github.com/vsimko/solr-ts-client/pull/321), [#325](https://github.com/vsimko/solr-ts-client/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |"
+      },
+      {
+        "id": "github-321",
+        "number": 321,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/321",
+        "priority": "P2",
+        "state": "merged",
+        "title": "test(update): expand streaming ingestion consumer coverage",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/solr-ts-client/pull/300), [#317](https://github.com/vsimko/solr-ts-client/pull/317), [#321](https://github.com/vsimko/solr-ts-client/pull/321), [#325](https://github.com/vsimko/solr-ts-client/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |"
+      },
+      {
+        "id": "github-325",
+        "number": 325,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/325",
+        "priority": "P2",
+        "state": "merged",
+        "title": "docs: align streaming ingestion API and compatibility evidence",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/solr-ts-client/pull/300), [#317](https://github.com/vsimko/solr-ts-client/pull/317), [#321](https://github.com/vsimko/solr-ts-client/pull/321), [#325](https://github.com/vsimko/solr-ts-client/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |"
+      },
+      {
+        "id": "github-297",
+        "number": 297,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/297",
+        "priority": "P2",
+        "state": "closed",
+        "title": "test: add high-value regression cases from Solr client ecosystem audit",
+        "labels": [
+          "enhancement",
+          "test"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "### Next feature tranche — TypeScript-first API coverage | P2 | Cross-client regression test audit | [#297](https://github.com/vsimko/solr-ts-client/issues/297) | Add only missing high-value cases from Solarium/pysolr/SolrJ: nested documents, Unicode round-trip, long request boundary, custom handler response extensibility, and test-topology clarity. |"
+      },
+      {
+        "id": "github-232",
+        "number": 232,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/232",
+        "priority": "P1",
+        "state": "open",
+        "title": "Add opt-in isolated SolrCloud verification for SPLITSHARD and MIGRATE",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "### P1 — SolrCloud operation evidence | Execute the opt-in, loopback-only SPLITSHARD and MIGRATE verification workflow for each pinned Solr version; retain non-certification until evidence exists | [#232](https://github.com/vsimko/solr-ts-client/issues/232) | Test harness and manual `workflow_dispatch` workflow are merged in PR #253. A maintainer must manually run it with `enable_destructive_solrcloud_tests=true` and record successful evidence for Solr 8.11.4, 9.11.0, and 10.1.0. |"
+      },
+      {
+        "id": "github-341",
+        "number": 341,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/341",
+        "priority": "P1",
+        "state": "open",
+        "title": "test(solrcloud): build isolated stale-replica FORCELEADER fault injection",
+        "labels": [
+          "testing",
+          "solrcloud"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "### P1 — SolrCloud operation evidence | Execute the isolated stale-replica FORCELEADER fault-injection workflow for each pinned Solr version | [#341](https://github.com/vsimko/solr-ts-client/issues/341) | PR #362 adds a separate manual `workflow_dispatch` input and job with independent ZooKeeper, two labelled Solr containers, loopback-only ports, and an explicit acknowledged-data-loss assertion. Harness is not runtime evidence until a maintainer dispatches `enable_forceleader_fault_injection=true` and records each Solr result. |"
+      },
+      {
+        "id": "github-110",
+        "number": 110,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/110",
+        "priority": "P0",
+        "state": "open",
+        "title": "Prepare v4.0 stable release checklist and changelog",
+        "labels": [
+          "documentation"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "### Separate release gate v4.0 stable publication remains a separate release-owner decision and must not block feature development. Complete the exact release-candidate CI matrix, release notes/migration summary, npm trusted-publisher configuration and provenance verification, and clean npm consumer smoke test before publication. Tracking: [#110](https://github.com/vsimko/solr-ts-client/issues/110). Do not create a stable tag or publish without explicit release-owner approval."
+      },
+      {
+        "id": "github-122",
+        "number": 122,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/122",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Align development workflow, documentation, roadmap, and audit legacy branches",
+        "labels": [],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - Mainline/branch strategy and historical branch audit: [#122](https://github.com/vsimko/solr-ts-client/issues/122)."
+      },
+      {
+        "id": "github-44",
+        "number": 44,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/44",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Complete typed Query API parameter model",
+        "labels": [
+          "enhancement"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - Query API and consumer-facing TypeScript foundation: [#44–#59](https://github.com/vsimko/solr-ts-client/issues/44)."
+      },
+      {
+        "id": "github-60",
+        "number": 60,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/60",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Complete Update API command model",
+        "labels": [
+          "enhancement"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - Update API and response handling: [#60–#67](https://github.com/vsimko/solr-ts-client/issues/60); remaining runtime semantics are tracked only when still open."
+      },
+      {
+        "id": "github-68",
+        "number": 68,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/68",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Complete Schema API typed request and response models",
+        "labels": [
+          "enhancement"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - Schema API: [#68–#72](https://github.com/vsimko/solr-ts-client/issues/68)."
+      },
+      {
+        "id": "github-73",
+        "number": 73,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/73",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Complete Config API typed models",
+        "labels": [
+          "enhancement"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - Config command/read/overlay implementation: [#73–#76](https://github.com/vsimko/solr-ts-client/issues/73); component-specific options work is historical unless reopened."
+      },
+      {
+        "id": "github-77",
+        "number": 77,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/77",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Complete Core Admin action types and methods",
+        "labels": [
+          "enhancement"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - CoreAdmin and Collections implementation: [#77–#85](https://github.com/vsimko/solr-ts-client/issues/77)."
+      },
+      {
+        "id": "github-86",
+        "number": 86,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/86",
+        "priority": "P3",
+        "state": "closed",
+        "title": "Complete Security API authentication models and methods",
+        "labels": [
+          "enhancement"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## Completed foundation and historical work - Security, System, Metrics, Streaming Expressions, and Export foundations: [#86–#94](https://github.com/vsimko/solr-ts-client/issues/86)."
+      },
+      {
+        "id": "github-274",
+        "number": 274,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/274",
+        "priority": "P1",
+        "state": "closed",
+        "title": "[Website] Define GitHub Pages architecture and repository-owned site data contract",
+        "labels": [
+          "enhancement",
+          "documentation"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## P1 — Public project website and status dashboard | Architecture and versioned site-data contract | [#274](https://github.com/vsimko/solr-ts-client/issues/274) | Foundation recorded in ADR 0001 and the site-data schema; no runtime dependency or npm package-content change. |"
+      },
+      {
+        "id": "github-275",
+        "number": 275,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/275",
+        "priority": "P1",
+        "state": "closed",
+        "title": "[Website] Implement deterministic site-data validation and consistency checks",
+        "labels": [
+          "enhancement",
+          "documentation",
+          "testing"
+        ],
+        "milestone": null,
+        "isPullRequest": false,
+        "roadmapContext": "## P1 — Public project website and status dashboard | Deterministic validation and consistency checks | [#275](https://github.com/vsimko/solr-ts-client/issues/275) | Offline validation of normalized snapshots and P1 domains; optional P2 domains cannot gate P1 delivery. |"
+      },
+      {
+        "id": "github-276",
+        "number": 276,
+        "url": "https://github.com/vsimko/solr-ts-client/issues/276",
+        "priority": "P1",
+        "state": "merged",
+        "title": "[Website] Build the GitHub Pages site and generate project status data",
+        "labels": [
+          "enhancement",
+          "documentation"
+        ],
+        "milestone": null,
+        "isPullRequest": true,
+        "roadmapContext": "## P1 — Public project website and status dashboard | GitHub Pages site, generated data, and deployment workflow | [#276](https://github.com/vsimko/solr-ts-client/issues/276) | Static build and PR validation without deployment; deployment only from the default branch. |"
+      }
+    ]
   },
   "npm": {
-    "status": "unavailable",
+    "status": "available",
     "sourceIds": [
       "npm-registry",
       "npm-downloads"
     ],
-    "observedAt": "2026-11-13T21:18:25.000Z",
-    "records": []
+    "observedAt": "2026-11-13T23:09:44.000Z",
+    "records": [
+      {
+        "id": "npm-latest",
+        "packageName": "solr-ts-client",
+        "version": "4.0.0-beta.0",
+        "distTags": {},
+        "publishedAt": null,
+        "downloads": 0,
+        "window": "last-7-days",
+        "windowStart": "2026-11-07T00:00:00.000Z",
+        "windowEnd": "2026-11-13T23:59:59.000Z",
+        "sourceUrl": "https://www.npmjs.com/package/solr-ts-client",
+        "retrievedAt": "2026-11-13T23:09:44.000Z"
+      }
+    ]
   },
   "releases": {
-    "status": "unavailable",
+    "status": "available",
     "sourceIds": [
       "github-releases",
       "github-tags",
       "npm-registry",
       "changelog"
     ],
-    "observedAt": "2026-11-13T21:18:25.000Z",
+    "observedAt": "2026-11-13T23:09:44.000Z",
     "unreleased": {
       "sourceId": "changelog",
       "path": "CHANGELOG.md",
       "url": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
       "content": "### Added\n\n- Replace the v3 functional Axios client with a TypeScript-first Fetch-based `SolrClient`, supporting Node.js 22/24/26, ESM and CommonJS, and no required runtime dependencies; keep Zod optional for runtime validation.\n- Add Node.js 26 Active LTS support and expand the unit/type, standalone, security, and SolrCloud CI matrices to Node.js 22/24/26; exclude Node.js 20 because it reached end-of-life.\n- Add typed transport configuration for Basic/Bearer authentication, headers, request defaults, retries, timeouts, cancellation, structured HTTP/network/timeout/abort/validation errors, and safe raw/streaming requests.\n- Add an autocomplete-first Query API covering parser-specific options, filters, sorting, cursorMark pagination, classic and JSON facets, highlighting, grouping, stats, MoreLikeThis, debug/explain, spatial helpers, and optional SpellCheck and Suggester components.\n- Add typed document contracts including RealTime Get (`get()`), JSON documents and command objects, atomic updates, update/delete options, commit/soft-commit/optimize behavior, and update response/error envelopes.\n- Add `SolrClient.addStream()` for backpressure-aware JSON-array document ingestion from async iterables, with bounded buffering, cancellation, and explicit partial-ingestion semantics.\n- Add an injectable `SolrJsonCodec` for caller-selected lossless JSON parsing and serialization, including BigInt-safe handling; native JSON behavior remains the default.\n- Add typed Core Admin, Collections, Schema, Config, Security, Metrics, and System API contracts, with action-specific request models and response shapes for the operations documented in the API reference.\n- Add an explicit shared-transport Solr V2 namespace and typed Core Admin V2 list/status/reload/rename/unload operations, with isolated runtime and security evidence on Solr 9.11.0 and 10.1.0; Solr 8.11.4 V2 Core Admin remains unverified.\n- Add the typed V1 Collections `FORCELEADER` action with exact serialization and consumer type coverage; stale-replica runtime verification remains unverified pending isolated fault-injection testing.\n- Add an explicit `client.v2` namespace with generic JSON and raw request methods over the shared transport; V1 methods remain unchanged, and operation-specific V2 contracts/runtime compatibility remain unverified.\n- Add a reproducible query, bulk-ingestion, and streaming benchmark harness comparing the client with direct Node.js Fetch; reports include host OS release and physical-memory metadata, and no performance leadership claim is made.\n\n- Add Update API unit coverage for JSON endpoint selection, typed success responses, and Solr HTTP failures, plus Solr 8/9/10 delete-by-query persisted-state integration coverage.\n\n- Add Solr 8/9/10 integration coverage for Schema API dynamic-field add/replace/delete and copy-field add/delete, including copy-rule replacement via delete+add.\n\n- Add unit and Solr 8/9/10 integration coverage for Schema API add, replace, and delete field-type operations, including analyzer, tokenizer, and filter read-back.\n\n- Add unit and Solr 8/9/10 integration coverage for Schema API add, replace, and delete field operations, including typed mutation responses and schema read-back.\n\n- Add end-to-end v3-to-v4 migration coverage for health checks, document add/replace/delete, and typed query read-back on Solr 8/9/10.\n\n- Add typed core-level and SolrCloud collection backup/restore APIs with asynchronous status handling.\n- Add typed V1 ReplicationHandler commands and raw file-content streaming through `replication()` and `replicationFile()`.\n- Add typed response contracts for Schema and Config reads, Security authentication/authorization, Metrics, System diagnostics, Core Admin status/async actions, and Collections aliases/cluster status.\n- Add typed Collections shard lifecycle and MIGRATE operations, including V1 wire-name corrections and explicit runtime-verification boundaries.\n- Complete typed V1 Collections CREATE options for shard/replica layouts, routing, node placement, aliases, core properties, and legacy Solr 8.11 placement controls; add compile-time and serialization coverage.\n- Add typed Streaming Expressions JSON envelopes and Export Handler request/sort models; distinguish parsed JSON expressions from raw streamed Export responses.\n- Harden the public client boundary by keeping transport configuration private and verifying the package-root stable/experimental/internal export decisions.\n- Verify the packed npm tarball in clean consumers, including ESM/CommonJS runtime imports, TypeScript declarations, optional Zod absence, and prerelease/stable dist-tag policy.\n\n### Documentation\n\n- Add a public API reference and machine-readable operation inventory, with consistency checks against package exports and client methods.\n- Document the explicit generic Solr V2 namespace, its `/api/` path constraints, shared-transport behavior, introspection fixture policy, and unverified operation-specific compatibility boundary.\n- Add action-specific Collections API evidence and an explicit public API review, including the stable, generic escape-hatch, and internal export decisions.\n- Document npm tarball validation, prerelease dist-tag behavior, release rollback, and the manually gated GitHub Actions/npm OIDC trusted-publishing workflow.\n- Add a Solr 8.11.4/9.11.0/10.1.0 Schema API compatibility matrix with explicit V1/V2 scope and unverified similarity plugin behavior.\n- Add typed Schema API command responses and read-response models for schema metadata, fields, dynamic fields, field types, copy fields, uniqueKey, and similarity.\n- Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.\n- Expand the v3-to-v4 migration guide with a complete v4 CRUD example and link its compile-time and Solr integration checks.\n- Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.\n- Record the historical standalone, authenticated, and SolrCloud integration matrix on Node.js 20/22/24/26 across Solr 8.11.4/9.11.0/10.1.0. Node.js 20 has since reached EOL and is excluded from the current 22/24/26 support matrix.\n- Document ReplicationHandler abort lifecycle evidence per Solr version, including the Solr 8.11.4 observability limitation, and keep one-shot fetch verification separate.\n- Document the opt-in SPLITSHARD/MIGRATE workflow and retain explicit non-certification until a maintainer manually runs it on every pinned Solr version.\n\nAll notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.\n\n### [3.0.5](https://github.com/vsimko/node-solr-lambda/compare/v3.0.4...v3.0.5) (2023-06-27)\n\n### [3.0.4](https://github.com/vsimko/node-solr-lambda/compare/v3.0.3...v3.0.4) (2020-05-12)\n\n### [3.0.3](https://github.com/vsimko/node-solr-lambda/compare/v3.0.1...v3.0.3) (2020-05-12)\n\n\n### Bug Fixes\n\n* link to types.d.ts mentioned in jsdocs ([c732f02](https://github.com/vsimko/node-solr-lambda/commit/c732f02bdd16a5be414658b4d92bbc46187af3b7))\n\n<a name=\"3.0.1\"></a>",
-      "observedAt": "2026-11-13T21:18:25.000Z"
+      "observedAt": "2026-11-13T23:09:44.000Z"
     },
-    "records": []
+    "records": [
+      {
+        "id": "v3.0.4",
+        "tag": "v3.0.4",
+        "version": "3.0.4",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v3.0.4",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v3.0.3",
+        "tag": "v3.0.3",
+        "version": "3.0.3",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v3.0.3",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v3.0.1",
+        "tag": "v3.0.1",
+        "version": "3.0.1",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v3.0.1",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v3.0.0",
+        "tag": "v3.0.0",
+        "version": "3.0.0",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v3.0.0",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v2.2.0",
+        "tag": "v2.2.0",
+        "version": "2.2.0",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v2.2.0",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v2.1.0",
+        "tag": "v2.1.0",
+        "version": "2.1.0",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v2.1.0",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v2.0.2",
+        "tag": "v2.0.2",
+        "version": "2.0.2",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v2.0.2",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v2.0.0",
+        "tag": "v2.0.0",
+        "version": "2.0.0",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v2.0.0",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v1.1.0",
+        "tag": "v1.1.0",
+        "version": "1.1.0",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v1.1.0",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v1.0.0",
+        "tag": "v1.0.0",
+        "version": "1.0.0",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v1.0.0",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v0.2.2",
+        "tag": "v0.2.2",
+        "version": "0.2.2",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v0.2.2",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      },
+      {
+        "id": "v0.2.1",
+        "tag": "v0.2.1",
+        "version": "0.2.1",
+        "draft": false,
+        "url": "https://github.com/vsimko/solr-ts-client/tree/v0.2.1",
+        "changelogUrl": "https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md",
+        "displayAsPublished": false,
+        "npmPublished": false,
+        "npmPublishedAt": null,
+        "tagOnly": true
+      }
+    ]
   },
   "documentation": {
     "status": "available",
     "sourceIds": [
       "docs-index"
     ],
-    "observedAt": "2026-11-13T21:18:25.000Z",
+    "observedAt": "2026-11-13T23:09:44.000Z",
     "records": [
       {
         "id": "docs/getting-started.md",
