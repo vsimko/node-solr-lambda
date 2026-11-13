@@ -4,7 +4,7 @@
 
 ## Highlights
 
-Version 4 is a TypeScript-first redesign of node-solr-lambda. It replaces the v3 functional/Axios client with a Fetch-based `SolrClient`, typed request and response contracts, and a broader set of Solr API wrappers.
+Version 4 is a TypeScript-first redesign of solr-ts-client. It replaces the v3 functional/Axios client with a Fetch-based `SolrClient`, typed request and response contracts, and a broader set of Solr API wrappers.
 
 - **Modern runtime and package:** Node.js 26 (Active LTS), 24 and 22 (Maintenance LTS); Node.js 20 reached EOL and is unsupported. ESM and CommonJS exports; no required runtime dependencies. Zod is an optional peer used only when runtime validation is enabled.
 - **Transport:** Basic/Bearer authentication, custom headers and Fetch implementations, request defaults, timeouts, AbortSignal cancellation, opt-in retry policy, structured error classes, and raw/streaming request methods.
