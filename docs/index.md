@@ -46,6 +46,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 
 ## Migration, development, and release
 
+- [Package identity migration to Solr TS Client](migration-to-solr-ts-client.md)
 - [Migration from v3 to v4](migration-v3-to-v4.md)
 - [Development roadmap](roadmap.md)
 - [Comparison with solr-client](solr-client-comparison.md)
