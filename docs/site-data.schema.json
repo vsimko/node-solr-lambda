@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/vsimko/node-solr-lambda/blob/master/docs/site-data.schema.json",
-  "title": "node-solr-lambda website data",
+  "$id": "https://github.com/vsimko/solr-ts-client/blob/master/docs/site-data.schema.json",
+  "title": "solr-ts-client website data",
   "description": "Versioned, provenance-aware data model for the static GitHub Pages site.",
   "type": "object",
   "additionalProperties": false,
@@ -36,7 +36,7 @@
       ],
       "properties": {
         "name": {
-          "const": "node-solr-lambda"
+          "const": "solr-ts-client"
         },
         "repository": {
           "type": "string",
