@@ -592,7 +592,7 @@ jobs:
             --network solr-forceleader-net \
             --network-alias solr-forceleader-zk \
             --env ZOO_4LW_COMMANDS_WHITELIST=ruok,stat,srvr \
-            --label com.vsimko.node-solr-lambda.forceleader=zookeeper \
+            --label com.vsimko.solr-ts-client.forceleader=zookeeper \
             zookeeper:3.9.3
       - name: Wait for independent ZooKeeper
         run: |
@@ -613,7 +613,7 @@ jobs:
             --network solr-forceleader-net \
             --network-alias solr-forceleader-1 \
             --publish 127.0.0.1:8983:8983 \
-            --label com.vsimko.node-solr-lambda.forceleader=true \
+            --label com.vsimko.solr-ts-client.forceleader=true \
             --env SOLR_HOST=solr-forceleader-1 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             "solr:${{ matrix.solr-version }}" \
@@ -642,7 +642,7 @@ jobs:
             --network solr-forceleader-net \
             --network-alias solr-forceleader-2 \
             --publish 127.0.0.1:8984:8983 \
-            --label com.vsimko.node-solr-lambda.forceleader=true \
+            --label com.vsimko.solr-ts-client.forceleader=true \
             --env SOLR_HOST=solr-forceleader-2 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             "solr:${{ matrix.solr-version }}" \
@@ -669,7 +669,7 @@ jobs:
           SOLR_FORCELEADER_PRIMARY_CONTAINER: solr-forceleader-1
           SOLR_FORCELEADER_SECONDARY_CONTAINER: solr-forceleader-2
           SOLR_FORCELEADER_ZK_CONTAINER: solr-forceleader-zk
-          SOLR_FORCELEADER_CONTAINER_LABEL: com.vsimko.node-solr-lambda.forceleader
+          SOLR_FORCELEADER_CONTAINER_LABEL: com.vsimko.solr-ts-client.forceleader
           SOLR_FORCELEADER_NETWORK: solr-forceleader-net
           SOLR_FORCELEADER_PRIMARY_PORT: "8983"
           SOLR_FORCELEADER_SECONDARY_PORT: "8984"

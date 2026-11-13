@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const repoUrl = "https://github.com/vsimko/node-solr-lambda";
+const repoUrl = "https://github.com/vsimko/solr-ts-client";
 const iso = (value) => {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) throw new Error("SITE_GENERATED_AT must be a valid ISO timestamp.");
@@ -104,12 +104,12 @@ export async function generateSiteData({ asOf, token, fetchImpl = fetch } = {}) 
   const start = new Date(Date.parse(generatedAt) - 6 * 86400000).toISOString().slice(0, 10);
   const end = generatedAt.slice(0, 10);
   const endpoints = [
-    ["github-actions", "https://api.github.com/repos/vsimko/node-solr-lambda/actions/runs?per_page=20", headers],
-    ["github-issues", "https://api.github.com/repos/vsimko/node-solr-lambda/issues?state=all&per_page=100", headers],
-    ["npm-registry", "https://registry.npmjs.org/node-solr-lambda", {}],
-    ["npm-downloads", "https://api.npmjs.org/downloads/point/" + start + ":" + end + "/node-solr-lambda", {}],
-    ["github-releases", "https://api.github.com/repos/vsimko/node-solr-lambda/releases?per_page=50", headers],
-    ["github-tags", "https://api.github.com/repos/vsimko/node-solr-lambda/tags?per_page=50", headers]
+    ["github-actions", "https://api.github.com/repos/vsimko/solr-ts-client/actions/runs?per_page=20", headers],
+    ["github-issues", "https://api.github.com/repos/vsimko/solr-ts-client/issues?state=all&per_page=100", headers],
+    ["npm-registry", "https://registry.npmjs.org/solr-ts-client", {}],
+    ["npm-downloads", "https://api.npmjs.org/downloads/point/" + start + ":" + end + "/solr-ts-client", {}],
+    ["github-releases", "https://api.github.com/repos/vsimko/solr-ts-client/releases?per_page=50", headers],
+    ["github-tags", "https://api.github.com/repos/vsimko/solr-ts-client/tags?per_page=50", headers]
   ];
   const results = await Promise.all(endpoints.map(async (item) => {
     const fresh = await optional(fetchImpl, item[1], item[2]);
@@ -138,13 +138,13 @@ export async function generateSiteData({ asOf, token, fetchImpl = fetch } = {}) 
     ref: run.head_branch ? "refs/heads/" + run.head_branch : "unknown", startedAt: run.run_started_at || run.created_at,
     ...(run.status === "completed" ? { completedAt: run.updated_at } : {}), observed: true
   }));
-  const roadmapNumbers = [...new Set([...roadmap.matchAll(/https:\/\/github\.com\/vsimko\/node-solr-lambda\/(?:issues|pull)\/(\d+)/g)].map((m) => Number(m[1])))];
+  const roadmapNumbers = [...new Set([...roadmap.matchAll(/https:\/\/github\.com\/vsimko\/solr-ts-client\/(?:issues|pull)\/(\d+)/g)].map((m) => Number(m[1])))];
   const roadmapLookups = await Promise.all(roadmapNumbers.map(async (number) => {
     const key = "issue-" + number;
-    const fresh = await optional(fetchImpl, "https://api.github.com/repos/vsimko/node-solr-lambda/issues/" + number, headers);
+    const fresh = await optional(fetchImpl, "https://api.github.com/repos/vsimko/solr-ts-client/issues/" + number, headers);
     if (fresh.status === "available") {
-      snapshots[key] = { value: normalizeSnapshot(key, fresh.value), retrievedAt: generatedAt, url: "https://api.github.com/repos/vsimko/node-solr-lambda/issues/" + number };
-      return { ...fresh, retrievedAt: generatedAt, url: "https://api.github.com/repos/vsimko/node-solr-lambda/issues/" + number };
+      snapshots[key] = { value: normalizeSnapshot(key, fresh.value), retrievedAt: generatedAt, url: "https://api.github.com/repos/vsimko/solr-ts-client/issues/" + number };
+      return { ...fresh, retrievedAt: generatedAt, url: "https://api.github.com/repos/vsimko/solr-ts-client/issues/" + number };
     }
     if (fresh.error?.includes("HTTP 404")) return { ...fresh, retrievedAt: generatedAt };
     const cached = snapshots[key];
@@ -167,7 +167,7 @@ export async function generateSiteData({ asOf, token, fetchImpl = fetch } = {}) 
       roadmapLookups[index].error?.includes("HTTP 404") ? "missing" : "unknown";
     if (issue?.pull_request) {
       const prKey = "pull-" + number;
-      const freshPr = await optional(fetchImpl, "https://api.github.com/repos/vsimko/node-solr-lambda/pulls/" + number, headers);
+      const freshPr = await optional(fetchImpl, "https://api.github.com/repos/vsimko/solr-ts-client/pulls/" + number, headers);
       if (freshPr.status === "available") snapshots[prKey] = { value: normalizeSnapshot(prKey, freshPr.value), retrievedAt: generatedAt };
       const pr = freshPr.status === "available" ? freshPr : (snapshots[prKey]?.value ? { status: "stale", value: snapshots[prKey].value } : freshPr);
       if (pr.value?.merged) state = "merged";
@@ -197,7 +197,7 @@ export async function generateSiteData({ asOf, token, fetchImpl = fetch } = {}) 
     downloads, window: "last-7-days",
     windowStart: new Date(lookup["npm-downloads"].url.match(/point\/([^:]+):/)[1] + "T00:00:00Z").toISOString(),
     windowEnd: new Date(lookup["npm-downloads"].url.match(/point\/[^:]+:([^/]+)/)[1] + "T23:59:59Z").toISOString(),
-    sourceUrl: "https://www.npmjs.com/package/node-solr-lambda", retrievedAt: lookup["npm-downloads"].retrievedAt
+    sourceUrl: "https://www.npmjs.com/package/solr-ts-client", retrievedAt: lookup["npm-downloads"].retrievedAt
   }] : [];
   const releaseMap = new Map();
   for (const item of (lookup["github-releases"].value || [])) {

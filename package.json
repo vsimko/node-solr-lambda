@@ -1,11 +1,11 @@
 {
-  "name": "node-solr-lambda",
+  "name": "solr-ts-client",
   "version": "4.0.0-beta.0",
   "description": "A typed Apache Solr client for Node.js",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vsimko/node-solr-lambda.git"
+    "url": "https://github.com/vsimko/solr-ts-client.git"
   },
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -51,6 +51,7 @@
     "release:check": "npm run test:api-inventory && npm run docs:check && npm run test:consumer:no-zod && npm run test:bench && npm run test:release-watch && npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test:types && npm test && npm run build && npm run release:check",
     "release:publish": "node scripts/publish.mjs",
+    "release:stage": "node scripts/stage-publish.mjs",
     "test:consumer:no-zod": "node test/no-zod-consumer.mjs",
     "test:api-inventory": "node test/api-inventory.mjs",
     "docs:check": "node scripts/check-docs.mjs && npm run site:check && npm run test:site-data",
@@ -74,9 +75,9 @@
     "typescript": "^5.8.3",
     "zod": "^4.0.0"
   },
-  "homepage": "https://github.com/vsimko/node-solr-lambda#readme",
+  "homepage": "https://github.com/vsimko/solr-ts-client#readme",
   "bugs": {
-    "url": "https://github.com/vsimko/node-solr-lambda/issues"
+    "url": "https://github.com/vsimko/solr-ts-client/issues"
   },
   "keywords": [
     "apache-solr",

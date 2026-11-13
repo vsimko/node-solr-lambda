@@ -5,7 +5,7 @@ The client exposes typed wrappers for Solr's Update Request Handler. Add and ful
 ## Add and replace documents
 
 ```ts
-import { createSolrClient } from "node-solr-lambda";
+import { createSolrClient } from "solr-ts-client";
 
 const solr = createSolrClient({ baseUrl: "http://localhost:8983", collection: "catalog" });
 
@@ -27,7 +27,7 @@ await solr.update(
 - `route`: a SolrCloud shard-routing value; serialized as the `_route_` request parameter.
 - `boost`: retained as a legacy option for source compatibility.
 
-`update()` is an alias for full-document replacement through the same add command. Atomic/partial document updates use a different command shape and are tracked separately in [Issue #61](https://github.com/vsimko/node-solr-lambda/issues/61).
+`update()` is an alias for full-document replacement through the same add command. Atomic/partial document updates use a different command shape and are tracked separately in [Issue #61](https://github.com/vsimko/solr-ts-client/issues/61).
 
 ## SolrCloud routing and commitWithin
 
@@ -187,7 +187,7 @@ Successful responses can be validated through `validation.outputs` using the pub
 
 ```ts
 import { z } from "zod";
-import { createSolrClient } from "node-solr-lambda";
+import { createSolrClient } from "solr-ts-client";
 
 const client = createSolrClient({
   core: "catalog",

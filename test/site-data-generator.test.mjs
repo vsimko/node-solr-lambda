@@ -64,14 +64,14 @@ test("uses timestamped public snapshots as stale data when sources are rate-limi
   fs.mkdirSync("build", { recursive: true });
   const retrievedAt = "2026-11-05T09:00:00.000Z";
   const roadmap = fs.readFileSync("docs/roadmap.md", "utf8");
-  const numbers = [...new Set([...roadmap.matchAll(/https:\/\/github\.com\/vsimko\/node-solr-lambda\/(?:issues|pull)\/(\d+)/g)].map((m) => Number(m[1])))];
+  const numbers = [...new Set([...roadmap.matchAll(/https:\/\/github\.com\/vsimko\/solr-ts-client\/(?:issues|pull)\/(\d+)/g)].map((m) => Number(m[1])))];
   const snapshot = {
-    "github-actions": { value: { workflow_runs: [] }, retrievedAt, url: "https://api.github.com/repos/vsimko/node-solr-lambda/actions/runs?per_page=20" },
-    "github-issues": { value: [], retrievedAt, url: "https://api.github.com/repos/vsimko/node-solr-lambda/issues?state=all&per_page=100" },
-    "npm-registry": { value: { "dist-tags": { latest: "4.0.0-beta.0" }, versions: { "4.0.0-beta.0": {} }, time: {} }, retrievedAt, url: "https://registry.npmjs.org/node-solr-lambda" },
-    "npm-downloads": { value: { downloads: 23 }, retrievedAt, url: "https://api.npmjs.org/downloads/point/2026-10-30:2026-11-05/node-solr-lambda" },
-    "github-releases": { value: [], retrievedAt, url: "https://api.github.com/repos/vsimko/node-solr-lambda/releases?per_page=50" },
-    "github-tags": { value: [], retrievedAt, url: "https://api.github.com/repos/vsimko/node-solr-lambda/tags?per_page=50" }
+    "github-actions": { value: { workflow_runs: [] }, retrievedAt, url: "https://api.github.com/repos/vsimko/solr-ts-client/actions/runs?per_page=20" },
+    "github-issues": { value: [], retrievedAt, url: "https://api.github.com/repos/vsimko/solr-ts-client/issues?state=all&per_page=100" },
+    "npm-registry": { value: { "dist-tags": { latest: "4.0.0-beta.0" }, versions: { "4.0.0-beta.0": {} }, time: {} }, retrievedAt, url: "https://registry.npmjs.org/solr-ts-client" },
+    "npm-downloads": { value: { downloads: 23 }, retrievedAt, url: "https://api.npmjs.org/downloads/point/2026-10-30:2026-11-05/solr-ts-client" },
+    "github-releases": { value: [], retrievedAt, url: "https://api.github.com/repos/vsimko/solr-ts-client/releases?per_page=50" },
+    "github-tags": { value: [], retrievedAt, url: "https://api.github.com/repos/vsimko/solr-ts-client/tags?per_page=50" }
   };
   for (const number of numbers) snapshot["issue-" + number] = { value: { number, state: "open", title: "Cached issue " + number, labels: [], milestone: null }, retrievedAt };
   fs.writeFileSync(cachePath, JSON.stringify(snapshot));

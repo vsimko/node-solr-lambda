@@ -85,7 +85,7 @@ function validateSiteData(data, rules) {
   if (typeof data.generatedAt !== "string" || !Number.isFinite(Date.parse(data.generatedAt))) {
     errors.push({ id: "site-data-generated-at", severity: "error", path: "generatedAt", message: "generatedAt must be a valid ISO date-time." });
   }
-  if (!isRecord(data.package) || data.package.name !== "node-solr-lambda" ||
+  if (!isRecord(data.package) || data.package.name !== "solr-ts-client" ||
       typeof data.package.version !== "string" || !isHttpUrl(data.package.repository) ||
       typeof data.package.source !== "string" || !data.package.source) {
     errors.push({ id: "site-data-package", severity: "error", path: "package", message: "Package identity, version, repository URL, and source reference are required." });

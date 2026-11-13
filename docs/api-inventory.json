@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "package": "node-solr-lambda",
+  "package": "solr-ts-client",
   "clientVersion": "4.0.0-beta.0",
   "documentationBaselines": {
     "8": "8.11",

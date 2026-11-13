@@ -42,13 +42,13 @@ try {
     { cwd: consumerDir, stdio: "inherit" }
   );
 
-  const packedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "node-solr-lambda", "package.json"), "utf8"));
+  const packedManifest = JSON.parse(readFileSync(join(consumerDir, "node_modules", "solr-ts-client", "package.json"), "utf8"));
   const sourceManifest = JSON.parse(readFileSync(join(repositoryRoot, "package.json"), "utf8"));
   assert.equal(packedManifest.name, packageInfo.name);
   assert.equal(packedManifest.scripts?.["release:publish"], "node scripts/publish.mjs");
-  assert.equal(packedManifest.repository?.url, "https://github.com/vsimko/node-solr-lambda.git");
-  assert.equal(packedManifest.homepage, "https://github.com/vsimko/node-solr-lambda#readme");
-  assert.equal(packedManifest.bugs?.url, "https://github.com/vsimko/node-solr-lambda/issues");
+  assert.equal(packedManifest.repository?.url, "https://github.com/vsimko/solr-ts-client.git");
+  assert.equal(packedManifest.homepage, "https://github.com/vsimko/solr-ts-client#readme");
+  assert.equal(packedManifest.bugs?.url, "https://github.com/vsimko/solr-ts-client/issues");
   assert.ok(packedManifest.keywords?.includes("apache-solr"));
   assert.equal(packedManifest.main, "./dist/cjs/index.js");
   assert.equal(packedManifest.module, "./dist/esm/index.js");
@@ -66,7 +66,7 @@ try {
   assert.equal(npmDistTagForVersion("4.0.0-rc.1"), "rc");
   assert.throws(() => npmDistTagForVersion("4.0.0-dev.1"), /Unsupported prerelease channel/);
 
-  const packageNodeModules = join(consumerDir, "node_modules", "node-solr-lambda", "node_modules");
+  const packageNodeModules = join(consumerDir, "node_modules", "solr-ts-client", "node_modules");
   if (existsSync(join(consumerDir, "node_modules", "zod")) || existsSync(join(packageNodeModules, "zod"))) {
     throw new Error("Zod was installed as a required runtime dependency");
   }
@@ -77,7 +77,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import { createSolrClient } from 'node-solr-lambda'; const client = createSolrClient(); if (typeof client.request !== 'function') throw new Error('ESM import failed');"
+      "import { createSolrClient } from 'solr-ts-client'; const client = createSolrClient(); if (typeof client.request !== 'function') throw new Error('ESM import failed');"
     ],
     { cwd: consumerDir, stdio: "inherit" }
   );
@@ -87,20 +87,20 @@ try {
     process.execPath,
     [
       "-e",
-      "const { createSolrClient } = require('node-solr-lambda'); const client = createSolrClient(); if (typeof client.request !== 'function') throw new Error('CommonJS require failed');"
+      "const { createSolrClient } = require('solr-ts-client'); const client = createSolrClient(); if (typeof client.request !== 'function') throw new Error('CommonJS require failed');"
     ],
     { cwd: consumerDir, stdio: "inherit" }
   );
 
   // Compile both ESM and CommonJS TypeScript consumers against the packed declarations.
-  writeFileSync(join(consumerDir, "index.mts"), `import { createSolrClient, SolrHttpError, type RequestControlOptions } from "node-solr-lambda";
+  writeFileSync(join(consumerDir, "index.mts"), `import { createSolrClient, SolrHttpError, type RequestControlOptions } from "solr-ts-client";
 const client = createSolrClient({ collection: "catalog" });
 const controls: RequestControlOptions = { timeoutMs: 500 };
 void client.query({ query: "*:*" }, controls);
 const error: SolrHttpError | undefined = undefined;
 void error;
 `);
-  writeFileSync(join(consumerDir, "index.cts"), `import { createSolrClient, type RequestControlOptions } from "node-solr-lambda";
+  writeFileSync(join(consumerDir, "index.cts"), `import { createSolrClient, type RequestControlOptions } from "solr-ts-client";
 const client = createSolrClient({ collection: "catalog" });
 const controls: RequestControlOptions = { timeoutMs: 500 };
 void client.query({ query: "*:*" }, controls);
