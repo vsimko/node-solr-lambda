@@ -72,4 +72,4 @@ For a defensible comparison:
 
 ## Next steps
 
-Use [Issue #314](https://github.com/vsimko/node-solr-lambda/issues/314) to track real benchmark runs, workload expansion, comparison against maintained JavaScript clients, and evidence-backed optimization. No optimization or performance-leadership claim should be made from the harness alone.
+Use [Issue #314](https://github.com/vsimko/solr-ts-client/issues/314) to track real benchmark runs, workload expansion, comparison against maintained JavaScript clients, and evidence-backed optimization. No optimization or performance-leadership claim should be made from the harness alone.
