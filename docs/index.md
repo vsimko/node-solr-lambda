@@ -57,6 +57,7 @@ This is the canonical catalogue for the project's guides, API references, compat
 - [Public project website](../website/index.html)
 
 - [GitHub Pages architecture decision (ADR 0001)](adr/0001-github-pages-site.md)
+- [Project identity migration (ADR 0007)](adr/0007-project-identity-migration.md)
 - [Solr client API coverage and implementation principles (ADR 0002)](adr/0002-solr-client-api-coverage.md)
 - [Cross-client regression test strategy (ADR 0003)](adr/0003-cross-client-test-strategy.md)
 - [Suggester query-component decision (ADR 0004)](adr/0004-suggester-query-component.md)
