@@ -34,9 +34,11 @@ The maintainer's current preferred candidate is:
 
 This is a preference for further screening, not a final identity decision. No candidate is approved or claimed to be available on npm, GitHub, as a domain, or as a trademark. The spelling must remain **Solr** (the Apache Solr product name), not “Solar”.
 
+**Newly identified naming conflict:** an existing project named **SolrTS** describes itself as a TypeScript client for Solr and is associated with the GitHub repository [h-sslefree/solrts](https://github.com/h-sslefree/solrts); its documented package/import name is `solrts`. This is a close conceptual and visual neighbor to “Solr TS Client”. The distinct proposed identifier `solr-ts-client` is not thereby proven unavailable, but the overlap creates a discoverability and brand-confusion risk that must be explicitly weighed before final approval. Do not imply affiliation with that project.
+
 | Candidate | Rationale | Known concern / next check |
 |---|---|---|
-| `solr-ts-client` | Short, clear client identity; “TS” intentionally conveys TypeScript and type-safe | Preferred; verify exact npm package, global GitHub repository name, domain and trademark |
+| `solr-ts-client` | Short, clear client identity; “TS” intentionally conveys TypeScript and type-safe | Maintainer-preferred candidate, but close existing SolrTS project creates brand-confusion risk; verify exact npm package, global GitHub repository name, domain and trademark |
 | `solr-client-ts` | Clear client and TypeScript positioning | Verify exact npm package, GitHub repository, domain and trademark |
 | `solr-fetch-client` | Highlights the Fetch-based transport | Transport may be an implementation detail rather than enduring identity |
 | `node-solr-client-ts` | Explicit Node.js and TypeScript positioning | Long; verify exact npm package, GitHub repository, domain and trademark |
@@ -141,5 +143,5 @@ The v4 release line and feature roadmap remain independent. Do not make the rena
 - [ ] Verify exact npm availability for `solr-ts-client` (direct registry request timed out in current research pass).
 - [ ] Verify global GitHub namespace and domain availability for `solr-ts-client`.
 - [ ] Complete searchable repository-wide reference inventory.
-- [ ] Complete authoritative checks for preferred candidate `solr-ts-client` and obtain final name approval.
+- [ ] Resolve naming-confusion risk with existing SolrTS project; complete authoritative checks for `solr-ts-client` and obtain final name approval.
 - [ ] Prepare migration PR and execute only after go/no-go approval.
