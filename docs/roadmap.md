@@ -4,7 +4,7 @@ This roadmap tracks the single active development line on `master`. Work is deli
 
 ## Product direction
 
-**North-star: make node-solr-lambda the best-in-class Apache Solr client for JavaScript, TypeScript, and Node.js.** The goal is leadership through demonstrable quality—not a marketing claim or feature-count contest. See [strategic goal #310](https://github.com/vsimko/node-solr-lambda/issues/310).
+**North-star: make solr-ts-client the best-in-class Apache Solr client for JavaScript, TypeScript, and Node.js.** The goal is leadership through demonstrable quality—not a marketing claim or feature-count contest. See [strategic goal #310](https://github.com/vsimko/solr-ts-client/issues/310).
 
 We optimize for five mutually reinforcing pillars:
 
@@ -37,14 +37,14 @@ We optimize for five mutually reinforcing pillars:
 
 The primary product goal is to build the best Apache Solr client in the world for JavaScript, TypeScript, and Node.js. This means more than a broad method list: every important capability should have a correct typed contract, clear documentation, relevant tests, and explicit version evidence.
 
-The objective is tracked by [#310](https://github.com/vsimko/node-solr-lambda/issues/310) and has four measurable engineering workstreams. The API breadth audit (#312), V2 API audit (#327), and support policy (#313) are complete. The Node.js 26 qualification (#329) is merged. Remaining execution is tracked by #314 (benchmark harness #338, baseline execution #339), #315 (broader test depth and reliability; mutation baseline #343 is complete and accepted), #328, #332–#335, and #341.
+The objective is tracked by [#310](https://github.com/vsimko/solr-ts-client/issues/310) and has four measurable engineering workstreams. The API breadth audit (#312), V2 API audit (#327), and support policy (#313) are complete. The Node.js 26 qualification (#329) is merged. Remaining execution is tracked by #314 (benchmark harness #338, baseline execution #339), #315 (broader test depth and reliability; mutation baseline #343 is complete and accepted), #328, #332–#335, and #341.
 
 | Workstream | Tracking | Required evidence |
 | --- | --- | --- |
-| API breadth and feature correctness | [#312](https://github.com/vsimko/node-solr-lambda/issues/312) (audit complete); V2 implementation #332–#334 | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |
-| Solr and Node.js compatibility | [#313](https://github.com/vsimko/node-solr-lambda/issues/313) (policy complete); weekly release discovery #335 | Explicit support policy and evidence-backed version/deployment matrix |
-| Performance and efficiency | [#314](https://github.com/vsimko/node-solr-lambda/issues/314) (harness #338 merged; baseline execution #339) | Reproducible comparisons, latency percentiles, throughput, CPU and memory measurements, regression budgets |
-| Test depth and reliability | [#315](https://github.com/vsimko/node-solr-lambda/issues/315) (mutation baseline #343 accepted at 81.51%; no score gate) | API-to-test traceability, failure-mode coverage, consumer type tests, coverage visibility, reliable CI evidence |
+| API breadth and feature correctness | [#312](https://github.com/vsimko/solr-ts-client/issues/312) (audit complete); V2 implementation #332–#334 | Official Solr API inventory, prioritized gaps, typed contracts, docs, serialization and integration tests |
+| Solr and Node.js compatibility | [#313](https://github.com/vsimko/solr-ts-client/issues/313) (policy complete); weekly release discovery #335 | Explicit support policy and evidence-backed version/deployment matrix |
+| Performance and efficiency | [#314](https://github.com/vsimko/solr-ts-client/issues/314) (harness #338 merged; baseline execution #339) | Reproducible comparisons, latency percentiles, throughput, CPU and memory measurements, regression budgets |
+| Test depth and reliability | [#315](https://github.com/vsimko/solr-ts-client/issues/315) (mutation baseline #343 accepted at 81.51%; no score gate) | API-to-test traceability, failure-mode coverage, consumer type tests, coverage visibility, reliable CI evidence |
 
 Developer experience remains a cross-cutting requirement: excellent TypeScript inference, ESM/CommonJS behavior, actionable errors, discoverable documentation, and safe migration paths.
 
@@ -68,13 +68,13 @@ This tranche is deliberately small and independent of the v4.0 release gate. It 
 
 | Priority / sequence | Feature | Tracking | User value and scope |
 | --- | --- | --- | --- |
-| P1 — complete | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/node-solr-lambda/pull/271) | Direct unique-key single/multi-document retrieval; uncommitted read-after-write integration passed on pinned Solr 8.11.4/9.11.0/10.1.0. |
-| P2 — complete | Typed SpellCheck query component | [#272](https://github.com/vsimko/node-solr-lambda/pull/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
-| P2 — complete | BigInt-safe JSON codec | [PR #299](https://github.com/vsimko/node-solr-lambda/pull/299) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |
-| P2 — complete | Typed Suggester query component | [PR #298](https://github.com/vsimko/node-solr-lambda/pull/298) | Typed autocomplete dictionary selection, query/count/context controls, lifecycle flags, and extensible suggestion response contracts on the existing query API. |
-| P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/node-solr-lambda/pull/300), [#317](https://github.com/vsimko/node-solr-lambda/pull/317), [#321](https://github.com/vsimko/node-solr-lambda/pull/321), [#325](https://github.com/vsimko/node-solr-lambda/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |
+| P1 — complete | Typed RealTime Get API (`/get`) | [#271](https://github.com/vsimko/solr-ts-client/pull/271) | Direct unique-key single/multi-document retrieval; uncommitted read-after-write integration passed on pinned Solr 8.11.4/9.11.0/10.1.0. |
+| P2 — complete | Typed SpellCheck query component | [#272](https://github.com/vsimko/solr-ts-client/pull/272) | Discoverable common SpellCheck options and extensible suggestion/collation response contracts on the existing standard Query API. |
+| P2 — complete | BigInt-safe JSON codec | [PR #299](https://github.com/vsimko/solr-ts-client/pull/299) | Opt-in exact handling for 64-bit Solr values such as `_version_`; preserve native JSON defaults and avoid mandatory dependencies. |
+| P2 — complete | Typed Suggester query component | [PR #298](https://github.com/vsimko/solr-ts-client/pull/298) | Typed autocomplete dictionary selection, query/count/context controls, lifecycle flags, and extensible suggestion response contracts on the existing query API. |
+| P2 — complete | Backpressure-aware document ingestion | [PR #300](https://github.com/vsimko/solr-ts-client/pull/300), [#317](https://github.com/vsimko/solr-ts-client/pull/317), [#321](https://github.com/vsimko/solr-ts-client/pull/321), [#325](https://github.com/vsimko/solr-ts-client/pull/325) | Bounded-memory JSON-array ingestion through the shared transport; lifecycle, backpressure, cancellation, and partial-failure semantics are documented and tested. |
 
-| P2 | Cross-client regression test audit | [#297](https://github.com/vsimko/node-solr-lambda/issues/297) | Add only missing high-value cases from Solarium/pysolr/SolrJ: nested documents, Unicode round-trip, long request boundary, custom handler response extensibility, and test-topology clarity. |
+| P2 | Cross-client regression test audit | [#297](https://github.com/vsimko/solr-ts-client/issues/297) | Add only missing high-value cases from Solarium/pysolr/SolrJ: nested documents, Unicode round-trip, long request boundary, custom handler response extensibility, and test-topology clarity. |
 
 The cross-client regression test audit (#297) is implemented in PR #296 with ADR 0003 and synchronized test/inventory documentation; #297 is closed after the full pinned CI matrix passed. RealTime Get (#271), SpellCheck (#272), Suggester (#293), BigInt-safe JSON (#292), and streaming ingestion (#295) are all implemented and merged. RealTime Get, SpellCheck, Suggester, nested-document/Unicode fidelity, and streaming-ingestion runtime tests passed on the pinned Solr 8.11.4/9.11.0/10.1.0 matrix in CI run #42392182590. BigInt codec tests passed in run #42361470308. Issue #294 remains closed after the API audit: prepare-commit is not documented as a supported public option in the pinned Solr guides, so no typed wrapper or compatibility claim is planned unless authoritative documentation and reproducible lifecycle tests become available. These features remain independent of #110 and #232. Each future implementation must include consumer type fixtures, serialization tests, operation-specific integration evidence, and synchronized API/compatibility/inventory documentation.
 
@@ -82,12 +82,12 @@ The cross-client regression test audit (#297) is implemented in PR #296 with ADR
 
 | Work | Tracking | Current status |
 | --- | --- | --- |
-| Execute the opt-in, loopback-only SPLITSHARD and MIGRATE verification workflow for each pinned Solr version; retain non-certification until evidence exists | [#232](https://github.com/vsimko/node-solr-lambda/issues/232) | Test harness and manual `workflow_dispatch` workflow are merged in PR #253. A maintainer must manually run it with `enable_destructive_solrcloud_tests=true` and record successful evidence for Solr 8.11.4, 9.11.0, and 10.1.0. |
-| Execute the isolated stale-replica FORCELEADER fault-injection workflow for each pinned Solr version | [#341](https://github.com/vsimko/node-solr-lambda/issues/341) | PR #362 adds a separate manual `workflow_dispatch` input and job with independent ZooKeeper, two labelled Solr containers, loopback-only ports, and an explicit acknowledged-data-loss assertion. Harness is not runtime evidence until a maintainer dispatches `enable_forceleader_fault_injection=true` and records each Solr result. |
+| Execute the opt-in, loopback-only SPLITSHARD and MIGRATE verification workflow for each pinned Solr version; retain non-certification until evidence exists | [#232](https://github.com/vsimko/solr-ts-client/issues/232) | Test harness and manual `workflow_dispatch` workflow are merged in PR #253. A maintainer must manually run it with `enable_destructive_solrcloud_tests=true` and record successful evidence for Solr 8.11.4, 9.11.0, and 10.1.0. |
+| Execute the isolated stale-replica FORCELEADER fault-injection workflow for each pinned Solr version | [#341](https://github.com/vsimko/solr-ts-client/issues/341) | PR #362 adds a separate manual `workflow_dispatch` input and job with independent ZooKeeper, two labelled Solr containers, loopback-only ports, and an explicit acknowledged-data-loss assertion. Harness is not runtime evidence until a maintainer dispatches `enable_forceleader_fault_injection=true` and records each Solr result. |
 
 ### Separate release gate
 
-v4.0 stable publication remains a separate release-owner decision and must not block feature development. Complete the exact release-candidate CI matrix, release notes/migration summary, npm trusted-publisher configuration and provenance verification, and clean npm consumer smoke test before publication. Tracking: [#110](https://github.com/vsimko/node-solr-lambda/issues/110). Do not create a stable tag or publish without explicit release-owner approval.
+v4.0 stable publication remains a separate release-owner decision and must not block feature development. Complete the exact release-candidate CI matrix, release notes/migration summary, npm trusted-publisher configuration and provenance verification, and clean npm consumer smoke test before publication. Tracking: [#110](https://github.com/vsimko/solr-ts-client/issues/110). Do not create a stable tag or publish without explicit release-owner approval.
 
 ## Residual-gap triage
 
@@ -116,13 +116,13 @@ The residual opportunities in API coverage, endpoint inventory, and the machine-
 
 Closed issues are retained as historical evidence, not active priorities:
 
-- Mainline/branch strategy and historical branch audit: [#122](https://github.com/vsimko/node-solr-lambda/issues/122).
-- Query API and consumer-facing TypeScript foundation: [#44–#59](https://github.com/vsimko/node-solr-lambda/issues/44).
-- Update API and response handling: [#60–#67](https://github.com/vsimko/node-solr-lambda/issues/60); remaining runtime semantics are tracked only when still open.
-- Schema API: [#68–#72](https://github.com/vsimko/node-solr-lambda/issues/68).
-- Config command/read/overlay implementation: [#73–#76](https://github.com/vsimko/node-solr-lambda/issues/73); component-specific options work is historical unless reopened.
-- CoreAdmin and Collections implementation: [#77–#85](https://github.com/vsimko/node-solr-lambda/issues/77).
-- Security, System, Metrics, Streaming Expressions, and Export foundations: [#86–#94](https://github.com/vsimko/node-solr-lambda/issues/86).
+- Mainline/branch strategy and historical branch audit: [#122](https://github.com/vsimko/solr-ts-client/issues/122).
+- Query API and consumer-facing TypeScript foundation: [#44–#59](https://github.com/vsimko/solr-ts-client/issues/44).
+- Update API and response handling: [#60–#67](https://github.com/vsimko/solr-ts-client/issues/60); remaining runtime semantics are tracked only when still open.
+- Schema API: [#68–#72](https://github.com/vsimko/solr-ts-client/issues/68).
+- Config command/read/overlay implementation: [#73–#76](https://github.com/vsimko/solr-ts-client/issues/73); component-specific options work is historical unless reopened.
+- CoreAdmin and Collections implementation: [#77–#85](https://github.com/vsimko/solr-ts-client/issues/77).
+- Security, System, Metrics, Streaming Expressions, and Export foundations: [#86–#94](https://github.com/vsimko/solr-ts-client/issues/86).
 - Packaging, public API review, and operation inventory foundations: #104, #108, #184, and #185.
 - Feature/evidence follow-ups #228–#231 and #233–#238 are completed and merged. In particular, #238 (one-shot ReplicationHandler leader/follower fetch and read-back) was completed by PR #253; abort/async lifecycle is tracked separately in #259.
 - Roadmap/documentation reconciliation #255 and API-gap triage #256 are completed by PR #257.
@@ -151,9 +151,9 @@ Deliver the static GitHub Pages experience as a product-discovery feature: TypeS
 
 | Work | Tracking | Scope boundary |
 | --- | --- | --- |
-| Architecture and versioned site-data contract | [#274](https://github.com/vsimko/node-solr-lambda/issues/274) | Foundation recorded in ADR 0001 and the site-data schema; no runtime dependency or npm package-content change. |
-| Deterministic validation and consistency checks | [#275](https://github.com/vsimko/node-solr-lambda/issues/275) | Offline validation of normalized snapshots and P1 domains; optional P2 domains cannot gate P1 delivery. |
-| GitHub Pages site, generated data, and deployment workflow | [#276](https://github.com/vsimko/node-solr-lambda/issues/276) | Static build and PR validation without deployment; deployment only from the default branch. |
+| Architecture and versioned site-data contract | [#274](https://github.com/vsimko/solr-ts-client/issues/274) | Foundation recorded in ADR 0001 and the site-data schema; no runtime dependency or npm package-content change. |
+| Deterministic validation and consistency checks | [#275](https://github.com/vsimko/solr-ts-client/issues/275) | Offline validation of normalized snapshots and P1 domains; optional P2 domains cannot gate P1 delivery. |
+| GitHub Pages site, generated data, and deployment workflow | [#276](https://github.com/vsimko/solr-ts-client/issues/276) | Static build and PR validation without deployment; deployment only from the default branch. |
 
 The website is a discovery and evidence surface, not a second source of technical truth. README and `docs/` remain canonical; API inventory and compatibility evidence remain operation/version-specific. The website work does not change the TypeScript-first API feature priorities or release/manual SolrCloud gates.
 
