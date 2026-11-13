@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies } from "../bench/lib.mjs";
+import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies, summarizeQueryResponse } from "../bench/lib.mjs";
 
 async function readStream(stream) {
   const reader = stream.getReader();
@@ -97,4 +97,27 @@ test("concurrent runner executes each task once and records latency", async () =
   assert.deepEqual(result.results, [0, 2, 4, 6, 8, 10, 12]);
   assert.equal(result.latenciesMs.length, 7);
   assert.ok(result.elapsedMs >= 0);
+});
+
+
+test("query response summary reports serialized size, documents, numFound, and facet buckets", () => {
+  const value = {
+    response: { numFound: 42, docs: [{ id: "a" }, { id: "b" }] },
+    facet_counts: { facet_fields: { title_s: ["one", 4, "two", 2], body_s: ["x", 3] } }
+  };
+  assert.deepEqual(summarizeQueryResponse(value), {
+    responseBytes: Buffer.byteLength(JSON.stringify(value)),
+    documentsReturned: 2,
+    numFound: 42,
+    facetValueCount: 3
+  });
+});
+
+test("query response summary tolerates partial and non-object response envelopes", () => {
+  assert.deepEqual(summarizeQueryResponse({ response: { docs: [] } }), {
+    responseBytes: Buffer.byteLength('{"response":{"docs":[]}}'),
+    documentsReturned: 0,
+    numFound: null,
+    facetValueCount: 0
+  });
 });
