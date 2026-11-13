@@ -36,7 +36,7 @@ import type {
   SolrConfigListenerSettings,
   SolrConfigReadResponse,
   SolrConfigOverlayResponse
-} from "node-solr-lambda";
+} from "solr-ts-client";
 
 const mutation: Promise<SolrConfigCommandResponse> = solr.config({
   "set-property": {
