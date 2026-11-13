@@ -5,13 +5,13 @@ Use Node.js 26 (Active LTS), 24 or 22 (Maintenance LTS). Node.js 20 reached EOL 
 Install the package:
 
 ```sh
-npm install node-solr-lambda
+npm install solr-ts-client
 ```
 
 Create a client. Set the Solr base URL and exactly one core or collection name.
 
 ```ts
-import { createSolrClient } from "node-solr-lambda";
+import { createSolrClient } from "solr-ts-client";
 
 const solr = createSolrClient({
   baseUrl: "http://localhost:8983",
@@ -31,14 +31,14 @@ The package provides separate ESM and CommonJS runtime exports. Node.js selects 
 ESM:
 
 ```js
-import { createSolrClient } from "node-solr-lambda";
+import { createSolrClient } from "solr-ts-client";
 const solr = createSolrClient({ collection: "catalog" });
 ```
 
 CommonJS:
 
 ```js
-const { createSolrClient } = require("node-solr-lambda");
+const { createSolrClient } = require("solr-ts-client");
 const solr = createSolrClient({ collection: "catalog" });
 ```
 
