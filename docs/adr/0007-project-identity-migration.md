@@ -58,7 +58,7 @@ Accordingly, the candidate is selected by the maintainer, but the identity migra
 | `node-solr-client-ts` | Explicit Node.js and TypeScript positioning | Long; verify exact npm package, GitHub repository, domain and trademark |
 | `solr-http-client` | Broad, understandable description | Generic and potentially crowded; verify all namespaces |
 
-Previously identified names requiring exclusion or careful collision review include `solr-client`, `solrkit`, `solr-node-client`, `solrcraft`, and `solrbridge`. Exact npm registry availability remains **unverified**; direct registry lookup timed out in the current environment. Connected-installation GitHub searches are not global namespace checks, and no domain or trademark clearance is claimed.
+Previously identified names requiring exclusion or careful collision review include `solr-client`, `solrkit`, `solr-node-client`, `solrcraft`, and `solrbridge`. The later direct registry experiment supersedes the earlier timed-out lookup: the exact `solr-ts-client` name and nine punctuation variants returned HTTP 404, but ownership/reservation and publish-time acceptance remain unverified. Connected-installation GitHub searches are not global namespace checks, and no domain or trademark clearance is claimed.
 
 ## Migration strategy
 
