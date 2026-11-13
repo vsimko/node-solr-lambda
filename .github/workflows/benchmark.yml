@@ -1,0 +1,78 @@
+name: Pragmatic benchmark
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pragmatic-benchmark
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    name: Relative client vs Fetch baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Start a small standalone Solr instance
+        run: |
+          docker run --detach \
+            --name solr-benchmark \
+            --publish 8983:8983 \
+            --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
+            solr:10.1.0 \
+            solr-precreate benchmark-client
+      - name: Wait for Solr and create isolated Fetch collection
+        run: |
+          for attempt in {1..60}; do
+            if curl --fail --silent "http://localhost:8983/solr/admin/cores?action=STATUS&core=benchmark-client&wt=json" > /dev/null; then
+              break
+            fi
+            sleep 5
+          done
+          curl --fail --silent "http://localhost:8983/solr/admin/cores?action=STATUS&core=benchmark-client&wt=json" > /dev/null
+          docker exec solr-benchmark solr create -c benchmark-fetch
+          for attempt in {1..30}; do
+            if curl --fail --silent "http://localhost:8983/solr/admin/cores?action=STATUS&core=benchmark-fetch&wt=json" > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Fetch benchmark collection did not become ready"
+          exit 1
+      - name: Benchmark typed client (small query and bulk workloads)
+        env:
+          SOLR_BASE_URL: http://localhost:8983/solr
+          SOLR_COLLECTION: benchmark-client
+          SOLR_VERSION: 10.1.0
+        run: |
+          npm run bench -- --workload bulk --mode client --docs 1000 --batch-size 250 --concurrency 1 --output benchmark-client-bulk.json
+          npm run bench -- --workload query --mode client --iterations 25 --rows 10 --concurrency 1 --warmup 3 --output benchmark-client-query.json
+      - name: Benchmark direct Fetch (same workloads and settings)
+        env:
+          SOLR_BASE_URL: http://localhost:8983/solr
+          SOLR_COLLECTION: benchmark-fetch
+          SOLR_VERSION: 10.1.0
+        run: |
+          npm run bench -- --workload bulk --mode fetch --docs 1000 --batch-size 250 --concurrency 1 --output benchmark-fetch-bulk.json
+          npm run bench -- --workload query --mode fetch --iterations 25 --rows 10 --concurrency 1 --warmup 3 --output benchmark-fetch-query.json
+      - name: Upload raw benchmark reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pragmatic-benchmark-node26-solr10.1.0
+          path: benchmark-*.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Print Solr logs
+        if: always()
+        run: docker logs solr-benchmark || true
