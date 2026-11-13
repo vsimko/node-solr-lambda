@@ -44,7 +44,7 @@ Not every API requires every failure mode. The API inventory and focused test na
 
 The Node.js built-in test coverage report is generated on Node.js 26 in CI and is published in the workflow summary. It is an initial visibility baseline for the unit suite, not a release threshold: coverage percentages alone do not measure assertion quality, Solr compatibility, or safety.
 
-Mutation testing is separate from ordinary CI and is not scheduled. The one-time StrykerJS baseline tracked by [#343](https://github.com/vsimko/node-solr-lambda/issues/343) was completed and reviewed in [#364](https://github.com/vsimko/node-solr-lambda/issues/364): the last complete report (#22) scored **81.51%** (811 killed, 177 survived, 4 no-coverage, 3 timeouts, and 374 compile errors). Three transport timeout mutants are documented as a runner limitation. The maintainer accepted this baseline; no mutation-score threshold, additional survivor-classification work, or further mutation workflow is planned.
+Mutation testing is separate from ordinary CI and is not scheduled. The one-time StrykerJS baseline tracked by [#343](https://github.com/vsimko/solr-ts-client/issues/343) was completed and reviewed in [#364](https://github.com/vsimko/solr-ts-client/issues/364): the last complete report (#22) scored **81.51%** (811 killed, 177 survived, 4 no-coverage, 3 timeouts, and 374 compile errors). Three transport timeout mutants are documented as a runner limitation. The maintainer accepted this baseline; no mutation-score threshold, additional survivor-classification work, or further mutation workflow is planned.
 
 ## Flaky-test and CI failure policy
 
