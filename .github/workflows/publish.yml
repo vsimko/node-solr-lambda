@@ -36,6 +36,26 @@ jobs:
             if (process.env.GITHUB_REF !== "refs/heads/master") throw new Error("Unexpected ref");
             if (process.env.GITHUB_JOB !== "publish") throw new Error("Unexpected job");
           '
+      - name: Inspect GitHub OIDC claims (without printing token)
+        env:
+          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
+          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+        run: |
+          node --input-type=module -e '
+            const endpoint = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+            endpoint.searchParams.set("audience", "npm:registry.npmjs.org");
+            const response = await fetch(endpoint, {
+              headers: { Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` }
+            });
+            if (!response.ok) throw new Error(`OIDC endpoint returned HTTP ${response.status}`);
+            const { value } = await response.json();
+            const payload = JSON.parse(Buffer.from(value.split(".")[1], "base64url").toString("utf8"));
+            const safe = Object.fromEntries(
+              ["iss", "aud", "sub", "repository", "repository_owner", "workflow_ref",
+               "job_workflow_ref", "environment", "ref", "event_name"].map(k => [k, payload[k] ?? null])
+            );
+            console.log(JSON.stringify(safe, null, 2));
+          '
       - name: Ensure npm supports trusted publishing
         run: |
           npm install --global npm@11.15.0
