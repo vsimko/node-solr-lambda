@@ -1,6 +1,6 @@
 # ADR 0007: Project identity migration
 
-- **Status:** Proposed; identity not yet selected
+- **Status:** Proposed; preferred candidate identified, availability and clearance not yet verified
 - **Date:** 2026-11-13
 - **Owners:** Maintainers
 - **Tracking:** [#288](https://github.com/vsimko/node-solr-lambda/issues/288), [#289](https://github.com/vsimko/node-solr-lambda/issues/289), [#290](https://github.com/vsimko/node-solr-lambda/issues/290)
@@ -24,17 +24,25 @@ The final identity must:
 
 ## Candidate screening (not availability claims)
 
-The following are candidates for further screening only. No candidate is approved or claimed to be available on npm, GitHub, as a domain, or as a trademark.
+The maintainer's current preferred candidate is:
+
+- **Display name:** Solr TS Client
+- **Proposed GitHub repository:** `solr-ts-client`
+- **Proposed npm package:** `solr-ts-client`
+- **Proposed import specifier:** `solr-ts-client`
+- **Intended “TS” meaning:** both TypeScript and type-safe.
+
+This is a preference for further screening, not a final identity decision. No candidate is approved or claimed to be available on npm, GitHub, as a domain, or as a trademark. The spelling must remain **Solr** (the Apache Solr product name), not “Solar”.
 
 | Candidate | Rationale | Known concern / next check |
 |---|---|---|
+| `solr-ts-client` | Short, clear client identity; “TS” intentionally conveys TypeScript and type-safe | Preferred; verify exact npm package, global GitHub repository name, domain and trademark |
 | `solr-client-ts` | Clear client and TypeScript positioning | Verify exact npm package, GitHub repository, domain and trademark |
-| `solr-ts-client` | Shorter TypeScript-oriented alternative | Verify exact npm package, GitHub repository, domain and trademark |
 | `solr-fetch-client` | Highlights the Fetch-based transport | Transport may be an implementation detail rather than enduring identity |
 | `node-solr-client-ts` | Explicit Node.js and TypeScript positioning | Long; verify exact npm package, GitHub repository, domain and trademark |
 | `solr-http-client` | Broad, understandable description | Generic and potentially crowded; verify all namespaces |
 
-Previously identified names requiring exclusion or careful collision review include `solr-client`, `solrkit`, `solr-node-client`, `solrcraft`, and `solrbridge`. The npm registry API could not be queried successfully during this pass, so registry availability remains **unverified**. GitHub search results are not proof of npm or domain availability.
+Previously identified names requiring exclusion or careful collision review include `solr-client`, `solrkit`, `solr-node-client`, `solrcraft`, and `solrbridge`. Exact npm registry availability remains **unverified**; direct registry lookup timed out in the current environment. Connected-installation GitHub searches are not global namespace checks, and no domain or trademark clearance is claimed.
 
 ## Migration strategy
 
@@ -130,8 +138,8 @@ The v4 release line and feature roadmap remain independent. Do not make the rena
 - [x] Maintainer selected full repository + package rename direction.
 - [x] Existing release workflow and release documentation inspected.
 - [x] Initial candidate set and known collisions recorded.
-- [ ] Verify exact npm availability (registry endpoint inaccessible in current research pass).
-- [ ] Verify GitHub namespace and domain availability for finalists.
+- [ ] Verify exact npm availability for `solr-ts-client` (direct registry request timed out in current research pass).
+- [ ] Verify global GitHub namespace and domain availability for `solr-ts-client`.
 - [ ] Complete searchable repository-wide reference inventory.
-- [ ] Select final names and obtain explicit approval.
+- [ ] Complete authoritative checks for preferred candidate `solr-ts-client` and obtain final name approval.
 - [ ] Prepare migration PR and execute only after go/no-go approval.
