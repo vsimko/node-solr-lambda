@@ -1,6 +1,6 @@
 # ADR 0007: Project identity migration
 
-- **Status:** Proposed; preferred candidate identified, availability and clearance not yet verified
+- **Status:** Proposed; maintainer-selected candidate identified, external availability and clearance not yet verified
 - **Date:** 2026-11-13
 - **Owners:** Maintainers
 - **Tracking:** [#288](https://github.com/vsimko/node-solr-lambda/issues/288), [#289](https://github.com/vsimko/node-solr-lambda/issues/289), [#290](https://github.com/vsimko/node-solr-lambda/issues/290)
@@ -24,7 +24,7 @@ The final identity must:
 
 ## Candidate screening (not availability claims)
 
-The maintainer's current preferred candidate is:
+The maintainer selected the following candidate on 2026-11-13 for final screening:
 
 - **Display name:** Solr TS Client
 - **Proposed GitHub repository:** `solr-ts-client`
@@ -32,7 +32,21 @@ The maintainer's current preferred candidate is:
 - **Proposed import specifier:** `solr-ts-client`
 - **Intended “TS” meaning:** both TypeScript and type-safe.
 
-This is a preference for further screening, not a final identity decision. No candidate is approved or claimed to be available on npm, GitHub, as a domain, or as a trademark. The spelling must remain **Solr** (the Apache Solr product name), not “Solar”.
+This is the maintainer-selected candidate, but it is **not yet cleared for migration**. No availability or trademark claim is made. The spelling must remain **Solr** (the Apache Solr product name), not “Solar”.
+
+### Maintainer selection and follow-up screening (2026-11-13)
+
+The maintainer explicitly selected `solr-ts-client` as the intended GitHub repository, npm package, and import specifier.
+
+Follow-up checks produced these results:
+
+- Exact public GitHub repository searches for `solr-ts-client` returned zero results. This is a search result, not a namespace reservation or guarantee of availability.
+- The exact npm registry metadata lookup could not be completed because network/DNS access from the research environment failed. npm package availability and ownership remain unverified.
+- RDAP lookups for `solr-ts-client.com`, `solr-ts-client.dev`, and `solr-ts-client.io` could not be completed because the RDAP endpoints were inaccessible. No domain availability claim is made.
+- Search-engine queries did not produce authoritative trademark-register clearance. No trademark clearance is claimed.
+- The existing SolrTS project remains a close conceptual and visual neighbor and creates a discoverability/confusion risk that must be explicitly accepted or mitigated.
+
+Accordingly, the candidate is selected by the maintainer, but the identity migration remains **NO-GO** until npm ownership/availability, domain strategy, and trademark review are verified by an authorized maintainer and the SolrTS confusion risk is resolved. This update does not authorize repository rename, package reservation/publication, deprecation, or domain purchase.
 
 **Newly identified naming conflict:** an existing project named **SolrTS** describes itself as a TypeScript client for Solr and is associated with the GitHub repository [h-sslefree/solrts](https://github.com/h-sslefree/solrts); its documented package/import name is `solrts`. This is a close conceptual and visual neighbor to “Solr TS Client”. The distinct proposed identifier `solr-ts-client` is not thereby proven unavailable, but the overlap creates a discoverability and brand-confusion risk that must be explicitly weighed before final approval. Do not imply affiliation with that project.
 
@@ -178,8 +192,9 @@ Before marking the inventory complete, repeat the search for variants and extern
 - [x] Maintainer selected full repository + package rename direction.
 - [x] Existing release workflow and release documentation inspected.
 - [x] Initial candidate set and known collisions recorded.
-- [ ] Verify exact npm availability for `solr-ts-client` (direct registry request timed out in current research pass).
-- [ ] Verify global GitHub namespace and domain availability for `solr-ts-client`.
+- [ ] Verify exact npm availability/ownership for `solr-ts-client` (registry lookup unavailable from the research environment).
+- [x] Run exact public GitHub repository search for `solr-ts-client` (zero results; not a reservation).
+- [ ] Verify domain availability for `solr-ts-client` through an authoritative registrar/RDAP source.
 - [x] Complete first-pass searchable tracked-file inventory (42 exact-literal matches); variant, historical/external and account-level checks remain open.
-- [ ] Resolve naming-confusion risk with existing SolrTS project; complete authoritative checks for `solr-ts-client` and obtain final name approval.
+- [ ] Complete authoritative npm and trademark checks; explicitly resolve naming-confusion risk with existing SolrTS project and obtain final identity go/no-go approval.
 - [ ] Prepare migration PR and execute only after go/no-go approval.
