@@ -42,8 +42,8 @@ async function main(){
       const query=el("api-search").value.toLowerCase(),version=el("version-filter").value;
       const filtered=api.filter(x=>(x.area+" "+x.method+" "+x.operationId).toLowerCase().includes(query)&&(!version||(x.versions||[]).includes(version)));
       render("api-list",filtered.slice(0,90),x=>{
-        const node=makeCard(x.area+": "+x.method,x.status,["Types: "+x.typeCoverage,"Unit tests: "+x.unitTests,"Integration: "+x.integrationTests,"Solr versions: "+(x.versions||[]).join(", "),"Evidence: "+Object.entries(x.versionEvidence||{}).map(([v,state])=>v+": "+state).join(", ")],x.documentation?"https://github.com/vsimko/node-solr-lambda/blob/master/"+x.documentation:null);
-        for(const path of x.testFiles||[]){const p=document.createElement("p"),a=document.createElement("a");a.href="https://github.com/vsimko/node-solr-lambda/blob/master/"+path;a.textContent="Test: "+path;p.append(a);node.append(p)}
+        const node=makeCard(x.area+": "+x.method,x.status,["Types: "+x.typeCoverage,"Unit tests: "+x.unitTests,"Integration: "+x.integrationTests,"Solr versions: "+(x.versions||[]).join(", "),"Evidence: "+Object.entries(x.versionEvidence||{}).map(([v,state])=>v+": "+state).join(", ")],x.documentation?"https://github.com/vsimko/solr-ts-client/blob/master/"+x.documentation:null);
+        for(const path of x.testFiles||[]){const p=document.createElement("p"),a=document.createElement("a");a.href="https://github.com/vsimko/solr-ts-client/blob/master/"+path;a.textContent="Test: "+path;p.append(a);node.append(p)}
         return node;
       });
     };
@@ -52,10 +52,17 @@ async function main(){
     const drawDocs=()=>render("docs-list",docs.filter(x=>(x.title+" "+x.path).toLowerCase().includes(el("docs-search").value.toLowerCase())),x=>makeCard(x.title,"guide",[x.path],x.url));
     drawDocs();el("docs-search").addEventListener("input",drawDocs);
     const npm=data.npm.records?.[0];
-    if(npm){el("npm-version").textContent=npm.version;const p=document.createElement("p");p.textContent=(Number.isFinite(npm.downloads)?npm.downloads.toLocaleString()+" downloads in the last 7 days":"Download count unavailable")+" · published package";el("npm-version").after(p)}
-    else el("npm-version").textContent="node-solr-lambda";
+    const npmStatus=document.createElement("p");
+    if(npm){
+      el("npm-version").textContent=npm.version;
+      npmStatus.textContent=(Number.isFinite(npm.downloads)?npm.downloads.toLocaleString()+" downloads in the last 7 days":"Download count unavailable")+" · published package";
+    }else{
+      el("npm-version").textContent="solr-ts-client";
+      npmStatus.textContent="Package details will appear after the first public release.";
+    }
+    el("npm-version").after(npmStatus);
     const copy=el("copy-install");
-    copy?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText("npm install node-solr-lambda");copy.textContent="Copied"}catch{copy.textContent="Copy unavailable"}});
+    copy?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText("npm install solr-ts-client");copy.textContent="Copied"}catch{copy.textContent="Copy unavailable"}});
   }catch(error){
     el("api-summary").textContent="API inventory unavailable: "+error.message;
     el("docs-list").textContent="Documentation catalogue unavailable. Use the repository documentation link.";
