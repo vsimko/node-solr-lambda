@@ -91,14 +91,20 @@ jobs:
                   updatedBody = `${currentBody.trim()}\n\n${metadata}`;
                 }
 
-                if (updatedBody !== currentBody) {
+                const reopen = trackedIssue.state === "closed";
+                if (updatedBody !== currentBody || reopen) {
                   await github.rest.issues.update({
                     owner,
                     repo,
                     issue_number: trackedIssue.number,
-                    body: updatedBody
+                    body: updatedBody,
+                    ...(reopen ? { state: "open" } : {})
                   });
-                  core.info(`Refreshed release metadata on issue #${trackedIssue.number} for Solr ${version}.`);
+                  if (reopen) {
+                    core.info(`Reopened existing qualification issue #${trackedIssue.number} for still-unqualified Solr ${version}.`);
+                  } else {
+                    core.info(`Refreshed release metadata on issue #${trackedIssue.number} for Solr ${version}.`);
+                  }
                 } else {
                   core.info(`Release metadata on issue #${trackedIssue.number} is already current.`);
                 }
