@@ -11,6 +11,7 @@ Version 4 is a TypeScript-first redesign of node-solr-lambda. It replaces the v3
 - **Query and documents:** Typed query parser options, filters, sorting, cursor pagination, classic and JSON facets, highlighting, grouping, stats, MoreLikeThis, debug/explain and spatial helpers; document add/update/delete, backpressure-aware `addStream()` ingestion from async iterables, atomic updates, JSON update commands, and explicit commit/soft-commit/optimize behavior.
 - **Administration:** Typed Schema, Config, Core Admin, Collections, Security, Metrics, System diagnostics, Export, ReplicationHandler, and backup/restore APIs. The Collections surface includes typed replica/shard lifecycle, aliases, cluster status, and V1 MIGRATE contracts.
 - **Developer experience:** Package-root TypeScript exports, action-specific parameter models, typed response envelopes, ESM/CommonJS declarations, compile-time consumer fixtures, and a machine-readable API inventory.
+- **Diagnostic benchmarking:** The opt-in client-versus-Fetch harness records runtime and host context (OS release, architecture, CPU, and physical memory) alongside latency, throughput, CPU, memory, and event-loop measurements. These reports estimate wrapper overhead; they are not competitive performance claims.
 - **Safety and compatibility evidence:** Operation-specific documentation and integration coverage against pinned Solr 8.11.4, 9.11.0, and 10.1.0 images. Untested or destructive operations are explicitly identified rather than described as universally verified.
 
 ## Breaking changes from v3
