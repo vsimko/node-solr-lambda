@@ -113,3 +113,10 @@ test("CI keeps pinned Solr baselines parseable and candidate qualification opt-i
   assert.match(ciWorkflow, /candidate_solr_version:/);
   assert.match(ciWorkflow, /downloads\.apache\.org\/solr\/solr\/\$CANDIDATE_SOLR_VERSION/);
 });
+
+test("release watch reopens a closed issue while its candidate is still unqualified", () => {
+  const workflow = readFileSync(new URL("../.github/workflows/solr-release-watch.yml", import.meta.url), "utf8");
+  assert.match(workflow, /const reopen = trackedIssue\.state === "closed"/);
+  assert.match(workflow, /\{ state: "open" \}/);
+  assert.match(workflow, /solr-release-watch:metadata:start/);
+});
