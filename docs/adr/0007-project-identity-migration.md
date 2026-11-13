@@ -1,6 +1,6 @@
 # ADR 0007: Project identity migration
 
-- **Status:** Proposed; maintainer-selected candidate identified, external availability and clearance not yet verified
+- **Status:** Proposed; maintainer-selected identity and migration sequence recorded; external clearance gates remain NO-GO
 - **Date:** 2026-11-13
 - **Owners:** Maintainers
 - **Tracking:** [#288](https://github.com/vsimko/node-solr-lambda/issues/288), [#289](https://github.com/vsimko/node-solr-lambda/issues/289), [#290](https://github.com/vsimko/node-solr-lambda/issues/290)
@@ -96,9 +96,10 @@ Do not mechanically replace historical references that are intentionally retaine
 
 - Publish the new package under the selected name only after its metadata, tarball, provenance, ESM/CommonJS exports, and consumer smoke tests pass.
 - Keep the old `node-solr-lambda` package available during a compatibility window. Do not immediately unpublish it.
-- Decide whether the old package receives a thin compatibility release or a deprecation notice with an explicit replacement and migration instructions. Do not promise API compatibility unless it is actually provided and tested.
-- Deprecate old versions/package only after the new package is publicly installable and verified, and after explicit maintainer approval.
-- Document whether future security fixes are backported to the old package during the transition.
+- Keep `node-solr-lambda` as a separate, existing npm package; do not transfer it, unpublish it, or continue normal releases.
+- After `solr-ts-client` is published and verified from a clean consumer project, deprecate the old package with a clear npm deprecation message naming `solr-ts-client` and its migration instructions. This requires explicit maintainer approval.
+- The old package is not to remain the canonical GitHub-linked project. Check the exact npm behavior: the deprecation message can be changed without a code release, but repository/homepage metadata shown for an already-published version may require a final metadata-only package version to remove the GitHub link. Do not publish such a version unless separately approved; if metadata cannot be detached without a new version, document that limitation and retain the deprecation message as the primary notice.
+- No compatibility or future security-fix backport is promised for `node-solr-lambda`; it remains available as a deprecated historical package.
 
 ### 5. Trusted publishing and provenance
 
@@ -114,15 +115,15 @@ The current npm account settings and trusted-publisher state are not visible fro
 
 ## Dependency order
 
-1. Candidate screening and final name approval.
-2. Complete identity-reference inventory and migration checklist.
-3. Update source/docs/workflows/tests on a branch; CI and package-consumer tests pass.
-4. Verify new npm package namespace and Trusted Publisher configuration plan.
-5. Merge preparation PR; do not publish yet.
-6. Rename GitHub repository and update external settings in a coordinated window.
-7. Verify redirects, Pages, Actions, clone remotes, and provenance configuration.
-8. Publish and verify the new package with explicit approval.
-9. Add migration instructions and only then deprecate the old package with explicit approval.
+1. **Clear the name (NO-GO until complete):** verify exact npm registry availability/ownership and publish-time acceptance; verify the GitHub owner namespace; obtain an authoritative domain strategy (purchase is not mandatory); complete preliminary trademark review and explicitly accept or mitigate the existing SolrTS confusion risk. Record the maintainer's go/no-go decision.
+2. **Finish the inventory:** search active tracked files and variants; review issue/PR templates, Discussions, Pages, Actions/environment settings, npm Trusted Publisher/account configuration, external integrations, and downstream consumers. Preserve historical/legal references deliberately.
+3. **Prepare the migration PR while the repository still has its old name:** change package name to `solr-ts-client`; update repository/homepage/bugs URLs to the intended new canonical GitHub URL; update README/import instructions, docs, website/site data, badges, workflows, tests, lockfile, release scripts, and migration/deprecation notice. Do not publish or deprecate anything.
+4. **Validate the prepared change:** run the complete applicable CI, package pack/tarball checks, ESM and CommonJS imports, TypeScript consumer tests, clean install, and package smoke tests. Review all references and rollback steps. Merge only after checks pass.
+5. **Schedule and rename GitHub:** rename the existing repository in place from `vsimko/node-solr-lambda` to `vsimko/solr-ts-client`; preserve repository history, issues, PRs, tags, and rely on GitHub redirects. Update local remotes, Pages/custom-domain settings, Actions references, badges, integrations, and canonical URLs.
+6. **Verify GitHub after rename:** test old-URL redirects, clone/fetch/push remotes, Pages production and preview deployments, workflows, issue/PR links, and external integrations. Resolve failures before npm publication.
+7. **Configure npm Trusted Publishing for the new identity:** configure the new `solr-ts-client` package against owner `vsimko`, repository `solr-ts-client`, workflow `publish.yml`, and environment `npm-publish`; verify the environment branch restriction and OIDC permissions. Do not add long-lived npm tokens.
+8. **Publish the new package only with explicit release-owner approval:** publish `solr-ts-client` using trusted publishing/provenance; verify the provenance points to the renamed public repository and exact commit; test installation and ESM/CommonJS/TypeScript use in a clean consumer project.
+9. **Retire the old npm package last:** only after the new package is publicly installable and verified, set the `node-solr-lambda` npm deprecation message to direct users to `solr-ts-client`. Keep the old package name available and do not unpublish it. Investigate whether removing its repository link requires a final metadata-only version; do not create that version without separate approval. Do not deprecate before the replacement works.
 
 The v4 release line and feature roadmap remain independent. Do not make the rename a prerequisite for v4.0.0 unless the release owner explicitly chooses to coordinate them.
 
@@ -137,7 +138,7 @@ The v4 release line and feature roadmap remain independent. Do not make the rena
 
 **Go only when all are true:**
 
-- [ ] Maintainer approves exact GitHub and npm names.
+- [x] Maintainer selected exact working names: display name `Solr TS Client`; GitHub repository, npm package, and import specifier `solr-ts-client` (external clearance still required).
 - [ ] Exact npm registry availability and namespace ownership verified.
 - [ ] GitHub name collision and domain checks completed.
 - [ ] Preliminary trademark review completed; no unresolved high-risk conflict.
@@ -212,5 +213,5 @@ These checks improve the evidence but do not change the **NO-GO** decision: npm 
 - [x] Run exact public GitHub repository search for `solr-ts-client` (zero results; not a reservation).
 - [ ] Confirm domain availability for `solr-ts-client.com`, `.dev`, and `.io` with an authoritative registrar (RDAP returned 404 for all three; purchase/reservability not established).
 - [x] Complete first-pass searchable tracked-file inventory (42 exact-literal matches); variant, historical/external and account-level checks remain open.
-- [ ] Complete authoritative npm and trademark checks; explicitly resolve naming-confusion risk with existing SolrTS project and obtain final identity go/no-go approval.
-- [ ] Prepare migration PR and execute only after go/no-go approval.
+- [ ] Complete authoritative npm ownership/publish-time acceptance and preliminary trademark checks; explicitly accept or mitigate naming-confusion risk with existing SolrTS project and record final identity go/no-go approval.
+- [ ] Prepare and merge the migration PR only after name go/no-go; perform GitHub rename, new npm publication, and old-package deprecation strictly in the sequence above and only with explicit approval.
