@@ -28,6 +28,14 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+      - name: Verify npm trusted publisher workflow context
+        run: |
+          node --input-type=module -e '
+            if (process.env.GITHUB_REPOSITORY !== "vsimko/solr-ts-client") throw new Error("Unexpected repository claim");
+            if (process.env.GITHUB_WORKFLOW_REF !== "vsimko/solr-ts-client/.github/workflows/publish.yml@refs/heads/master") throw new Error("Unexpected workflow_ref: " + process.env.GITHUB_WORKFLOW_REF);
+            if (process.env.GITHUB_REF !== "refs/heads/master") throw new Error("Unexpected ref");
+            if (process.env.GITHUB_JOB !== "publish") throw new Error("Unexpected job");
+          '
       - name: Ensure npm supports trusted publishing
         run: |
           npm install --global npm@11.15.0
