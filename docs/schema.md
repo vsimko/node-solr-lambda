@@ -118,7 +118,7 @@ import type {
   SolrSchemaFieldsResponse,
   SolrSchemaFieldTypesResponse,
   SolrSchemaUniqueKeyResponse
-} from "node-solr-lambda";
+} from "solr-ts-client";
 
 const fullSchema = await solr.request<SolrSchemaReadResponse>("/solr/books/schema");
 const fields = await solr.request<SolrSchemaFieldsResponse>("/solr/books/schema/fields");
