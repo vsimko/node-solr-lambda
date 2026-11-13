@@ -29,11 +29,11 @@ The repository provides a separate, manually dispatched workflow at `.github/wor
 
 Before enabling publication:
 
-1. On npmjs.com, open the `node-solr-lambda` package settings and add a GitHub Actions trusted publisher.
-2. Set the owner/user to `vsimko`, repository to `node-solr-lambda`, workflow filename to `publish.yml`, and environment to `npm-publish`.
+1. On npmjs.com, open the `solr-ts-client` package settings and add a GitHub Actions trusted publisher.
+2. Set the owner/user to `vsimko`, repository to `solr-ts-client`, workflow filename to `publish.yml`, and environment to `npm-publish`.
 3. Allow direct `npm publish` for this trusted publisher.
 4. In GitHub repository settings, create the `npm-publish` environment and configure required reviewers / deployment protection. Restrict who can approve and dispatch releases.
-5. Verify the package is public and its `package.json` repository URL exactly matches `https://github.com/vsimko/node-solr-lambda.git`.
+5. Verify the package is public and its `package.json` repository URL exactly matches `https://github.com/vsimko/solr-ts-client.git`.
 6. Do not test this workflow by publishing a real version until the release owner explicitly approves a prerelease test. The first successful trusted publish must occur within two days of creating the npm trusted-publisher configuration; otherwise recreate the configuration.
 
 The workflow passes `--provenance` to the existing version-aware publisher. npm trusted publishing also generates provenance automatically for public packages published from a public repository. The account's existing npm settings and the trusted-publisher configuration cannot be verified from this repository. A merged workflow alone does not mean trusted publishing is configured or that an attestation has been produced.
@@ -43,14 +43,14 @@ To publish, select the workflow on the `master` branch, set `confirm_publish` to
 ## Publication
 
 1. Complete and approve the release checklist in Issue #110, including the exact release-candidate commit and full Node.js/Solr matrix.
-2. Confirm `npm view node-solr-lambda dist-tags` and the current version before publication.
+2. Confirm `npm view solr-ts-client dist-tags` and the current version before publication.
 3. Confirm npm trusted publishing is configured exactly as above and that the `npm-publish` environment is protected.
 4. Run the `Publish to npm` workflow manually from `master`, with `confirm_publish: true`, and approve the protected environment.
-5. Verify `npm view node-solr-lambda@<version> version dist.tarball`, the corresponding dist-tag, and the published provenance attestation; then install that exact version in a clean consumer and repeat the ESM/CommonJS/type smoke test.
+5. Verify `npm view solr-ts-client@<version> version dist.tarball`, the corresponding dist-tag, and the published provenance attestation; then install that exact version in a clean consumer and repeat the ESM/CommonJS/type smoke test.
 
 ## Rollback
 
-If a prerelease is defective, publish a corrected higher prerelease version under the same prerelease tag and move that tag forward. Deprecate the defective version with `npm deprecate node-solr-lambda@<version> "Reason and replacement version"` so consumers receive a warning. Prefer deprecation and a replacement release over unpublishing; unpublishing is subject to npm's policy and can break downstream lockfiles. For a stable release, prepare and verify a corrected patch release, then move `latest` only after the release owner approves it. Record the affected version, replacement, dist-tag change, and consumer impact in the changelog.
+If a prerelease is defective, publish a corrected higher prerelease version under the same prerelease tag and move that tag forward. Deprecate the defective version with `npm deprecate solr-ts-client@<version> "Reason and replacement version"` so consumers receive a warning. Prefer deprecation and a replacement release over unpublishing; unpublishing is subject to npm's policy and can break downstream lockfiles. For a stable release, prepare and verify a corrected patch release, then move `latest` only after the release owner approves it. Record the affected version, replacement, dist-tag change, and consumer impact in the changelog.
 
 ## Scope and gates
 
