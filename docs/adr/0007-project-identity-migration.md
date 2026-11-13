@@ -156,6 +156,19 @@ The 42 files are grouped below by migration responsibility:
 - Review older ADRs and audit snapshots individually: update stale canonical navigation links only when it does not rewrite the historical decision record.
 - The literal search did not return any files under `src/`; runtime source does not appear to hard-code the old identity in the indexed default-branch content.
 
+### Follow-up variant search (2026-11-13)
+
+A second pass against the default-branch code-search index checked common alternate spellings and public-facing references:
+
+- Searches for the underscore form `node_solr_lambda`, camel-case `nodeSolrLambda`, and the guessed Pages host `node-solr-lambda.vercel.app` returned no indexed files.
+- The canonical GitHub URL search returned 26 indexed files in this pass (the earlier inventory recorded 27); the difference illustrates that GitHub code-search indexing/results are a discovery aid, not a stable exhaustive count.
+- The exact npm package URL `npmjs.com/package/node-solr-lambda` appeared in 3 files: `website/index.html`, `scripts/site/generate-data.mjs`, and `test/site-data-validator.test.mjs`.
+- The old Git remote suffix `node-solr-lambda.git` appeared in 3 files: `docs/release-process.md`, `package.json`, and `test/no-zod-consumer.mjs`.
+- The old install command appeared in 11 indexed files in this pass, consistent with the earlier 12-file baseline within normal search-index/result variation.
+- The broader `solr-lambda` search returned the same 42-file set as the exact old-name baseline. No additional variant-only paths were identified.
+
+These results do not inspect Git history, issue/PR text, discussions, GitHub Pages settings, Actions variables/secrets/environments, npm Trusted Publisher configuration, npm account state, or downstream consumers. The connected GitHub search is limited to indexed repository code and cannot certify external configuration. Therefore this remains a **partial searchable inventory**, not a complete migration inventory.
+
 ### Remaining inventory work
 
 Before marking the inventory complete, repeat the search for variants and external surfaces: case/spacing variants, old GitHub URL forms, npm package/import strings, badges and Pages URLs, GitHub Actions environment/repository identifiers, release and OIDC settings, issue/PR templates, discussions, and npm Trusted Publisher configuration. External account settings and downstream dependents require maintainer access and are not visible from this repository search.
