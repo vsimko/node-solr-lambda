@@ -135,6 +135,31 @@ The v4 release line and feature roadmap remain independent. Do not make the rena
 
 **No-go:** any unverified namespace, unresolved trademark concern, missing owner access, failing CI, or inability to verify trusted publishing. No external rename or publication should occur on a no-go.
 
+## Tracked-reference inventory (2026-11-13)
+
+A GitHub code search for the exact literal `node-solr-lambda` in this repository's default-branch index returned **42 tracked files**. A second search for the canonical old repository URL returned 27 files, all within the 42-file set. The search for the old package install command returned 12 files, also within that set. This is a searchable baseline, not a claim that external systems, unindexed files, Git history, issue/PR bodies, or third-party consumers have been inventoried.
+
+The 42 files are grouped below by migration responsibility:
+
+- **Package and primary entry points:** `package.json`, `package-lock.json`, `README.md`, `test/no-zod-consumer.mjs`.
+- **Website and generated site data:** `website/index.html`, `website/assets/dashboard.js`, `scripts/site/generate-data.mjs`, `scripts/site/validate-data.mjs`, `docs/site-data.schema.json`, `docs/api-inventory.json`, `test/site-data-generator.test.mjs`, `test/site-data-validator.test.mjs`.
+- **CI and legal metadata:** `.github/workflows/ci.yml`, `LICENSE`.
+- **Release and migration documentation:** `CHANGELOG.md`, `docs/release-process.md`, `docs/migration-v3-to-v4.md`, `docs/release-notes-v4.0.0.md`.
+- **Current user/developer documentation:** `docs/getting-started.md`, `docs/validation.md`, `docs/solr-client-comparison.md`, `docs/api-coverage.md`, `docs/api-reference.md`, `docs/raw-requests.md`, `docs/compatibility.md`, `docs/testing-strategy.md`, `docs/query.md`, `docs/update.md`, `docs/config.md`, `docs/benchmarking.md`, `docs/schema.md`, `docs/architecture.md`, `docs/endpoint-inventory.md`, `docs/solr-v2-api-strategy.md`, `docs/roadmap.md`.
+- **Historical ADRs and audit records:** `docs/audit-2026-11-06.md`, `docs/adr/0002-solr-client-api-coverage.md`, `docs/adr/0003-cross-client-test-strategy.md`, `docs/adr/0004-suggester-query-component.md`, `docs/adr/0005-lossless-json-codec.md`, `docs/adr/0006-streaming-document-ingestion.md`, `docs/adr/0007-project-identity-migration.md`.
+
+### Migration treatment
+
+- Update package metadata, lockfile, README install/import instructions, current docs, website source, site-data schema/fixtures, consumer tests, and CI links as part of the reviewed migration preparation change.
+- Review the LICENSE hit manually; do not change copyright or legal ownership text merely because the repository/package identity changes.
+- Preserve old-name references in changelog history, the v3-to-v4 migration history, release notes describing already-published versions, and this ADR's migration context. Where useful, label these as historical rather than mechanically replacing them.
+- Review older ADRs and audit snapshots individually: update stale canonical navigation links only when it does not rewrite the historical decision record.
+- The literal search did not return any files under `src/`; runtime source does not appear to hard-code the old identity in the indexed default-branch content.
+
+### Remaining inventory work
+
+Before marking the inventory complete, repeat the search for variants and external surfaces: case/spacing variants, old GitHub URL forms, npm package/import strings, badges and Pages URLs, GitHub Actions environment/repository identifiers, release and OIDC settings, issue/PR templates, discussions, and npm Trusted Publisher configuration. External account settings and downstream dependents require maintainer access and are not visible from this repository search.
+
 ## Current status and open work
 
 - [x] Maintainer selected full repository + package rename direction.
@@ -142,6 +167,6 @@ The v4 release line and feature roadmap remain independent. Do not make the rena
 - [x] Initial candidate set and known collisions recorded.
 - [ ] Verify exact npm availability for `solr-ts-client` (direct registry request timed out in current research pass).
 - [ ] Verify global GitHub namespace and domain availability for `solr-ts-client`.
-- [ ] Complete searchable repository-wide reference inventory.
+- [x] Complete first-pass searchable tracked-file inventory (42 exact-literal matches); variant, historical/external and account-level checks remain open.
 - [ ] Resolve naming-confusion risk with existing SolrTS project; complete authoritative checks for `solr-ts-client` and obtain final name approval.
 - [ ] Prepare migration PR and execute only after go/no-go approval.
