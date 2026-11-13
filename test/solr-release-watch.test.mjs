@@ -41,6 +41,7 @@ test("Solr download parser accepts valid HTML href forms but ignores external, n
     <a href="10.4.0/?C=M">sorted index link</a>
     <a href="https://example.invalid/10.5.0/">external link</a>
     <a href="subdir/10.6.0/">nested link</a>
+    <a href="/solr/solr-other/10.8.0/">same-origin path outside index</a>
     <a href="10.7.0-rc1/">candidate</a>
   `;
   assert.deepEqual(parseSolrDirectoryListing(html), ["10.2.0"]);
@@ -79,6 +80,20 @@ test("release check rejects an unexpected upstream content type", async () => {
         ok: true,
         headers: { get: () => "application/json" },
         text: async () => JSON.stringify({ error: "temporary upstream failure" })
+      })
+    }),
+    /unexpected content type/
+  );
+});
+
+test("release check rejects a missing upstream content type", async () => {
+  await assert.rejects(
+    checkSolrReleases({
+      workflowYaml: workflow,
+      fetchImpl: async () => ({
+        ok: true,
+        headers: { get: () => null },
+        text: async () => listing
       })
     }),
     /unexpected content type/
