@@ -1,75 +1,82 @@
 # Performance benchmarking
 
-The repository includes a dependency-free benchmark harness to compare the typed client with direct Node.js Fetch calls against the same Solr endpoint. It is intended to establish reproducible baselines before optimization; it does not claim that the client is faster than direct HTTP or competing Solr clients.
+The repository includes a lightweight, opt-in benchmark harness. It has two distinct possible purposes, which must not be conflated:
+
+1. **Wrapper-overhead baseline:** compare this package with direct Node.js Fetch to estimate the cost of the abstractions and processing added by this library.
+2. **Competitive benchmark:** compare independent Solr client libraries that provide comparable functionality in the same JavaScript runtime.
+
+The current harness implements only the first purpose. It does **not** establish that this package is faster, more efficient, or more capable than competing JavaScript Solr clients.
 
 ## Scope
 
-The runner supports five workloads:
+The harness supports five workloads:
 
-- **Query:** repeated `GET /select?q=*:*&rows=N&wt=json` requests with configurable warm-up and concurrency.
-- **Facet:** classic field faceting over the benchmark `title_s` and `body_s` fields, returning facet counts without document rows.
-- **Large response:** retrieves `rows=N` documents including `id,title_s,body_s` to measure larger JSON response parsing and transfer.
+- **Query:** repeated `GET /select?q=*:*&rows=N&wt=json` requests.
+- **Facet:** classic field faceting over `title_s` and `body_s`.
+- **Large response:** retrieves documents with `id,title_s,body_s`.
 - **Bulk ingestion:** concurrent JSON-array `add()` requests followed by one hard commit.
 - **Streaming ingestion:** one `addStream()` request followed by one hard commit.
 
-Each workload can run through the typed client, direct Fetch, or both. The direct Fetch path uses the same Node.js runtime and network stack, so the comparison isolates client-layer serialization/transport overhead rather than comparing different HTTP implementations.
+Each workload can run through the typed client, direct Node.js Fetch, or both. The direct Fetch path is the low-level baseline for the same Node runtime and HTTP stack. It helps estimate the overhead of this library's client layer; it is not an independent competing Solr client.
 
-Query, facet, and large-response results also report serialized response bytes, returned document count, Solr numFound, and facet bucket count where applicable. The JSON report includes Node/V8 and host metadata (OS release, architecture, CPU model/count, and total physical memory), optional Solr version, elapsed time, throughput, request latency percentiles (p50/p95/p99), process CPU time, RSS/heap deltas, sampled peak RSS, and event-loop delay. For bulk requests, latency is measured per batch; for streaming, ingestion and commit times are reported separately.
+The JSON report includes Node/V8 and host metadata, optional Solr version, elapsed time, throughput, request latency percentiles (p50/p95/p99), process CPU time, RSS/heap deltas, sampled peak RSS, and event-loop delay. Query workloads also report response size and result/facet counts.
 
-## Requirements and safety
+## Recommended routine: wrapper-overhead baseline
 
-- Node.js 22, 24, or 26 (the v4 package engine range). Node.js 20 reached EOL and is not supported.
-- A running Solr server and a **pre-created disposable collection**.
-- A stable, dedicated host for meaningful performance comparisons.
-- Never point the benchmark at a production or shared Solr collection. The script adds uniquely named documents and does not create, clear, or delete collections/documents.
+For a pragmatic comparison, start with only **query** and **bulk ingestion**:
 
-Build and run:
+- Use GitHub Actions' manually triggered `Pragmatic benchmark` workflow.
+- Use the pinned Solr 10.1.0 container and Node.js 26 runtime.
+- Use the small default dataset and low concurrency configured in that workflow.
+- Compare this client with direct Fetch on the same runner and Solr instance. Each mode uses its own disposable collection to avoid data/order effects.
+- Keep the raw JSON reports as workflow artifacts. Treat the numbers as a relative smoke baseline, not as a stable performance claim.
+
+The workflow is opt-in and is not a required PR check. It does not run long/high-concurrency workloads and does not fail based on performance thresholds. Run it only when a change plausibly affects request serialization, transport, response parsing, or ingestion.
+
+For a local exploratory run:
 
 ```sh
 npm ci
 npm run build
-SOLR_BASE_URL=http://127.0.0.1:8983/solr \
-SOLR_COLLECTION=benchmark \
-SOLR_VERSION=10.1.0 \
-npm run bench -- --workload all --mode both \
-  --docs 10000 --batch-size 500 --iterations 100 \
-  --rows 10 --concurrency 4 --warmup 10 --payload-bytes 256 \
-  --output benchmark-node-solr.json
+SOLR_BASE_URL=http://127.0.0.1:8983/solr \\
+SOLR_COLLECTION=benchmark \\
+SOLR_VERSION=10.1.0 \\
+npm run bench -- --workload query --mode both \\
+  --iterations 25 --rows 10 --concurrency 1 --warmup 3 \\
+  --output benchmark-query.json
 ```
 
-The collection must exist before the run. For a local disposable standalone instance, create it with the Solr image's `solr-precreate` command or the Collections API. The script never changes server topology or collection configuration.
+The collection must be pre-created and disposable. Never point the benchmark at a production or shared collection. The runner adds uniquely named documents for ingestion workloads and does not create, clear, or delete collections/documents.
 
-Authentication can be supplied without putting secrets in the URL:
+## JavaScript ecosystem: potential competitors
 
-```sh
-SOLR_USERNAME=benchmark-user SOLR_PASSWORD='...' npm run bench -- --workload query
-# Or:
-SOLR_BEARER_TOKEN='...' npm run bench -- --workload query
-```
+A preliminary survey did not identify a clearly maintained, broadly adopted, general-purpose JavaScript Solr client that is an obvious modern benchmark peer. The closest candidates have important limitations:
 
-Use `npm run bench -- --help` to list options. `SOLR_TIMEOUT_MS` controls the client request timeout. `SOLR_VERSION` is a label recorded in the report; the script does not infer the server version.
+| Candidate | What it is | Assessment for a competitive benchmark |
+| --- | --- | --- |
+| `solr-client` (`lbdremy/solr-node-client`) | The best-known standalone Node.js Solr client by historical GitHub adoption; supports query and update operations. | The strongest historical comparator, but not a current baseline: latest npm release is `0.10.0-rc10` from March 2022; its documented compatibility is Solr 3–8. It is marked inactive/abandoned by package-health sources. A Solr 8 legacy comparison may be possible after compatibility and dependency checks, but should be labelled legacy. |
+| `feathers-solr` | FeathersJS database/service adapter over Solr, with query, CRUD, and raw Solr parameter support. | Not a general-purpose client API; it is framework-specific and its published release is old/inactive. It could be a relevant competitor only for Feathers applications, not for a general Solr client shoot-out. |
+| `solrts` / SolrTS | Small TypeScript query-oriented client intended to make Solr query construction more expressive. | Very small ecosystem footprint in available package directories; not a credible broad-market performance baseline without evidence of active maintenance and real adoption. |
+| Apache Solr generated JavaScript client | OpenAPI-generated JavaScript client used by the Solr Admin UI. | Not published as a standalone npm release and not currently presented by Apache Solr as a general-purpose external client package. It is an interesting first-party implementation reference, not a ready-made npm competitor. |
 
-## Reproducibility protocol
+The historical `solr-client` package is therefore the answer to “which existing package is our biggest recognizable competitor?” It is **not** the answer to “which actively maintained client should we use to prove competitiveness today?” At present, there may be no strong, maintained, like-for-like competitor in the general-purpose Node.js Solr-client niche.
 
-For a defensible comparison:
+Before adding any competitor to the harness, verify the exact npm release, repository activity, supported Solr versions, Node compatibility, security/dependency status, and whether equivalent query and bulk-ingestion semantics can be implemented. Do not add an adapter or an abandoned package merely to make the benchmark look competitive.
 
-1. Pin the exact Solr Docker image and record its configset, JVM flags, heap, security mode, and collection schema.
-2. Record Node.js version, OS/kernel, architecture, CPU model/count, memory limits, and Git commit from the JSON report.
-3. Use the same Solr host, collection settings, document count, payload size, batch size, query rows, concurrency, and warm-up for each run.
-4. Use a fresh disposable collection or equivalent clean dataset for each mode. The runner intentionally does not delete documents; every run writes unique IDs.
-5. Run each mode in a separate process for serious comparisons. `--mode both` is convenient for exploratory checks, but client mode runs before direct Fetch and both mutate the collection.
-6. Repeat at least five times, report medians and spread across runs, and avoid concurrent workloads on the same Solr server.
-7. Keep raw JSON reports with the environment details. Do not compare results from different hardware or Solr/JVM configurations as if they were controlled experiments.
+A client from another language (for example Apache SolrJ) is not a like-for-like replacement: runtime, HTTP implementation, JSON handling, and client architecture all change. Such a comparison can be interesting as a separate ecosystem experiment, but it should not be used to claim that one JavaScript client is faster than another.
 
-## Interpretation and limitations
+## Safety and interpretation
 
-- Query defaults to `q=*:*` and returns 10 documents; use `--rows 0` for a count-only request or adjust `--rows` to measure response parsing at another size.
-- Bulk request latency is measured per batch. The reported batch throughput excludes the final commit; the commit duration is reported separately.
+- The benchmark requires a running Solr server and a **pre-created disposable collection**.
+- Use identical Solr version, schema/configset, dataset, request parameters, and JVM settings for any meaningful comparison.
+- `--mode both` is convenient for exploration, but it runs client mode before Fetch mode. Separate collections/processes are preferred when order or mutation could affect results.
+- Query defaults to `q=*:*` and returns 10 documents; use `--rows 0` for count-only requests.
+- Bulk request latency is measured per batch; final commit duration is reported separately.
 - Streaming throughput excludes the final commit; ingestion and commit durations are reported separately.
-- Peak RSS is sampled every 20 ms and can miss short-lived spikes. CPU and memory measurements are process-level, not container-level.
-- The current suite is a first baseline, not a complete workload model. Facet coverage uses two representative string fields and is not a substitute for workload-specific facet schemas. Large-response coverage depends on the collection already containing enough documents; run bulk ingestion first or use a populated disposable collection. The suite does not yet cover concurrent streaming producers, SolrCloud routing, TLS, or comparisons against third-party clients.
-- There are no performance thresholds in ordinary CI. CI tests the benchmark primitives, not noisy performance numbers. Add regression budgets only after stable baselines and variance are understood.
+- Peak RSS is sampled and may miss short-lived spikes. CPU and memory metrics are process-level.
+- GitHub-hosted runner performance varies. Compare modes from the same workflow run only; do not compare absolute numbers across different runs as controlled experiments.
+- There are no performance thresholds in ordinary CI. Benchmark reports are diagnostic artifacts, not release gates.
 
-## Next steps
+## Further work
 
-Use [Issue #314](https://github.com/vsimko/node-solr-lambda/issues/314) to track real benchmark runs, workload expansion, comparison against maintained JavaScript clients, and evidence-backed optimization. No optimization or performance-leadership claim should be made from the harness alone.
+Use [Issue #339](https://github.com/vsimko/node-solr-lambda/issues/339) for the bounded wrapper-overhead baseline and candidate evaluation. Keep broader performance research under [Issue #314](https://github.com/vsimko/node-solr-lambda/issues/314), but do not expand it into long-running benchmark infrastructure unless real user workloads justify it.
