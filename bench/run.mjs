@@ -5,12 +5,12 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { writeFileSync } from "node:fs";
-import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies } from "./lib.mjs";
+import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies, summarizeQueryResponse } from "./lib.mjs";
 
 const HELP = `Usage: npm run bench -- [options]
 
 Options:
-  --workload query|bulk|stream|all   Workload to run (default: all)
+  --workload query|facet|large-response|bulk|stream|all   Workload to run (default: all)
   --mode client|fetch|both           Compare the typed client with direct Fetch (default: both)
   --docs N                           Documents for bulk/stream workloads (default: 10000)
   --batch-size N                     Documents per bulk request (default: 500)
@@ -58,7 +58,7 @@ function parseArgs(argv) {
   for (const key of ["warmup", "payloadBytes", "rows"]) {
     if (!Number.isInteger(options[key]) || options[key] < 0) throw new RangeError(`--${key} must be a non-negative integer`);
   }
-  if (!["query", "bulk", "stream", "all"].includes(options.workload)) throw new Error("Invalid --workload");
+  if (!["query", "facet", "large-response", "bulk", "stream", "all"].includes(options.workload)) throw new Error("Invalid --workload");
   if (!["client", "fetch", "both"].includes(options.mode)) throw new Error("Invalid --mode");
   return options;
 }
@@ -121,7 +121,7 @@ async function run() {
   const payload = "x".repeat(options.payloadBytes);
   const runId = randomUUID().slice(0, 8);
   const modes = options.mode === "both" ? ["client", "fetch"] : [options.mode];
-  const workloads = options.workload === "all" ? ["bulk", "stream", "query"] : [options.workload];
+  const workloads = options.workload === "all" ? ["bulk", "stream", "query", "facet", "large-response"] : [options.workload];
   const results = [];
 
   async function sendBulk(mode, docs) {
@@ -140,19 +140,34 @@ async function run() {
     }), "direct Fetch commit");
   }
 
-  async function sendQuery(mode) {
-    if (mode === "client") return client.query({ query: "*:*", limit: options.rows, params: { wt: "json" } });
+  async function sendQuery(mode, workload = "query") {
+    const facet = workload === "facet";
+    const largeResponse = workload === "large-response";
+    const rows = facet ? 0 : options.rows;
+    if (mode === "client") return client.query({
+      query: "*:*", limit: rows, params: { wt: "json" },
+      ...(largeResponse ? { fields: ["id", "title_s", "body_s"] } : {}),
+      ...(facet ? { facets: { fields: ["title_s", "body_s"], limit: 20, minCount: 1 } } : {})
+    });
     const url = new URL(selectUrl);
     url.searchParams.set("q", "*:*");
-    url.searchParams.set("rows", String(options.rows));
+    url.searchParams.set("rows", String(rows));
     url.searchParams.set("wt", "json");
-    return readJsonResponse(await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) }), "direct Fetch query");
+    if (largeResponse) url.searchParams.set("fl", "id,title_s,body_s");
+    if (facet) {
+      url.searchParams.set("facet", "true");
+      url.searchParams.append("facet.field", "title_s");
+      url.searchParams.append("facet.field", "body_s");
+      url.searchParams.set("facet.limit", "20");
+      url.searchParams.set("facet.mincount", "1");
+    }
+    return readJsonResponse(await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) }), `direct Fetch ${workload}`);
   }
 
   for (const workload of workloads) {
     for (const mode of modes) {
-      if (workload === "query") {
-        for (let index = 0; index < options.warmup; index++) await sendQuery(mode);
+      if (["query", "facet", "large-response"].includes(workload)) {
+        for (let index = 0; index < options.warmup; index++) await sendQuery(mode, workload);
       }
       const measured = await measure(async () => {
         if (workload === "bulk") {
@@ -206,11 +221,12 @@ async function run() {
           };
         }
 
-        const requests = await runConcurrent(options.iterations, options.concurrency, () => sendQuery(mode));
+        const requests = await runConcurrent(options.iterations, options.concurrency, () => sendQuery(mode, workload));
         return {
           requests: options.iterations, concurrency: options.concurrency, warmup: options.warmup,
           requestsPerSecond: options.iterations / (requests.elapsedMs / 1000),
-          latency: summarizeLatencies(requests.latenciesMs)
+          latency: summarizeLatencies(requests.latenciesMs),
+          response: summarizeQueryResponse(requests.results[0])
         };
       });
       results.push({ workload, mode, ...measured });

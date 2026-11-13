@@ -4,15 +4,17 @@ The repository includes a dependency-free benchmark harness to compare the typed
 
 ## Scope
 
-The runner supports three workloads:
+The runner supports five workloads:
 
-- **Query:** repeated `GET /select?q=*:*&rows=N&wt=json` requests with configurable warm-up, concurrency, and response size.
+- **Query:** repeated `GET /select?q=*:*&rows=N&wt=json` requests with configurable warm-up and concurrency.
+- **Facet:** classic field faceting over the benchmark `title_s` and `body_s` fields, returning facet counts without document rows.
+- **Large response:** retrieves `rows=N` documents including `id,title_s,body_s` to measure larger JSON response parsing and transfer.
 - **Bulk ingestion:** concurrent JSON-array `add()` requests followed by one hard commit.
 - **Streaming ingestion:** one `addStream()` request followed by one hard commit.
 
 Each workload can run through the typed client, direct Fetch, or both. The direct Fetch path uses the same Node.js runtime and network stack, so the comparison isolates client-layer serialization/transport overhead rather than comparing different HTTP implementations.
 
-The JSON report includes Node/V8 and host metadata (OS release, architecture, CPU model/count, and total physical memory), optional Solr version, elapsed time, throughput, request latency percentiles (p50/p95/p99), process CPU time, RSS/heap deltas, sampled peak RSS, and event-loop delay. For bulk requests, latency is measured per batch; for streaming, ingestion and commit times are reported separately.
+Query, facet, and large-response results also report serialized response bytes, returned document count, Solr numFound, and facet bucket count where applicable. The JSON report includes Node/V8 and host metadata (OS release, architecture, CPU model/count, and total physical memory), optional Solr version, elapsed time, throughput, request latency percentiles (p50/p95/p99), process CPU time, RSS/heap deltas, sampled peak RSS, and event-loop delay. For bulk requests, latency is measured per batch; for streaming, ingestion and commit times are reported separately.
 
 ## Requirements and safety
 
@@ -65,7 +67,7 @@ For a defensible comparison:
 - Bulk request latency is measured per batch. The reported batch throughput excludes the final commit; the commit duration is reported separately.
 - Streaming throughput excludes the final commit; ingestion and commit durations are reported separately.
 - Peak RSS is sampled every 20 ms and can miss short-lived spikes. CPU and memory measurements are process-level, not container-level.
-- The current suite is a first baseline, not a complete workload model. It does not yet cover facet-heavy queries, large response bodies, concurrent streaming producers, SolrCloud routing, TLS, or comparisons against third-party clients.
+- The current suite is a first baseline, not a complete workload model. Facet coverage uses two representative string fields and is not a substitute for workload-specific facet schemas. Large-response coverage depends on the collection already containing enough documents; run bulk ingestion first or use a populated disposable collection. The suite does not yet cover concurrent streaming producers, SolrCloud routing, TLS, or comparisons against third-party clients.
 - There are no performance thresholds in ordinary CI. CI tests the benchmark primitives, not noisy performance numbers. Add regression budgets only after stable baselines and variance are understood.
 
 ## Next steps
