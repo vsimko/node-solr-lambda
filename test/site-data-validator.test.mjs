@@ -7,12 +7,12 @@ const source = { id: "github-actions", kind: "github", url: "https://api.github.
 const base = {
   schemaVersion: 1,
   generatedAt: "2026-11-06T08:00:00.000Z",
-  package: { name: "node-solr-lambda", version: "4.0.0-beta.0", repository: "https://github.com/vsimko/node-solr-lambda", source: "package.json" },
+  package: { name: "solr-ts-client", version: "4.0.0-beta.0", repository: "https://github.com/vsimko/solr-ts-client", source: "package.json" },
   sources: [source],
   apiCoverage: { status: "available", sourceIds: [source.id], records: [{ id: "select", operationId: "select", status: "verified", versions: ["8", "9", "10"], typeCoverage: "complete", unitTests: "present", integrationTests: "tested", documentation: "docs/api-reference.md", testFiles: ["test/query.test.ts"], evidence: { sourceIds: [source.id], path: "README.md", description: "Canonical API inventory evidence" } }] },
   ci: { status: "available", sourceIds: [source.id], records: [{ id: "run-1", runId: "1", workflow: "CI", event: "pull_request", status: "completed", conclusion: "success", runUrl: "https://github.com/example/project/actions/runs/1", commit: "abc123", ref: "refs/heads/main", startedAt: "2026-11-06T07:00:00Z", completedAt: "2026-11-06T07:01:00Z", observed: true }] },
   roadmap: { status: "available", sourceIds: [source.id], records: [{ id: "issue-1", number: 1, url: "https://github.com/example/project/issues/1", priority: "P1", state: "open" }] },
-  npm: { status: "available", sourceIds: [source.id], records: [{ id: "downloads-week", packageName: "node-solr-lambda", version: "4.0.0-beta.0", downloads: 0, window: "last-7-days", windowStart: "2026-10-30T00:00:00Z", windowEnd: "2026-11-06T00:00:00Z", sourceUrl: "https://www.npmjs.com/package/node-solr-lambda", retrievedAt: "2026-11-06T08:00:00Z" }] },
+  npm: { status: "available", sourceIds: [source.id], records: [{ id: "downloads-week", packageName: "solr-ts-client", version: "4.0.0-beta.0", downloads: 0, window: "last-7-days", windowStart: "2026-10-30T00:00:00Z", windowEnd: "2026-11-06T00:00:00Z", sourceUrl: "https://www.npmjs.com/package/solr-ts-client", retrievedAt: "2026-11-06T08:00:00Z" }] },
   releases: { status: "available", sourceIds: [source.id], records: [{ id: "v4-beta", tag: "v4.0.0-beta.0", version: "4.0.0-beta.0", draft: false, publishedAt: "2026-11-01T08:00:00Z", url: "https://github.com/example/project/releases/tag/v4.0.0-beta.0", changelogUrl: "https://github.com/example/project/blob/main/CHANGELOG.md", displayAsPublished: true }] },
   documentation: { status: "available", sourceIds: [source.id], records: [{ id: "api-reference", path: "docs/api-reference.md", url: "https://github.com/example/project/blob/main/docs/api-reference.md", owner: "authored" }] }
 };
@@ -32,7 +32,7 @@ test("accepts a valid deterministic P1 data fixture, including a genuine zero me
 test("validates local-link and required-text rule definitions", () => {
   const valid = validateRules({ version: 1, rules: [
     { id: "links", severity: "error", enabled: true, check: "local-links", path: "docs/index.md" },
-    { id: "text", severity: "warning", enabled: true, check: "text-contains", path: "README.md", text: "# node-solr-lambda" }
+    { id: "text", severity: "warning", enabled: true, check: "text-contains", path: "README.md", text: "# solr-ts-client" }
   ] });
   assert.deepEqual(valid, []);
   const invalid = validateRules({ version: 1, rules: [
