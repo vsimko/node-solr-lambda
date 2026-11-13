@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { writeFileSync } from "node:fs";
-import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies } from "./lib.mjs";
+import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies, summarizeQueryResponse } from "./lib.mjs";
 
 const HELP = `Usage: npm run bench -- [options]
 
