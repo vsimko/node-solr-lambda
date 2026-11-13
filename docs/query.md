@@ -71,7 +71,7 @@ A structured filter serializes to Solr local params, for example `{!tag=category
 Tagged filters can be excluded from supported facets or query parsers by passing their tags through the relevant local parameter. For a classic facet field, Solr uses the `ex` local param:
 
 ```ts
-import { solrExcludeTags, solrLocalParams } from "node-solr-lambda";
+import { solrExcludeTags, solrLocalParams } from "solr-ts-client";
 
 await solr.query({
   query: "*:*",
@@ -314,7 +314,7 @@ See the official [Stats Component reference](https://solr.apache.org/guide/solr/
 `query<T>()` lets the caller choose the complete response type. For the standard `/select` handler, `SolrQueryResponse<TDocument, TJsonFacet>` provides named sections for document metadata, classic facets, JSON facets, highlighting, grouping, statistics, and debug information. The first generic parameter controls the document shape; the second describes the JSON Facet API's `facets` object.
 
 ```ts
-import type { SolrQueryResponse } from "node-solr-lambda";
+import type { SolrQueryResponse } from "solr-ts-client";
 
 interface Product {
   id: string;
@@ -347,7 +347,7 @@ The existing `SolrResponse<TDocument>` remains available and keeps its original 
 Cursor pagination is useful for walking large sorted result sets without increasing the `start` offset. The first request uses `cursorMark: "*"`; pass the response's `nextCursorMark` into the next request. Stop when the returned mark equals the mark used for that request:
 
 ```ts
-import type { SolrResponse } from "node-solr-lambda";
+import type { SolrResponse } from "solr-ts-client";
 
 interface Product { id: string; updatedAt: string; }
 
@@ -382,7 +382,7 @@ TypeScript requires `sort` whenever `cursorMark` is supplied and rejects non-zer
 The helpers build Solr syntax strings; they do not parse or restrict the full Solr expression language. Raw strings remain supported for custom functions, transformers, local syntax, and server extensions.
 
 ```ts
-import { solrFieldAlias, solrFields, solrFunction, solrLocalParams, solrSort } from "node-solr-lambda";
+import { solrFieldAlias, solrFields, solrFunction, solrLocalParams, solrSort } from "solr-ts-client";
 
 const sort = solrSort(
   { expression: "price", direction: "asc" },
@@ -460,7 +460,7 @@ Use `queryJson()` to send a JSON Request API body. The method accepts the typed 
 The JSON Facet API models terms, query, and range facets as a recursive tree. Each facet can contain nested facets or metrics, and can apply a domain transformation before evaluating its buckets.
 
 ```ts
-import type { SolrJsonQueryRequest, SolrJsonQueryResponse } from "node-solr-lambda";
+import type { SolrJsonQueryRequest, SolrJsonQueryResponse } from "solr-ts-client";
 
 interface Product { id: string; category_s: string; price_d: number; }
 interface ProductFacets {
