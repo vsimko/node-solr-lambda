@@ -31,7 +31,7 @@ jobs:
           package-manager-cache: false
       - name: Ensure npm supports trusted publishing
         run: |
-          npm install --global npm@11.5.1
+          npm install --global npm@11.15.0
           node --version
           npm --version
           node --input-type=module -e '
@@ -41,8 +41,8 @@ jobs:
               throw new Error("Trusted publishing requires Node.js 22.14.0 or newer");
             }
             const [npmMajor, npmMinor, npmPatch] = execFileSync("npm", ["--version"], { encoding: "utf8" }).trim().split(".").map(Number);
-            if (npmMajor < 11 || (npmMajor === 11 && (npmMinor < 5 || (npmMinor === 5 && npmPatch < 1)))) {
-              throw new Error("Trusted publishing requires npm 11.5.1 or newer");
+            if (npmMajor < 11 || (npmMajor === 11 && (npmMinor < 15))) {
+              throw new Error("Trusted publishing requires npm 11.15.0 or newer");
             }
           '
       - run: npm ci
