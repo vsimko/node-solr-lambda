@@ -481,7 +481,7 @@ jobs:
           docker run --detach \
             --name solr-cloud \
             --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
-            --publish 8983:8983 \
+            --publish 127.0.0.1:8983:8983 \
             --network solr-cloud-net \
             --network-alias solr-cloud \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
@@ -521,7 +521,7 @@ jobs:
             --name solr-cloud-2 \
             --volume "$RUNNER_TEMP/solr-backups:/var/solr/backups" \
             --network solr-cloud-net \
-            --publish 8984:8983 \
+            --publish 127.0.0.1:8984:8983 \
             --env SOLR_JAVA_MEM="-Xms512m -Xmx512m" \
             --env SOLR_OPTS="-Dsolr.allowPaths=/var/solr/backups" \
             "solr:${{ matrix.solr-version }}" \
