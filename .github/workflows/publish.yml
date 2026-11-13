@@ -55,7 +55,18 @@ jobs:
       - run: npm ci
       # npm stage publish runs prepublishOnly, which performs type checks,
       # tests, build, release checks, and package dry-run before staging.
-      # setup-node may leave a dummy NODE_AUTH_TOKEN without registry-url.
-      # Unset it so npm can use the GitHub OIDC trusted publisher.
+      # setup-node writes an _authToken placeholder to its temporary .npmrc.
+      # npm treats even an empty placeholder as classic auth and skips OIDC.
+      # Remove only that line, preserving the registry configuration.
+      - name: Remove setup-node token placeholder
+        run: |
+          npmrc="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+          if [ -f "$npmrc" ]; then
+            sed -i '/_authToken/d' "$npmrc"
+          fi
+          if grep -q '_authToken' "$npmrc" 2>/dev/null; then
+            echo "npm auth token placeholder still present" >&2
+            exit 1
+          fi
       - name: Stage with npm trusted publishing
-        run: unset NODE_AUTH_TOKEN && npm run release:stage
+        run: npm run release:stage
