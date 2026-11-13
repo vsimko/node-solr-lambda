@@ -10,7 +10,7 @@ The client uses one HTTP transport and separate API modules. Public methods on `
 4. **Keep transport concerns centralized.** API modules must share authentication, timeout, retry, validation, and error handling.
 5. **Document version differences.** A type must not imply that an option behaves identically on Solr 8, 9, and 10 when it does not.
 
-The autocomplete-first work is tracked in [Issue #121](https://github.com/vsimko/node-solr-lambda/issues/121). Query-specific follow-up work is tracked in Issues #44–#59.
+The autocomplete-first work is tracked in [Issue #121](https://github.com/vsimko/solr-ts-client/issues/121). Query-specific follow-up work is tracked in Issues #44–#59.
 
 ## Modules
 
