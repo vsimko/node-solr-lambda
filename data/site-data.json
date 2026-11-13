@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-13T15:45:57.000Z",
+  "generatedAt": "2026-11-13T16:13:05.000Z",
   "package": {
     "name": "node-solr-lambda",
     "repository": "https://github.com/vsimko/node-solr-lambda",
@@ -12,84 +12,84 @@
       "id": "package",
       "kind": "repository",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/package.json",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "api-inventory",
       "kind": "repository",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/docs/api-inventory.json",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "docs-index",
       "kind": "repository",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/docs/index.md",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "roadmap",
       "kind": "repository",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/docs/roadmap.md",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "changelog",
       "kind": "repository",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/CHANGELOG.md",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "ci-workflow",
       "kind": "repository",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/.github/workflows/ci.yml",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "github-actions",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/node-solr-lambda/actions/runs?per_page=20",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "github-issues",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/node-solr-lambda/issues?state=all&per_page=100",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "npm-registry",
       "kind": "npm",
       "url": "https://registry.npmjs.org/node-solr-lambda",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "npm-downloads",
       "kind": "npm",
       "url": "https://api.npmjs.org/downloads/point/2026-11-07:2026-11-13/node-solr-lambda",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "github-releases",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/node-solr-lambda/releases?per_page=50",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     },
     {
       "id": "github-tags",
       "kind": "github",
       "url": "https://api.github.com/repos/vsimko/node-solr-lambda/tags?per_page=50",
-      "retrievedAt": "2026-11-13T15:45:57.000Z",
+      "retrievedAt": "2026-11-13T16:13:05.000Z",
       "status": "available"
     }
   ],
@@ -98,7 +98,7 @@
     "sourceIds": [
       "api-inventory"
     ],
-    "observedAt": "2026-11-13T15:45:57.000Z",
+    "observedAt": "2026-11-13T16:13:05.000Z",
     "records": [
       {
         "id": "update.add",
@@ -1765,7 +1765,7 @@
       "github-actions",
       "ci-workflow"
     ],
-    "observedAt": "2026-11-13T15:45:57.000Z",
+    "observedAt": "2026-11-13T16:13:05.000Z",
     "configuredMatrix": [
       {
         "dimension": "node",
@@ -1788,15 +1788,97 @@
     ],
     "records": [
       {
+        "id": "43460476519",
+        "runId": "43460476519",
+        "workflow": "Deploy GitHub Pages",
+        "event": "push",
+        "status": "in_progress",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43460476519",
+        "commit": "74b999f42d84ff3480c40329f0e6f22beed80f53",
+        "ref": "refs/heads/master",
+        "startedAt": "2026-11-13T16:13:08Z",
+        "observed": true
+      },
+      {
+        "id": "43460476513",
+        "runId": "43460476513",
+        "workflow": "CI",
+        "event": "push",
+        "status": "in_progress",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43460476513",
+        "commit": "74b999f42d84ff3480c40329f0e6f22beed80f53",
+        "ref": "refs/heads/master",
+        "startedAt": "2026-11-13T16:13:08Z",
+        "observed": true
+      },
+      {
+        "id": "43459619684",
+        "runId": "43459619684",
+        "workflow": "Identity name availability experiment",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43459619684",
+        "commit": "20504946d72431b636d65d4d011d5a2cc589cd52",
+        "ref": "refs/heads/experiment/solr-ts-client-name-check",
+        "startedAt": "2026-11-13T16:08:08Z",
+        "completedAt": "2026-11-13T16:08:23Z",
+        "observed": true
+      },
+      {
+        "id": "43459266781",
+        "runId": "43459266781",
+        "workflow": "Identity name availability experiment",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43459266781",
+        "commit": "4509af1704a615dd1c72775148a6df0a8e2e1503",
+        "ref": "refs/heads/experiment/solr-ts-client-name-check",
+        "startedAt": "2026-11-13T16:06:04Z",
+        "completedAt": "2026-11-13T16:06:29Z",
+        "observed": true
+      },
+      {
+        "id": "43456005964",
+        "runId": "43456005964",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "success",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43456005964",
+        "commit": "ee30efecd97adf67184b27cddb013c7c9126c024",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T15:46:44Z",
+        "completedAt": "2026-11-13T15:47:09Z",
+        "observed": true
+      },
+      {
+        "id": "43455968817",
+        "runId": "43455968817",
+        "workflow": "pages build and deployment",
+        "event": "dynamic",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43455968817",
+        "commit": "f4f9db7d00cfdb3cfd19c98023551280eec0d843",
+        "ref": "refs/heads/gh-pages",
+        "startedAt": "2026-11-13T15:46:30Z",
+        "completedAt": "2026-11-13T15:46:46Z",
+        "observed": true
+      },
+      {
         "id": "43455887256",
         "runId": "43455887256",
         "workflow": "Pull request website preview",
         "event": "pull_request",
-        "status": "pending",
+        "status": "completed",
+        "conclusion": "success",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43455887256",
         "commit": "122aac04a9261c136811cd10b9fdb3ce46cba378",
         "ref": "refs/heads/docs/record-solr-ts-client-selection",
         "startedAt": "2026-11-13T15:46:01Z",
+        "completedAt": "2026-11-13T15:47:09Z",
         "observed": true
       },
       {
@@ -1804,11 +1886,13 @@
         "runId": "43455885255",
         "workflow": "Deploy GitHub Pages",
         "event": "push",
-        "status": "in_progress",
+        "status": "completed",
+        "conclusion": "success",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43455885255",
         "commit": "e99b2f62d41fa362fffb91053e4f413a28382fee",
         "ref": "refs/heads/master",
         "startedAt": "2026-11-13T15:46:01Z",
+        "completedAt": "2026-11-13T15:46:33Z",
         "observed": true
       },
       {
@@ -1816,11 +1900,13 @@
         "runId": "43455885225",
         "workflow": "CI",
         "event": "push",
-        "status": "in_progress",
+        "status": "completed",
+        "conclusion": "success",
         "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43455885225",
         "commit": "e99b2f62d41fa362fffb91053e4f413a28382fee",
         "ref": "refs/heads/master",
         "startedAt": "2026-11-13T15:46:01Z",
+        "completedAt": "2026-11-13T15:46:24Z",
         "observed": true
       },
       {
@@ -1976,90 +2062,6 @@
         "startedAt": "2026-11-13T12:25:39Z",
         "completedAt": "2026-11-13T12:25:59Z",
         "observed": true
-      },
-      {
-        "id": "43425048070",
-        "runId": "43425048070",
-        "workflow": "CI",
-        "event": "push",
-        "status": "completed",
-        "conclusion": "success",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43425048070",
-        "commit": "6b8760141fa4004cead540bf3a69802deb03217a",
-        "ref": "refs/heads/master",
-        "startedAt": "2026-11-13T12:25:39Z",
-        "completedAt": "2026-11-13T12:26:05Z",
-        "observed": true
-      },
-      {
-        "id": "43424954381",
-        "runId": "43424954381",
-        "workflow": "pages build and deployment",
-        "event": "dynamic",
-        "status": "completed",
-        "conclusion": "success",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43424954381",
-        "commit": "de5efb750e400dfa91087fd810c37be47a0f067e",
-        "ref": "refs/heads/gh-pages",
-        "startedAt": "2026-11-13T12:24:59Z",
-        "completedAt": "2026-11-13T12:25:25Z",
-        "observed": true
-      },
-      {
-        "id": "43424906163",
-        "runId": "43424906163",
-        "workflow": "Pull request website preview",
-        "event": "pull_request",
-        "status": "completed",
-        "conclusion": "success",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43424906163",
-        "commit": "7f836d6505f7e361f67d3a6dcb586cfe890eecbd",
-        "ref": "refs/heads/docs/identity-variant-inventory",
-        "startedAt": "2026-11-13T12:24:38Z",
-        "completedAt": "2026-11-13T12:25:27Z",
-        "observed": true
-      },
-      {
-        "id": "43424906157",
-        "runId": "43424906157",
-        "workflow": "CI",
-        "event": "pull_request",
-        "status": "completed",
-        "conclusion": "success",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43424906157",
-        "commit": "7f836d6505f7e361f67d3a6dcb586cfe890eecbd",
-        "ref": "refs/heads/docs/identity-variant-inventory",
-        "startedAt": "2026-11-13T12:24:38Z",
-        "completedAt": "2026-11-13T12:25:05Z",
-        "observed": true
-      },
-      {
-        "id": "43420091042",
-        "runId": "43420091042",
-        "workflow": "pages build and deployment",
-        "event": "dynamic",
-        "status": "completed",
-        "conclusion": "success",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43420091042",
-        "commit": "e2405ddb8283108d50c61b5d661ec8ec6a4f2f9f",
-        "ref": "refs/heads/gh-pages",
-        "startedAt": "2026-11-13T11:49:17Z",
-        "completedAt": "2026-11-13T11:49:47Z",
-        "observed": true
-      },
-      {
-        "id": "43420060684",
-        "runId": "43420060684",
-        "workflow": "pages build and deployment",
-        "event": "dynamic",
-        "status": "completed",
-        "conclusion": "cancelled",
-        "runUrl": "https://github.com/vsimko/node-solr-lambda/actions/runs/43420060684",
-        "commit": "858b64a31ea44b4db1f189adcd356eb2ac7b30e7",
-        "ref": "refs/heads/gh-pages",
-        "startedAt": "2026-11-13T11:49:03Z",
-        "completedAt": "2026-11-13T11:49:23Z",
-        "observed": true
       }
     ]
   },
@@ -2069,7 +2071,7 @@
       "roadmap",
       "github-issues"
     ],
-    "observedAt": "2026-11-13T15:45:57.000Z",
+    "observedAt": "2026-11-13T16:13:05.000Z",
     "records": [
       {
         "id": "github-310",
@@ -2442,7 +2444,7 @@
       "npm-registry",
       "npm-downloads"
     ],
-    "observedAt": "2026-11-13T15:45:57.000Z",
+    "observedAt": "2026-11-13T16:13:05.000Z",
     "records": [
       {
         "id": "npm-latest",
@@ -2457,7 +2459,7 @@
         "windowStart": "2026-11-07T00:00:00.000Z",
         "windowEnd": "2026-11-13T23:59:59.000Z",
         "sourceUrl": "https://www.npmjs.com/package/node-solr-lambda",
-        "retrievedAt": "2026-11-13T15:45:57.000Z"
+        "retrievedAt": "2026-11-13T16:13:05.000Z"
       }
     ]
   },
@@ -2469,13 +2471,13 @@
       "npm-registry",
       "changelog"
     ],
-    "observedAt": "2026-11-13T15:45:57.000Z",
+    "observedAt": "2026-11-13T16:13:05.000Z",
     "unreleased": {
       "sourceId": "changelog",
       "path": "CHANGELOG.md",
       "url": "https://github.com/vsimko/node-solr-lambda/blob/master/CHANGELOG.md",
       "content": "### Added\n\n- Replace the v3 functional Axios client with a TypeScript-first Fetch-based `SolrClient`, supporting Node.js 22/24/26, ESM and CommonJS, and no required runtime dependencies; keep Zod optional for runtime validation.\n- Add Node.js 26 Active LTS support and expand the unit/type, standalone, security, and SolrCloud CI matrices to Node.js 22/24/26; exclude Node.js 20 because it reached end-of-life.\n- Add typed transport configuration for Basic/Bearer authentication, headers, request defaults, retries, timeouts, cancellation, structured HTTP/network/timeout/abort/validation errors, and safe raw/streaming requests.\n- Add an autocomplete-first Query API covering parser-specific options, filters, sorting, cursorMark pagination, classic and JSON facets, highlighting, grouping, stats, MoreLikeThis, debug/explain, spatial helpers, and optional SpellCheck and Suggester components.\n- Add typed document contracts including RealTime Get (`get()`), JSON documents and command objects, atomic updates, update/delete options, commit/soft-commit/optimize behavior, and update response/error envelopes.\n- Add `SolrClient.addStream()` for backpressure-aware JSON-array document ingestion from async iterables, with bounded buffering, cancellation, and explicit partial-ingestion semantics.\n- Add an injectable `SolrJsonCodec` for caller-selected lossless JSON parsing and serialization, including BigInt-safe handling; native JSON behavior remains the default.\n- Add typed Core Admin, Collections, Schema, Config, Security, Metrics, and System API contracts, with action-specific request models and response shapes for the operations documented in the API reference.\n- Add an explicit shared-transport Solr V2 namespace and typed Core Admin V2 list/status/reload/rename/unload operations, with isolated runtime and security evidence on Solr 9.11.0 and 10.1.0; Solr 8.11.4 V2 Core Admin remains unverified.\n- Add the typed V1 Collections `FORCELEADER` action with exact serialization and consumer type coverage; stale-replica runtime verification remains unverified pending isolated fault-injection testing.\n- Add an explicit `client.v2` namespace with generic JSON and raw request methods over the shared transport; V1 methods remain unchanged, and operation-specific V2 contracts/runtime compatibility remain unverified.\n- Add a reproducible query, bulk-ingestion, and streaming benchmark harness comparing the client with direct Node.js Fetch; no performance leadership claim is made.\n\n- Add Update API unit coverage for JSON endpoint selection, typed success responses, and Solr HTTP failures, plus Solr 8/9/10 delete-by-query persisted-state integration coverage.\n\n- Add Solr 8/9/10 integration coverage for Schema API dynamic-field add/replace/delete and copy-field add/delete, including copy-rule replacement via delete+add.\n\n- Add unit and Solr 8/9/10 integration coverage for Schema API add, replace, and delete field-type operations, including analyzer, tokenizer, and filter read-back.\n\n- Add unit and Solr 8/9/10 integration coverage for Schema API add, replace, and delete field operations, including typed mutation responses and schema read-back.\n\n- Add end-to-end v3-to-v4 migration coverage for health checks, document add/replace/delete, and typed query read-back on Solr 8/9/10.\n\n- Add typed core-level and SolrCloud collection backup/restore APIs with asynchronous status handling.\n- Add typed V1 ReplicationHandler commands and raw file-content streaming through `replication()` and `replicationFile()`.\n- Add typed response contracts for Schema and Config reads, Security authentication/authorization, Metrics, System diagnostics, Core Admin status/async actions, and Collections aliases/cluster status.\n- Add typed Collections shard lifecycle and MIGRATE operations, including V1 wire-name corrections and explicit runtime-verification boundaries.\n- Complete typed V1 Collections CREATE options for shard/replica layouts, routing, node placement, aliases, core properties, and legacy Solr 8.11 placement controls; add compile-time and serialization coverage.\n- Add typed Streaming Expressions JSON envelopes and Export Handler request/sort models; distinguish parsed JSON expressions from raw streamed Export responses.\n- Harden the public client boundary by keeping transport configuration private and verifying the package-root stable/experimental/internal export decisions.\n- Verify the packed npm tarball in clean consumers, including ESM/CommonJS runtime imports, TypeScript declarations, optional Zod absence, and prerelease/stable dist-tag policy.\n\n### Documentation\n\n- Add a public API reference and machine-readable operation inventory, with consistency checks against package exports and client methods.\n- Document the explicit generic Solr V2 namespace, its `/api/` path constraints, shared-transport behavior, introspection fixture policy, and unverified operation-specific compatibility boundary.\n- Add action-specific Collections API evidence and an explicit public API review, including the stable, generic escape-hatch, and internal export decisions.\n- Document npm tarball validation, prerelease dist-tag behavior, release rollback, and the manually gated GitHub Actions/npm OIDC trusted-publishing workflow.\n- Add a Solr 8.11.4/9.11.0/10.1.0 Schema API compatibility matrix with explicit V1/V2 scope and unverified similarity plugin behavior.\n- Add typed Schema API command responses and read-response models for schema metadata, fields, dynamic fields, field types, copy fields, uniqueKey, and similarity.\n- Add compile-time checks for the documented Update API examples, including atomic update modifiers, JSON update commands, delete options, and commit/optimize semantics.\n- Expand the v3-to-v4 migration guide with a complete v4 CRUD example and link its compile-time and Solr integration checks.\n- Clarify Solr 8/9/10 runtime evidence per endpoint and document the remaining unverified query, update-option, and generic transport behaviors.\n- Record the historical standalone, authenticated, and SolrCloud integration matrix on Node.js 20/22/24/26 across Solr 8.11.4/9.11.0/10.1.0. Node.js 20 has since reached EOL and is excluded from the current 22/24/26 support matrix.\n- Document ReplicationHandler abort lifecycle evidence per Solr version, including the Solr 8.11.4 observability limitation, and keep one-shot fetch verification separate.\n- Document the opt-in SPLITSHARD/MIGRATE workflow and retain explicit non-certification until a maintainer manually runs it on every pinned Solr version.\n\nAll notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.\n\n### [3.0.5](https://github.com/vsimko/node-solr-lambda/compare/v3.0.4...v3.0.5) (2023-06-27)\n\n### [3.0.4](https://github.com/vsimko/node-solr-lambda/compare/v3.0.3...v3.0.4) (2020-05-12)\n\n### [3.0.3](https://github.com/vsimko/node-solr-lambda/compare/v3.0.1...v3.0.3) (2020-05-12)\n\n\n### Bug Fixes\n\n* link to types.d.ts mentioned in jsdocs ([c732f02](https://github.com/vsimko/node-solr-lambda/commit/c732f02bdd16a5be414658b4d92bbc46187af3b7))\n\n<a name=\"3.0.1\"></a>",
-      "observedAt": "2026-11-13T15:45:57.000Z"
+      "observedAt": "2026-11-13T16:13:05.000Z"
     },
     "records": [
       {
@@ -2629,7 +2631,7 @@
     "sourceIds": [
       "docs-index"
     ],
-    "observedAt": "2026-11-13T15:45:57.000Z",
+    "observedAt": "2026-11-13T16:13:05.000Z",
     "records": [
       {
         "id": "docs/getting-started.md",
