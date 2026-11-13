@@ -1,11 +1,11 @@
 {
-  "name": "node-solr-lambda",
+  "name": "solr-ts-client",
   "version": "4.0.0-beta.0",
   "description": "A typed Apache Solr client for Node.js",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vsimko/node-solr-lambda.git"
+    "url": "https://github.com/vsimko/solr-ts-client.git"
   },
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -74,9 +74,9 @@
     "typescript": "^5.8.3",
     "zod": "^4.0.0"
   },
-  "homepage": "https://github.com/vsimko/node-solr-lambda#readme",
+  "homepage": "https://github.com/vsimko/solr-ts-client#readme",
   "bugs": {
-    "url": "https://github.com/vsimko/node-solr-lambda/issues"
+    "url": "https://github.com/vsimko/solr-ts-client/issues"
   },
   "keywords": [
     "apache-solr",
