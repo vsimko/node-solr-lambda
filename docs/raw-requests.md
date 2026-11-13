@@ -5,7 +5,7 @@ Use `SolrClient.requestRaw()` when a Solr endpoint is not yet represented by a d
 ## Example
 
 ```ts
-import { createSolrClient } from "node-solr-lambda";
+import { createSolrClient } from "solr-ts-client";
 
 const solr = createSolrClient({
   baseUrl: "https://search.example/solr",
