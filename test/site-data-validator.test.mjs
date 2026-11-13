@@ -32,7 +32,7 @@ test("accepts a valid deterministic P1 data fixture, including a genuine zero me
 test("validates local-link and required-text rule definitions", () => {
   const valid = validateRules({ version: 1, rules: [
     { id: "links", severity: "error", enabled: true, check: "local-links", path: "docs/index.md" },
-    { id: "text", severity: "warning", enabled: true, check: "text-contains", path: "README.md", text: "# solr-ts-client" }
+    { id: "text", severity: "warning", enabled: true, check: "text-contains", path: "README.md", text: "# Solr TS Client" }
   ] });
   assert.deepEqual(valid, []);
   const invalid = validateRules({ version: 1, rules: [
