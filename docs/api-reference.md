@@ -2,7 +2,7 @@
 
 This page documents the package root entry point. Runtime and declaration files are produced by `npm run build`; the release check verifies that the ESM, CommonJS, and top-level TypeScript entry points declared in `package.json` exist. The documentation check compares this method list with the public `SolrClient` and `SolrTransport` class declarations, and compares every API inventory entry with those declarations.
 
-Install with `npm install node-solr-lambda`, then import `createSolrClient` from `node-solr-lambda`. The factory returns a `SolrClient`. Configure exactly one of `core` or `collection` for scoped operations. See [getting started](getting-started.md) and [configuration](configuration.md).
+Install with `npm install solr-ts-client`, then import `createSolrClient` from `solr-ts-client`. The factory returns a `SolrClient`. Configure exactly one of `core` or `collection` for scoped operations. See [getting started](getting-started.md) and [configuration](configuration.md).
 
 ## Client methods
 
@@ -72,8 +72,8 @@ The root entry point exports `createSolrClient`, `SolrClient`, `SolrV2Client`, `
 Use named imports from the package root:
 
 ```ts
-import { createSolrClient, SolrHttpError, solrFilter } from "node-solr-lambda";
-import type { SolrClientConfig, SolrQuery, SolrUpdateOptions } from "node-solr-lambda";
+import { createSolrClient, SolrHttpError, solrFilter } from "solr-ts-client";
+import type { SolrClientConfig, SolrQuery, SolrUpdateOptions } from "solr-ts-client";
 
 const config: SolrClientConfig = { baseUrl: "http://localhost:8983", core: "books" };
 const solr = createSolrClient(config);
