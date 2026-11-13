@@ -1,6 +1,6 @@
 # ADR 0007: Project identity migration
 
-- **Status:** Proposed; maintainer-selected identity and migration sequence recorded; external clearance gates remain NO-GO
+- **Status:** Accepted for staged execution; maintainer GO for Phase 0 recorded on 2026-11-13; operational namespace checks remain before external actions
 - **Date:** 2026-11-13
 - **Owners:** Maintainers
 - **Tracking:** [#288](https://github.com/vsimko/node-solr-lambda/issues/288), [#289](https://github.com/vsimko/node-solr-lambda/issues/289), [#290](https://github.com/vsimko/node-solr-lambda/issues/290)
@@ -215,3 +215,17 @@ These checks improve the evidence but do not change the **NO-GO** decision: npm 
 - [x] Complete first-pass searchable tracked-file inventory (42 exact-literal matches); variant, historical/external and account-level checks remain open.
 - [ ] Complete authoritative npm ownership/publish-time acceptance and preliminary trademark checks; explicitly accept or mitigate naming-confusion risk with existing SolrTS project and record final identity go/no-go approval.
 - [ ] Prepare and merge the migration PR only after name go/no-go; perform GitHub rename, new npm publication, and old-package deprecation strictly in the sequence above and only with explicit approval.
+
+
+## Maintainer GO — 2026-11-13
+
+The maintainer explicitly approved proceeding into Phase 1 and confirmed:
+
+- The naming-confusion risk with the existing `h-sslefree/solrts` project is accepted.
+- Domain strategy is closed as **no new domain**.
+- The preliminary TMview/DPMA screening is accepted as sufficient to proceed to preparation. This is not a legal opinion or a guarantee of trademark clearance.
+- Phase 0 is **GO for preparation work**.
+
+This approval does not authorize merging the migration PR, renaming the GitHub repository, publishing `solr-ts-client`, deprecating `node-solr-lambda`, or purchasing a domain. Immediately before the relevant external actions, verify that `vsimko/solr-ts-client` is still available and that npm accepts the package name from the authorized maintainer account. Publication and legacy deprecation require their own explicit approvals.
+
+The Phase 0 decision and its limits are recorded in [Issue #290](https://github.com/vsimko/node-solr-lambda/issues/290). The older screening notes above are historical records; this section supersedes their earlier NO-GO status.
