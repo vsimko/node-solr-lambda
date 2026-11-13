@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createJsonArrayStream, runConcurrent, summarizeLatencies } from "../bench/lib.mjs";
+import { createJsonArrayStream, measure, runConcurrent, summarizeLatencies } from "../bench/lib.mjs";
 
 async function readStream(stream) {
   const reader = stream.getReader();
@@ -51,6 +51,39 @@ test("JSON array stream closes the source iterator on cancellation", async () =>
   await reader.read();
   await reader.cancel();
   assert.equal(closed, true);
+});
+
+test("JSON array stream rejects unserializable values and closes its source", async () => {
+  let closed = false;
+  async function* documents() {
+    try {
+      yield undefined;
+    } finally {
+      closed = true;
+    }
+  }
+  const reader = createJsonArrayStream(documents()).getReader();
+  await reader.read();
+  await assert.rejects(reader.read(), /serialize to JSON/);
+  assert.equal(closed, true);
+});
+
+test("measurement captures CPU, memory, event-loop, and operation result", async () => {
+  const measured = await measure(async () => "measured");
+  assert.equal(measured.result, "measured");
+  assert.ok(Number.isFinite(measured.elapsedMs));
+  assert.ok(Number.isFinite(measured.cpuUserMs));
+  assert.ok(Number.isFinite(measured.cpuSystemMs));
+  for (const key of [
+    "rssBeforeBytes", "rssAfterBytes", "rssPeakSampledBytes",
+    "heapUsedBeforeBytes", "heapUsedAfterBytes", "heapUsedDeltaBytes"
+  ]) assert.ok(Number.isFinite(measured.memory[key]), key);
+  assert.ok(
+    measured.eventLoopDelay.meanMs === null || Number.isFinite(measured.eventLoopDelay.meanMs)
+  );
+  assert.ok(
+    measured.eventLoopDelay.maxMs === null || Number.isFinite(measured.eventLoopDelay.maxMs)
+  );
 });
 
 test("concurrent runner executes each task once and records latency", async () => {
