@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 export const SOLR_RELEASE_INDEX_URL = "https://downloads.apache.org/solr/solr/";
+const VERSION_DIRECTORY = /^\d+\.\d+\.\d+$/;
 
 export function compareVersions(left, right) {
   const a = left.split(".").map(Number);
@@ -14,11 +15,33 @@ export function compareVersions(left, right) {
   return 0;
 }
 
-export function parseSolrDirectoryListing(html) {
+/**
+ * Parse version-directory links from Apache's canonical release download index.
+ * This intentionally reads link targets, not rendered link text or page layout.
+ */
+export function parseSolrDirectoryListing(html, indexUrl = SOLR_RELEASE_INDEX_URL) {
   const versions = new Set();
-  for (const match of html.matchAll(/href=["'](\d+\.\d+\.\d+)\/["']/g)) {
-    versions.add(match[1]);
+  const base = new URL(indexUrl);
+
+  for (const anchor of html.matchAll(/<a\b([^>]*)>/gi)) {
+    const attributes = anchor[1] ?? "";
+    const hrefMatch = attributes.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    const href = hrefMatch?.[1] ?? hrefMatch?.[2] ?? hrefMatch?.[3];
+    if (!href) continue;
+
+    let link;
+    try {
+      link = new URL(href, base);
+    } catch {
+      continue;
+    }
+
+    if (link.origin !== base.origin || link.search || link.hash) continue;
+    const relativePath = link.pathname.slice(base.pathname.length).replace(/\/$/, "");
+    if (relativePath.includes("/") || !VERSION_DIRECTORY.test(relativePath)) continue;
+    versions.add(relativePath);
   }
+
   return [...versions].sort(compareVersions);
 }
 
@@ -40,18 +63,26 @@ export async function checkSolrReleases({ html, workflowYaml, fetchImpl = fetch 
   const page = html ?? await (async () => {
     const response = await fetchImpl(sourceUrl, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error(`Apache Solr download index returned HTTP ${response.status}`);
-    return response.text();
+    const contentType = response.headers?.get?.("content-type");
+    if (contentType && !/text\/html/i.test(contentType)) {
+      throw new Error(`Apache Solr download index returned unexpected content type: ${contentType}`);
+    }
+    const body = await response.text();
+    if (body.length > 2_000_000) throw new Error("Apache Solr download index exceeded the 2 MB safety limit");
+    return body;
   })();
   const yaml = workflowYaml ?? readFileSync(resolve(".github/workflows/ci.yml"), "utf8");
-  const availableVersions = parseSolrDirectoryListing(page);
+  const availableVersions = parseSolrDirectoryListing(page, sourceUrl);
   if (availableVersions.length === 0) throw new Error("No stable Solr version directories found in the official download index");
   const configuredVersions = parseSolrMatrixVersions(yaml);
+  const newestConfigured = configuredVersions.at(-1);
   const configured = new Set(configuredVersions);
   return {
     sourceUrl,
     availableVersions,
     configuredVersions,
-    missingVersions: availableVersions.filter(version => compareVersions(version, configuredVersions.at(-1)) > 0 && !configured.has(version))
+    newestConfigured,
+    missingVersions: availableVersions.filter(version => compareVersions(version, newestConfigured) > 0 && !configured.has(version))
   };
 }
 
@@ -62,6 +93,7 @@ async function main() {
     appendFileSync(outputPath, `missing_versions=${report.missingVersions.join(",")}\n`);
     appendFileSync(outputPath, `available_versions=${report.availableVersions.join(",")}\n`);
     appendFileSync(outputPath, `configured_versions=${report.configuredVersions.join(",")}\n`);
+    appendFileSync(outputPath, `newest_configured=${report.newestConfigured}\n`);
   }
   process.stdout.write(JSON.stringify(report, null, 2) + "\n");
 }
