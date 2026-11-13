@@ -123,3 +123,23 @@ export async function measure(operation) {
     eventLoop.disable();
   }
 }
+
+
+/** Summarize parsed Solr query payload size and useful response counts. */
+export function summarizeQueryResponse(value) {
+  const response = value && typeof value === "object" ? value.response : undefined;
+  const docs = response && typeof response === "object" && Array.isArray(response.docs)
+    ? response.docs
+    : [];
+  const facetFields = value?.facet_counts?.facet_fields;
+  const facetValueCount = facetFields && typeof facetFields === "object"
+    ? Object.values(facetFields).reduce((total, buckets) =>
+      total + (Array.isArray(buckets) ? Math.floor(buckets.length / 2) : 0), 0)
+    : 0;
+  return {
+    responseBytes: Buffer.byteLength(JSON.stringify(value)),
+    documentsReturned: docs.length,
+    numFound: Number.isFinite(response?.numFound) ? response.numFound : null,
+    facetValueCount
+  };
+}
