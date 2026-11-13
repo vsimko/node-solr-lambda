@@ -36,7 +36,7 @@ export function parseSolrDirectoryListing(html, indexUrl = SOLR_RELEASE_INDEX_UR
       continue;
     }
 
-    if (link.origin !== base.origin || link.search || link.hash) continue;
+    if (link.origin !== base.origin || !link.pathname.startsWith(base.pathname) || link.search || link.hash) continue;
     const relativePath = link.pathname.slice(base.pathname.length).replace(/\/$/, "");
     if (relativePath.includes("/") || !VERSION_DIRECTORY.test(relativePath)) continue;
     versions.add(relativePath);
