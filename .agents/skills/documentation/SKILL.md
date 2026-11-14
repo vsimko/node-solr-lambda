@@ -5,12 +5,13 @@ description: Use when changing public documentation, examples, API coverage, roa
 
 # Documentation
 
-## Read first
+## Canonical documentation
 
-- `docs/index.md`
-- Relevant topic guide and `README.md`
-- `docs/check-docs` implementation in `scripts/check-docs.mjs`
-- Website data contract and validation docs when touching website content
+- [Documentation index](../../../docs/index.md)
+- [Documentation policy](../../../docs/DOCUMENTATION.md)
+- [Architecture index](../../../docs/architecture/README.md)
+- [Website data contract](../../../docs/site-data-contract.md)
+- [Website validation](../../../docs/site-data-validation.md)
 
 ## Documentation principles
 
@@ -23,33 +24,24 @@ description: Use when changing public documentation, examples, API coverage, roa
 - Keep links relative within docs and consistent with the documentation index.
 - Avoid duplicated guidance; prefer a canonical page and link to it.
 - Follow the existing Markdown structure and terminology.
+- Keep source documentation readable on GitHub. Generated website output is not an authoring location.
 
 ## Documentation update map
 
-Depending on the change, consider:
-
-- `README.md` — user-facing summary and development commands.
-- `docs/index.md` — documentation navigation.
-- Topic guide — API usage and examples.
-- `docs/api-reference.md` — public signatures/reference.
-- `docs/api-coverage.md` / `docs/collections-api-coverage.md` — implementation and test evidence.
-- `docs/compatibility.md` — exact runtime support.
-- `docs/roadmap.md` — status and product direction.
-- `docs/api-inventory.json` — machine-readable coverage.
-- `CHANGELOG.md` and release notes — user-visible changes.
+Depending on the change, consider README, the relevant topic guide, `docs/index.md`, API reference, coverage matrices, compatibility matrix, roadmap, machine-readable API inventory, changelog, and release notes. Update only the canonical sources affected by the change.
 
 Do not edit generated website output or generated data manually when a source-of-truth generator exists. Follow the relevant site-data contract and generation scripts.
 
 ## Validation
 
-Run the relevant documentation checks, normally:
+Run:
 
 ```sh
 npm run docs:check
 npm run test:api-inventory
 ```
 
-If website source data changes, also run the specific site generation/validation/test commands documented in package scripts and site docs.
+If website source data changes, also run the site generation, validation, and tests defined in `package.json`.
 
 ## Completion checklist
 
