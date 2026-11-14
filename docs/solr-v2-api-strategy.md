@@ -216,3 +216,30 @@ Runtime tests use a uniquely named disposable collection and alias, verify mappi
 
 
 Validation: the pinned Node.js 22/24/26 CI matrix passed in [run #43211482752](https://github.com/vsimko/node-solr-lambda/actions/runs/43210450787) with 33 successful jobs and two expected skips. This includes SolrCloud alias list/detail verification on Solr 9.11.0 and 10.1.0, plus BasicAuth allow/deny coverage. The 10.1.0 detail GET 405 compatibility fallback is exercised by the same integration suite.
+
+## Collections V2 backup and restore operations (#412)
+
+The first typed collection-backup slice exposes the post-Solr-9.3 REST-style routes through the separate V2 namespace. It does not change the V1 `collections("BACKUP" | "RESTORE" | ...)` contracts and does not translate requests to the legacy Solr 8.11 V2 command envelope.
+
+| Client method | HTTP route | Purpose |
+| --- | --- | --- |
+| `v2.collections.backup(collection, backupName, params)` | `POST /api/collections/{collection}/backups/{backup}/versions` | Create an incremental collection backup point |
+| `v2.backups.list(backupName, { location, repository? })` | `GET /api/backups/{backup}/versions` | List backup-point metadata |
+| `v2.backups.delete(backupName, backupId, { location, repository? })` | `DELETE /api/backups/{backup}/versions/{backupId}` | Delete one backup point |
+| `v2.backups.restore(backupName, params)` | `POST /api/backups/{backup}/restore` | Restore a selected backup point to a collection |
+
+The collection backup request body models the documented `location`, `repository`, `maxNumBackupPoints`, `backupConfigset`, `extraProperties`, `incremental`, `backupStrategy`, and `snapshotName` options. The async request ID is sent as a query parameter. Listing and deletion require the same repository location used to create the backup. Restore accepts `collection`, optional `location`/ `repository`, an optional `backupId` selector, and the V2 `create-collection` object for creation overrides.
+
+**Compatibility boundary:** the redesigned REST routes are documented from Solr 9.3. The pinned Solr 8.11.4 guide predates this route/payload design, so these typed methods do not claim Solr 8.11.4 support and do not fall back to V1. Runtime and BasicAuth evidence remains pending for Solr 9.11.0 and 10.1.0 until isolated integration jobs pass.
+
+**Operational requirements:** SolrCloud collection backups require a shared repository location mounted or configured consistently across all nodes. A location that is mounted only on current collection replicas can still fail if the overseer changes. Restore replaces the target collection's index contents; test against a separate disposable collection. Backup deletion permanently removes the selected backup point and can orphan index files; use the documented purge workflow deliberately rather than assuming point deletion also garbage-collects all unused files.
+
+The initial API intentionally excludes backup-retention deletion (`retainLatest`), `purgeUnused`, backup repository configuration, and core-level backup/restore. These are separate follow-up surfaces with their own safety and compatibility review.
+
+Official references:
+- [Solr 10.1 Collection Management — BACKUP/LISTBACKUP/RESTORE/DELETEBACKUP](https://solr.apache.org/guide/solr/10_1/deployment-guide/collection-management.html)
+- [Solr 9.11 release notes — V2 route redesign](https://solr.apache.org/docs/9_11_0/changes/Changes.html)
+- [Solr 9.3 Collection Management — redesigned backup routes](https://solr.apache.org/guide/solr/9_3/deployment-guide/collection-management.html)
+- [Solr 8.11 V2 API guide — legacy route baseline](https://solr.apache.org/guide/8_11/v2-api.html)
+
+Unit serialization and consumer type fixtures are in `test/v2-collections.test.ts` and `test/v2-types.ts`. An isolated SolrCloud backup/list/restore/read-back/delete scenario is in `test/integration/solrcloud-backup-restore.test.ts`; it skips Solr 8.11.4 because that line predates the redesigned routes. BasicAuth route probes for create/list/delete/restore are included in `test/integration/solr-v2-security.test.ts` on Solr 9.11.0 and 10.1.0. Runtime and security evidence remains pending CI; the inventory intentionally records all pinned versions as unverified until the corresponding jobs pass.

@@ -305,3 +305,62 @@ test("V2 alias status rejects empty or path-like alias names before fetch", () =
     assert.throws(() => client.v2.aliases.status(name), /non-empty alias name/);
   }
 });
+
+test("V2 collection backup, list, delete and restore serialize the documented Solr 9.3+ routes", async () => {
+  const requests: { url: URL; method: string; body: string }[] = [];
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      requests.push({ url: new URL(String(input)), method: String(init?.method), body: String(init?.body ?? "") });
+      return new Response(JSON.stringify({ responseHeader: { status: 0 }, response: { backupId: 0 }, backups: [{ backupId: 0 }] }));
+    }
+  });
+
+  const created = await client.v2.collections.backup("books", "books-backup", {
+    location: "file:///backups", repository: "shared", incremental: true,
+    extraProperties: { source: "integration" }, async: "backup-1"
+  });
+  const listed = await client.v2.backups.list("books-backup", { location: "file:///backups", repository: "shared" });
+  const deleted = await client.v2.backups.delete("books-backup", 0, { location: "file:///backups", repository: "shared" });
+  const restored = await client.v2.backups.restore("books-backup", {
+    collection: "books-restored", location: "file:///backups", backupId: 0,
+    "create-collection": { nrtReplicas: 1, nodeSet: ["node-a"] }
+  }, { async: "restore-1" });
+
+  assert.equal(created.response?.backupId, 0);
+  assert.equal(listed.backups?.[0]?.backupId, 0);
+  assert.equal(deleted.response?.backupId, 0);
+  assert.equal(restored.response?.backupId, 0);
+  assert.deepEqual(requests.map(({ url, method }) => [url.pathname, method]), [
+    ["/api/collections/books/backups/books-backup/versions", "POST"],
+    ["/api/backups/books-backup/versions", "GET"],
+    ["/api/backups/books-backup/versions/0", "DELETE"],
+    ["/api/backups/books-backup/restore", "POST"]
+  ]);
+  assert.deepEqual(JSON.parse(requests[0]!.body), {
+    location: "file:///backups", repository: "shared", incremental: true,
+    extraProperties: { source: "integration" }
+  });
+  assert.equal(requests[0]!.url.searchParams.get("async"), "backup-1");
+  assert.equal(requests[1]!.url.searchParams.get("location"), "file:///backups");
+  assert.equal(requests[1]!.url.searchParams.get("repository"), "shared");
+  assert.equal(requests[2]!.url.searchParams.get("location"), "file:///backups");
+  assert.deepEqual(JSON.parse(requests[3]!.body), {
+    collection: "books-restored", location: "file:///backups",
+    "create-collection": { nrtReplicas: 1, nodeSet: ["node-a"] }
+  });
+  assert.equal(requests[3]!.url.searchParams.get("backupId"), "0");
+  assert.equal(requests[3]!.url.searchParams.get("async"), "restore-1");
+});
+
+test("V2 backup operations reject invalid names, locations, IDs and async identifiers before fetch", () => {
+  const client = createSolrClient({ fetch: async () => { throw new Error("fetch must not run"); } });
+  assert.throws(() => client.v2.collections.backup("books", "../backup", { location: "file:///backups" }), /backup name/);
+  assert.throws(() => client.v2.collections.backup("books", "backup", { location: " " }), /non-empty location/);
+  assert.throws(() => client.v2.collections.backup("books", "backup", { location: "file:///backups", async: " " }), /async request id/);
+  assert.throws(() => client.v2.backups.list("../backup", { location: "file:///backups" }), /backup name/);
+  assert.throws(() => client.v2.backups.list("backup", { location: " " }), /non-empty location/);
+  assert.throws(() => client.v2.backups.delete("backup", -1, { location: "file:///backups" }), /non-negative safe integer/);
+  assert.throws(() => client.v2.backups.restore("backup", { collection: "../target" }), /collection name/);
+  assert.throws(() => client.v2.backups.restore("backup", { collection: "target", backupId: -1 }), /non-negative safe integer/);
+  assert.throws(() => client.v2.backups.restore("backup", { collection: "target" }, { async: " " }), /async request id/);
+});

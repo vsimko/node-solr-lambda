@@ -1409,6 +1409,91 @@ export interface SolrV2AliasPropertyResponse {
   readonly [key: string]: unknown;
 }
 
+/** Shared options for collection backup operations. These V2 routes require Solr 9.3+. */
+export interface SolrV2BackupLocationOptions {
+  /** Shared or configured repository location; must be consistent across SolrCloud nodes. */
+  location: string;
+  repository?: string;
+  async?: string;
+}
+
+/** Additional options accepted when creating an incremental collection backup. */
+export interface SolrV2CollectionBackupParams extends SolrV2BackupLocationOptions {
+  maxNumBackupPoints?: number;
+  backupConfigset?: boolean;
+  extraProperties?: Readonly<Record<string, string>>;
+  incremental?: boolean;
+  backupStrategy?: "copy-files" | "none";
+  snapshotName?: string;
+}
+
+/** Options for listing collection backup points. */
+export interface SolrV2BackupListOptions {
+  location: string;
+  repository?: string;
+  async?: string;
+}
+
+/** Options for deleting one backup point by its numeric ID. */
+export interface SolrV2BackupDeleteOptions extends SolrV2BackupListOptions {}
+
+/** Parameters for creating a collection when restoring a backup to a new name. */
+export interface SolrV2RestoreCreateCollectionParams {
+  config?: string;
+  nodeSet?: readonly string[];
+  shuffleNodes?: boolean;
+  nrtReplicas?: number;
+  tlogReplicas?: number;
+  pullReplicas?: number;
+  replicationFactor?: number;
+  properties?: Readonly<Record<string, string | number | boolean>>;
+}
+
+/** Parameters for restoring a collection backup to an existing or new collection. */
+export interface SolrV2BackupRestoreParams {
+  collection: string;
+  backupId?: number;
+  location?: string;
+  repository?: string;
+  "create-collection"?: SolrV2RestoreCreateCollectionParams;
+}
+
+/** One incremental backup point's stable metadata fields. */
+export interface SolrV2BackupMetadata {
+  backupId?: number;
+  collection?: string;
+  startTime?: string;
+  endTime?: string;
+  indexVersion?: string;
+  indexFileCount?: number;
+  uploadedIndexFileCount?: number;
+  indexSizeMB?: number;
+  uploadedIndexFileMB?: number;
+  shardBackupIds?: readonly string[] | Readonly<Record<string, string>>;
+  [key: string]: unknown;
+}
+
+/** Response returned by collection backup creation and restore operations. */
+export interface SolrV2BackupOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  response?: Readonly<Record<string, unknown>>;
+  requestid?: string;
+  [key: string]: unknown;
+}
+
+/** Response returned by GET /api/backups/{backup}/versions. */
+export interface SolrV2BackupListResponse {
+  responseHeader?: SolrResponseHeader;
+  collection?: string;
+  backups?: readonly SolrV2BackupMetadata[];
+  [key: string]: unknown;
+}
+
+/** Response returned by DELETE /api/backups/{backup}/versions/{backupId}. */
+export interface SolrV2BackupDeleteResponse extends SolrV2BackupOperationResponse {
+  deleted?: readonly unknown[];
+}
+
 /**
  * GET /api/cluster response. The CLUSTERSTATUS V2 route is documented from
  * Solr 9.11; its response remains extensible across Solr versions.

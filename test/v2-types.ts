@@ -141,3 +141,40 @@ void namespace.collections.addReplica("books", { shard: "shard1", type: "leader"
 void namespace.collections.addReplica("books", {});
 // @ts-expect-error Filesystem deletion flags must be booleans.
 void namespace.collections.deleteReplica("books", "shard1", "core_node2", { deleteDataDir: "yes" });
+
+import type {
+  SolrV2BackupsClient,
+  SolrV2CollectionBackupParams,
+  SolrV2BackupListResponse,
+  SolrV2BackupDeleteResponse,
+  SolrV2BackupRestoreParams,
+  SolrV2BackupOperationResponse
+} from "../src/index.js";
+const backupsNamespace: SolrV2BackupsClient = client.v2.backups;
+const backupParams: SolrV2CollectionBackupParams = {
+  location: "file:///backups",
+  repository: "shared",
+  incremental: true,
+  extraProperties: { source: "tests" }
+};
+const createdBackup: Promise<SolrV2BackupOperationResponse> =
+  collectionsNamespace.backup("books", "books-backup", backupParams);
+const listedBackups: Promise<SolrV2BackupListResponse> =
+  backupsNamespace.list("books-backup", { location: "file:///backups" });
+const deletedBackup: Promise<SolrV2BackupDeleteResponse> =
+  backupsNamespace.delete("books-backup", 0, { location: "file:///backups" });
+const restoreParams: SolrV2BackupRestoreParams = {
+  collection: "books-restored",
+  location: "file:///backups",
+  backupId: 0,
+  "create-collection": { nrtReplicas: 1, nodeSet: ["node-a"] }
+};
+const restoredBackup: Promise<SolrV2BackupOperationResponse> =
+  backupsNamespace.restore("books-backup", restoreParams, { async: "restore-1" });
+void [createdBackup, listedBackups, deletedBackup, restoredBackup];
+// @ts-expect-error Backup creation requires a location.
+void collectionsNamespace.backup("books", "books-backup", {});
+// @ts-expect-error Backup IDs must be numbers.
+void backupsNamespace.delete("books-backup", "0", { location: "file:///backups" });
+// @ts-expect-error Restore requires a target collection.
+void backupsNamespace.restore("books-backup", { location: "file:///backups" });
