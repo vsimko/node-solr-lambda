@@ -112,5 +112,7 @@ void [createdAlias, deletedAlias, aliasPropertiesResponse, aliasPropertyResponse
 void aliasesNamespace.create({ name: "books_alias" });
 // @ts-expect-error Property values are limited to JSON scalar values.
 void aliasesNamespace.setProperty("books_alias", "owner", {});
+// @ts-expect-error Solr alias metadata values are strings.
+void aliasesNamespace.setProperty("books_alias", "generation", 2);
 // @ts-expect-error Async request identifiers must be strings.
 void aliasesNamespace.delete("books_alias", { async: 1 });
