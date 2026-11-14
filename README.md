@@ -103,6 +103,8 @@ The primary goal is to build the best Apache Solr client in the world for JavaSc
 ## Documentation
 
 - [Complete documentation index](docs/index.md)
+- [Contributor guide](docs/contributor/README.md)
+- [Agent Skills for coding agents](.agents/skills/README.md)
 - [Getting started](docs/getting-started.md)
 - [Configuration](docs/configuration.md)
 - [Query API](docs/query.md)
