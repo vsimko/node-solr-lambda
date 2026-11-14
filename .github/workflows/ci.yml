@@ -119,7 +119,7 @@ jobs:
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
             case "$path" in
-              README.md|CHANGELOG.md|docs/*.md|docs/**/*.md|docs/*.json|docs/**/*.json)
+              README.md|CHANGELOG.md|AGENTS.md|.agents/*|.agents/**|scripts/validate-agent-skills.mjs|docs/*.md|docs/**/*.md|docs/*.json|docs/**/*.json)
                 docs_changed=true
                 website_only=false
                 ;;
