@@ -5,12 +5,11 @@ description: Use when designing or reviewing exported TypeScript types, generics
 
 # TypeScript API design
 
-## Read first
+## Canonical documentation
 
-- `docs/architecture.md` (especially Type model guidelines)
-- `docs/public-api-review.md`
-- Relevant API guide and source types
-- `test/public-api-types.ts`, `test/query-types.ts`, and nearby type fixtures
+- [Client architecture and type model guidelines](../../../docs/architecture.md)
+- [Public API review](../../../docs/public-api-review.md)
+- Relevant API guide from [the documentation index](../../../docs/index.md)
 
 ## Public API principles
 
@@ -27,16 +26,9 @@ description: Use when designing or reviewing exported TypeScript types, generics
 
 ## Type-test expectations
 
-For a public type change, add consumer-style compile fixtures that prove:
+For a public type change, add consumer-style compile fixtures that prove typical valid usage, nested/action-specific options, invalid-key rejection where appropriate, generic propagation, extension-point usability, and declaration consumption.
 
-1. Typical valid usage is accepted.
-2. Important nested/action-specific options are accepted.
-3. Invalid keys and incompatible values are rejected where the contract is closed.
-4. Generic document and response types flow to the consumer correctly.
-5. Explicit extension points remain usable.
-6. The package declarations remain consumable from the supported module formats.
-
-Use `npm run test:types` and the relevant dedicated type fixtures. Do not rely only on `tsc` compiling implementation source.
+Run `npm run test:types`. Do not rely only on `tsc` compiling implementation source.
 
 ## Review questions
 
