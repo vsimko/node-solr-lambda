@@ -38,7 +38,7 @@ test("V2 Core Admin enforces authentication and permits an authenticated admin",
   );
 });
 
-test("V2 Collections, cluster, and alias routes enforce BasicAuth before handler execution", {
+test("V2 Collections, cluster, and alias discovery/mutation routes enforce BasicAuth", {
   skip: process.env.SOLR_SECURITY !== "true" || !baseUrl || !username || !password
 }, async () => {
   const probe = "security_alias_" + randomUUID().replaceAll("-", "");
@@ -49,7 +49,7 @@ test("V2 Collections, cluster, and alias routes enforce BasicAuth before handler
     { path: "/api/aliases/" + probe, method: "GET" },
     { path: "/api/aliases/" + probe + "/properties", method: "GET" },
     { path: "/api/aliases/" + probe + "/properties/owner", method: "GET" },
-    { path: "/api/aliases", method: "POST", body: JSON.stringify({ name: probe, collections: ["__missing_security_probe_collection__"] }) },
+    { path: "/api/aliases", method: "POST", body: JSON.stringify({ name: probe, collections: [probe + "_missing_collection"] }) },
     { path: "/api/aliases/" + probe, method: "DELETE" },
     { path: "/api/aliases/" + probe + "/properties", method: "PUT", body: JSON.stringify({ properties: { owner: "security-probe" } }) },
     { path: "/api/aliases/" + probe + "/properties/owner", method: "PUT", body: JSON.stringify({ value: "security-probe" }) },
