@@ -174,6 +174,53 @@ test("V2 alias status preserves non-405 detail errors", async () => {
   );
 });
 
+test("V2 replica administration serializes add and exact delete routes safely", async () => {
+  const requests: { url: URL; method: string; body: string }[] = [];
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      requests.push({
+        url: new URL(String(input)),
+        method: String(init?.method),
+        body: String(init?.body ?? "")
+      });
+      return new Response(JSON.stringify({ responseHeader: { status: 0 }, success: {} }));
+    }
+  });
+
+  await client.v2.collections.addReplica("books", {
+    shard: "shard 1", nodeSet: ["node-a", "node-b"], type: "tlog", waitForFinalState: true
+  }, { async: "add-1" });
+  await client.v2.collections.addReplica("books", { route: "tenant!42", node: "node-a" });
+  await client.v2.collections.deleteReplica("books", "shard 1", "core_node 2", { async: "delete-1" });
+
+  assert.deepEqual(requests.map(({ url, method }) => [url.pathname, method]), [
+    ["/api/collections/books/shards/shard%201/replicas", "POST"],
+    ["/api/collections/books/shards/replicas", "POST"],
+    ["/api/collections/books/shards/shard%201/replicas/core_node%202", "DELETE"]
+  ]);
+  assert.deepEqual(JSON.parse(requests[0]!.body), {
+    nodeSet: ["node-a", "node-b"], type: "tlog", waitForFinalState: true
+  });
+  assert.equal(requests[0]!.url.searchParams.get("async"), "add-1");
+  assert.deepEqual(JSON.parse(requests[1]!.body), { route: "tenant!42", node: "node-a" });
+  assert.deepEqual(Object.fromEntries(requests[2]!.url.searchParams), {
+    deleteInstanceDir: "false", deleteDataDir: "false", deleteIndex: "false", async: "delete-1"
+  });
+});
+
+test("V2 replica administration validates required selectors and path segments", () => {
+  const client = createSolrClient({ fetch: async () => { throw new Error("fetch must not run"); } });
+  assert.throws(() => client.v2.collections.addReplica("books", {}), /shard or route/);
+  assert.throws(() => client.v2.collections.addReplica("books", { shard: "s", route: "r" }), /shard or route, not both/);
+  assert.throws(() => client.v2.collections.addReplica("books", { shard: "../admin" }), /shard name/);
+  assert.throws(() => client.v2.collections.addReplica("books", { shard: "s", node: "n", nodeSet: ["n"] }), /node or nodeSet/);
+  assert.throws(() => client.v2.collections.addReplica("books", { shard: "s", nodeSet: [] }), /nodeSet/);
+  assert.throws(() => client.v2.collections.addReplica("books", { shard: "s", nrtReplicas: -1 }), /non-negative integer/);
+  assert.throws(() => client.v2.collections.deleteReplica("books", "../admin", "replica"), /shard name/);
+  assert.throws(() => client.v2.collections.deleteReplica("books", "shard", "replica/name"), /replica name/);
+  assert.throws(() => client.v2.collections.deleteReplica("books", "shard", "replica", { async: " " }), /async request id/);
+});
+
 test("V2 alias lifecycle and property methods serialize documented routes and payloads", async () => {
   const requests: { url: URL; method: string; body: string }[] = [];
   const client = createSolrClient({
