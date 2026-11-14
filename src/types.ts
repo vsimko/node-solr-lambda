@@ -1344,16 +1344,6 @@ export interface SolrV2AliasMutationOptions {
 /** Alias metadata values accepted by the V2 property endpoints. */
 export type SolrV2AliasPropertyValue = string | number | boolean;
 
-/** Bulk alias property mutation body for PUT /api/aliases/{alias}/properties. */
-export interface SolrV2AliasSetPropertiesParams {
-  properties: Readonly<Record<string, SolrV2AliasPropertyValue>>;
-}
-
-/** Single alias property mutation body for PUT /api/aliases/{alias}/properties/{property}. */
-export interface SolrV2AliasSetPropertyParams {
-  value: SolrV2AliasPropertyValue;
-}
-
 /** Extensible response envelope for V2 alias create/delete/property mutations. */
 export interface SolrV2AliasOperationResponse {
   responseHeader?: SolrResponseHeader;
