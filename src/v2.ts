@@ -156,6 +156,9 @@ export class SolrV2CollectionsClient {
     if (route !== undefined && route.trim().length === 0) {
       throw new TypeError("Solr V2 addReplica route must be non-empty");
     }
+    if (params.type !== undefined && !["nrt", "tlog", "pull"].includes(params.type)) {
+      throw new TypeError("Solr V2 addReplica type must be nrt, tlog, or pull");
+    }
     if (params.node !== undefined && (typeof params.node !== "string" || params.node.trim().length === 0)) {
       throw new TypeError("Solr V2 addReplica node must be non-empty");
     }
@@ -225,7 +228,7 @@ export class SolrV2CollectionsClient {
 
   private validatePathSegment(value: string, label: string): string {
     if (typeof value !== "string" || value.trim().length === 0 || value === "." || value === ".." ||
-      value.includes("/") || value.includes("\\\\")) {
+      value.includes("/") || value.includes("\\")) {
       throw new TypeError(`Solr V2 replica operation requires a non-empty ${label} name without path separators`);
     }
     return encodeURIComponent(value);
