@@ -1,5 +1,13 @@
 # Documentation
 
+- [Documentation overview](README.md)
+- [Documentation policy](DOCUMENTATION.md)
+- [Contributor guide](contributor/README.md)
+- [Architecture index](architecture/README.md)
+- [Architecture decision records](adr/README.md)
+- [Testing and verification guide](testing/README.md)
+- [Agent Skills index](../.agents/skills/README.md)
+
 This is the canonical catalogue for the project's guides, API references, compatibility evidence, and release documentation.
 
 ## Getting started and client fundamentals
