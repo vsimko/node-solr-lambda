@@ -1452,6 +1452,7 @@ export interface SolrV2RestoreCreateCollectionParams {
 /** Parameters for restoring a collection backup to an existing or new collection. */
 export interface SolrV2BackupRestoreParams {
   collection: string;
+  backupId?: number;
   location?: string;
   repository?: string;
   "create-collection"?: SolrV2RestoreCreateCollectionParams;
