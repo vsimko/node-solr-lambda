@@ -5,15 +5,15 @@ description: Use when adding tests, debugging regressions, changing transport be
 
 # Solr testing
 
-## Read first
+## Canonical documentation
 
-- `docs/testing-strategy.md`
-- `docs/adr/0003-cross-client-test-strategy.md`
-- Relevant test files and CI workflow in `.github/workflows/ci.yml`
+- [Testing and quality strategy](../../../docs/testing-strategy.md)
+- [Cross-client regression ADR](../../../docs/adr/0003-cross-client-test-strategy.md)
+- [CI workflow](../../../.github/workflows/ci.yml)
 
-## Understand the evidence layers
+## Evidence layers
 
-| Layer | Command | Evidence |
+| Layer | Command / workflow | What it proves |
 | --- | --- | --- |
 | Source types/build | `npm run typecheck`, `npm run test:types`, `npm run build` | Source and declarations compile; not server compatibility |
 | Unit/contract | `npm test` | Tested serialization, transport, response, error, cancellation behavior |
@@ -40,13 +40,9 @@ Never describe one layer as proof of another.
 
 ## Cross-version discipline
 
-The pinned baselines are operation-specific. Consult `docs/compatibility.md` before selecting expectations. A passing test on one version does not certify another version or an entire major line.
+The pinned baselines are operation-specific. Consult [the compatibility matrix](../../../docs/compatibility.md) before selecting expectations. A passing test on one version does not certify another version or an entire major line.
 
-If integration infrastructure is unavailable:
-- Add meaningful unit/type coverage.
-- Clearly state which integration checks were not run.
-- Do not mark compatibility as verified.
-- Record a follow-up issue when runtime evidence is required.
+If integration infrastructure is unavailable, add meaningful unit/type coverage, clearly state which integration checks were not run, do not mark compatibility as verified, and record a follow-up issue when runtime evidence is required.
 
 ## Completion checklist
 
