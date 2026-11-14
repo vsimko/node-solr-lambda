@@ -794,7 +794,7 @@ export interface SolrClusterReplica {
   type?: string;
   replicaType?: string;
   leader?: boolean | string;
-  properties?: Readonly<Record<string, unknown>>;
+  properties?: Readonly<Record<string, string>>;
   [key: string]: unknown;
 }
 /** One shard entry in a SolrCloud CLUSTERSTATUS response. */
@@ -1317,7 +1317,7 @@ export interface SolrV2CollectionOperationResponse {
 export interface SolrV2AliasListResponse {
   responseHeader?: SolrResponseHeader;
   aliases?: Readonly<Record<string, string>>;
-  properties?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  properties?: Readonly<Record<string, Readonly<Record<string, string>>>>;
   readonly [key: string]: unknown;
 }
 
@@ -1326,7 +1326,42 @@ export interface SolrV2AliasStatusResponse {
   responseHeader?: SolrResponseHeader;
   alias?: string;
   collections?: readonly string[];
-  properties?: Readonly<Record<string, unknown>>;
+  properties?: Readonly<Record<string, string>>;
+  readonly [key: string]: unknown;
+}
+
+/** Standard alias creation contract for POST /api/aliases (Solr 9.3+). */
+export interface SolrV2AliasCreateParams {
+  name: string;
+  collections: readonly string[];
+}
+
+/** Optional asynchronous request identifier accepted by alias mutations. */
+export interface SolrV2AliasMutationOptions {
+  async?: string;
+}
+
+/** Alias metadata values accepted by the V2 property endpoints. */
+export type SolrV2AliasPropertyValue = string;
+
+/** Extensible response envelope for V2 alias create/delete/property mutations. */
+export interface SolrV2AliasOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  requestid?: string;
+  [key: string]: unknown;
+}
+
+/** GET /api/aliases/{alias}/properties response. */
+export interface SolrV2AliasPropertiesResponse {
+  responseHeader?: SolrResponseHeader;
+  properties?: Readonly<Record<string, string>>;
+  readonly [key: string]: unknown;
+}
+
+/** GET /api/aliases/{alias}/properties/{property} response. */
+export interface SolrV2AliasPropertyResponse {
+  responseHeader?: SolrResponseHeader;
+  value?: string;
   readonly [key: string]: unknown;
 }
 

@@ -89,3 +89,30 @@ const alias: Promise<SolrV2AliasStatusResponse> = aliasesNamespace.status("books
 void [aliases, alias];
 // @ts-expect-error Alias names must be strings.
 void aliasesNamespace.status(123);
+import type {
+  SolrV2AliasCreateParams,
+  SolrV2AliasMutationOptions,
+  SolrV2AliasOperationResponse,
+  SolrV2AliasPropertiesResponse,
+  SolrV2AliasPropertyResponse,
+  SolrV2AliasPropertyValue
+} from "../src/index.js";
+const aliasCreateParams: SolrV2AliasCreateParams = { name: "books_alias", collections: ["books", "archive"] };
+const aliasMutationOptions: SolrV2AliasMutationOptions = { async: "alias-task-1" };
+const aliasPropertyValue: SolrV2AliasPropertyValue = "integration";
+const createdAlias: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.create(aliasCreateParams, aliasMutationOptions);
+const deletedAlias: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.delete("books_alias", aliasMutationOptions);
+const aliasPropertiesResponse: Promise<SolrV2AliasPropertiesResponse> = aliasesNamespace.getProperties("books_alias");
+const aliasPropertyResponse: Promise<SolrV2AliasPropertyResponse> = aliasesNamespace.getProperty("books_alias", "owner");
+const setAliasProperties: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.setProperties("books_alias", { owner: "tests", generation: "2" }, aliasMutationOptions);
+const setAliasProperty: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.setProperty("books_alias", "owner", "tests");
+const deleteAliasProperty: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.deleteProperty("books_alias", "owner", aliasMutationOptions);
+void [createdAlias, deletedAlias, aliasPropertiesResponse, aliasPropertyResponse, setAliasProperties, setAliasProperty, deleteAliasProperty, aliasPropertyValue];
+// @ts-expect-error Standard alias creation requires a collection mapping.
+void aliasesNamespace.create({ name: "books_alias" });
+// @ts-expect-error Property values are limited to JSON scalar values.
+void aliasesNamespace.setProperty("books_alias", "owner", {});
+// @ts-expect-error Solr alias metadata values are strings.
+void aliasesNamespace.setProperty("books_alias", "generation", 2);
+// @ts-expect-error Async request identifiers must be strings.
+void aliasesNamespace.delete("books_alias", { async: 1 });

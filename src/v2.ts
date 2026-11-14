@@ -1,6 +1,6 @@
 import { SolrHttpError } from "./errors.js";
 import type { SolrTransport } from "./transport.js";
-import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CollectionCreateParams, SolrV2CollectionDeleteOptions, SolrV2CollectionOperationResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
+import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CollectionCreateParams, SolrV2CollectionDeleteOptions, SolrV2CollectionOperationResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2AliasCreateParams, SolrV2AliasMutationOptions, SolrV2AliasPropertyValue, SolrV2AliasOperationResponse, SolrV2AliasPropertiesResponse, SolrV2AliasPropertyResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
@@ -178,6 +178,14 @@ export class SolrV2CollectionsClient {
  * GET /api/aliases and GET /api/aliases/{alias} are documented in the Solr 9.2+ reference guides.
  * The Solr 8.11 line is intentionally not claimed.
  */
+/**
+ * SolrCloud alias operations using the redesigned V2 routes (Solr 9.3+).
+ *
+ * Standard alias create/delete and alias property endpoints are kept distinct
+ * from the legacy V2 /api/collections command envelope used by Solr 8.11.
+ * Routed-alias creation is intentionally not modelled by this standard-alias
+ * create method; use the generic V2 request escape hatch for advanced routers.
+ */
 export class SolrV2AliasesClient {
   constructor(private readonly v2: SolrV2Client) {}
 
@@ -191,10 +199,7 @@ export class SolrV2AliasesClient {
 
   /** Read one alias, including its collection targets and properties. */
   status(alias: string, requestOptions: RequestControlOptions = {}): Promise<SolrV2AliasStatusResponse> {
-    if (typeof alias !== "string" || alias.trim().length === 0 || alias === "." || alias === ".." || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
-      throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
-    }
-    const path = `/api/aliases/${encodeURIComponent(alias)}` as `/api/${string}`;
+    const path = this.aliasPath(alias);
     return this.v2.request<SolrV2AliasStatusResponse>(path, {
       ...requestOptions,
       method: "GET"
@@ -214,6 +219,158 @@ export class SolrV2AliasesClient {
         ...(listed.properties?.[alias] === undefined ? {} : { properties: listed.properties[alias] })
       };
     });
+  }
+
+  /** Create or replace a standard alias pointing to one or more existing collections. */
+  create(
+    params: SolrV2AliasCreateParams,
+    options: SolrV2AliasMutationOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasOperationResponse> {
+    this.validateAliasName(params?.name);
+    if (!Array.isArray(params.collections) || params.collections.length === 0 ||
+      params.collections.some(collection => typeof collection !== "string" || collection.trim().length === 0)) {
+      throw new TypeError("Solr V2 Aliases create requires at least one non-empty collection name");
+    }
+    return this.v2.request<SolrV2AliasOperationResponse>("/api/aliases", {
+      ...requestOptions,
+      method: "POST",
+      body: { name: params.name, collections: params.collections },
+      ...(options.async === undefined ? {} : { query: this.asyncQuery(options.async) })
+    });
+  }
+
+  /** Delete an alias. The underlying collections are not deleted. */
+  delete(
+    alias: string,
+    options: SolrV2AliasMutationOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasOperationResponse> {
+    return this.v2.request<SolrV2AliasOperationResponse>(this.aliasPath(alias), {
+      ...requestOptions,
+      method: "DELETE",
+      ...(options.async === undefined ? {} : { query: this.asyncQuery(options.async) })
+    });
+  }
+
+  /** Read all metadata properties on an alias. */
+  getProperties(
+    alias: string,
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasPropertiesResponse> {
+    return this.v2.request<SolrV2AliasPropertiesResponse>(`${this.aliasPath(alias)}/properties`, {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+
+  /** Read one metadata property on an alias. */
+  getProperty(
+    alias: string,
+    property: string,
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasPropertyResponse> {
+    return this.v2.request<SolrV2AliasPropertyResponse>(this.propertyPath(alias, property), {
+      ...requestOptions,
+      method: "GET"
+    });
+  }
+
+  /** Set one or more alias metadata properties without replacing other properties. */
+  setProperties(
+    alias: string,
+    properties: Readonly<Record<string, SolrV2AliasPropertyValue>>,
+    options: SolrV2AliasMutationOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasOperationResponse> {
+    this.validateProperties(properties);
+    return this.v2.request<SolrV2AliasOperationResponse>(`${this.aliasPath(alias)}/properties`, {
+      ...requestOptions,
+      method: "PUT",
+      body: { properties },
+      ...(options.async === undefined ? {} : { query: this.asyncQuery(options.async) })
+    });
+  }
+
+  /** Set one alias metadata property. */
+  setProperty(
+    alias: string,
+    property: string,
+    value: SolrV2AliasPropertyValue,
+    options: SolrV2AliasMutationOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasOperationResponse> {
+    this.validatePropertyValue(value);
+    return this.v2.request<SolrV2AliasOperationResponse>(this.propertyPath(alias, property), {
+      ...requestOptions,
+      method: "PUT",
+      body: { value },
+      ...(options.async === undefined ? {} : { query: this.asyncQuery(options.async) })
+    });
+  }
+
+  /** Delete one alias metadata property. */
+  deleteProperty(
+    alias: string,
+    property: string,
+    options: SolrV2AliasMutationOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2AliasOperationResponse> {
+    return this.v2.request<SolrV2AliasOperationResponse>(this.propertyPath(alias, property), {
+      ...requestOptions,
+      method: "DELETE",
+      ...(options.async === undefined ? {} : { query: this.asyncQuery(options.async) })
+    });
+  }
+
+  private aliasPath(alias: string): `/api/aliases/${string}` {
+    this.validateAliasName(alias);
+    return `/api/aliases/${encodeURIComponent(alias)}`;
+  }
+
+  private propertyPath(alias: string, property: string): `/api/aliases/${string}/properties/${string}` {
+    if (typeof property !== "string" || property.trim().length === 0 ||
+      property === "." || property === ".." || property.includes("/") || property.includes(String.fromCharCode(92))) {
+      throw new TypeError("Solr V2 Aliases requires a non-empty property name without path separators");
+    }
+    return `${this.aliasPath(alias)}/properties/${encodeURIComponent(property)}`;
+  }
+
+  private validateAliasName(alias: string): void {
+    if (typeof alias !== "string" || alias.trim().length === 0 ||
+      alias === "." || alias === ".." || alias.includes("/") || alias.includes(String.fromCharCode(92))) {
+      throw new TypeError("Solr V2 Aliases requires a non-empty alias name without path separators");
+    }
+  }
+
+  private validateProperties(properties: Readonly<Record<string, SolrV2AliasPropertyValue>>): void {
+    if (properties === null || typeof properties !== "object" || Array.isArray(properties) ||
+      Object.keys(properties).length === 0) {
+      throw new TypeError("Solr V2 Aliases setProperties requires at least one property");
+    }
+    for (const [name, value] of Object.entries(properties)) {
+      if (name.trim().length === 0 || name !== name.trim() || name === "." || name === ".." ||
+        name.includes("/") || name.includes(String.fromCharCode(92))) {
+        throw new TypeError("Solr V2 Aliases requires non-empty property names without path separators");
+      }
+      this.validatePropertyValue(value);
+    }
+  }
+
+  private validatePropertyValue(value: SolrV2AliasPropertyValue): void {
+    if (typeof value !== "string") {
+      throw new TypeError("Solr V2 Aliases property values must be strings");
+    }
+    if (value === "") {
+      throw new TypeError("Solr V2 Aliases property values must not be empty; use deleteProperty() to remove a property");
+    }
+  }
+
+  private asyncQuery(asyncId: string): Record<string, string> {
+    if (typeof asyncId !== "string" || asyncId.trim().length === 0) {
+      throw new TypeError("Solr V2 Aliases async request id must be a non-empty string");
+    }
+    return { async: asyncId };
   }
 }
 

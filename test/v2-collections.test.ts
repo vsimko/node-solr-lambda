@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createSolrClient } from "../src/index.js";
+import { createSolrClient, SolrHttpError } from "../src/index.js";
 
 test("V2 Collections list and status use the documented GET routes", async () => {
   const requests: { url: URL; method: string }[] = [];
@@ -172,6 +172,84 @@ test("V2 alias status preserves non-405 detail errors", async () => {
   await assert.rejects(client.v2.aliases.status("books_alias"), (error: unknown) =>
     error instanceof Error && "status" in error && error.status === 403
   );
+});
+
+test("V2 alias lifecycle and property methods serialize documented routes and payloads", async () => {
+  const requests: { url: URL; method: string; body: string }[] = [];
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      requests.push({ url: new URL(String(input)), method: String(init?.method), body: String(init?.body ?? "") });
+      const payload = requests.length === 1
+        ? { responseHeader: { status: 0 } }
+        : requests.length === 2
+          ? { responseHeader: { status: 0 }, properties: { owner: "tests", generation: "2" } }
+          : requests.length === 3
+            ? { responseHeader: { status: 0 }, value: "tests" }
+            : { responseHeader: { status: 0 } };
+      return new Response(JSON.stringify(payload));
+    }
+  });
+
+  await client.v2.aliases.create({ name: "books alias", collections: ["books", "archive"] }, { async: "alias-create-1" });
+  const allProperties = await client.v2.aliases.getProperties("books alias");
+  const oneProperty = await client.v2.aliases.getProperty("books alias", "owner name");
+  await client.v2.aliases.setProperties("books alias", { owner: "tests", generation: "2" }, { async: "props-1" });
+  await client.v2.aliases.setProperty("books alias", "owner name", "tests");
+  await client.v2.aliases.deleteProperty("books alias", "owner name", { async: "props-2" });
+  await client.v2.aliases.delete("books alias", { async: "alias-delete-1" });
+
+  assert.deepEqual(allProperties.properties, { owner: "tests", generation: "2" });
+  assert.equal(oneProperty.value, "tests");
+  assert.deepEqual(requests.map(({ url, method }) => [url.pathname, method]), [
+    ["/api/aliases", "POST"],
+    ["/api/aliases/books%20alias/properties", "GET"],
+    ["/api/aliases/books%20alias/properties/owner%20name", "GET"],
+    ["/api/aliases/books%20alias/properties", "PUT"],
+    ["/api/aliases/books%20alias/properties/owner%20name", "PUT"],
+    ["/api/aliases/books%20alias/properties/owner%20name", "DELETE"],
+    ["/api/aliases/books%20alias", "DELETE"]
+  ]);
+  assert.deepEqual(JSON.parse(requests[0]!.body), { name: "books alias", collections: ["books", "archive"] });
+  assert.equal(requests[0]!.url.searchParams.get("async"), "alias-create-1");
+  assert.deepEqual(JSON.parse(requests[3]!.body), { properties: { owner: "tests", generation: "2" } });
+  assert.equal(requests[3]!.url.searchParams.get("async"), "props-1");
+  assert.deepEqual(JSON.parse(requests[4]!.body), { value: "tests" });
+  assert.equal(requests[5]!.url.searchParams.get("async"), "props-2");
+  assert.equal(requests[6]!.url.searchParams.get("async"), "alias-delete-1");
+});
+
+test("V2 alias mutation methods preserve Solr HTTP errors", async () => {
+  const client = createSolrClient({
+    fetch: async () => new Response(JSON.stringify({ error: { msg: "alias already exists" } }), {
+      status: 409,
+      statusText: "Conflict"
+    })
+  });
+  await assert.rejects(
+    client.v2.aliases.create({ name: "books_alias", collections: ["books"] }),
+    error => error instanceof SolrHttpError && error.status === 409
+  );
+});
+
+test("V2 alias mutations validate names, mappings, properties and async ids before fetch", () => {
+  const client = createSolrClient({ fetch: async () => { throw new Error("fetch must not run"); } });
+  for (const name of ["", " ", ".", "..", "../admin", "a/b", "a\\\\b"]) {
+    assert.throws(() => client.v2.aliases.delete(name), /non-empty alias name/);
+    assert.throws(() => client.v2.aliases.getProperties(name), /non-empty alias name/);
+  }
+  for (const property of ["", " ", ".", "..", "../admin", "a/b", "a\\\\b"]) {
+    assert.throws(() => client.v2.aliases.getProperty("books", property), /non-empty property name/);
+    assert.throws(() => client.v2.aliases.setProperty("books", property, "x"), /non-empty property name/);
+  }
+  assert.throws(() => client.v2.aliases.create({ name: "books_alias", collections: [] }), /at least one non-empty collection/);
+  assert.throws(() => client.v2.aliases.create({ name: "books_alias", collections: ["books", " "] }), /at least one non-empty collection/);
+  assert.throws(() => client.v2.aliases.setProperties("books_alias", {}), /at least one property/);
+  assert.throws(() => client.v2.aliases.setProperties("books_alias", { " ": "x" }), /non-empty property names/);
+  assert.throws(() => client.v2.aliases.setProperties("books_alias", { " owner ": "x" }), /non-empty property names/);
+  assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", ""), /must not be empty/);
+  assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", (1 as unknown as string)), /must be strings/);
+  assert.throws(() => client.v2.aliases.setProperties("books_alias", { owner: (1 as unknown as string) }), /must be strings/);
+  assert.throws(() => client.v2.aliases.delete("books_alias", { async: " " }), /async request id/);
 });
 
 test("V2 alias status rejects empty or path-like alias names before fetch", () => {
