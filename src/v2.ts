@@ -144,7 +144,7 @@ export class SolrV2CollectionsClient {
 
   private collectionPath(collection: string): `/api/collections/${string}` {
     if (typeof collection !== "string" || collection.trim().length === 0 ||
-      collection.includes("/") || collection.includes("\\\\")) {
+      collection.includes("/") || collection.includes("\\")) {
       throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
     }
     return `/api/collections/${encodeURIComponent(collection)}`;
@@ -156,10 +156,7 @@ export class SolrV2CollectionsClient {
     options: SolrV2CollectionStatusOptions = {},
     requestOptions: RequestControlOptions = {}
   ): Promise<SolrV2CollectionStatusResponse> {
-    if (typeof collection !== "string" || collection.trim().length === 0 ||
-      collection.includes("/") || collection.includes("\\")) {
-      throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
-    }
+    const path = this.collectionPath(collection);
     const query: Record<string, boolean> = {};
     if (options.coreInfo !== undefined) query.coreInfo = options.coreInfo;
     if (options.segments !== undefined) query.segments = options.segments;
