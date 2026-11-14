@@ -182,7 +182,7 @@ test("V2 alias lifecycle and property methods serialize documented routes and pa
       const payload = requests.length === 1
         ? { responseHeader: { status: 0 } }
         : requests.length === 2
-          ? { responseHeader: { status: 0 }, properties: { owner: "tests", generation: 2 } }
+          ? { responseHeader: { status: 0 }, properties: { owner: "tests", generation: "2" } }
           : requests.length === 3
             ? { responseHeader: { status: 0 }, value: "tests" }
             : { responseHeader: { status: 0 } };
@@ -211,7 +211,7 @@ test("V2 alias lifecycle and property methods serialize documented routes and pa
   ]);
   assert.deepEqual(JSON.parse(requests[0]!.body), { name: "books alias", collections: ["books", "archive"] });
   assert.equal(requests[0]!.url.searchParams.get("async"), "alias-create-1");
-  assert.deepEqual(JSON.parse(requests[3]!.body), { properties: { owner: "tests", generation: 2 } });
+  assert.deepEqual(JSON.parse(requests[3]!.body), { properties: { owner: "tests", generation: "2" } });
   assert.equal(requests[3]!.url.searchParams.get("async"), "props-1");
   assert.deepEqual(JSON.parse(requests[4]!.body), { value: "tests" });
   assert.equal(requests[5]!.url.searchParams.get("async"), "props-2");
@@ -233,7 +233,7 @@ test("V2 alias mutations validate names, mappings, properties and async ids befo
   assert.throws(() => client.v2.aliases.setProperties("books_alias", {}), /at least one property/);
   assert.throws(() => client.v2.aliases.setProperties("books_alias", { " ": "x" }), /non-empty property names/);
   assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", ""), /must not be empty/);
-  assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", Number.NaN), /finite/);
+  assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", (1 as unknown as string)), /must be strings/);
   assert.throws(() => client.v2.aliases.delete("books_alias", { async: " " }), /async request id/);
 });
 
