@@ -53,9 +53,9 @@ cloudIntegrationTest("V2 Aliases create, update and delete an isolated standard 
     assert.equal(list.aliases?.[alias], collection,
       "POST /api/aliases must create the requested collection mapping");
 
-    await client.v2.aliases.setProperties(alias, { owner: "integration", generation: 2 });
+    await client.v2.aliases.setProperties(alias, { owner: "integration", generation: "2" });
     const properties = await client.v2.aliases.getProperties(alias);
-    assert.deepEqual(properties.properties, { owner: "integration", generation: 2 });
+    assert.deepEqual(properties.properties, { owner: "integration", generation: "2" });
 
     await client.v2.aliases.setProperty(alias, "owner", "updated");
     const property = await client.v2.aliases.getProperty(alias, "owner");
