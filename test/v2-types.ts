@@ -104,7 +104,7 @@ const createdAlias: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.cre
 const deletedAlias: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.delete("books_alias", aliasMutationOptions);
 const aliasPropertiesResponse: Promise<SolrV2AliasPropertiesResponse> = aliasesNamespace.getProperties("books_alias");
 const aliasPropertyResponse: Promise<SolrV2AliasPropertyResponse> = aliasesNamespace.getProperty("books_alias", "owner");
-const setAliasProperties: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.setProperties("books_alias", { owner: "tests", generation: 2 }, aliasMutationOptions);
+const setAliasProperties: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.setProperties("books_alias", { owner: "tests", generation: "2" }, aliasMutationOptions);
 const setAliasProperty: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.setProperty("books_alias", "owner", "tests");
 const deleteAliasProperty: Promise<SolrV2AliasOperationResponse> = aliasesNamespace.deleteProperty("books_alias", "owner", aliasMutationOptions);
 void [createdAlias, deletedAlias, aliasPropertiesResponse, aliasPropertyResponse, setAliasProperties, setAliasProperty, deleteAliasProperty, aliasPropertyValue];
