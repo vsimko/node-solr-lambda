@@ -47,7 +47,7 @@ for (const skillPath of skillFiles) {
     if (field) fields.set(field[1], field[2].replace(/^["']|["']$/g, ""));
   }
 
-  const expectedName = relative(dirname(skillPath), root).split(/[\\/]/).at(-1);
+  const expectedName = relative(root, dirname(skillPath)).split(/[\\/]/).at(-1);
   assert.equal(fields.get("name"), expectedName,
     `${relativePath}: frontmatter name must match directory ${expectedName}`);
   assert.ok(fields.get("description"), `${relativePath}: description is required`);
