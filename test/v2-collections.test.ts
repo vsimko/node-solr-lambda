@@ -232,6 +232,7 @@ test("V2 alias mutations validate names, mappings, properties and async ids befo
   assert.throws(() => client.v2.aliases.create({ name: "books_alias", collections: ["books", " "] }), /at least one non-empty collection/);
   assert.throws(() => client.v2.aliases.setProperties("books_alias", {}), /at least one property/);
   assert.throws(() => client.v2.aliases.setProperties("books_alias", { " ": "x" }), /non-empty property names/);
+  assert.throws(() => client.v2.aliases.setProperties("books_alias", { " owner ": "x" }), /non-empty property names/);
   assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", ""), /must not be empty/);
   assert.throws(() => client.v2.aliases.setProperty("books_alias", "owner", (1 as unknown as string)), /must be strings/);
   assert.throws(() => client.v2.aliases.setProperties("books_alias", { owner: (1 as unknown as string) }), /must be strings/);
