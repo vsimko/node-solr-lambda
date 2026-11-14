@@ -358,11 +358,8 @@ export class SolrV2AliasesClient {
   }
 
   private validatePropertyValue(value: SolrV2AliasPropertyValue): void {
-    if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
-      throw new TypeError("Solr V2 Aliases property values must be strings, numbers, or booleans");
-    }
-    if (typeof value === "number" && !Number.isFinite(value)) {
-      throw new TypeError("Solr V2 Aliases property numbers must be finite");
+    if (typeof value !== "string") {
+      throw new TypeError("Solr V2 Aliases property values must be strings");
     }
     if (value === "") {
       throw new TypeError("Solr V2 Aliases property values must not be empty; use deleteProperty() to remove a property");
