@@ -116,3 +116,28 @@ void aliasesNamespace.setProperty("books_alias", "owner", {});
 void aliasesNamespace.setProperty("books_alias", "generation", 2);
 // @ts-expect-error Async request identifiers must be strings.
 void aliasesNamespace.delete("books_alias", { async: 1 });
+
+import type {
+  SolrV2AddReplicaParams,
+  SolrV2DeleteReplicaOptions,
+  SolrV2ReplicaOperationResponse,
+  SolrV2ReplicaType
+} from "../src/index.js";
+const replicaType: SolrV2ReplicaType = "tlog";
+const addReplicaParams: SolrV2AddReplicaParams = {
+  shard: "shard1", nodeSet: ["node-a", "node-b"], type: replicaType, waitForFinalState: true
+};
+const deleteReplicaOptions: SolrV2DeleteReplicaOptions = {
+  deleteDataDir: true, deleteIndex: true, async: "delete-replica-1"
+};
+const addedReplica: Promise<SolrV2ReplicaOperationResponse> =
+  namespace.collections.addReplica("books", addReplicaParams, { async: "add-replica-1" });
+const deletedReplica: Promise<SolrV2ReplicaOperationResponse> =
+  namespace.collections.deleteReplica("books", "shard1", "core_node2", deleteReplicaOptions);
+void [addedReplica, deletedReplica];
+// @ts-expect-error Replica types are restricted to Solr's NRT/TLOG/PULL values.
+void namespace.collections.addReplica("books", { shard: "shard1", type: "leader" });
+// @ts-expect-error At least one of shard or route is required.
+void namespace.collections.addReplica("books", {});
+// @ts-expect-error Filesystem deletion flags must be booleans.
+void namespace.collections.deleteReplica("books", "shard1", "core_node2", { deleteDataDir: "yes" });

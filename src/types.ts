@@ -1313,6 +1313,50 @@ export interface SolrV2CollectionOperationResponse {
   [key: string]: unknown;
 }
 
+/** Supported replica types accepted by the V2 ADDREPLICA endpoint. */
+export type SolrV2ReplicaType = "nrt" | "tlog" | "pull";
+
+/** Parameters for adding one or more replicas to a shard (Solr 9+). */
+export interface SolrV2AddReplicaParams {
+  /** Exact shard name or route selector; at least one is required. */
+  shard?: string;
+  route?: string;
+  node?: string;
+  nodeSet?: readonly string[];
+  instanceDir?: string;
+  dataDir?: string;
+  type?: SolrV2ReplicaType;
+  nrtReplicas?: number;
+  tlogReplicas?: number;
+  pullReplicas?: number;
+  waitForFinalState?: boolean;
+}
+
+/** Async tracking option for replica administration requests. */
+export interface SolrV2ReplicaMutationOptions {
+  async?: string;
+}
+
+/** Controls the filesystem cleanup performed by deleting one replica. */
+export interface SolrV2DeleteReplicaOptions extends SolrV2ReplicaMutationOptions {
+  /** Defaults to false in this client to preserve the replica's instance directory. */
+  deleteInstanceDir?: boolean;
+  /** Defaults to false in this client to preserve the replica's data directory. */
+  deleteDataDir?: boolean;
+  /** Defaults to false in this client to preserve the replica's index. */
+  deleteIndex?: boolean;
+  onlyIfDown?: boolean;
+  followAliases?: boolean;
+}
+
+/** Extensible response envelope for V2 replica administration. */
+export interface SolrV2ReplicaOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  success?: Readonly<Record<string, unknown>>;
+  requestid?: string;
+  [key: string]: unknown;
+}
+
 /** GET /api/aliases response with extensible alias/property maps. */
 export interface SolrV2AliasListResponse {
   responseHeader?: SolrResponseHeader;

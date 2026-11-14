@@ -162,6 +162,28 @@ Official evidence:
 
 Collection deletion, create and reload are state-changing operations. Runtime tests must use uniquely named disposable collections and verify state before cleanup; no shared or user data may be targeted.
 
+## V2 shard and replica administration (issue #411)
+
+The first typed administration slice is intentionally limited to additive replica creation and deletion of one explicitly named replica:
+
+- client.v2.collections.addReplica(collection, params, options?) — POST /api/collections/{collection}/shards/{shard}/replicas; accepts a typed shard selector or route, optional node / nodeSet, replica type (nrt, tlog, pull), replica counts, and waitForFinalState. With route and no shard, the route is sent in the body to the collection-level shards endpoint.
+- client.v2.collections.deleteReplica(collection, shard, replica, options?) — DELETE /api/collections/{collection}/shards/{shard}/replicas/{replica}; this wrapper only deletes the exact named replica, never a count-selected group.
+
+The delete wrapper deliberately sends deleteInstanceDir=false, deleteDataDir=false, and deleteIndex=false unless the caller explicitly opts in. This differs from Solr's server defaults, which delete these directories by default, and protects callers from accidental filesystem deletion. onlyIfDown, followAliases, and async are exposed as documented query controls. No bulk/count delete helper is exposed.
+
+The Solr 10.1 Replica Management guide documents the add route/body and exact replica-delete route. The 9.0 guide already documents the REST-style named-replica delete route; 8.11's older V2 API guide does not document these redesigned REST-style shard/replica routes, so no Solr 8.11.4 support is claimed. Runtime coverage is limited to the pinned Solr 9.11.0 and 10.1.0 targets after the new isolated test runs; the tests verify replica topology before and after operations and clean up only the newly created replica.
+
+Deferred from this slice:
+- moveReplica: internally performs add-then-delete and can leave an extra replica after timeout; its operational semantics deserve a separate typed contract and failure-recovery test.
+- Replica property add/delete: useful for preferred-leader and custom properties, but deferred until the property contract and read-back surface are separately modeled.
+- Bulk/count replica deletion and scale operations: omitted because they can affect multiple replicas and need stronger explicit safety design.
+- splitShard, forceLeader, migrate, and other shard topology/failover operations: remain separate due their destructive or fault-injection behavior and existing issues #232/#341/#328. No such tests are run by ordinary CI.
+
+Official route evidence:
+- Solr 10.1 Replica Management — ADDREPLICA and named DELETEREPLICA V2 routes, payload fields, async behavior, and filesystem flags.
+- Solr 9.0 Replica Management — documents the named V2 replica DELETE route.
+- Solr 8.11 V2 API guide — documents the earlier command-style V2 route family, not these REST-style replica routes.
+
 ## V2 alias read operations
 
 The read-only alias slice exposes `client.v2.aliases.list()` (`GET /api/aliases`) and `client.v2.aliases.status(name)` (`GET /api/aliases/{alias}`). The Solr 9.2, 9.11, and 10.1 Alias Management guides document both response shapes: the list returns an `aliases` name-to-collection mapping and optional per-alias `properties`; the detail response returns `alias`, a `collections` array, and optional `properties`.

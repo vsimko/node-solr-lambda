@@ -38,6 +38,42 @@ cloudIntegrationTest("V2 cluster status reports the isolated collection", async 
   ? undefined
   : "GET /api/cluster CLUSTERSTATUS is documented from Solr 9.11; Solr 8.11 is not claimed");
 
+cloudIntegrationTest("V2 replica add and exact delete update isolated collection topology", async ({
+  client,
+  createCollection
+}) => {
+  const collection = await createCollection("v2_replica_admin");
+  const before = await client.v2.collections.status(collection);
+  const shardNames = Object.keys(before.shards ?? {});
+  assert.ok(shardNames.length > 0, "the disposable collection must expose at least one shard");
+  const shard = shardNames[0]!;
+  const beforeShard = (before.shards as Record<string, { replicas?: Record<string, unknown> }>)[shard]!;
+  const beforeReplicas = Object.keys(beforeShard.replicas ?? {});
+  let addedReplica: string | undefined;
+  try {
+    await client.v2.collections.addReplica(collection, { shard, waitForFinalState: true });
+    const afterAdd = await client.v2.collections.status(collection);
+    const afterShard = (afterAdd.shards as Record<string, { replicas?: Record<string, unknown> }>)[shard]!;
+    const afterReplicas = Object.keys(afterShard.replicas ?? {});
+    addedReplica = afterReplicas.find(name => !beforeReplicas.includes(name));
+    assert.ok(addedReplica, "ADDREPLICA must add one distinct replica to the requested shard");
+    assert.equal(afterReplicas.length, beforeReplicas.length + 1);
+
+    await client.v2.collections.deleteReplica(collection, shard, addedReplica);
+    addedReplica = undefined;
+    const afterDelete = await client.v2.collections.status(collection);
+    const finalShard = (afterDelete.shards as Record<string, { replicas?: Record<string, unknown> }>)[shard]!;
+    assert.equal(Object.keys(finalShard.replicas ?? {}).length, beforeReplicas.length,
+      "DELETEREPLICA must remove only the named replica");
+  } finally {
+    if (addedReplica) {
+      await client.v2.collections.deleteReplica(collection, shard, addedReplica);
+    }
+  }
+}, false, false, ["9.11.0", "10.1.0"].includes(process.env.SOLR_VERSION ?? "")
+  ? undefined
+  : "The REST-style replica routes are documented from Solr 9.0; Solr 8.11.4 is not claimed");
+
 cloudIntegrationTest("V2 Aliases create, update and delete an isolated standard alias", async ({
   client,
   createCollection

@@ -1139,6 +1139,54 @@
       "notes": "Read-only cluster discovery. GET CLUSTERSTATUS at /api/cluster is documented from Solr 9.11; pinned Solr 8.11.4 is explicitly not claimed/skipped. Runtime tests pass on pinned 9.11.0 and 10.1.0 in CI run #43008748363; response preserves unknown fields."
     },
     {
+      "area": "Solr V2 Replica Administration",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "id": "v2.collections.addReplica",
+      "clientMethod": "v2.collections.addReplica",
+      "httpMethod": "POST",
+      "path": "/api/collections/{collection}/shards/{shard}/replicas",
+      "notes": "Adds one or more replicas to an exact shard, or uses the collection-level shards route with route selector. Supports node/nodeSet, NRT/TLOG/PULL type, replica counts, waitForFinalState, and async. REST-style route documented from Solr 9.0; Solr 8.11.4 not claimed. Unit/type and isolated topology/security tests added; runtime evidence pending."
+    },
+    {
+      "area": "Solr V2 Replica Administration",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "id": "v2.collections.deleteReplica",
+      "clientMethod": "v2.collections.deleteReplica",
+      "httpMethod": "DELETE",
+      "path": "/api/collections/{collection}/shards/{shard}/replicas/{replica}",
+      "notes": "Deletes only the explicitly named replica. Unlike Solr defaults, the client defaults deleteInstanceDir/deleteDataDir/deleteIndex to false to preserve on-disk data; each deletion flag requires explicit opt-in. Supports onlyIfDown, followAliases, and async. REST-style route documented from Solr 9.0; Solr 8.11.4 not claimed. Unit/type and isolated topology/security tests added; runtime evidence pending."
+    },
+    {
       "area": "Solr V2 Aliases",
       "methodImplemented": true,
       "typeCoverage": "complete",

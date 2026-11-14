@@ -1,6 +1,6 @@
 import { SolrHttpError } from "./errors.js";
 import type { SolrTransport } from "./transport.js";
-import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CollectionCreateParams, SolrV2CollectionDeleteOptions, SolrV2CollectionOperationResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2AliasCreateParams, SolrV2AliasMutationOptions, SolrV2AliasPropertyValue, SolrV2AliasOperationResponse, SolrV2AliasPropertiesResponse, SolrV2AliasPropertyResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
+import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CollectionCreateParams, SolrV2CollectionDeleteOptions, SolrV2CollectionOperationResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2AliasCreateParams, SolrV2AliasMutationOptions, SolrV2AliasPropertyValue, SolrV2AliasOperationResponse, SolrV2AliasPropertiesResponse, SolrV2AliasPropertyResponse, SolrV2AddReplicaParams, SolrV2ReplicaMutationOptions, SolrV2DeleteReplicaOptions, SolrV2ReplicaOperationResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
@@ -129,6 +129,120 @@ export class SolrV2CollectionsClient {
       method: "DELETE",
       ...(Object.keys(query).length > 0 ? { query } : {})
     });
+  }
+
+  /**
+   * Add replicas to a shard. This creates new SolrCloud topology and can consume
+   * disk/CPU resources; callers should use an isolated or explicitly managed cluster.
+   * The redesigned REST route is documented in Solr 9.x and 10.x.
+   */
+  addReplica(
+    collection: string,
+    params: SolrV2AddReplicaParams,
+    options: SolrV2ReplicaMutationOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2ReplicaOperationResponse> {
+    const collectionPath = this.collectionPath(collection);
+    const shard = params?.shard;
+    const route = params?.route;
+    if ((typeof shard !== "string" || shard.trim().length === 0) &&
+      (typeof route !== "string" || route.trim().length === 0)) {
+      throw new TypeError("Solr V2 addReplica requires a non-empty shard or route");
+    }
+    if (shard !== undefined && route !== undefined) {
+      throw new TypeError("Solr V2 addReplica accepts shard or route, not both");
+    }
+    if (shard !== undefined) this.validatePathSegment(shard, "shard");
+    if (route !== undefined && route.trim().length === 0) {
+      throw new TypeError("Solr V2 addReplica route must be non-empty");
+    }
+    if (params.type !== undefined && !["nrt", "tlog", "pull"].includes(params.type)) {
+      throw new TypeError("Solr V2 addReplica type must be nrt, tlog, or pull");
+    }
+    if (params.node !== undefined && (typeof params.node !== "string" || params.node.trim().length === 0)) {
+      throw new TypeError("Solr V2 addReplica node must be non-empty");
+    }
+    if (params.nodeSet !== undefined &&
+      (!Array.isArray(params.nodeSet) || params.nodeSet.length === 0 ||
+        params.nodeSet.some(node => typeof node !== "string" || node.trim().length === 0))) {
+      throw new TypeError("Solr V2 addReplica nodeSet must contain non-empty node names");
+    }
+    if (params.node !== undefined && params.nodeSet !== undefined) {
+      throw new TypeError("Solr V2 addReplica accepts node or nodeSet, not both");
+    }
+    for (const [name, count] of Object.entries({
+      nrtReplicas: params.nrtReplicas,
+      tlogReplicas: params.tlogReplicas,
+      pullReplicas: params.pullReplicas
+    })) {
+      if (count !== undefined && (!Number.isInteger(count) || count < 0)) {
+        throw new TypeError(`Solr V2 addReplica ${name} must be a non-negative integer`);
+      }
+    }
+    const body: Record<string, unknown> = {};
+    if (route !== undefined) body.route = route;
+    for (const key of ["node", "nodeSet", "instanceDir", "dataDir", "type", "nrtReplicas",
+      "tlogReplicas", "pullReplicas", "waitForFinalState"] as const) {
+      if (params[key] !== undefined) body[key] = params[key];
+    }
+    const shardPath = shard === undefined ? "" : `/shards/${encodeURIComponent(shard)}`;
+    return this.v2.request<SolrV2ReplicaOperationResponse>(
+      `${collectionPath}${shardPath}/replicas`,
+      {
+        ...requestOptions,
+        method: "POST",
+        body,
+        ...(options.async === undefined ? {} : { query: this.asyncQuery(options.async) })
+      }
+    );
+  }
+
+  /**
+   * Delete exactly one named replica. To avoid implicit data loss, this client
+   * defaults deleteInstanceDir/deleteDataDir/deleteIndex to false; callers
+   * must explicitly opt in to each directory/index deletion.
+   */
+  deleteReplica(
+    collection: string,
+    shard: string,
+    replica: string,
+    options: SolrV2DeleteReplicaOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2ReplicaOperationResponse> {
+    const path = `${this.collectionPath(collection)}/shards/${this.validatePathSegment(shard, "shard")}/replicas/${this.validatePathSegment(replica, "replica")}`;
+    const query: Record<string, string | boolean> = {
+      deleteInstanceDir: options.deleteInstanceDir ?? false,
+      deleteDataDir: options.deleteDataDir ?? false,
+      deleteIndex: options.deleteIndex ?? false
+    };
+    for (const key of ["onlyIfDown", "followAliases"] as const) {
+      if (options[key] !== undefined) query[key] = options[key]!;
+    }
+    if (options.async !== undefined) query.async = this.asyncId(options.async);
+    return this.v2.request<SolrV2ReplicaOperationResponse>(path, {
+      ...requestOptions,
+      method: "DELETE",
+      query
+    });
+  }
+
+  private validatePathSegment(value: string, label: string): string {
+    if (typeof value !== "string" || value.trim().length === 0 || value === "." || value === ".." ||
+      value.includes("/") || value.includes("\\")) {
+      throw new TypeError(`Solr V2 replica operation requires a non-empty ${label} name without path separators`);
+    }
+    return encodeURIComponent(value);
+  }
+
+  private asyncQuery(asyncId: string): Record<string, string> {
+    return { async: this.asyncId(asyncId) };
+  }
+
+  private asyncId(asyncId: string): string {
+    if (typeof asyncId !== "string" || asyncId.trim().length === 0) {
+      throw new TypeError("Solr V2 replica async request id must be a non-empty string");
+    }
+    return asyncId;
   }
 
   /** Reload a collection using the REST-style V2 route (Solr 9.3+). */
