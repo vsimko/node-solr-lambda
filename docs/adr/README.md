@@ -11,5 +11,6 @@ This directory contains the project's recorded architectural decisions (ADRs). A
 | [0005 — Lossless JSON codec](0005-lossless-json-codec.md) | Injectable lossless JSON handling |
 | [0006 — Streaming document ingestion](0006-streaming-document-ingestion.md) | Backpressure-aware document ingestion |
 | [0007 — Project identity migration](0007-project-identity-migration.md) | Package and repository identity |
+| [0008 — Agent skills and documentation infrastructure](0008-agent-skills-and-documentation-infrastructure.md) | Agent skill discovery, documentation navigation, and automated validation |
 
 When adding an ADR, use the existing numbered naming convention and update this index and [the documentation index](../index.md). Do not silently rewrite historical rationale; record superseding decisions explicitly.
