@@ -1440,7 +1440,7 @@ export interface SolrV2BackupDeleteOptions extends SolrV2BackupListOptions {}
 /** Parameters for creating a collection when restoring a backup to a new name. */
 export interface SolrV2RestoreCreateCollectionParams {
   config?: string;
-  createNodeSet?: readonly string[];
+  nodeSet?: readonly string[];
   shuffleNodes?: boolean;
   nrtReplicas?: number;
   tlogReplicas?: number;
