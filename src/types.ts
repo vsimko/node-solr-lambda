@@ -1326,7 +1326,7 @@ export interface SolrV2AliasStatusResponse {
   responseHeader?: SolrResponseHeader;
   alias?: string;
   collections?: readonly string[];
-  properties?: Readonly<Record<string, unknown>>;
+  properties?: Readonly<Record<string, string>>;
   readonly [key: string]: unknown;
 }
 
@@ -1354,7 +1354,7 @@ export interface SolrV2AliasOperationResponse {
 /** GET /api/aliases/{alias}/properties response. */
 export interface SolrV2AliasPropertiesResponse {
   responseHeader?: SolrResponseHeader;
-  properties?: Readonly<Record<string, unknown>>;
+  properties?: Readonly<Record<string, string>>;
   readonly [key: string]: unknown;
 }
 
