@@ -5,15 +5,14 @@ description: Use when adding, changing, or reviewing Solr endpoint support, API 
 
 # Solr API design
 
-## Read first
+## Canonical documentation
 
-- `docs/architecture.md`
-- `docs/endpoint-inventory.md`
-- `docs/api-coverage.md` and `docs/api-inventory.json`
-- The endpoint-specific guide under `docs/`
-- Relevant API module, `src/client.ts`, and adjacent tests
+- [Client architecture](../../../docs/architecture.md)
+- [Endpoint inventory](../../../docs/endpoint-inventory.md)
+- [API coverage](../../../docs/api-coverage.md) and [machine-readable inventory](../../../docs/api-inventory.json)
+- The endpoint-specific guide linked from [the documentation index](../../../docs/index.md)
 
-## Design rules
+## Procedure
 
 1. Identify the exact Solr endpoint, HTTP method, path, parameters, body contract, response shape, and version-specific behavior from authoritative Solr documentation or verified fixtures.
 2. Determine whether the operation belongs in an existing API module. Keep domain request construction in `src/apis/` and public delegation/types in the established client/type structure.
