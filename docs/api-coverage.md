@@ -4,7 +4,7 @@ See the [public API reference](api-reference.md) for the package-root client met
 
 See the [Solr endpoint inventory](endpoint-inventory.md) for the explicit typed-client boundary, deferred endpoint families, and official Solr reference sources.
 
-The [Solr V2 API strategy](solr-v2-api-strategy.md) records the V1/V2 route map and version boundaries. The explicit `client.v2` namespace uses the shared transport and includes typed Core Admin plus read-only Collections, cluster, and alias discovery operations. Alias detail uses the documented GET route and falls back only on HTTP 405 to the V2 alias list; no V1 fallback is used. Remaining V2 mutation and lifecycle route families require separate request/response contracts and per-version runtime evidence.
+The [Solr V2 API strategy](solr-v2-api-strategy.md) records the V1/V2 route map and version boundaries. The explicit `client.v2` namespace uses the shared transport and includes typed Core Admin, Collections lifecycle, cluster discovery, alias discovery, standard alias mutations, and alias property operations. Alias detail uses the documented GET route and falls back only on HTTP 405 to the V2 alias list; no V1 fallback is used. The new alias mutation/property methods have unit/type and isolated SolrCloud/BasicAuth fixtures, with runtime evidence pending on the pinned 9.11.0 and 10.1.0 baselines; Solr 8.11.4 is not claimed. Routed-alias creation and the remaining shard/replica and backup/restore route families require separate request/response contracts and per-version runtime evidence.
 
 See [Client architecture](architecture.md) for module boundaries, type-model guidelines, and shared request conventions. The [roadmap](roadmap.md) tracks priorities and links to implementation issues.
 
