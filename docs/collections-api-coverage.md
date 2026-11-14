@@ -10,6 +10,10 @@ The parallel V2 namespace exposes `client.v2.collections.list()` (`GET /api/coll
 
 The V2 namespace now has typed `create()`, `delete()`, and `reload()` methods in addition to read-only discovery. The implementation uses the post-Solr-9.3 routes and does not translate to the legacy Solr 8.11 command envelope. Exact serialization and consumer type fixtures are present. Integration and BasicAuth route-gate evidence has not yet been collected; these operations must not be described as runtime-tested until the pinned Solr 9.11.0 and 10.1.0 workflows pass. CREATE/DELETE/RELOAD tests must use disposable collections only.
 
+## V2 collection backup operations
+
+The separate V2 namespace exposes `client.v2.collections.backup(collection, backupName, params)`, `client.v2.backups.list(backupName, options)`, `client.v2.backups.delete(backupName, backupId, options)`, and `client.v2.backups.restore(backupName, params)`. These are not aliases for the V1 `BACKUP`, `LISTBACKUP`, `DELETEBACKUP`, or `RESTORE` actions: they use the redesigned REST routes and V2-specific request/response types introduced in Solr 9.3. Solr 8.11.4 is not claimed. Unit and consumer type tests exist; runtime/security tests remain pending. The operations require a shared SolrCloud backup repository, and restore replaces the target collection's index contents. See [V2 strategy](solr-v2-api-strategy.md).
+
 ## Action matrix
 
 | Action | Input contract | Response contract | Unit / type evidence | Integration evidence |
