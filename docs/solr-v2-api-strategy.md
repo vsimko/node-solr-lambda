@@ -168,6 +168,29 @@ The read-only alias slice exposes `client.v2.aliases.list()` (`GET /api/aliases`
 
 The Solr 9.11 release notes record the alias mutation redesign in Solr 9.3, including the move of alias creation to `POST /api/aliases` and the updated delete route; this does not change the documented GET read paths described above. Runtime claims are limited to pinned Solr 9.11.0 and 10.1.0; Solr 8.11.4 remains explicitly unclaimed. Solr 10.1.0 currently returns 405 (`Allow: DELETE,OPTIONS`) for the documented detail GET, despite the route being present in the release notes and Javadocs. `status()` therefore uses the direct GET first and falls back only on 405 to `GET /api/aliases`, deriving the requested alias's mapping and properties from that V2 response. It does not use V1 fallback and propagates 401/403/404 and other errors. Unit tests cover the fallback and error propagation; isolated SolrCloud tests verify exact target mapping on 9.11.0 and 10.1.0 in CI #43211482752. BasicAuth allow/deny checks cover both list and detail paths on the pinned security matrix.
 
-These wrappers are read-only. Alias creation, deletion, property mutation, and routed-alias management remain separate follow-up work and are not implied by the read methods.
+## V2 alias mutation implementation status
+
+Issue #410 adds the standard-alias and metadata-property operations to `client.v2.aliases`:
+
+- `create({ name, collections })` — `POST /api/aliases`, creating or replacing a standard alias over one or more existing collections.
+- `delete(name, { async? })` — `DELETE /api/aliases/{alias}`; only the alias is removed, not its target collections.
+- `getProperties(name)` / `getProperty(name, property)` — read all or one property using the property subresource GET routes.
+- `setProperties(name, properties, { async? })` — bulk `PUT /api/aliases/{alias}/properties` with a `{ properties }` body.
+- `setProperty(name, property, value, { async? })` — property-level `PUT` with a `{ value }` body.
+- `deleteProperty(name, property, { async? })` — property-level `DELETE`.
+
+The standard create contract requires a non-empty collection mapping. Routed-alias creation (time/category routers and `create-collection` options) is deliberately not included in this typed method yet; advanced routed aliases can still use the generic V2 request escape hatch with caller-owned contracts. Property writes accept scalar string, number, and boolean values. Empty strings are rejected by the convenience methods because Solr interprets an empty property value as removal; callers should use `deleteProperty()` for explicit deletion. The optional `async` option is sent as the documented query parameter for create/delete/property mutations.
+
+The redesigned alias route family is documented from Solr 9.3. The Solr 8.11 V2 guide documents the earlier Collections command route family (including alias commands through `/api/collections`), not these redesigned `/api/aliases` and `/properties` routes. The implementation therefore makes no Solr 8.11.4 compatibility claim and performs no legacy-envelope or V1 fallback. Solr 9.11.0 and 10.1.0 are the documented target baselines; the new isolated SolrCloud and BasicAuth tests are added but runtime results remain pending until CI completes.
+
+Official route and payload evidence:
+- [Solr 10.1 Alias Management](https://solr.apache.org/guide/solr/10_1/deployment-guide/alias-management.html) — standard alias `POST /api/aliases`, `DELETE /api/aliases/{alias}`, bulk and property-level mutation, property reads, and async parameters.
+- [Solr 9.5 Alias Management](https://solr.apache.org/guide/solr/9_5/deployment-guide/alias-management.html) — confirms the redesigned alias and property routes before the 9.11 baseline.
+- [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) — records the alias mutation redesign introduced in the Solr 9.3 line.
+- [Solr 8.11 V2 API guide](https://solr.apache.org/guide/8_11/v2-api.html) — documents the earlier `/api/collections` command route family; no modern alias-route compatibility is claimed.
+
+Runtime tests use a uniquely named disposable collection and alias, verify mapping/property state after each mutation, and remove the alias in a `finally` cleanup. The BasicAuth matrix probes each new HTTP method against a unique nonexistent alias so the authentication test cannot mutate shared cluster state.
+
+
 
 Validation: the pinned Node.js 22/24/26 CI matrix passed in [run #43211482752](https://github.com/vsimko/node-solr-lambda/actions/runs/43210450787) with 33 successful jobs and two expected skips. This includes SolrCloud alias list/detail verification on Solr 9.11.0 and 10.1.0, plus BasicAuth allow/deny coverage. The 10.1.0 detail GET 405 compatibility fallback is exercised by the same integration suite.
