@@ -1,28 +1,21 @@
 ---
 name: solr-compatibility
-description: Use when assessing Solr version support, updating compatibility claims, interpreting CI matrices, or deciding whether an endpoint/option is verified.
+description: Use when assessing Solr version support, updating compatibility claims, interpreting CI matrices, or deciding whether an endpoint or option is verified.
 ---
 
 # Solr compatibility
 
-## Read first
+## Canonical documentation
 
-- `docs/compatibility.md`
-- `docs/api-coverage.md`
-- `docs/collections-api-coverage.md`
-- `docs/endpoint-inventory.md`
-- `docs/api-inventory.json`
-- Relevant Solr release notes and CI workflow results
+- [Solr compatibility matrix](../../../docs/compatibility.md)
+- [API coverage](../../../docs/api-coverage.md)
+- [Collections action coverage](../../../docs/collections-api-coverage.md)
+- [Endpoint inventory](../../../docs/endpoint-inventory.md)
+- [Machine-readable API inventory](../../../docs/api-inventory.json)
 
 ## Current project baselines
 
-The documented pinned targets are:
-
-- Solr 10.1.0 — current primary target
-- Solr 9.11.0 — current compatibility target
-- Solr 8.11.4 — legacy compatibility only; upstream 8.x is EOL
-
-These are exact baselines, not blanket guarantees for every patch release in a major line. Re-read `docs/compatibility.md` before using these values; the policy may change.
+The documented pinned targets are Solr 10.1.0 (current primary target), Solr 9.11.0 (current compatibility target), and Solr 8.11.4 (legacy compatibility only; upstream 8.x is EOL). Re-read the compatibility policy before using these values; they may change.
 
 ## Evidence rules
 
@@ -37,14 +30,7 @@ These are exact baselines, not blanket guarantees for every patch release in a m
 
 ## Updating compatibility records
 
-When a change affects support claims:
-
-- Update the endpoint-specific evidence in `docs/compatibility.md`.
-- Update `docs/api-coverage.md` and/or `docs/collections-api-coverage.md`.
-- Update `docs/api-inventory.json` and any generated/validated views consistently.
-- Record exact Solr version, operation, relevant options, test outcome, and limitations.
-- Keep roadmap status aligned with the evidence.
-- Run the repository documentation and API inventory checks.
+When a change affects support claims, update the endpoint-specific evidence in `docs/compatibility.md`, the relevant coverage matrices, `docs/api-inventory.json`, and the roadmap. Record exact Solr version, operation, relevant options, test outcome, and limitations. Run the repository documentation and API inventory checks.
 
 ## Review questions
 
