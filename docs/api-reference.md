@@ -58,6 +58,9 @@ The client also exposes an opt-in `client.v2` namespace. It uses the same config
 | `SolrV2CoreAdminClient.rename()` | Rename a core | `POST /api/cores/{core}/rename` with `{ to }` JSON body. |
 | `SolrV2CoreAdminClient.unload()` | Unload a core | `POST /api/cores/{core}/unload`; data/index deletion flags are opt-in. |
 | `SolrV2CollectionsClient.list()` | List SolrCloud collection names | `GET /api/collections`. |
+| `SolrV2CollectionsClient.create()` | Create a SolrCloud collection | `POST /api/collections` with the flat post-9.3 JSON request body; requires `name` and `config`. |
+| `SolrV2CollectionsClient.delete()` | Delete a SolrCloud collection | `DELETE /api/collections/{collection}`; data/index directory deletion flags are opt-in. |
+| `SolrV2CollectionsClient.reload()` | Reload a SolrCloud collection | `POST /api/collections/{collection}/reload`; documented from Solr 9.3. |
 | `SolrV2CollectionsClient.status()` | Read one collection's status | `GET /api/collections/{collection}`; direct `CollectionStatusResponse` with `name`, `activeShards`, `inactiveShards`, `properties`, and `shards`; supports `coreInfo`, `segments`, `fieldInfo`, and `sizeInfo` flags. |
 | `SolrV2ClusterClient.status()` | Read SolrCloud cluster status | `GET /api/cluster`; documented from Solr 9.11. |
 | `SolrV2AliasesClient.list()` | List alias names and collection mappings | `GET /api/aliases`; read-only V2 route. |
