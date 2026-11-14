@@ -143,7 +143,7 @@ export class SolrV2CollectionsClient {
   }
 
   private collectionPath(collection: string): `/api/collections/${string}` {
-    if (typeof collection !== "string" || collection.trim().length === 0 ||
+    if (typeof collection !== "string" || collection.trim().length === 0 || collection === "." || collection === ".." ||
       collection.includes("/") || collection.includes("\\")) {
       throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
     }
