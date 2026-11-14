@@ -1330,6 +1330,51 @@ export interface SolrV2AliasStatusResponse {
   readonly [key: string]: unknown;
 }
 
+/** Standard alias creation contract for POST /api/aliases (Solr 9.3+). */
+export interface SolrV2AliasCreateParams {
+  name: string;
+  collections: readonly string[];
+}
+
+/** Optional asynchronous request identifier accepted by alias mutations. */
+export interface SolrV2AliasMutationOptions {
+  async?: string;
+}
+
+/** Alias metadata values accepted by the V2 property endpoints. */
+export type SolrV2AliasPropertyValue = string | number | boolean;
+
+/** Bulk alias property mutation body for PUT /api/aliases/{alias}/properties. */
+export interface SolrV2AliasSetPropertiesParams {
+  properties: Readonly<Record<string, SolrV2AliasPropertyValue>>;
+}
+
+/** Single alias property mutation body for PUT /api/aliases/{alias}/properties/{property}. */
+export interface SolrV2AliasSetPropertyParams {
+  value: SolrV2AliasPropertyValue;
+}
+
+/** Extensible response envelope for V2 alias create/delete/property mutations. */
+export interface SolrV2AliasOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  requestid?: string;
+  [key: string]: unknown;
+}
+
+/** GET /api/aliases/{alias}/properties response. */
+export interface SolrV2AliasPropertiesResponse {
+  responseHeader?: SolrResponseHeader;
+  properties?: Readonly<Record<string, unknown>>;
+  readonly [key: string]: unknown;
+}
+
+/** GET /api/aliases/{alias}/properties/{property} response. */
+export interface SolrV2AliasPropertyResponse {
+  responseHeader?: SolrResponseHeader;
+  value?: unknown;
+  readonly [key: string]: unknown;
+}
+
 /**
  * GET /api/cluster response. The CLUSTERSTATUS V2 route is documented from
  * Solr 9.11; its response remains extensible across Solr versions.
