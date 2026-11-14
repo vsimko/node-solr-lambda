@@ -62,6 +62,8 @@ The client also exposes an opt-in `client.v2` namespace. It uses the same config
 | `SolrV2CollectionsClient.delete()` | Delete a SolrCloud collection | `DELETE /api/collections/{collection}`; data/index directory deletion flags are opt-in. |
 | `SolrV2CollectionsClient.reload()` | Reload a SolrCloud collection | `POST /api/collections/{collection}/reload`; documented from Solr 9.3. |
 | `SolrV2CollectionsClient.status()` | Read one collection's status | `GET /api/collections/{collection}`; direct `CollectionStatusResponse` with `name`, `activeShards`, `inactiveShards`, `properties`, and `shards`; supports `coreInfo`, `segments`, `fieldInfo`, and `sizeInfo` flags. |
+| `SolrV2CollectionsClient.addReplica()` | Add replica(s) to a shard | `POST /api/collections/{collection}/shards/{shard}/replicas` with a typed body; alternatively uses `route` when shard is omitted. Solr 9.0+. |
+| `SolrV2CollectionsClient.deleteReplica()` | Delete one named replica | `DELETE /api/collections/{collection}/shards/{shard}/replicas/{replica}`; preserves instance/data/index directories by default, with explicit opt-in flags. Solr 9.0+. |
 | `SolrV2ClusterClient.status()` | Read SolrCloud cluster status | `GET /api/cluster`; documented from Solr 9.11. |
 | `SolrV2AliasesClient.list()` | List alias names and collection mappings | `GET /api/aliases`; read-only V2 route. |
 | `SolrV2AliasesClient.status()` | Read one alias and its collection targets/properties | Tries `GET /api/aliases/{alias}`; on HTTP 405 only, falls back to `GET /api/aliases` and extracts that alias. V2-only; no V1 fallback. |
