@@ -46,6 +46,9 @@ test("V2 Collections, cluster, and alias discovery/mutation routes enforce Basic
     { path: "/api/collections", method: "GET" },
     { path: "/api/cluster", method: "GET" },
     { path: "/api/aliases", method: "GET" },
+    { path: "/api/collections/security_probe_collection/shards/shard1/replicas", method: "POST", body: JSON.stringify({ node: "missing-node" }) },
+    { path: "/api/collections/security_probe_collection/shards/shard1/replicas/core_node999", method: "DELETE" },
+
     { path: "/api/aliases/" + probe, method: "GET" },
     { path: "/api/aliases/" + probe + "/properties", method: "GET" },
     { path: "/api/aliases/" + probe + "/properties/owner", method: "GET" },
