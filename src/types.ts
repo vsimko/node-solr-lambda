@@ -1283,6 +1283,36 @@ export interface SolrV2CollectionStatusResponse extends SolrV2CollectionStatus {
   responseHeader?: SolrResponseHeader;
 }
 
+/** Common fields accepted by the post-Solr-9.3 V2 collection creation API. */
+export interface SolrV2CollectionCreateParams {
+  name: string;
+  config: string;
+  numShards?: number;
+  replicationFactor?: number;
+  nrtReplicas?: number;
+  tlogReplicas?: number;
+  pullReplicas?: number;
+  createNodeSet?: string;
+  createNodeSetShuffle?: boolean;
+  router?: Readonly<Record<string, unknown>>;
+  properties?: Readonly<Record<string, string | number | boolean>>;
+}
+
+/** Query controls for deleting a V2 collection. Destructive directory deletion is opt-in. */
+export interface SolrV2CollectionDeleteOptions {
+  deleteInstanceDir?: boolean;
+  deleteDataDir?: boolean;
+  deleteIndex?: boolean;
+}
+
+/** Extensible response envelope for V2 collection lifecycle operations. */
+export interface SolrV2CollectionOperationResponse {
+  responseHeader?: SolrResponseHeader;
+  requestid?: string;
+  collection?: string;
+  [key: string]: unknown;
+}
+
 /** GET /api/aliases response with extensible alias/property maps. */
 export interface SolrV2AliasListResponse {
   responseHeader?: SolrResponseHeader;
