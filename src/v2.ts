@@ -349,7 +349,7 @@ export class SolrV2AliasesClient {
       throw new TypeError("Solr V2 Aliases setProperties requires at least one property");
     }
     for (const [name, value] of Object.entries(properties)) {
-      if (name.trim().length === 0 || name === "." || name === ".." ||
+      if (name.trim().length === 0 || name !== name.trim() || name === "." || name === ".." ||
         name.includes("/") || name.includes(String.fromCharCode(92))) {
         throw new TypeError("Solr V2 Aliases requires non-empty property names without path separators");
       }
