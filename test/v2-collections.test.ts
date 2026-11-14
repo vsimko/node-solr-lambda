@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createSolrClient } from "../src/index.js";
+import { createSolrClient, SolrHttpError } from "../src/index.js";
 
 test("V2 Collections list and status use the documented GET routes", async () => {
   const requests: { url: URL; method: string }[] = [];
@@ -216,6 +216,19 @@ test("V2 alias lifecycle and property methods serialize documented routes and pa
   assert.deepEqual(JSON.parse(requests[4]!.body), { value: "tests" });
   assert.equal(requests[5]!.url.searchParams.get("async"), "props-2");
   assert.equal(requests[6]!.url.searchParams.get("async"), "alias-delete-1");
+});
+
+test("V2 alias mutation methods preserve Solr HTTP errors", async () => {
+  const client = createSolrClient({
+    fetch: async () => new Response(JSON.stringify({ error: { msg: "alias already exists" } }), {
+      status: 409,
+      statusText: "Conflict"
+    })
+  });
+  await assert.rejects(
+    client.v2.aliases.create({ name: "books_alias", collections: ["books"] }),
+    error => error instanceof SolrHttpError && error.status === 409
+  );
 });
 
 test("V2 alias mutations validate names, mappings, properties and async ids before fetch", () => {
