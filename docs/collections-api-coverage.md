@@ -6,6 +6,10 @@ This matrix is deliberately action-specific. The public client infers a named re
 
 The parallel V2 namespace exposes `client.v2.collections.list()` (`GET /api/collections`), `client.v2.collections.status(name)` (`GET /api/collections/{collection}`), and `client.v2.cluster.status()` (`GET /api/cluster`). These are separate from the V1 `collections()` action contracts below. They are read-only, use V2-specific extensible response types, and do not perform V1 fallback. The isolated SolrCloud and security-gate tests passed in CI run #43008748363. Collection listing is tested on Solr 8.11.4 / 9.11.0 / 10.1.0; per-collection status and cluster GET status are tested on 9.11.0 / 10.1.0 and explicitly not claimed on 8.11.4. Alias read operations are exposed separately as `client.v2.aliases.list()` (`GET /api/aliases`) and `client.v2.aliases.status(name)` (`GET /api/aliases/{alias}`). Both operations passed isolated SolrCloud integration on pinned 9.11.0 and 10.1.0 in CI #43211482752; Solr 8.11.4 remains explicitly unclaimed. Solr 10.1.0 returns 405 for the documented detail GET at runtime, so `status()` falls back only on 405 to the V2 list response. BasicAuth allow/deny checks cover both alias paths on the pinned security matrix. Alias mutation and property management remain out of scope.
 
+## V2 lifecycle methods
+
+The V2 namespace now has typed `create()`, `delete()`, and `reload()` methods in addition to read-only discovery. The implementation uses the post-Solr-9.3 routes and does not translate to the legacy Solr 8.11 command envelope. Exact serialization and consumer type fixtures are present. Integration and BasicAuth route-gate evidence has not yet been collected; these operations must not be described as runtime-tested until the pinned Solr 9.11.0 and 10.1.0 workflows pass. CREATE/DELETE/RELOAD tests must use disposable collections only.
+
 ## Action matrix
 
 | Action | Input contract | Response contract | Unit / type evidence | Integration evidence |
