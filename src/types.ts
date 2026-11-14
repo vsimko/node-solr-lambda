@@ -794,7 +794,7 @@ export interface SolrClusterReplica {
   type?: string;
   replicaType?: string;
   leader?: boolean | string;
-  properties?: Readonly<Record<string, unknown>>;
+  properties?: Readonly<Record<string, string>>;
   [key: string]: unknown;
 }
 /** One shard entry in a SolrCloud CLUSTERSTATUS response. */
@@ -1317,7 +1317,7 @@ export interface SolrV2CollectionOperationResponse {
 export interface SolrV2AliasListResponse {
   responseHeader?: SolrResponseHeader;
   aliases?: Readonly<Record<string, string>>;
-  properties?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  properties?: Readonly<Record<string, Readonly<Record<string, string>>>>;
   readonly [key: string]: unknown;
 }
 
@@ -1342,7 +1342,7 @@ export interface SolrV2AliasMutationOptions {
 }
 
 /** Alias metadata values accepted by the V2 property endpoints. */
-export type SolrV2AliasPropertyValue = string | number | boolean;
+export type SolrV2AliasPropertyValue = string;
 
 /** Extensible response envelope for V2 alias create/delete/property mutations. */
 export interface SolrV2AliasOperationResponse {
@@ -1361,7 +1361,7 @@ export interface SolrV2AliasPropertiesResponse {
 /** GET /api/aliases/{alias}/properties/{property} response. */
 export interface SolrV2AliasPropertyResponse {
   responseHeader?: SolrResponseHeader;
-  value?: unknown;
+  value?: string;
   readonly [key: string]: unknown;
 }
 
