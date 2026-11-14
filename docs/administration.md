@@ -215,3 +215,53 @@ The action has unit serialization and consumer TypeScript coverage. A dedicated 
 The scenario creates a two-replica collection, commits a baseline visible on both replicas, stops the follower, writes and commits additional documents on the old leader, then stops that leader and restarts only the stale follower. After ZooKeeper confirms the old leader is gone and the shard has no leader, the test calls FORCELEADER against the surviving node. It records pre/post CLUSTERSTATUS and verifies the stale replica became leader, baseline documents remain, and updates acknowledged only by the unavailable old leader are absent. That intentional data-loss boundary is the behavior under test, not a client guarantee.
 
 The manual job runs only the dedicated test command, uses a separate ZooKeeper container so stopping either Solr node does not stop ZooKeeper, and removes all dedicated containers/network in an `always()` cleanup step. Ordinary CI and the existing SPLITSHARD/MIGRATE opt-in input do not enable this test. The harness has not yet been manually dispatched; FORCELEADER remains runtime-unverified on Solr 8.11.4, 9.11.0, and 10.1.0 until the per-version workflow jobs pass. A successful HTTP response alone is not sufficient evidence.
+
+
+## Collections V2 backup and restore (Solr 9.3+)
+
+SolrCloud collection backup and restore has a separate V2 REST surface. Use the explicit `client.v2` namespace; these methods do not alter the V1 `collections("BACKUP" | "RESTORE" | ...)` API and do not translate to the legacy Solr 8.11 V2 command envelope.
+
+```ts
+const backup = await client.v2.collections.backup(
+  "books",
+  "books-backup",
+  {
+    location: "/mnt/solr-backups",
+    repository: "local",
+    backupConfigset: true,
+    incremental: true,
+    async: "books-backup-2026-01"
+  }
+);
+
+// Async status remains available through the established Collections status action.
+await client.collections("REQUESTSTATUS", { requestid: "books-backup-2026-01" });
+
+const listed = await client.v2.backups.list("books-backup", {
+  location: "/mnt/solr-backups",
+  repository: "local"
+});
+const backupId = listed.backups?.[0]?.backupId;
+if (backupId === undefined) throw new Error("No backup point was returned");
+
+await client.v2.backups.restore(
+  "books-backup",
+  {
+    collection: "books-restored",
+    location: "/mnt/solr-backups",
+    repository: "local",
+    backupId
+  },
+  { async: "books-restore-2026-01" }
+);
+
+await client.collections("REQUESTSTATUS", { requestid: "books-restore-2026-01" });
+await client.v2.backups.delete("books-backup", backupId, {
+  location: "/mnt/solr-backups",
+  repository: "local"
+});
+```
+
+The backup location must be available consistently on every SolrCloud node because the overseer can change. Restoring replaces the target collection's index contents; use a new/disposable collection unless replacement is intentional. Deleting a backup point is permanent and may leave unreferenced files, which require the separate `purgeUnused` operation when appropriate.
+
+These redesigned routes are documented from Solr 9.3. Solr 8.11.4 is not claimed; no automatic V1 or legacy V2 fallback is performed. See [Solr V2 API strategy](solr-v2-api-strategy.md) and [Collections API coverage](collections-api-coverage.md).
