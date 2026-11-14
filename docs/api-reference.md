@@ -58,6 +58,9 @@ The client also exposes an opt-in `client.v2` namespace. It uses the same config
 | `SolrV2CoreAdminClient.rename()` | Rename a core | `POST /api/cores/{core}/rename` with `{ to }` JSON body. |
 | `SolrV2CoreAdminClient.unload()` | Unload a core | `POST /api/cores/{core}/unload`; data/index deletion flags are opt-in. |
 | `SolrV2CollectionsClient.list()` | List SolrCloud collection names | `GET /api/collections`. |
+| `SolrV2CollectionsClient.create()` | Create a SolrCloud collection | `POST /api/collections` with the flat post-9.3 JSON request body; requires `name` and `config`. |
+| `SolrV2CollectionsClient.delete()` | Delete a SolrCloud collection | `DELETE /api/collections/{collection}`; data/index directory deletion flags are opt-in. |
+| `SolrV2CollectionsClient.reload()` | Reload a SolrCloud collection | `POST /api/collections/{collection}/reload`; documented from Solr 9.3. |
 | `SolrV2CollectionsClient.status()` | Read one collection's status | `GET /api/collections/{collection}`; direct `CollectionStatusResponse` with `name`, `activeShards`, `inactiveShards`, `properties`, and `shards`; supports `coreInfo`, `segments`, `fieldInfo`, and `sizeInfo` flags. |
 | `SolrV2ClusterClient.status()` | Read SolrCloud cluster status | `GET /api/cluster`; documented from Solr 9.11. |
 | `SolrV2AliasesClient.list()` | List alias names and collection mappings | `GET /api/aliases`; read-only V2 route. |
@@ -67,7 +70,7 @@ The generic request methods require a relative `/api/…` path. Dot-segment trav
 
 ## Root exports
 
-The root entry point exports `createSolrClient`, `SolrClient`, `SolrV2Client`, `SolrV2CoreAdminClient`, `SolrV2CollectionsClient`, `SolrV2ClusterClient`, `SolrV2AliasesClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, request controls, and distinct V2 Core Admin status/rename/unload contracts, V2 Collections/cluster discovery contracts, and V2 alias list/detail response contracts; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
+The root entry point exports `createSolrClient`, `SolrClient`, `SolrV2Client`, `SolrV2CoreAdminClient`, `SolrV2CollectionsClient`, `SolrV2ClusterClient`, `SolrV2AliasesClient`, the public error classes, query helper functions, and the public TypeScript models. Type exports include client configuration, the optional `SolrJsonCodec` parser/serializer contract, request controls, and distinct V2 Core Admin status/rename/unload contracts, V2 Collections create/delete/reload and discovery contracts, and V2 alias list/detail response contracts; query, facet, grouping, highlighting, statistics, SpellCheck and Suggester component models, and JSON Request API models; update and atomic-update models; Schema, Config, CoreAdmin, and Collections command plus alias/cluster-status response models; replication and backup/restore models; Export, Metrics, System, Security, and Streaming Expressions models; and error/validation models.
 
 Use named imports from the package root:
 

@@ -27,6 +27,63 @@ test("V2 Collections list and status use the documented GET routes", async () =>
   assert.equal((status.books as { activeShards?: number }).activeShards, 1);
 });
 
+test("V2 Collections create posts the flat post-9.3 request body", async () => {
+  let captured: { url: URL; method: string; body: string | undefined } | undefined;
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      captured = { url: new URL(String(input)), method: String(init?.method), body: String(init?.body ?? "") };
+      return new Response(JSON.stringify({ responseHeader: { status: 0 }, collection: "books" }));
+    }
+  });
+  const response = await client.v2.collections.create({
+    name: "books", config: "books-config", numShards: 2, replicationFactor: 2
+  });
+  assert.equal(captured!.url.pathname, "/api/collections");
+  assert.equal(captured!.method, "POST");
+  assert.deepEqual(JSON.parse(captured!.body!), {
+    name: "books", config: "books-config", numShards: 2, replicationFactor: 2
+  });
+  assert.equal(response.collection, "books");
+});
+
+test("V2 Collections delete uses DELETE and serializes only explicit directory flags", async () => {
+  let captured: { url: URL; method: string } | undefined;
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      captured = { url: new URL(String(input)), method: String(init?.method) };
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+  await client.v2.collections.delete("books archive", { deleteIndex: true });
+  assert.equal(captured!.url.pathname, "/api/collections/books%20archive");
+  assert.equal(captured!.method, "DELETE");
+  assert.equal(captured!.url.searchParams.get("deleteIndex"), "true");
+  assert.equal(captured!.url.searchParams.has("deleteDataDir"), false);
+  assert.equal(captured!.url.searchParams.has("deleteInstanceDir"), false);
+});
+
+test("V2 Collections reload uses POST /api/collections/{collection}/reload", async () => {
+  let captured: { url: URL; method: string } | undefined;
+  const client = createSolrClient({
+    fetch: async (input, init) => {
+      captured = { url: new URL(String(input)), method: String(init?.method) };
+      return new Response(JSON.stringify({ responseHeader: { status: 0 } }));
+    }
+  });
+  await client.v2.collections.reload("books");
+  assert.equal(captured!.url.pathname, "/api/collections/books/reload");
+  assert.equal(captured!.method, "POST");
+});
+
+test("V2 Collections lifecycle methods validate names before fetch", () => {
+  const client = createSolrClient({ fetch: async () => { throw new Error("fetch must not run"); } });
+  assert.throws(() => client.v2.collections.create({ name: " ", config: "books" }), /non-empty name and config/);
+  for (const name of ["", " ", ".", "..", "../admin", "a/b", "a\\b"]) {
+    assert.throws(() => client.v2.collections.delete(name), /non-empty collection name/);
+    assert.throws(() => client.v2.collections.reload(name), /non-empty collection name/);
+  }
+});
+
 test("V2 cluster status uses GET /api/cluster and preserves the extensible response", async () => {
   const requests: { url: URL; method: string }[] = [];
   const client = createSolrClient({

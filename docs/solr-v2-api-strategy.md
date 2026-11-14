@@ -145,6 +145,23 @@ Official route and behavior references:
 
 Alias CRUD, collection lifecycle, shard/replica management, backup/restore, and destructive actions remain outside this first read-only tranche. Their V2 routes changed during the Solr 9.3 redesign and require their own request/response contracts, minimum-version decisions, and isolated behavior tests. FORCELEADER remains coordinated with #328/#341.
 
+## Collections V2 lifecycle implementation status
+
+Issue #409 adds the first state-changing V2 collection methods independently of the V1 Collections action API:
+
+- `client.v2.collections.create(params)` — `POST /api/collections` with the flat request body introduced by the Solr 9.3-era redesign. The required typed fields are `name` and `config`; commonly used shard and replica placement fields are optional.
+- `client.v2.collections.delete(name, options?)` — `DELETE /api/collections/{collection}`. Directory deletion controls are explicit opt-ins and are omitted unless supplied.
+- `client.v2.collections.reload(name)` — `POST /api/collections/{collection}/reload`, documented as the REST-style V2 route from Solr 9.3.
+
+These methods use V2-specific contracts and the shared authenticated transport. They do not reuse V1 request models, infer a V1 fallback, or claim Solr 8.11 compatibility. The Solr 8.11 guide predates the flat create-body and REST-style lifecycle redesign; its legacy command envelope is intentionally not synthesized by these methods. The current unit and consumer fixtures assert method, path, body/query serialization, input validation, and response extensibility. Runtime compatibility and security-gate checks remain pending; source presence is not runtime evidence.
+
+Official evidence:
+- [Solr 9.11 release notes](https://solr.apache.org/docs/9_11_0/changes/Changes.html) — SOLR-16391 records the flat `POST /api/collections` create body; SOLR-16398 records `POST /api/collections/{collection}/reload`.
+- [Solr 10.1 Collections API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/collections-api.html) — current collection lifecycle API family.
+- [Solr V2 API guide](https://solr.apache.org/guide/solr/10_1/configuration-guide/v2-api.html) — V2 route and request-body model.
+
+Collection deletion, create and reload are state-changing operations. Runtime tests must use uniquely named disposable collections and verify state before cleanup; no shared or user data may be targeted.
+
 ## V2 alias read operations
 
 The read-only alias slice exposes `client.v2.aliases.list()` (`GET /api/aliases`) and `client.v2.aliases.status(name)` (`GET /api/aliases/{alias}`). The Solr 9.2, 9.11, and 10.1 Alias Management guides document both response shapes: the list returns an `aliases` name-to-collection mapping and optional per-alias `properties`; the detail response returns `alias`, a `collections` array, and optional `properties`.

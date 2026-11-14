@@ -56,6 +56,27 @@ const collectionStatusOptions: SolrV2CollectionStatusOptions = {
 const collectionStatus: Promise<SolrV2CollectionStatusResponse> =
   collectionsNamespace.status("books", collectionStatusOptions);
 const clusterStatus: Promise<SolrV2ClusterStatusResponse> = clusterNamespace.status();
+import type {
+  SolrV2CollectionCreateParams,
+  SolrV2CollectionDeleteOptions,
+  SolrV2CollectionOperationResponse
+} from "../src/index.js";
+const createParams: SolrV2CollectionCreateParams = {
+  name: "books", config: "books-config", numShards: 2, replicationFactor: 2
+};
+const deleteOptions: SolrV2CollectionDeleteOptions = { deleteIndex: true };
+const createdCollection: Promise<SolrV2CollectionOperationResponse> =
+  collectionsNamespace.create(createParams);
+const deletedCollection: Promise<SolrV2CollectionOperationResponse> =
+  collectionsNamespace.delete("books", deleteOptions);
+const reloadedCollection: Promise<SolrV2CollectionOperationResponse> =
+  collectionsNamespace.reload("books");
+void [createdCollection, deletedCollection, reloadedCollection];
+// @ts-expect-error Collection creation requires a configset name.
+void collectionsNamespace.create({ name: "books" });
+// @ts-expect-error Destructive directory flags are boolean.
+void collectionsNamespace.delete("books", { deleteIndex: "true" });
+
 void [collectionList, collectionStatus, clusterStatus];
 
 // @ts-expect-error Collection status flags are booleans.

@@ -1,6 +1,6 @@
 import { SolrHttpError } from "./errors.js";
 import type { SolrTransport } from "./transport.js";
-import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
+import type { RequestControlOptions, RequestOptions, SolrV2ClusterStatusResponse, SolrV2CollectionListResponse, SolrV2CollectionStatusOptions, SolrV2CollectionStatusResponse, SolrV2CollectionCreateParams, SolrV2CollectionDeleteOptions, SolrV2CollectionOperationResponse, SolrV2AliasListResponse, SolrV2AliasStatusResponse, SolrV2CoreOperationResponse, SolrV2CoreRenameParams, SolrV2CoreStatusOptions, SolrV2CoreStatusResponse, SolrV2CoreUnloadParams } from "./types.js";
 
 /**
  * Explicit Solr V2 API namespace sharing the configured V1 transport.
@@ -91,23 +91,79 @@ export class SolrV2CollectionsClient {
     });
   }
 
+  /**
+   * Create a collection using the post-Solr-9.3 V2 request shape.
+   * The older Solr 8.11 V2 command envelope is intentionally not emulated.
+   */
+  create(
+    params: SolrV2CollectionCreateParams,
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2CollectionOperationResponse> {
+    if (typeof params.name !== "string" || params.name.trim().length === 0 ||
+      typeof params.config !== "string" || params.config.trim().length === 0) {
+      throw new TypeError("Solr V2 Collections create requires non-empty name and config");
+    }
+    return this.v2.request<SolrV2CollectionOperationResponse>("/api/collections", {
+      ...requestOptions,
+      method: "POST",
+      body: params
+    });
+  }
+
+  /**
+   * Delete one collection. This is destructive; callers must explicitly opt in
+   * to deleting its instance, data, or index directories.
+   */
+  delete(
+    collection: string,
+    options: SolrV2CollectionDeleteOptions = {},
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2CollectionOperationResponse> {
+    const path = this.collectionPath(collection);
+    const query: Record<string, boolean> = {};
+    if (options.deleteInstanceDir !== undefined) query.deleteInstanceDir = options.deleteInstanceDir;
+    if (options.deleteDataDir !== undefined) query.deleteDataDir = options.deleteDataDir;
+    if (options.deleteIndex !== undefined) query.deleteIndex = options.deleteIndex;
+    return this.v2.request<SolrV2CollectionOperationResponse>(path, {
+      ...requestOptions,
+      method: "DELETE",
+      ...(Object.keys(query).length > 0 ? { query } : {})
+    });
+  }
+
+  /** Reload a collection using the REST-style V2 route (Solr 9.3+). */
+  reload(
+    collection: string,
+    requestOptions: RequestControlOptions = {}
+  ): Promise<SolrV2CollectionOperationResponse> {
+    return this.v2.request<SolrV2CollectionOperationResponse>(`${this.collectionPath(collection)}/reload`, {
+      ...requestOptions,
+      method: "POST"
+    });
+  }
+
+  private collectionPath(collection: string): `/api/collections/${string}` {
+    if (typeof collection !== "string" || collection.trim().length === 0 || collection === "." || collection === ".." ||
+      collection.includes("/") || collection.includes("\\")) {
+      throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
+    }
+    return `/api/collections/${encodeURIComponent(collection)}`;
+  }
+
   /** Read status for one collection. */
   status(
     collection: string,
     options: SolrV2CollectionStatusOptions = {},
     requestOptions: RequestControlOptions = {}
   ): Promise<SolrV2CollectionStatusResponse> {
-    if (typeof collection !== "string" || collection.trim().length === 0 ||
-      collection.includes("/") || collection.includes("\\")) {
-      throw new TypeError("Solr V2 Collections requires a non-empty collection name without path separators");
-    }
+    const path = this.collectionPath(collection);
     const query: Record<string, boolean> = {};
     if (options.coreInfo !== undefined) query.coreInfo = options.coreInfo;
     if (options.segments !== undefined) query.segments = options.segments;
     if (options.fieldInfo !== undefined) query.fieldInfo = options.fieldInfo;
     if (options.sizeInfo !== undefined) query.sizeInfo = options.sizeInfo;
     return this.v2.request<SolrV2CollectionStatusResponse>(
-      `/api/collections/${encodeURIComponent(collection)}`,
+      path,
       {
         ...requestOptions,
         method: "GET",
