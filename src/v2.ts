@@ -407,7 +407,7 @@ export class SolrV2BackupsClient {
 
   private pathSegment(value: string, label: string): string {
     if (typeof value !== "string" || value.trim().length === 0 || value === "." || value === ".." ||
-      value.includes("/") || value.includes("\\\\")) {
+      value.includes("/") || value.includes("\\")) {
       throw new TypeError(`Solr V2 backup operation requires a non-empty ${label} name without path separators`);
     }
     return encodeURIComponent(value);
