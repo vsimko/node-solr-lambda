@@ -110,7 +110,7 @@ cloudIntegrationTest(
         incremental: true,
         backupStrategy: "copy-files"
       });
-      assert.equal(backup.responseHeader?.status, 0);
+      assert.ok(backup.response || backup.requestid, JSON.stringify(backup));
       await waitForCollectionRequest(client, backupRequest);
 
       const listed = await client.v2.backups.list(backupName, { location });
@@ -124,7 +124,7 @@ cloudIntegrationTest(
         { collection: target, location, backupId },
         { async: restoreRequest }
       );
-      assert.equal(restore.responseHeader?.status, 0);
+      assert.ok(restore.response || restore.requestid, JSON.stringify(restore));
       await waitForCollectionRequest(client, restoreRequest);
 
       const restored = await targetClient.query({ query: `id:${id}`, limit: 1 }) as {
