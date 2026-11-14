@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A TypeScript-first Apache Solr client for Node.js, with discoverable APIs and operation-level compatibility evidence.">
+<base href="./">
+<title>Solr TS Client — A typed Solr client for Node.js</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<script type="module" src="assets/dashboard.js"></script>
+</head>
+<body>
+<div class="noise" aria-hidden="true"></div>
+<header class="site-header">
+  <a class="brand" href="./"><span class="brand-mark">S<span>·</span>TS</span><span>Solr TS Client</span></a>
+  <nav aria-label="Main navigation">
+    <a href="#features">Why this client</a><a href="#api">API coverage</a><a href="#project">Project</a><a href="#docs">Docs</a>
+    <a class="nav-github" href="https://github.com/vsimko/solr-ts-client">GitHub <span aria-hidden="true">↗</span></a>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="eyebrow-dot"></span> NODE.JS <span>/</span> APACHE SOLR <span>/</span> TYPESCRIPT</p>
+      <h1>Solr, with<br><em>types that guide.</em></h1>
+      <p class="hero-lede">A modern TypeScript-first client built around discoverable APIs, explicit request models, and evidence you can inspect.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="https://github.com/vsimko/solr-ts-client#readme">Get started <span>↗</span></a>
+        <a class="text-link" href="https://www.npmjs.com/package/solr-ts-client">View on npm <span>↗</span></a>
+      </div>
+      <div class="install"><span>$</span> npm install solr-ts-client <button type="button" id="copy-install" aria-label="Copy install command">Copy</button></div>
+    </div>
+    <div class="hero-visual" aria-label="Example TypeScript API usage">
+      <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+      <div class="code-window">
+        <div class="window-bar"><span></span><span></span><span></span><small>typed-query.ts</small></div>
+        <pre><code><i>import</i> { createSolrClient }
+  <i>from</i> <b>"solr-ts-client"</b>;
+
+<i>interface</i> Product {
+  id: string;
+  type: string;
+  price: number;
+}
+
+<i>const</i> solr = createSolrClient({
+  baseUrl: <b>"http://localhost:8983"</b>,
+  core: <b>"gettingstarted"</b>
+});
+
+<i>const</i> result = <i>await</i> solr
+  .query&lt;Product&gt;({
+    query: <b>"type:book"</b>,
+    limit: <u>20</u>,
+    sort: <b>"price asc"</b>
+  });
+
+<span class="code-comment">// Fully typed response</span>
+result.response.docs;</code></pre>
+        <div class="window-foot"><span><b></b> TypeScript</span><span>autocomplete-first API</span></div>
+      </div>
+      <div class="orbit-label label-top">TYPES FIRST</div><div class="orbit-label label-bottom">SOLR 8 · 9 · 10</div>
+    </div>
+  </section>
+  <section class="progress-section" aria-labelledby="progress-title">
+    <div class="progress-heading"><div><p class="eyebrow">IMPLEMENTATION STATUS</p><h2 id="progress-title">How much is ready?</h2></div><p id="progress-updated">Live status from the API inventory and tracked roadmap.</p></div>
+    <div id="implementation-progress" class="progress-grid" aria-live="polite">
+      <p class="progress-loading">Loading implementation progress…</p>
+    </div>
+    <a class="progress-source" href="https://github.com/vsimko/solr-ts-client/blob/master/docs/api-coverage.md">How coverage is measured ↗</a>
+  </section>
+  <section class="stats-strip" id="features">
+    <div><strong>26 / 24 / 22</strong><span>Supported Node.js LTS targets</span></div>
+    <div><strong>10.1.0 / 9.11.0 / 8.11.4</strong><span>Pinned Solr baselines · 8.x legacy</span></div>
+    <div><strong>0</strong><span>Required runtime dependencies</span></div>
+    <div><strong id="package-version">Loading…</strong><span>Package version</span></div>
+  </section>
+  <section class="intro-row">
+    <p class="eyebrow">BUILT FOR REAL SOLR WORK</p>
+    <div><h2>Less guessing.<br><em>More building.</em></h2><p>Keep the flexibility of Solr while getting the clarity of a typed interface. Common workflows have named options and response models; uncommon ones still have an escape hatch.</p></div>
+  </section>
+  <section class="feature-grid">
+    <article class="feature-card feature-main"><span class="feature-number">01 / API DESIGN</span><div class="feature-icon">⌘</div><h3>Discoverable by default</h3><p>Named request models, literal unions, and generics make supported Solr options visible in your editor instead of buried in documentation.</p><a href="https://github.com/vsimko/solr-ts-client/blob/master/docs/api-reference.md">Explore the API reference ↗</a></article>
+    <article class="feature-card"><span class="feature-number">02 / TRANSPORT</span><div class="feature-icon">⇄</div><h3>One Fetch transport</h3><p>Timeouts, retries, cancellation, authentication, and structured errors share a consistent transport layer.</p><a href="https://github.com/vsimko/solr-ts-client/blob/master/docs/configuration.md">Read configuration guide ↗</a></article>
+    <article class="feature-card"><span class="feature-number">03 / EVIDENCE</span><div class="feature-icon">◫</div><h3>Compatibility, not assumptions</h3><p>Runtime support is tracked per operation and pinned Solr version. A green matrix is never stretched into a blanket claim.</p><a href="https://github.com/vsimko/solr-ts-client/blob/master/docs/compatibility.md">See compatibility matrix ↗</a></article>
+  </section>
+  <section id="api" class="content-section">
+    <div class="section-heading"><div><p class="eyebrow">THE DETAILS MATTER</p><h2>API coverage</h2></div><p>Browse implementation, type coverage, tests, and runtime evidence independently for each operation.</p></div>
+    <div class="filter-bar"><label for="api-search">Find an operation</label><input id="api-search" type="search" placeholder="Search area or method…"><label for="version-filter">Solr version</label><select id="version-filter"><option value="">All versions</option><option value="8">Solr 8</option><option value="9">Solr 9</option><option value="10">Solr 10</option></select></div>
+    <p id="api-summary" class="result-summary">Loading API inventory…</p><div id="api-list" class="coverage-grid"></div>
+  </section>
+  <section id="project" class="content-section project-section">
+    <div class="section-heading"><div><p class="eyebrow">FOLLOW THE WORK</p><h2>Project direction</h2></div><p>Planning and delivery live in the repository. These links always open the current source rather than a build-time snapshot.</p></div>
+    <div class="link-panels">
+      <a class="link-panel" href="https://github.com/vsimko/solr-ts-client/blob/master/docs/roadmap.md"><span class="panel-kicker">PRODUCT PLAN <span>↗</span></span><strong>Development roadmap</strong><p>Priorities, sequencing, scope boundaries, and the longer-term direction.</p><span class="panel-cta">Read the roadmap <b>↗</b></span></a>
+      <a class="link-panel" href="https://github.com/vsimko/solr-ts-client/issues"><span class="panel-kicker">LIVE TRACKING <span>↗</span></span><strong>Issue tracker</strong><p>Current status, discussion, ownership, and progress for individual work items.</p><span class="panel-cta">Browse open issues <b>↗</b></span></a>
+    </div>
+  </section>
+  <section class="npm-band">
+    <div><p class="eyebrow">READY TO USE</p><h2>Install it. Type it.<br><em>Ship with confidence.</em></h2></div>
+    <div class="npm-card"><span class="npm-mark">npm</span><strong id="npm-version">solr-ts-client</strong><p>Package registry status and download information.</p><a href="https://www.npmjs.com/package/solr-ts-client">Open npm package ↗</a></div>
+  </section>
+  <section id="releases" class="content-section releases-section">
+    <div class="section-heading"><div><p class="eyebrow">PROJECT HISTORY</p><h2>Releases &amp; changelog</h2></div><p>Release history and change notes are maintained at their canonical GitHub locations.</p></div>
+    <div class="source-links">
+      <a href="https://github.com/vsimko/solr-ts-client/releases"><span>01</span><div><strong>GitHub releases</strong><small>Published versions and release assets</small></div><b>↗</b></a>
+      <a href="https://github.com/vsimko/solr-ts-client/blob/master/CHANGELOG.md"><span>02</span><div><strong>Changelog</strong><small>Unreleased changes and historical notes</small></div><b>↗</b></a>
+      <a href="https://github.com/vsimko/solr-ts-client/blob/master/docs/release-notes-v4.0.0.md"><span>03</span><div><strong>v4.0.0 release notes</strong><small>Current draft and migration summary</small></div><b>↗</b></a>
+    </div>
+  </section>
+  <section id="docs" class="content-section docs-section">
+    <div class="section-heading"><div><p class="eyebrow">CANONICAL KNOWLEDGE</p><h2>Documentation</h2></div><p>Guides and references stay in the repository and remain the source of truth.</p></div>
+    <label for="docs-search">Search documentation</label><input id="docs-search" type="search" placeholder="Search guides and references…"><div id="docs-list" class="docs-grid"></div>
+    <a class="all-docs" href="https://github.com/vsimko/solr-ts-client/tree/master/docs">Browse all documentation ↗</a>
+  </section>
+</main>
+<footer><a class="brand" href="./"><span class="brand-mark">S<span>·</span>TS</span><span>Solr TS Client</span></a><span>TypeScript-first Apache Solr client for Node.js.</span><div><a href="https://github.com/vsimko/solr-ts-client">GitHub</a><a href="https://www.npmjs.com/package/solr-ts-client">npm</a><a href="https://github.com/vsimko/solr-ts-client/issues/new">Report an issue</a></div></footer>
+</body></html>
