@@ -1025,6 +1025,72 @@
       "notes": "Read-only SolrCloud collection-name discovery. GET /api/collections is runtime-tested on pinned Solr 8.11.4, 9.11.0, and 10.1.0 in CI run #43211482752 across Node.js 22/24/26. The test creates an isolated collection and verifies it appears in the V2 list. Uses the shared V2 transport."
     },
     {
+      "id": "v2.collections.create",
+      "area": "Solr V2 Collections",
+      "clientMethod": "v2.collections.create",
+      "httpMethod": "POST",
+      "path": "/api/collections",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts"
+      ],
+      "notes": "Typed post-Solr-9.3 create body with required name/config and common shard/replica fields. Exact unit serialization and consumer type fixtures are present. Runtime and security checks are pending; Solr 8.11 legacy command-envelope payload is intentionally not supported."
+    },
+    {
+      "id": "v2.collections.delete",
+      "area": "Solr V2 Collections",
+      "clientMethod": "v2.collections.delete",
+      "httpMethod": "DELETE",
+      "path": "/api/collections/{collection}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts"
+      ],
+      "notes": "V2 collection deletion with explicit optional directory-deletion query flags. Unit serialization and consumer type fixtures are present. Runtime and security checks are pending; no V1 fallback."
+    },
+    {
+      "id": "v2.collections.reload",
+      "area": "Solr V2 Collections",
+      "clientMethod": "v2.collections.reload",
+      "httpMethod": "POST",
+      "path": "/api/collections/{collection}/reload",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts"
+      ],
+      "notes": "REST-style V2 collection reload route documented from Solr 9.3. Unit serialization and consumer type fixtures are present. Runtime and security checks are pending; Solr 8.11 is not claimed."
+    },
+    {
       "id": "v2.collections.status",
       "area": "Solr V2 Collections",
       "clientMethod": "v2.collections.status",
