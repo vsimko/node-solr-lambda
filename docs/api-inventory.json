@@ -1185,6 +1185,174 @@
       "clientMethod": "v2.aliases.status",
       "httpMethod": "GET",
       "path": "/api/aliases/{alias}"
+    },
+    {
+      "id": "v2.aliases.create",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.create",
+      "httpMethod": "POST",
+      "path": "/api/aliases",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Create or replace a standard alias using the documented V2 {name, collections[]} request body. The redesigned route is documented from Solr 9.3; Solr 8.11.4 legacy alias commands are not mapped or claimed. Unit/type and disposable SolrCloud/security tests are present; runtime and BasicAuth evidence remains pending."
+    },
+    {
+      "id": "v2.aliases.delete",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.delete",
+      "httpMethod": "DELETE",
+      "path": "/api/aliases/{alias}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Delete only the alias, not its backing collections. Supports the documented async query parameter. The redesigned route is documented from Solr 9.3; Solr 8.11.4 is not claimed. Runtime and security evidence remains pending."
+    },
+    {
+      "id": "v2.aliases.getProperties",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.getProperties",
+      "httpMethod": "GET",
+      "path": "/api/aliases/{alias}/properties",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read all metadata properties for one alias using the documented Solr 9.3+ property subresource. Solr 8.11.4 is not claimed; runtime evidence pending."
+    },
+    {
+      "id": "v2.aliases.getProperty",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.getProperty",
+      "httpMethod": "GET",
+      "path": "/api/aliases/{alias}/properties/{property}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Read one metadata property using the documented Solr 9.3+ property subresource. Solr 8.11.4 is not claimed; runtime evidence pending."
+    },
+    {
+      "id": "v2.aliases.setProperties",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.setProperties",
+      "httpMethod": "PUT",
+      "path": "/api/aliases/{alias}/properties",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Set a map of metadata properties using the {properties} JSON body and optional async query parameter. Solr 9.3+ route; Solr 8.11.4 is not claimed; runtime evidence pending."
+    },
+    {
+      "id": "v2.aliases.setProperty",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.setProperty",
+      "httpMethod": "PUT",
+      "path": "/api/aliases/{alias}/properties/{property}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Set one metadata property using the {value} JSON body and optional async query parameter. Solr 9.3+ route; Solr 8.11.4 is not claimed; runtime evidence pending."
+    },
+    {
+      "id": "v2.aliases.deleteProperty",
+      "area": "Solr V2 Aliases",
+      "clientMethod": "v2.aliases.deleteProperty",
+      "httpMethod": "DELETE",
+      "path": "/api/aliases/{alias}/properties/{property}",
+      "methodImplemented": true,
+      "typeCoverage": "complete",
+      "unitTests": "present",
+      "integrationTests": "not-run",
+      "versions": {
+        "8": "unverified",
+        "9": "unverified",
+        "10": "unverified"
+      },
+      "documentation": "docs/solr-v2-api-strategy.md",
+      "testFiles": [
+        "test/v2-collections.test.ts",
+        "test/v2-types.ts",
+        "test/integration/solr-v2-collections.test.ts",
+        "test/integration/solr-v2-security.test.ts"
+      ],
+      "notes": "Delete one metadata property with the property-level DELETE route and optional async query parameter. Solr 9.3+ route; Solr 8.11.4 is not claimed; runtime evidence pending."
     }
   ]
 }
