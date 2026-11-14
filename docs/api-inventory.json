@@ -1417,9 +1417,10 @@
       "testFiles": [
         "test/v2-collections.test.ts",
         "test/v2-types.ts",
-        "test/integration/solrcloud-backup-restore.test.ts"
+        "test/integration/solrcloud-backup-restore.test.ts",
+        "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Typed REST-style collection backup contract introduced by the Solr 9.3 V2 route redesign. Solr 8.11.4's older command envelope is intentionally not mapped. Unit serialization, consumer type fixtures, and an isolated SolrCloud read-back test are present; runtime and BasicAuth evidence is pending CI.",
+      "notes": "Typed REST-style collection backup contract introduced by the Solr 9.3 V2 route redesign. Solr 8.11.4's older command envelope is intentionally not mapped. Unit serialization, consumer type fixtures, and an isolated SolrCloud read-back test are present; runtime and BasicAuth route-probe evidence is pending CI.",
       "id": "v2.collections.backup",
       "clientMethod": "v2.collections.backup",
       "httpMethod": "POST",
@@ -1440,9 +1441,10 @@
       "testFiles": [
         "test/v2-collections.test.ts",
         "test/v2-types.ts",
-        "test/integration/solrcloud-backup-restore.test.ts"
+        "test/integration/solrcloud-backup-restore.test.ts",
+        "test/integration/solr-v2-security.test.ts"
       ],
-      "notes": "Typed REST-style collection backup contract introduced by the Solr 9.3 V2 route redesign. Solr 8.11.4's older command envelope is intentionally not mapped. Unit serialization, consumer type fixtures, and an isolated SolrCloud read-back test are present; runtime and BasicAuth evidence is pending CI.",
+      "notes": "Typed REST-style collection backup contract introduced by the Solr 9.3 V2 route redesign. Solr 8.11.4's older command envelope is intentionally not mapped. Unit serialization, consumer type fixtures, and an isolated SolrCloud read-back test are present; runtime and BasicAuth route-probe evidence is pending CI.",
       "id": "v2.backups.list",
       "clientMethod": "v2.backups.list",
       "httpMethod": "GET",
@@ -1463,7 +1465,8 @@
       "testFiles": [
         "test/v2-collections.test.ts",
         "test/v2-types.ts",
-        "test/integration/solrcloud-backup-restore.test.ts"
+        "test/integration/solrcloud-backup-restore.test.ts",
+        "test/integration/solr-v2-security.test.ts"
       ],
       "notes": "Deletes exactly one backup point by numeric ID and requires the same repository location used for creation. This is a permanent storage mutation; no bulk retainLatest or purgeUnused operation is included in this first slice. Runtime and BasicAuth evidence is pending.",
       "id": "v2.backups.delete",
@@ -1486,7 +1489,8 @@
       "testFiles": [
         "test/v2-collections.test.ts",
         "test/v2-types.ts",
-        "test/integration/solrcloud-backup-restore.test.ts"
+        "test/integration/solrcloud-backup-restore.test.ts",
+        "test/integration/solr-v2-security.test.ts"
       ],
       "notes": "Restores a selected backup point into an existing or newly created collection. Restore replaces target index contents; the caller must select a compatible or disposable target. Optional backupId is sent as a query parameter and create-collection options use the documented V2 body shape. Runtime and BasicAuth evidence is pending.",
       "id": "v2.backups.restore",
