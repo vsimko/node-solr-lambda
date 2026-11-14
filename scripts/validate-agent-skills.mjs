@@ -8,10 +8,6 @@ const skillsRoot = resolve(root, ".agents/skills");
 const linkPattern = /(?<!!)\[[^\]]*\]\(([^)]+)\)/g;
 const frontmatterPattern = /^---\s*\n([\s\S]*?)\n---\s*\n/;
 
-function fail(message) {
-  throw new Error(message);
-}
-
 function localTargets(markdown, sourcePath) {
   const targets = [];
   for (const match of markdown.matchAll(linkPattern)) {
