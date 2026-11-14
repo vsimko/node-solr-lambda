@@ -54,7 +54,7 @@
     "release:stage": "node scripts/stage-publish.mjs",
     "test:consumer:no-zod": "node test/no-zod-consumer.mjs",
     "test:api-inventory": "node test/api-inventory.mjs",
-    "docs:check": "node scripts/check-docs.mjs && npm run site:check && npm run test:site-data",
+    "docs:check": "npm run agents:check && node scripts/check-docs.mjs && npm run site:check && npm run test:site-data",
     "site:check": "node scripts/site/validate-data.mjs",
     "test:site-data": "node --test test/site-data-validator.test.mjs",
     "site:generate": "node scripts/site/generate-data.mjs",
@@ -67,7 +67,8 @@
     "bench": "node bench/run.mjs",
     "test:coverage": "node --experimental-test-coverage --import tsx --test test/*.test.ts",
     "test:release-watch": "node --test test/solr-release-watch.test.mjs",
-    "test:forceleader-optin": "tsx --test test/integration/solrcloud-forceleader-optin.test.ts"
+    "test:forceleader-optin": "tsx --test test/integration/solrcloud-forceleader-optin.test.ts",
+    "agents:check": "node scripts/validate-agent-skills.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
