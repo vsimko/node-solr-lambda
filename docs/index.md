@@ -5,6 +5,7 @@
 - [Contributor guide](contributor/README.md)
 - [Architecture index](architecture/README.md)
 - [Architecture decision records](adr/README.md)
+- [ADR 0008 — Agent skills and documentation infrastructure](adr/0008-agent-skills-and-documentation-infrastructure.md)
 - [Testing and verification guide](testing/README.md)
 - [Agent Skills index](../.agents/skills/README.md)
 
